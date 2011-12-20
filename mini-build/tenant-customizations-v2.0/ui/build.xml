@@ -121,8 +121,7 @@
     </target>
     
     <target name="check-ui-war-file-exists"
-        description="Identify whether a UI .war file exists."
-        unless="${ui.war.dir.exists}">
+        description="Identify whether a UI .war file exists.">
         <available type="file" file="${ui.war.filepath}"
             property="ui.war.file.exists" />
     </target>
