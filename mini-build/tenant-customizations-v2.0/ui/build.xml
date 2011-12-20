@@ -1,0 +1,126 @@
+<project name="tenant-customizations-ui" default="deploy" basedir=".">
+    <description>Per-tenant UI customizations for CollectionSpace</description>
+    
+    <!-- 'environment' must be declared to bring values of system -->
+    <!-- environment variables into Ant, prior to reading any -->
+    <!-- properties files that may reference those values. -->
+    <property environment="env" />
+    
+    <!-- Set global properties for this build -->
+    <property file="../build.properties" />
+    <!-- Set tenant-specific properties for this build -->
+    <property file="../our-tenant.properties" />
+    <!-- Set UI properties for this build -->
+    <property file="ui.properties" />
+
+    <property name="ui.war.filepath"
+        value="${jboss.deploy.cspace}/${cspace.ui.war}" />
+    <property name="ui.war.tenants.filepath" 
+        value="${ui.war.filepath}/${cspace.ui.tenants}" />
+
+    <!-- Deploy the tenant directory to an exploded UI .war directory if -->
+    <!-- present; if not, deploy to a compressed UI .war file. -->
+    <target name="deploy"
+        description="Deploy per-tenant UI customizations to the appropriate CollectionSpace server folders." 
+        depends="undeploy, deploy-to-war">
+    </target>
+    
+    <target name="deploy-to-war"
+        description="Copies a potentially customized tenant to the deployed UI .war"
+        depends="deploy-to-war-dir, deploy-to-war-file">
+    </target>
+    
+    <target name="deploy-to-war-dir"
+        description="Copies a potentially customized tenant to the deployed UI .war directory"
+        if="${ui.war.dir.exists}">
+        <mkdir dir="${ui.war.tenants.filepath}" />
+        <copy todir="${ui.war.tenants.filepath}/${our.tenant.name.short}">
+            <fileset dir="${cspace.ui.our.tenant}" defaultexcludes="false">
+                <include name="**" />
+                <exclude name="**/.project" />
+                <exclude name="**/.classpath" />
+                <exclude name="**/.idea/**" />
+                <exclude name="**/.settings/**" />
+                <exclude name="**/.svn/**" />
+                <exclude name="**/nbproject/**" />
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="deploy-to-war-file"
+        description="Copies a potentially customized tenant to the deployed UI .war file"
+        if="${ui.war.file.exists}"
+        unless="${ui.war.dir.exists}">
+        <!-- Copies and modifies the war file locally before deploying it, -->
+        <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
+        <mkdir dir="${build.dir}" />
+        <copy file="${ui.war.filepath}" todir="${build.dir}" />
+        <jar destfile="${build.dir}/${cspace.ui.war}" update="true">
+            <!-- Copies the tenant directory into the 'tenants' directory -->
+            <!-- of the WAR file, renaming it to the tenant's short name -->
+            <zipfileset dir="${cspace.ui.our.tenant}"
+                prefix="${cspace.ui.tenants}/${our.tenant.name.short}" />
+        </jar>
+        <copy file="${build.dir}/${cspace.ui.war}" todir="${jboss.deploy.cspace}"
+            overwrite="true" />
+        <delete dir="${build.dir}" quiet="true" />
+    </target>
+    
+    <!-- Undeploy the tenant directory-->
+    <target name="undeploy"
+        description="Undeploy per-tenant UI customizations from the appropriate CollectionSpace server folders." 
+        depends="check-war-exists, undeploy-from-war">
+    </target>
+    
+    <target name="undeploy-from-war"
+        description="Undeploys a potentially customized tenant from the deployed UI .war"
+        depends="undeploy-from-war-dir, undeploy-from-war-file">
+    </target>
+    
+    <target name="undeploy-from-war-dir"
+        description="Undeploys a potentially customized tenant from the deployed UI .war directory"
+        if="${ui.war.dir.exists}">
+        <delete dir="${ui.war.tenants.filepath}/${our.tenant.name.short}"
+            failonerror="false" />
+    </target>
+    
+    <target name="undeploy-from-war-file"
+        description="Undeploys a potentially customized tenant from the deployed UI .war file"
+        if="${ui.war.file.exists}"
+        unless="${ui.war.dir.exists}">
+        <!-- Copies and modifies the war file locally before deploying it, -->
+        <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
+        <mkdir dir="${build.dir}" />
+        <copy file="${ui.war.filepath}" todir="${build.dir}" />
+        <!-- For details on this removal technique, see http://stackoverflow.com/questions/2521231/ -->
+        <jar destfile="${build.dir}/undeployed.war">
+            <!-- Removes the potentially customized tenant directory -->
+            <!-- from the UI 'tenants' directory of the WAR file -->
+            <zipfileset src="${build.dir}/${cspace.ui.war}"
+                excludes="${cspace.ui.tenants}/${our.tenant.name.short}/**" />
+        </jar>
+        <copy file="${build.dir}/undeployed.war" tofile="${ui.war.filepath}" />
+        <delete dir="${build.dir}" quiet="true" />
+    </target>
+    
+    <!-- Utility methods called by undeploy, setting properties -->
+    <!-- used by both undeploy and deploy -->
+    <target name="check-war-exists"
+        description="Identify whether a UI .war directory or file exists."
+        depends="check-ui-war-dir-exists, check-ui-war-file-exists">
+    </target>
+    
+    <target name="check-ui-war-dir-exists"
+        description="Identify whether a UI .war directory exists.">
+        <available type="dir" file="${ui.war.filepath}"
+            property="ui.war.dir.exists" />
+    </target>
+    
+    <target name="check-ui-war-file-exists"
+        description="Identify whether a UI .war file exists."
+        unless="${ui.war.dir.exists}">
+        <available type="file" file="${ui.war.filepath}"
+            property="ui.war.file.exists" />
+    </target>
+
+</project>

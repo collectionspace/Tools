@@ -1,0 +1,83 @@
+<project name="tenant-customizations-services" default="deploy" basedir=".">
+    <description>Per-tenant services customizations for CollectionSpace</description>
+    
+    <!-- 'environment' must be declared to bring values of system -->
+    <!-- environment variables into Ant, prior to reading any -->
+    <!-- properties files that may reference those values. -->
+    <property environment="env" />
+    
+    <!-- Set global properties for this build -->
+    <property file="../build.properties" />
+    <!-- Set tenant-specific properties for this build -->
+    <property file="../our-tenant.properties" />
+    <!-- Set services layer-specific properties for this build -->
+    <property file="services.properties" />
+    
+    <target name="deploy"
+            description="Deploy per-tenant services customizations to the appropriate CollectionSpace server folders."
+            depends="check-tenant-bindings-path-exists, deploy-tenant-bindings">
+    </target>
+    
+    <target name="check-tenant-bindings-path-exists"
+        description="Identify whether the tenant bindings deployment location exists">
+        <available type="dir" file="${services.tenant.bindings.path}"
+            property="services.tenant.bindings.path.exists" />
+    </target>
+    
+    <target name="deploy-to-config"
+        description="Copies tenant-specific application customizations to the deployment location"
+        depends="deploy-tenant-bindings">
+    </target>
+    
+    <target name="deploy-tenant-bindings"
+        description="Copies tenant-specific services bindings settings to the deployment location"
+        if="${services.tenant.bindings.path.exists}"
+        depends="update-tenant-id, update-tenant-bindings-with-domain, update-tenant-bindings-with-tenant, update-tenant-bindings-with-displayname">
+        <property name="tenant.deploy.dir"
+            value="${services.tenant.bindings.path}/${our.tenant.name.short}" />
+        <mkdir dir="${tenant.deploy.dir}" />
+        <copy todir="${tenant.deploy.dir}"
+            file="${services.our.tenant}/${services.tenant.bindings.delta}" />
+    </target>
+    
+    <target name="update-tenant-id"
+        description="Updates the tenant ID">
+        <replaceregexp
+            match="(&lt;tenant:tenantBinding id=&quot;)([^&quot;]*?)(&quot;)"
+            replace="\1${our.tenant.id}\3"
+            file="${services.our.tenant}/${services.tenant.bindings.delta}" />
+    </target>
+    
+    <target name="update-tenant-bindings-with-domain"
+        description="Updates tenant-specific services bindings settings to reflect the customized tenant Internet domain">
+        <replaceregexp
+            match="${services.default.domain}"
+            replace="${our.tenant.domain}"
+            flags="g">
+            <fileset dir="${services.our.tenant}" 
+                includes="**/${services.tenant.bindings.delta}" />
+        </replaceregexp>
+    </target>
+    
+    <target name="update-tenant-bindings-with-tenant"
+        description="Updates tenant-specific services bindings settings to reflect the customized tenant name">
+        <replaceregexp
+            match="${services.default.tenant}"
+            replace="${our.tenant.name.short}"
+            flags="g">
+            <fileset dir="${services.our.tenant}" 
+                includes="**/${services.tenant.bindings.delta}" />
+        </replaceregexp>
+    </target>
+    
+    <!-- Currently defaults to using the tenant's Internet domain as its display name. -->
+    <!-- If desired, this could be obtained from a new top-level property. -->
+    <target name="update-tenant-bindings-with-displayname"
+        description="Updates tenant-specific services bindings settings to reflect the customized tenant display name">
+        <replaceregexp
+            match="(&lt;tenant:tenantBinding[^&gt;]*? displayName=&quot;)([^&quot;]*?)(&quot;)"
+            replace="\1${our.tenant.domain}\3"
+            file="${services.our.tenant}/${services.tenant.bindings.delta}" />
+    </target>
+
+</project>
