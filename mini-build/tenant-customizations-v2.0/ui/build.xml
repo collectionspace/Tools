@@ -14,9 +14,14 @@
     <property file="ui.properties" />
 
     <property name="ui.war.filepath"
-        value="${jboss.deploy.cspace}/${cspace.ui.war}" />
+        value="${jee.deploy.cspace}/${cspace.ui.war}" />
+    <property name="ui.war.dir.filepath"
+        value="${jee.deploy.cspace}/${cspace.ui.war.dir}" />
+
     <property name="ui.war.tenants.filepath" 
         value="${ui.war.filepath}/${cspace.ui.tenants}" />
+    <property name="ui.war.dir.tenants.filepath" 
+        value="${ui.war.dir.filepath}/${cspace.ui.tenants}" />
 
     <!-- Deploy the tenant directory to an exploded UI .war directory if -->
     <!-- present; if not, deploy to a compressed UI .war file. -->
@@ -33,8 +38,8 @@
     <target name="deploy-to-war-dir"
         description="Copies a potentially customized tenant to the deployed UI .war directory"
         if="${ui.war.dir.exists}">
-        <mkdir dir="${ui.war.tenants.filepath}" />
-        <copy todir="${ui.war.tenants.filepath}/${our.tenant.name.short}">
+        <mkdir dir="${ui.war.dir.tenants.filepath}" />
+        <copy todir="${ui.war.dir.tenants.filepath}/${our.tenant.name.short}">
             <fileset dir="${cspace.ui.our.tenant}" defaultexcludes="false">
                 <include name="**" />
                 <exclude name="**/.project" />
@@ -49,8 +54,7 @@
     
     <target name="deploy-to-war-file"
         description="Copies a potentially customized tenant to the deployed UI .war file"
-        if="${ui.war.file.exists}"
-        unless="${ui.war.dir.exists}">
+        if="${ui.war.file.exists}">
         <!-- Copies and modifies the war file locally before deploying it, -->
         <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
         <mkdir dir="${build.dir}" />
@@ -61,7 +65,7 @@
             <zipfileset dir="${cspace.ui.our.tenant}"
                 prefix="${cspace.ui.tenants}/${our.tenant.name.short}" />
         </jar>
-        <copy file="${build.dir}/${cspace.ui.war}" todir="${jboss.deploy.cspace}"
+        <copy file="${build.dir}/${cspace.ui.war}" todir="${jee.deploy.cspace}"
             overwrite="true" />
         <delete dir="${build.dir}" quiet="true" />
     </target>
@@ -112,7 +116,7 @@
     
     <target name="check-ui-war-dir-exists"
         description="Identify whether a UI .war directory exists.">
-        <available type="dir" file="${ui.war.filepath}"
+        <available type="dir" file="${ui.war.dir.filepath}"
             property="ui.war.dir.exists" />
     </target>
     
