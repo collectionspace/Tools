@@ -29,6 +29,12 @@
         description="Deploy per-tenant UI customizations to the appropriate CollectionSpace server folders." 
         depends="undeploy, deploy-to-war">
     </target>
+
+    <!-- Deploy the tenant directory to an exploded UI .war directory if present, without an undeploy. -->
+    <target name="quick-deploy"
+        description="Deploy per-tenant UI customizations to the deployed UI .war directory. Does not handle deletions." 
+        depends="check-ui-war-dir-exists, deploy-to-war-dir">
+    </target>
     
     <target name="deploy-to-war"
         description="Copies a potentially customized tenant to the deployed UI .war"
