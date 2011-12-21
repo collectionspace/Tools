@@ -23,8 +23,9 @@
     <property name="ui.war.dir.tenants.filepath" 
         value="${ui.war.dir.filepath}/${cspace.ui.tenants}" />
 
-    <!-- Deploy the tenant directory to an exploded UI .war directory if -->
-    <!-- present; if not, deploy to a compressed UI .war file. -->
+    <!-- Deploy the tenant directory: -->
+    <!-- * To an exploded UI .war directory, if present; and -->
+    <!-- * To a compressed UI .war file. -->
     <target name="deploy"
         description="Deploy per-tenant UI customizations to the appropriate CollectionSpace server folders." 
         depends="undeploy, deploy-to-war">
