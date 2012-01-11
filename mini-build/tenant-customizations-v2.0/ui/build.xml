@@ -22,45 +22,39 @@
         value="${ui.war.filepath}/${cspace.ui.tenants}" />
     <property name="ui.war.dir.tenants.filepath" 
         value="${ui.war.dir.filepath}/${cspace.ui.tenants}" />
+        
+    <fileset id="ui.our.tenant.with.standard.excludes" dir="${cspace.ui.our.tenant}"
+        defaultexcludes="false">
+        <include name="**" />
+        <exclude name="**/.project" />
+        <exclude name="**/.classpath" />
+        <exclude name="**/.idea/**" />
+        <exclude name="**/.settings/**" />
+        <exclude name="**/.svn/**" />
+        <exclude name="**/nbproject/**" />
+    </fileset>
 
     <!-- Deploy the tenant directory: -->
     <!-- * To an exploded UI war directory, if present; and -->
     <!-- * To a compressed UI .war file. -->
     <target name="deploy"
         description="Deploy per-tenant UI customizations to the appropriate CollectionSpace server folders." 
-        depends="undeploy, deploy-to-war">
-    </target>
-
-    <!-- Deploy the tenant directory to an exploded UI .war directory if present, without an undeploy. -->
-    <target name="quick-deploy"
-        description="Deploy per-tenant UI customizations to the deployed UI .war directory. Does not handle deletions." 
-        depends="check-ui-war-dir-exists, deploy-to-war-dir">
-    </target>
-    
-    <target name="deploy-to-war"
-        description="Copies a potentially customized tenant to the deployed UI .war"
         depends="deploy-to-war-dir, deploy-to-war-file">
     </target>
     
+    <!-- Copies a potentially customized tenant to the deployed UI .war directory" -->
     <target name="deploy-to-war-dir"
-        description="Copies a potentially customized tenant to the deployed UI .war directory"
+        depends="undeploy-from-war-dir"
         if="${ui.war.dir.exists}">
         <mkdir dir="${ui.war.dir.tenants.filepath}" />
         <copy todir="${ui.war.dir.tenants.filepath}/${our.tenant.name.short}">
-            <fileset dir="${cspace.ui.our.tenant}" defaultexcludes="false">
-                <include name="**" />
-                <exclude name="**/.project" />
-                <exclude name="**/.classpath" />
-                <exclude name="**/.idea/**" />
-                <exclude name="**/.settings/**" />
-                <exclude name="**/.svn/**" />
-                <exclude name="**/nbproject/**" />
-            </fileset>
+            <fileset refid="ui.our.tenant.with.standard.excludes" />
         </copy>
     </target>
     
+    <!-- Copies a potentially customized tenant to the deployed UI .war file" -->
     <target name="deploy-to-war-file"
-        description="Copies a potentially customized tenant to the deployed UI .war file"
+        depends="undeploy-from-war-file"
         if="${ui.war.file.exists}">
         <!-- Copies and modifies the war file locally before deploying it, -->
         <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
@@ -77,30 +71,46 @@
         <delete dir="${build.dir}" quiet="true" />
     </target>
     
+    <!-- One-way sync the contents of the tenant directory to an exploded UI .war directory, -->
+    <!-- if present, without first doing an undeploy. -->
+    <target name="quick-deploy"
+        description="Sync per-tenant UI customizations to the deployed CollectionSpace UI .war directory." 
+        depends="sync-to-war-dir">
+    </target>
+    
+    <!-- Syncs a potentially customized tenant to the deployed UI .war directory -->
+    <target name="sync-to-war-dir"
+        depends="check-ui-war-dir-exists"
+        if="${ui.war.dir.exists}">
+        <mkdir dir="${ui.war.dir.tenants.filepath}" />
+        <!-- Does not overwrite files in the target with same or newer timestamp and provides -->
+        <!-- verbose output, both helping make the set of files being updated readily apparent. -->
+        <sync todir="${ui.war.dir.tenants.filepath}/${our.tenant.name.short}"
+            verbose="true">
+              <fileset refid="ui.our.tenant.with.standard.excludes" />
+        </sync>
+    </target>
+    
     <!-- Undeploy the tenant directory-->
     <target name="undeploy"
         description="Undeploy per-tenant UI customizations from the appropriate CollectionSpace server folders." 
-        depends="check-war-exists, undeploy-from-war">
-    </target>
-    
-    <target name="undeploy-from-war"
-        description="Undeploys a potentially customized tenant from the deployed UI .war"
         depends="undeploy-from-war-dir, undeploy-from-war-file">
     </target>
     
+    <!-- Undeploys a potentially customized tenant from the deployed UI .war directory -->
     <target name="undeploy-from-war-dir"
-        description="Undeploys a potentially customized tenant from the deployed UI .war directory"
+        depends="check-ui-war-dir-exists"
         if="${ui.war.dir.exists}">
-        <delete dir="${ui.war.tenants.filepath}/${our.tenant.name.short}"
+        <delete dir="${ui.war.dir.tenants.filepath}/${our.tenant.name.short}"
             failonerror="false" />
     </target>
     
+   <!-- Undeploys a potentially customized tenant from the deployed UI .war file -->
     <target name="undeploy-from-war-file"
-        description="Undeploys a potentially customized tenant from the deployed UI .war file"
-        if="${ui.war.file.exists}"
-        unless="${ui.war.dir.exists}">
+        depends="check-ui-war-file-exists"
+        if="${ui.war.file.exists}">
         <!-- Copies and modifies the war file locally before deploying it, -->
-        <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
+        <!-- thus playing nice with containers' automatic deployment techniques. -->
         <mkdir dir="${build.dir}" />
         <copy file="${ui.war.filepath}" todir="${build.dir}" />
         <!-- For details on this removal technique, see http://stackoverflow.com/questions/2521231/ -->
@@ -116,19 +126,15 @@
     
     <!-- Utility methods called by undeploy, setting properties -->
     <!-- used by both undeploy and deploy -->
-    <target name="check-war-exists"
-        description="Identify whether a UI .war directory or file exists."
-        depends="check-ui-war-dir-exists, check-ui-war-file-exists">
-    </target>
     
-    <target name="check-ui-war-dir-exists"
-        description="Identify whether a UI .war directory exists.">
+    <!-- Identify whether a UI .war directory exists." -->
+    <target name="check-ui-war-dir-exists">
         <available type="dir" file="${ui.war.dir.filepath}"
             property="ui.war.dir.exists" />
     </target>
     
-    <target name="check-ui-war-file-exists"
-        description="Identify whether a UI .war file exists.">
+    <!-- Identify whether a UI .war file exists." -->
+    <target name="check-ui-war-file-exists">
         <available type="file" file="${ui.war.filepath}"
             property="ui.war.file.exists" />
     </target>
