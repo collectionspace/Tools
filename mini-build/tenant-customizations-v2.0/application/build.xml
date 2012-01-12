@@ -35,98 +35,107 @@
     </taskdef>
 
     <target name="deploy"
-        description="Deploy tenant-specific application customizations to the deployment location (i.e. the appropriate CollectionSpace server folder)" 
-        depends="check-config-exists, deploy-to-config">
+        description="Deploy per-tenant application customizations to the appropriate CollectionSpace server folders" 
+        depends="undeploy, deploy-tenant-config-master-file, create-tenant-dir, deploy-tenant-host-config, deploy-tenant-config-files">
     </target>
     
-    <target name="check-config-exists"
-        description="Identify whether the deployment location exists">
-        <available type="dir" file="${application.config.path}"
-            property="application.config.path.exists" />
-    </target>
-    
-    <target name="deploy-to-config"
-        description="Copies tenant-specific application customizations to the deployment location"
-        depends="deploy-tenant-config-master, make-tenant-folder, deploy-tenant-host-config, deploy-tenant-config-files">
-    </target>
-    
+    <!-- Copies the tenant-specific application configuration settings master file to the deployment location -->
     <!-- Copies and renames *-tenant.xml -->
-    <target name="deploy-tenant-config-master"
-        description="Copies the tenant-specific application configuration settings master file to the deployment location"
-        if="${application.config.path.exists}"
+    <target name="deploy-tenant-config-master-file"
+        if="${application.config.dir.exists}"
         depends="update-config-with-tenant">
         <!-- Copy the placeholder tenant config, changing its name -->
         <!-- to the actual tenant's short name and applying a new -->
         <!-- filename prefix -->
-        <copy todir="${application.config.path}">
-            <fileset dir="${application.our.tenant}" 
+        <copy todir="${cspace.application.config.path}">
+            <fileset dir="${cspace.application.our.tenant}" 
                 includes="**/${sample.tenant.name.short}-tenant.xml" />
             <globmapper from="${sample.tenant.name.short}-tenant.xml"
-                to="cspace-config-${our.tenant.name.short}.xml" />
+                to="${cspace.application.config.prefix}-${our.tenant.name.short}.xml" />
         </copy>
     </target>
     
-    <!-- Makes a tenant folder -->
-    <target name="make-tenant-folder"
-        description="Makes a tenant folder in the deployment location"
-        if="${application.config.path.exists}">
-        <property name="tenant.config.path" value="${application.config.path}/tenants/${our.tenant.name.short}" />
-        <delete dir="${tenant.config.path}" quiet="true" />
+    <!-- Makes a directory for the currently-specified tenant within the deployment location. -->
+    <target name="create-tenant-dir"
+        if="${application.config.dir.exists}">
         <mkdir dir="${tenant.config.path}" />
     </target>
     
-    <!-- Copies *-settings.xml -->
+    <!-- Copies tenant-specific, host-related application configuration settings -->
+    <!-- (hosts, ports, URLs, etc. relevant to this tenant) to the directory for the -->
+    <!-- currently specified tenant within the deployment location. -->
+    <!-- Invokes targets that customize these settings prior to making the copy. -->
+    <!-- Currently copies all *-settings.xml files to the deployent location. -->
     <target name="deploy-tenant-host-config"
-        description="Copies tenant-specific, host-related application configuration settings (hosts, ports, URLs, etc. relevant to this tenant) to the deployment location"
-        if="${application.config.path.exists}"
+        if="${application.config.dir.exists}"
         depends="update-tenant-id, update-host-config-with-domain, update-host-config-with-tenant">
         <copy todir="${tenant.config.path}">
-            <fileset dir="${application.our.tenant}" 
-                includes="**/*${application.settings.suffix}" />
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/*${cspace.application.settings.suffix}" />
         </copy>
     </target>
     
-    <!-- Copy any other tenant config files to the config folder for this tenant -->
+    <!-- Copies any other tenant config files to the directory for the -->
+    <!-- currently specified tenant within the deployment location. -->
+    <!-- This deploys all files other than those explicitly specified by other deploy targets above. -->
     <target name="deploy-tenant-config-files"
-        description="Copies any other tenant-specific configuration files to the tenant folder in the deployment location"
-        if="${application.config.path.exists}">
+        if="${application.config.dir.exists}">
         <copy todir="${tenant.config.path}">
-            <fileset dir="${application.our.tenant}"
+            <fileset dir="${cspace.application.our.tenant}"
                 includes="**/*"
-                excludes="**/*-tenant.xml, **/${application.settings.suffix}" />
+                excludes="**/*-tenant.xml, **/*${cspace.application.settings.suffix}" />
         </copy>
     </target>
 
-    <!-- Inserts customized tenant name in the 'tenantname' reference in *-tenant.xml -->
-    <target name="update-config-with-tenant"
-        description="Updates tenant-specific application configuration settings to reflect the customized tenant name">
+    <target name="undeploy"
+        description="Undeploy tenant-specific application customizations from the deployment location." 
+        depends="check-config-dir-exists, undeploy-tenant-config-master-file, check-tenant-dir-exists, undeploy-tenant-dir">
+    </target>
+    
+    <target name="undeploy-tenant-config-master-file"
+        if="${application.config.dir.exists}">
+        <delete file="${cspace.application.config.path}/${cspace.application.config.prefix}-${our.tenant.name.short}.xml" quiet="true" />
+    </target>
+    
+    <target name="undeploy-tenant-dir"
+        if="${tenant.config.dir.exists}">
+        <delete dir="${tenant.config.path}" quiet="true" />
+    </target>
+    
+    <!-- Utility targets called by deploy, to modify local copies of configuration -->
+    <!-- files with tenant-specific settings prior to deploying those files. -->
+    
+    <!-- Updates tenant-specific application configuration settings to reflect the customized tenant name. -->
+    <!-- Currently updates the customized tenant name in the 'tenantname' reference in *-tenant.xml -->
+    <target name="update-config-with-tenant">
         <replaceregexp
             match="&lt;cspace-config tenantname=&quot;(.*)&quot;"
             replace="&lt;cspace-config tenantname=&quot;${our.tenant.name.short}&quot;">
-            <fileset dir="${application.our.tenant}" includes="**/*-tenant.xml" />
+            <fileset dir="${cspace.application.our.tenant}" includes="**/*-tenant.xml" />
         </replaceregexp>
     </target>
     
-    <target name="update-tenant-id"
-        description="Updates the tenant ID">
+    <!-- Updates the tenant ID. -->
+    <target name="update-tenant-id">
         <echo message="id=${our.tenant.id}" />
         <replaceregexp
             match="&lt;tenant&gt;(.*)&lt;/tenant&gt;"
             replace="&lt;tenant&gt;${our.tenant.id}&lt;/tenant&gt;">
-            <fileset dir="${application.our.tenant}" 
-                includes="**/${application.local.settings.suffix}" />
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
         </replaceregexp>
    </target>
     
-    <!-- Replaces default tenant Internet domain with customized Internet domain in *local-settings.xml -->
-    <target name="update-host-config-with-domain"
-        description="Updates tenant-specific, host-related application configuration settings to reflect the customized tenant Internet domain">
+    <!-- Updates tenant-specific, host-related application configuration settings -->
+    <!-- to reflect the customized tenant Internet domain. -->
+    <!-- Currently performs this update in *local-settings.xml -->
+    <target name="update-host-config-with-domain">
          <replaceregexp
-            match="${application.default.domain}"
+            match="${cspace.application.default.domain}"
             replace="${our.tenant.domain}"
             flags="g">
-            <fileset dir="${application.our.tenant}" 
-                includes="**/${application.local.settings.suffix}" />
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
         </replaceregexp>
     </target>
 
@@ -134,12 +143,29 @@
     <target name="update-host-config-with-tenant"
         description="Updates tenant-specific, host-related application configuration settings to reflect the customized tenant name">
          <replaceregexp
-            match="${application.default.tenant}"
+            match="${cspace.application.default.tenant}"
             replace="${our.tenant.name.short}"
             flags="g">
-            <fileset dir="${application.our.tenant}" 
-                includes="**/${application.local.settings.suffix}" />
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
         </replaceregexp>
+    </target>
+    
+    <!-- Utility targets called by undeploy, setting properties -->
+    <!-- used by both undeploy and deploy -->
+    
+    <!-- Identify whether the deployment location exists" -->
+    <target name="check-config-dir-exists">
+        <available type="dir" file="${cspace.application.config.path}"
+            property="application.config.dir.exists" />
+    </target>
+    
+    <!-- Identify whether the tenant directory within the deployment location exists -->
+    <target name="check-tenant-dir-exists"
+        depends="check-config-dir-exists">
+        <property name="tenant.config.path" value="${cspace.application.config.path}/${cspace.application.tenants}/${our.tenant.name.short}" />
+        <available type="dir" file="${tenant.config.path}"
+            property="tenant.config.dir.exists" />
     </target>
     
     <!-- This target is not yet complete, but rather demonstrates an approach that may work. -->
@@ -203,7 +229,6 @@
         
        <echo message="${status.property.reload}" />
 
-        
     </target>
 
 </project>
