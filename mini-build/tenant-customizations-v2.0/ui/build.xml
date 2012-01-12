@@ -57,7 +57,7 @@
         depends="undeploy-from-war-file"
         if="${ui.war.file.exists}">
         <!-- Copies and modifies the war file locally before deploying it, -->
-        <!-- thus playing nice with Jboss's deployment scanner, per CSPACE-4279. -->
+        <!-- thus playing nice with containers' automatic deployment techniques. -->
         <mkdir dir="${build.dir}" />
         <copy file="${ui.war.filepath}" todir="${build.dir}" />
         <jar destfile="${build.dir}/${cspace.ui.war}" update="true">
@@ -124,7 +124,7 @@
         <delete dir="${build.dir}" quiet="true" />
     </target>
     
-    <!-- Utility methods called by undeploy, setting properties -->
+    <!-- Utility targets called by undeploy, setting properties -->
     <!-- used by both undeploy and deploy -->
     
     <!-- Identify whether a UI .war directory exists." -->
