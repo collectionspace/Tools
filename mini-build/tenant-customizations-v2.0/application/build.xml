@@ -199,14 +199,14 @@
 
         <!-- Set URL paths -->
         <property name="url.host" value="${application.protocol}://${application.host}:${application.port}" />
-        <property name="url.path.login" value="/collectionspace/tenant/${our.tenant.name.short}/login" />
+        <property name="url.path.tenant.login" value="/collectionspace/tenant/${our.tenant.name.short}/login" />
         <property name="url.path.app.config.reload" value="/collectionspace/tenant/${our.tenant.name.short}/init" />
-        <property name="url.path.app.config.logout" value="/collectionspace/tenant/${our.tenant.name.short}/logout" />
+        <property name="url.path.tenant.logout" value="/collectionspace/tenant/${our.tenant.name.short}/logout" />
 
       <!-- Login by POSTing an admin username and password -->
       <!-- for the currently-selected tenant -->
-      <echo message="Logging into ${url.path.login} ..." />
-      <httppost url="${url.host}${url.path.login}"
+      <echo message="Logging into ${url.path.tenant.login} ..." />
+      <httppost url="${url.host}${url.path.tenant.login}"
           shutdown="true">
           <post name="userid" value="${application.user.urlencoded}" />
           <post name="password" value="${application.password.urlencoded}" />
@@ -219,8 +219,8 @@
           loglevel="all" logFile="reload.log" />
 
       <!-- Logout -->
-      <echo message="Logging out via ${url.path.app.config.logout} ..." />
-      <httpget url="${url.host}${url.path.app.config.logout}"
+      <echo message="Logging out via ${url.path.tenant.logout} ..." />
+      <httpget url="${url.host}${url.path.tenant.logout}"
           loglevel="all" logFile="logout.log"
           shutdown="true" />
 
