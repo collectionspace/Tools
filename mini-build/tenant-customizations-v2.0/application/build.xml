@@ -193,10 +193,6 @@
             <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
         </input>
 
-        <!-- URLencode the username and password -->
-        <urlencode name="application.user.urlencoded" value="${application.user}" />
-        <urlencode name="application.password.urlencoded" value="${application.password}" />
-
         <!-- Set URL paths -->
         <property name="url.host" value="${application.protocol}://${application.host}:${application.port}" />
         <property name="url.path.tenant.login" value="/collectionspace/tenant/${our.tenant.name.short}/login" />
@@ -208,8 +204,8 @@
       <echo message="Logging into ${url.path.tenant.login} ..." />
       <httppost url="${url.host}${url.path.tenant.login}"
           shutdown="true">
-          <post name="userid" value="${application.user.urlencoded}" />
-          <post name="password" value="${application.password.urlencoded}" />
+          <post name="userid" value="${application.user}" />
+          <post name="password" value="${application.password}" />
       </httppost>
 
       <!-- Request that the application layer reload its configuration -->
