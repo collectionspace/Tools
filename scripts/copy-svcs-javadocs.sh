@@ -26,7 +26,8 @@ SOURCE_DIR=$BAMBOO_BUILD_DIR/services/target/site/$SOURCE_DIR_NAME
 # SOURCE_JAR_FILE=$BAMBOO_BUILD_DIR/services/target/$SOURCE_JAR_FILENAME
 
 WEB_ROOT_DOCS_DIR=/var/www/html
-DEST_DIR=$WEB_ROOT_DOCS_DIR/$SOURCE_DIR_NAME/services
+DEST_PARENT_DIR=$WEB_ROOT_DOCS_DIR/$SOURCE_DIR_NAME
+DEST_DIR=$DEST_PARENT_DIR/services
 
 ####################################################
 # End of variables to set
@@ -75,11 +76,25 @@ if [ ! -d $WEB_ROOT_DOCS_DIR ]
     exit 1
 fi
 
-if [ -d DEST_DIR ] 
+if [ -d $DEST_PARENT_DIR ] 
+  then
+    if [ ! -O $DEST_PARENT_DIR ] 
+      then
+        echo "Destination parent directory $DEST_PARENT_DIR exists, but is not owned by the current effective user"
+        exit 1
+    fi
+  else
+      echo "Destination directory $DEST_PARENT_DIR does not exist"
+      echo "Attempting to create $DEST_PARENT_DIR ..."
+      mkdir $DEST_PARENT_DIR || \
+        { echo "Creating $DEST_PARENT_DIR failed"; exit 1; } 
+fi
+
+if [ -d $DEST_DIR ] 
   then
     if [ ! -O $DEST_DIR ] 
       then
-        echo "Destination directory $DEST_DIR is not owned by the current effective user"
+        echo "Destination directory $DEST_DIR exists, but is not owned by the current effective user"
         exit 1
       else
         echo "Removing old destination directory ..."
@@ -93,9 +108,9 @@ cp -Rf $SOURCE_DIR $DEST_DIR || \
   { echo "Copying $SOURCE_DIR to $DEST_DIR failed"; exit 1; } 
 
 # echo "Copying JAR file to destination ..."
-# cp -Rf $SOURCE_JAR_FILE $WEB_ROOT_DOCS_DIR || \
-#  { echo "Copying $SOURCE_JAR_FILE to $WEB_ROOT_DOCS_DIR failed"; exit 1; } 
-# cd $WEB_ROOT_DOCS_DIR
+# cp -Rf $SOURCE_JAR_FILE $DEST_PARENT_DIR || \
+#  { echo "Copying $SOURCE_JAR_FILE to $DEST_PARENT_DIR failed"; exit 1; } 
+# cd $DEST_PARENT_DIR
 # echo "Extracting JAR file ..."
 # $JAVA_HOME/bin/jar -xf $SOURCE_JAR_FILENAME || \
 #  { echo "Extracting JAR file $SOURCE_JAR_FILENAME failed"; exit 1; } 
