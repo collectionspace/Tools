@@ -1,0 +1,225 @@
+<project name="tenant-customizations-application" default="deploy" basedir=".">
+    <description>Per-tenant application customizations for CollectionSpace</description>
+    
+    <!-- 'environment' must be declared to bring values of system -->
+    <!-- environment variables into Ant, prior to reading any -->
+    <!-- properties files that may reference those values. -->
+    <property environment="env" />
+    
+    <!-- Set global properties for this build -->
+    <property file="../build.properties" />
+    <!-- Set tenant-specific properties for this build -->
+    <property file="../our-tenant.properties" />
+    <!-- Set application layer-specific properties for this build -->
+    <property file="application.properties" />
+    
+    <!-- Setup for additional Ant tasks required by this buildfile, -->
+    <!-- pointing Ant at the correct JAR files and resource locations for: -->
+    <!-- The Ant Contrib set of tasks -->
+    <!-- The Fikin Ant Tasks set of tasks, including several dependencies -->
+    <property name="ant-contrib.jar" value="ant-contrib-1.0b3.jar" />
+    <property name="fikin-ant-tasks.jar" value="fikin-ant-1.7.3.jar" />
+    <property name="apache-http-client.jar" value="commons-httpclient-3.0-rc1.jar" />
+    <property name="commons-logging.jar" value="commons-logging-1.0.3.jar" />
+    <property name="commons-codec.jar" value="commons-codec-1.3.jar" />
+    
+    <fileset id="runtime.libs" dir="./lib">
+        <include name="${ant-contrib.jar}" />
+        <include name="${fikin-ant-tasks.jar}" />
+        <include name="${apache-http-client.jar}" />
+        <include name="${commons-logging.jar}" />
+        <include name="${commons-codec.jar}" />
+    </fileset>
+    <path id="runtime.classpath">
+        <fileset refid="runtime.libs" />
+    </path>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath refid="runtime.classpath" />
+    </taskdef>
+    <taskdef name="httpget" classname="net.sf.fikin.ant.httpclientanttask.AntGetMethod">
+      <classpath refid="runtime.classpath" />
+    </taskdef>
+    <taskdef name="httppost" classname="net.sf.fikin.ant.httpclientanttask.AntPostMethod">
+      <classpath refid="runtime.classpath" />
+    </taskdef>
+
+
+    <target name="deploy"
+        description="Deploy per-tenant application customizations to the appropriate CollectionSpace server folders" 
+        depends="undeploy, deploy-tenant-config-master-file, create-tenant-dir, deploy-tenant-host-config, deploy-tenant-config-files">
+    </target>
+    
+    <!-- Copies the tenant-specific application configuration settings master file to the deployment location -->
+    <!-- Copies and renames *-tenant.xml -->
+    <target name="deploy-tenant-config-master-file"
+        if="${application.config.dir.exists}"
+        depends="update-config-with-tenant">
+        <!-- Copy the placeholder tenant config, changing its name -->
+        <!-- to the actual tenant's short name and applying a new -->
+        <!-- filename prefix -->
+        <copy todir="${cspace.application.config.path}">
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${sample.tenant.name.short}-tenant.xml" />
+            <globmapper from="${sample.tenant.name.short}-tenant.xml"
+                to="${cspace.application.config.prefix}-${our.tenant.name.short}.xml" />
+        </copy>
+    </target>
+    
+    <!-- Makes a directory for the currently-specified tenant within the deployment location. -->
+    <target name="create-tenant-dir"
+        if="${application.config.dir.exists}">
+        <mkdir dir="${tenant.config.path}" />
+    </target>
+    
+    <!-- Copies tenant-specific, host-related application configuration settings -->
+    <!-- (hosts, ports, URLs, etc. relevant to this tenant) to the directory for the -->
+    <!-- currently specified tenant within the deployment location. -->
+    <!-- Invokes targets that customize these settings prior to making the copy. -->
+    <!-- Currently copies all *-settings.xml files to the deployent location. -->
+    <target name="deploy-tenant-host-config"
+        if="${application.config.dir.exists}"
+        depends="update-tenant-id, update-host-config-with-domain, update-host-config-with-tenant">
+        <copy todir="${tenant.config.path}">
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/*${cspace.application.settings.suffix}" />
+        </copy>
+    </target>
+    
+    <!-- Copies any other tenant config files to the directory for the -->
+    <!-- currently specified tenant within the deployment location. -->
+    <!-- This deploys all files other than those explicitly specified by other deploy targets above. -->
+    <target name="deploy-tenant-config-files"
+        if="${application.config.dir.exists}">
+        <copy todir="${tenant.config.path}">
+            <fileset dir="${cspace.application.our.tenant}"
+                includes="**/*"
+                excludes="**/*-tenant.xml, **/*${cspace.application.settings.suffix}" />
+        </copy>
+    </target>
+
+    <target name="undeploy"
+        description="Undeploy tenant-specific application customizations from the deployment location." 
+        depends="check-config-dir-exists, undeploy-tenant-config-master-file, check-tenant-dir-exists, undeploy-tenant-dir">
+    </target>
+    
+    <target name="undeploy-tenant-config-master-file"
+        if="${application.config.dir.exists}">
+        <delete file="${cspace.application.config.path}/${cspace.application.config.prefix}-${our.tenant.name.short}.xml" quiet="true" />
+    </target>
+    
+    <target name="undeploy-tenant-dir"
+        if="${tenant.config.dir.exists}">
+        <delete dir="${tenant.config.path}" quiet="true" />
+    </target>
+    
+    <!-- Utility targets called by deploy, to modify local copies of configuration -->
+    <!-- files with tenant-specific settings prior to deploying those files. -->
+    
+    <!-- Updates tenant-specific application configuration settings to reflect the customized tenant name. -->
+    <!-- Currently updates the customized tenant name in the 'tenantname' reference in *-tenant.xml -->
+    <target name="update-config-with-tenant">
+        <replaceregexp
+            match="&lt;cspace-config tenantname=&quot;(.*)&quot;"
+            replace="&lt;cspace-config tenantname=&quot;${our.tenant.name.short}&quot;">
+            <fileset dir="${cspace.application.our.tenant}" includes="**/*-tenant.xml" />
+        </replaceregexp>
+    </target>
+    
+    <!-- Updates the tenant ID. -->
+    <target name="update-tenant-id">
+        <echo message="id=${our.tenant.id}" />
+        <replaceregexp
+            match="&lt;tenant&gt;(.*)&lt;/tenant&gt;"
+            replace="&lt;tenant&gt;${our.tenant.id}&lt;/tenant&gt;">
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
+        </replaceregexp>
+   </target>
+    
+    <!-- Updates tenant-specific, host-related application configuration settings -->
+    <!-- to reflect the customized tenant Internet domain. -->
+    <!-- Currently performs this update in *local-settings.xml -->
+    <target name="update-host-config-with-domain">
+         <replaceregexp
+            match="${cspace.application.default.domain}"
+            replace="${our.tenant.domain}"
+            flags="g">
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
+        </replaceregexp>
+    </target>
+
+    <!-- Replaces default tenant name with customized tenant name in *local-settings.xml -->
+    <target name="update-host-config-with-tenant"
+        description="Updates tenant-specific, host-related application configuration settings to reflect the customized tenant name">
+         <replaceregexp
+            match="${cspace.application.default.tenant}"
+            replace="${our.tenant.name.short}"
+            flags="g">
+            <fileset dir="${cspace.application.our.tenant}" 
+                includes="**/${cspace.application.local.settings.suffix}" />
+        </replaceregexp>
+    </target>
+    
+    <!-- Utility targets called by undeploy, setting properties -->
+    <!-- used by both undeploy and deploy -->
+    
+    <!-- Identify whether the deployment location exists" -->
+    <target name="check-config-dir-exists">
+        <available type="dir" file="${cspace.application.config.path}"
+            property="application.config.dir.exists" />
+    </target>
+    
+    <!-- Identify whether the tenant directory within the deployment location exists -->
+    <target name="check-tenant-dir-exists"
+        depends="check-config-dir-exists">
+        <property name="tenant.config.path" value="${cspace.application.config.path}/${cspace.application.tenants}/${our.tenant.name.short}" />
+        <available type="dir" file="${tenant.config.path}"
+            property="tenant.config.dir.exists" />
+    </target>
+    
+    <!-- This target is a demonstration of a possible future capability, -->
+    <!-- per CSPACE-4256. -->
+    <target name="reload">
+        <!-- Ask for the username and password of an admin user in this tenant -->
+        <input
+            message="Please enter a CollectionSpace admin username [or press Return for default value in brackets]"
+            addproperty="application.user"
+            defaultvalue="${application.default.admin.user}" />
+        <input
+            message="Please enter the password for user ${application.user} [or press Return for default value in brackets]"
+            addproperty="application.password"
+            defaultvalue="${application.default.admin.password}" >
+            <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+        </input>
+
+        <!-- Set URL paths -->
+        <property name="url.host" value="${application.protocol}://${application.host}:${application.port}" />
+        <property name="url.path.tenant.login" value="/collectionspace/tenant/${our.tenant.name.short}/login" />
+        <property name="url.path.app.config.reload" value="/collectionspace/tenant/${our.tenant.name.short}/init" />
+        <property name="url.path.tenant.logout" value="/collectionspace/tenant/${our.tenant.name.short}/logout" />
+
+      <!-- Login by POSTing an admin username and password -->
+      <!-- for the currently-selected tenant -->
+      <echo message="Logging into ${url.path.tenant.login} ..." />
+      <httppost url="${url.host}${url.path.tenant.login}"
+          shutdown="true">
+          <post name="userid" value="${application.user}" />
+          <post name="password" value="${application.password}" />
+      </httppost>
+
+      <!-- Request that the application layer reload its configuration -->
+      <!-- for this tenant. -->
+      <echo message="Reloading configuration via ${url.path.app.config.reload} ..." />
+      <httpget url="${url.host}${url.path.app.config.reload}"
+          loglevel="all" logFile="reload.log" />
+
+      <!-- Logout -->
+      <echo message="Logging out via ${url.path.tenant.logout} ..." />
+      <httpget url="${url.host}${url.path.tenant.logout}"
+          loglevel="all" logFile="logout.log"
+          shutdown="true" />
+
+    </target>
+
+</project>

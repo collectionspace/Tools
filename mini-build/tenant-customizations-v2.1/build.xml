@@ -1,0 +1,44 @@
+<project name="tenant-customizations" default="deploy" basedir=".">
+    <description>Per-tenant customizations for CollectionSpace</description>
+    
+    <!-- 'environment' must be declared to bring values of system -->
+    <!-- environment variables into Ant, prior to reading any -->
+    <!-- properties files that may reference those values. -->
+    <property environment="env" />
+    
+    <!-- Set global properties for this build -->
+    <property file="build.properties" />
+    <!-- Set tenant-specific properties for this build -->
+    <property file="our-tenant.properties" />
+    
+    <target name="deploy"
+            depends="deploy-ui, deploy-application, deploy-services"
+            description="Deploy per-tenant customizations to the appropriate CollectionSpace server folders.">
+    </target>
+    
+    <target name="deploy-ui"
+            description="Deploy per-tenant UI customizations to the appropriate CollectionSpace server folders.">
+        <ant antfile="ui/build.xml" target="deploy" inheritAll="false"/>
+    </target>
+    
+    <target name="deploy-application"
+            description="Deploy per-tenant application customizations to the appropriate CollectionSpace server folders.">
+        <ant antfile="application/build.xml" target="deploy" inheritAll="false"/>
+    </target>
+    
+    <target name="deploy-services"
+            description="Deploy per-tenant services customizations to the appropriate CollectionSpace server folders.">
+        <ant antfile="services/build.xml" target="deploy" inheritAll="false"/>
+    </target>
+
+    <target name="reload"
+            depends="reload-application"
+            description="Reload per-tenant customizations on the running CollectionSpace server.">
+    </target>
+
+    <target name="reload-application"
+            description="Reload application per-tenant customizations on the running CollectionSpace server.">
+        <ant antfile="application/build.xml" target="reload" inheritAll="false"/>
+    </target>
+
+</project>
