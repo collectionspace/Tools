@@ -21,6 +21,7 @@ DESTINATION_DIR=/var/www/html/builds
 # The following paths are all relative to the Tomcat directory
 NUXEO_CONF_FILE=bin/nuxeo.conf
 NUXEO_SERVER_DIR=nuxeo-server
+NUXEO_SERVER_BUNDLES_DIR=$NUXEO_SERVER_DIR/bundles
 NUXEO_SERVER_PLUGINS_DIR=$NUXEO_SERVER_DIR/plugins
 NUXEO_REPO_CONF_FILE=$NUXEO_SERVER_DIR/repos/default/default.xml
 NUXEO_DEFAULT_REPO_CONF_FILE=$NUXEO_SERVER_DIR/config/default-repo-config.xml
@@ -102,6 +103,13 @@ sed -i 's#\(roles\=\"\)[^\"]*\(\".*\)#\1\2#g' $TOMCAT_USERS_FILE
 echo "Removing temporary directories ..."
 rm -Rv temp[0-9a-f]*
 
+echo "Creating Nuxeo server bundles directory ..."
+if [ ! -e $NUXEO_SERVER_BUNDLES_DIR ]
+  then
+    mkdir $NUXEO_SERVER_BUNDLES_DIR  || \
+      { echo "Creating $NUXEO_SERVER_BUNDLES_DIR directory failed"; exit 1; }
+fi
+
 echo "Creating Nuxeo server plugins directory ..."
 if [ ! -e $NUXEO_SERVER_PLUGINS_DIR ]
   then
@@ -147,6 +155,9 @@ if [ -d $DESTINATION_DIR ] && [ -w $DESTINATION_DIR ]
     echo "Moving tarball to destination directory ..."
     mv $TARBALL_NAME $DESTINATION_DIR || \
       { echo "Moving tarball to $DESTINATION_DIR failed"; }
+    echo "Tarball copied to $DESTINATION_DIR"
+  else
+    echo "Tarball copied to $TMP_DIR/$TARBALL_NAME"
 fi
 
 if [ -e $DESTINATION_DIR/$TARBALL_NAME ]
