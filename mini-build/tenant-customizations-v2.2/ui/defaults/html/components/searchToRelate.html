@@ -1,0 +1,88 @@
+<div class="cs-add-related-records-dialog main-search-page csc-confirmationDialog cs-confirmationDialog">
+    <div class="csc-searchToRelate-closeBtn cs-dialog-closeBtn"><img class="csc-searchToRelate-closeBtnImg" src="../images/btnCloseTop.png" alt="" /></div>
+    <div class="csc-confirmationDialog-inner">
+        <div class="info-column">
+            <div class="csc-related-steps add-related-steps">
+                <div class="info-column2-45 fl-force-left">
+                    <div class="csc-search-box"></div>                    
+                </div>
+                <div class="info-column2-40 fl-force-right">                    
+					<div id="create-box">
+						<div class="header">
+							<div class="csc-searchToRelate-createNew label"></div>
+							<div class="clear"></div>
+						</div>
+						<div class="content">
+							<input type="button" style="margin-bottom:-2px; cursor:default;" class="csc-searchToRelate-createButton button" value="" />
+						</div>
+					</div>
+                </div>
+				<div class="clear"></div>
+            </div>
+        </div>
+		
+        <div class="csc-search-loadingIndicator">
+	        <div class="fl-container-flex header static button">
+	            <span class="found-records-content csc-search-resultsCountContainer">
+	                <span class="csc-search-results-count cs-search-highlight"></span>
+	            </span>
+	            <span class="found-records-content-looking csc-search-lookingContainer">
+                    <span class="csc-search-lookingString cs-search-highlight"></span>
+                </span>
+	            <input type="button" class="csc-searchToRelate-addButton cs-searchToRelate-addButton button add fl-force-right" />
+	            <div class="clear"></div>
+	        </div>
+	        <div class="csc-search-results">
+	            <div class="fl-pager list-table">
+	                <table summary="search results" id="search-results" class="flc-pager-body-template fl-pager-data" xmlns:rsf="http://ponder.org.uk">
+                        <thead class="flc-pager-body-template-content">
+                            <tr rsf:id="header:">
+                                <th><span rsf:id="selected"></span></th>
+                                <th class="flc-pager-sort-header"><a rsf:id="number" href="#"></a></th>
+                                <th class="flc-pager-sort-header"><a rsf:id="summary" href="#"></a></th>
+                                <th><span rsf:id="recordtype"></span></th>
+                                <th class="flc-pager-sort-header"><a rsf:id="summarylist.updatedAt" href="#"></a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="csc-row" rsf:id="row:">
+                                <td class="checkbox"><input rsf:id="selected" type="checkbox" /></td>
+                                <td><a rsf:id="number" href="#" class="link"></a></td>
+                                <td rsf:id="summary"></td>
+                                <td rsf:id="recordtype"></td>
+                                <td rsf:id="summarylist.updatedAt"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+	                <ul id="pager-bottom" class="fl-pager-ui flc-pager-bottom">
+	                    <li class="flc-per-page">
+	                        Show <span>
+	                            <select class="flc-pager-page-size">
+	                                <option value="5">5</option>
+	                                <option value="10">10</option>
+	                                <option value="20">20</option>
+	                                <option value="50">50</option>
+	                            </select>
+	                        </span>
+	                        per page
+	                    </li>
+	                    <li class="flc-pager-previous">
+	                        <a class="csc-searchToRelate-previous" href="#"></a>
+	                    </li>
+	                    <li>
+		                    <ul class="pager-links fl-pager-links flc-pager-links">
+		                        <li class="flc-pager-pageLink"><a href="#">1</a></li>
+		                        <li class="flc-pager-pageLink"><a href="#">3</a></li>
+		                    </ul>
+		                </li>
+		                <li class="flc-pager-next">
+	                        <a class="csc-searchToRelate-next" href="#"></a>
+	                    </li>
+	                    <li class="flc-pager-summary"></li>
+	                </ul>
+	                <div class="clear"></div>
+	            </div>
+	        </div>
+	    </div>
+    </div>
+</div>
