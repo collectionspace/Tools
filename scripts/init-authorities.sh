@@ -16,18 +16,19 @@
 ####################################################
 
 # Enable for verbose output - uncomment only while debugging!
-# set -x verbose
+set -x verbose
 
 # Enter a space-separated list of tenant identifiers
 TENANTS+=(core lifesci)
-DEFAULT_ADMIN_ACCTS+=()
-
 DEFAULT_ADMIN_PASSWORD=Administrator
+HOST=localhost
+PORT=8180
 
 ####################################################
 # End of variables to set
 ####################################################
 
+DEFAULT_ADMIN_ACCTS+=()
 let ACCT_COUNTER=0
 for item in ${TENANTS[*]}
 do
@@ -48,7 +49,6 @@ do
 
   tempfilename=`basename $0`
   TMPFILE=`mktemp -t ${tempfilename}` || exit 1
-  echo "tempfile=$TMPFILE"
 
   # Log into a tenant as an admin user, saving the response
   # headers - which include a session cookie - to a temporary file
@@ -60,11 +60,12 @@ do
   #######################################################
   
   $CURL_EXECUTABLE \
-  -X POST \
   -i \
   -s \
-  http://localhost:8280/collectionspace/tenant/$tenant/login \
-  -d "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}&password=$DEFAULT_ADMIN_PASSWORD" > TMPFILE
+  http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
+  -d "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
+  -d "password=$DEFAULT_ADMIN_PASSWORD" > TMPFILE
+  # -X POST
     
   # Read the response headers from that file
   results=( $( < TMPFILE ) )
@@ -77,7 +78,6 @@ do
     if [[ $results_item =~ $COOKIE_REGEX ]]; then
       cookie="$results_item"
       cookie="${cookie%?}" # Strip the trailing ';' from the cookie
-      echo "cookie=$cookie"
     fi
   done
   
@@ -91,8 +91,8 @@ do
         -i \
         --connect-timeout 60 \
         -H "Cookie: $cookie" \
-        http://localhost:8280/collectionspace/tenant/$tenant/authorities/initialise \
-        -u "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD"
+        http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
+        # -u "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD"
   fi
   
   let TENANT_COUNTER++
