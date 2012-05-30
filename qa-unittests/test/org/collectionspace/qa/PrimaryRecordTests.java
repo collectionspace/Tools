@@ -27,6 +27,7 @@ public class PrimaryRecordTests {
     @Parameters
     public static Collection<Object[]> data() {
         Object[][] data = new Object[][]{
+			//comment out here to limit tests
             {Record.INTAKE},
             {Record.LOAN_IN},
             {Record.LOAN_OUT},
@@ -194,7 +195,7 @@ public class PrimaryRecordTests {
         //check that the record is indeed deleted
         elementPresent("css=.cs-searchBox :input[value='Search']", selenium);
         selenium.select("recordTypeSelect-selection", "label=" + Record.getRecordTypePP(primaryType));
-        selenium.type("css=.cs-searchBox :input[name='query']", uniqueID);
+        selenium.type("css=.cs-searchBox :input[name='searchQuery-1']", uniqueID);
         selenium.click("css=.cs-searchBox :input[value='Search']");
         //removing the following line to prevent selenium from hanging on page load - JJM 2/15/12
         //selenium.waitForPageToLoad(MAX_WAIT);

@@ -327,7 +327,7 @@ public class Utilities {
         selenium.type(Record.getIDSelector(primaryType), modifiedID);
         //Search for our ID (should cause warning too)
         selenium.select("recordTypeSelect-selection", "label=" + Record.getRecordTypePP(primaryType));
-        selenium.type("query", modifiedID);
+        selenium.type("searchQuery", modifiedID);
         selenium.click("//input[@value='Search']");
         //expect warning for leaving page
         elementPresent("ui-dialog-title-1", selenium);
@@ -373,7 +373,7 @@ public class Utilities {
         textPresent(Record.getRecordTypePP(primaryType), selenium);
         //search for the changed ID (which should not be present, since we didn't save
         selenium.select("recordTypeSelect-selection", "label=" + Record.getRecordTypePP(primaryType));
-        selenium.type("query", modifiedID);
+        selenium.type("searchQuery", modifiedID);
         selenium.click("//input[@value='Search']");
         //wait for page to load.. Record should not be be found:
         textPresent("Viewing page 1", selenium);

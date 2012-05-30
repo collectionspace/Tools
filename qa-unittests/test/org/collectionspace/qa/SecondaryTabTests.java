@@ -33,7 +33,7 @@ public class SecondaryTabTests {
     public static Collection<Object[]> data() {
         Object[][] data = new Object[][]{
             //its the second entry being tested
-            //comment out here to limit tests JJM
+            //comment out here to limit tests
             {Record.GROUP, Record.INTAKE},
             {Record.INTAKE, Record.LOAN_IN},
             {Record.LOAN_IN, Record.LOAN_OUT},
@@ -298,7 +298,7 @@ public class SecondaryTabTests {
         //check that the record is not deleted
         elementPresent("css=.cs-searchBox :input[value='Search']", selenium);
         selenium.select("recordTypeSelect-selection", "label=" + Record.getRecordTypePP(secondaryType));
-        selenium.type("css=.cs-searchBox :input[name='query']", secondaryID);
+        selenium.type("css=.cs-searchBox :input[name='searchQuery']", secondaryID);
         selenium.click("css=.cs-searchBox :input[value='Search']");
         selenium.waitForPageToLoad(MAX_WAIT);
         //expect no results when searching for the record\n");
@@ -387,7 +387,7 @@ public class SecondaryTabTests {
         //check that the record is not deleted
         elementPresent("css=.cs-searchBox :input[value='Search']", selenium);
         selenium.select("recordTypeSelect-selection", "label=" + Record.getRecordTypePP(secondaryType));
-        selenium.type("css=.cs-searchBox :input[name='query']", secondaryID);
+        selenium.type("css=.cs-searchBox :input[name='searchQuery']", secondaryID);
         selenium.click("css=.cs-searchBox :input[value='Search']");
         selenium.waitForPageToLoad(MAX_WAIT);
         //expect no results when searching for the record\n");

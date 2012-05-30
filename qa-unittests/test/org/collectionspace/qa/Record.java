@@ -206,7 +206,7 @@ public class Record {
 				this.fieldMap.put("repeat::.csc-object-description-content-activity", "fill them out for testing");
 				this.vocabMap.put("repeat::.csc-object-description-content-person", "VOCAB");
 				
-				this.fieldMap.put("repeat::.csc-object-description-content-concept", "Automatisk QA");
+				this.vocabMap.put("repeat::.csc-object-description-content-concept", "VOCAB");
 				this.fieldMap.put("repeat::.csc-object-description-content-place", "On my computer");
 				
 				//date
@@ -261,7 +261,8 @@ public class Record {
 				
 				
 				//object production info
-				//date	//this.dateMap.put(".csc-object-production-date", "2011-05-05");
+				//date	
+				//this.dateMap.put(".csc-object-production-date", "2011-05-05");
 				this.fieldMap.put("repeat::.csc-object-production-people", "Wooohoooo");
 				this.fieldMap.put("repeat::.csc-collection-object-objectProductionPeopleRole", "Made it to next box");
 				
@@ -293,7 +294,7 @@ public class Record {
 				this.fieldMap.put("repeat::.csc-collection-object-assocObjectType", "only, and looks like");
 				this.fieldMap.put("repeat::.csc-collection-object-assocObjectNote", "there are more below");
 				
-				this.fieldMap.put("repeat::.csc-collection-object-assocConcept", "let me count");
+				this.vocabMap.put("repeat::.csc-collection-object-assocConcept", "VOCAB");
 				this.fieldMap.put("repeat::.csc-collection-object-assocConceptType", "one");
 				this.fieldMap.put("repeat::.csc-collection-object-assocConceptNote", "two");
 				
@@ -376,8 +377,8 @@ public class Record {
 				this.selectMap.put("css=.csc-collection-object-fieldCollectionMethod", "purchased");
 				this.fieldMap.put(".csc-collection-object-fieldCollectionNote", "Sooooooo close");
 				this.fieldMap.put(".csc-collection-object-fieldCollectionNumber", "Congratulations!");
-				
-				this.fieldMap.put(".csc-collection-object-fieldCollectionPlace", "Holland maybe?");
+
+				this.vocabMap.put(".csc-collection-object-fieldCollectionPlace", "VOCAB");
 				this.vocabMap.put("repeat::.csc-collection-object-fieldCollectionSource", "VOCAB");
 				this.vocabMap.put("repeat::.csc-collection-object-fieldCollector", "VOCAB");
 				this.fieldMap.put("repeat::.csc-collection-object-fieldColEventName", "Oooooh, three left");
@@ -534,9 +535,11 @@ public class Record {
                 this.fieldMap.put(".csc-acquisition-creditLine", "also yes");
                 this.fieldMap.put("repeat::.csc-acquisition-fieldCollectionEventName", "Abracadabre");
 
-                this.dateMap.put(".csc-acquisition-accession-date", "2011-04-19");
+				// removing due to becoming structured date
+                //this.dateMap.put(".csc-acquisition-accession-date", "2011-04-19"); 
                 this.dateMap.put(".csc-acquisition-acquisitionAuthorizerDate", "2011-04-20");
-                this.dateMap.put("repeat::.csc-acquisition-date", "2011-04-21");
+				// removing due to becoming structured date
+                //this.dateMap.put("repeat::.csc-acquisition-date", "2011-04-21");
 
                 this.vocabMap.put(".csc-acquisition-acquisitionAuthorizer", "VOCAB");
                 this.vocabMap.put("repeat::.csc-acquisition-acquisitionSource", "VOCAB");
@@ -635,17 +638,18 @@ public class Record {
                 this.requiredFieldSelector = ".csc-objectexit-exitNumber";
                 this.requiredFieldMessage = "Please specify an Exit Number";
                 this.generatedPostfix = " - exitNumber";
-
-                this.dateMap.put(".csc-objectexit-exitDate", "2011-05-05");
+				
+				// removing due to becoming structured date
+                //this.dateMap.put(".csc-objectexit-exitDate", "2011-05-05");
 
                 this.fieldMap.put(".csc-objectexit-exitNote", "Goodbye birdie");
-		this.fieldMap.put(".csc-objectexit-packingNote", "Foam and Cardboard");
+				this.fieldMap.put(".csc-objectexit-packingNote", "Foam and Cardboard");
 
                 this.selectMap.put("css=.csc-objectexit-exitReason", "Disposal");
-		this.selectMap.put("css=.csc-objectexit-exitMethods", "In Person");
+				this.selectMap.put("css=.csc-objectexit-exitMethods", "In Person");
 
                 this.vocabMap.put(".csc-objectexit-currentOwner", "VOCAB");
-		this.vocabMap.put(".csc-objectexit-depositor", "VOCAB");
+				this.vocabMap.put(".csc-objectexit-depositor", "VOCAB");
 
                 break;
 

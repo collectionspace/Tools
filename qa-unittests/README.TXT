@@ -39,10 +39,9 @@ RUNNING THE AUTOMATED TESTS
 Running the tests consist of two steps; starting a selenium server and running the actual tests. This is explained below.
 
 Starting the Selenium server
-Assuming you are in the root of the code downloaded from git:
-
+Change to the qa-unittests/lib directory of the code downloaded from git:
 ----
-home$ cd lib
+home$ cd Tools/qa-unittests/lib
 home$ java -jar selenium-server-standalone-2.3.0.jar
 ----
 
@@ -53,8 +52,9 @@ tip: If you want to run the Selenium server on a specific port, use:
 
 
 Running Primary Tab Tests:
-Assuming you're in the root of the downloaded code, enter the following to run the tests against the QA server:
+Change directories back on level to the qa-unittests directory, then enter the following to run the tests against the QA server:
 ----
+home$ cd Tools/qa-unittests
 home$ ant primaryTabTests
 ----
 
