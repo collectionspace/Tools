@@ -1,0 +1,57 @@
+<project basedir="." default="clean-test">
+    <property name="portnum" value="4444" />
+    <property name="baseurl" value="http://qa.collectionspace.org:8180/collectionspace/ui/core/html/" />
+    <property name="browser" value="firefox" />
+    
+    <property name="src.dir"     value="test"/>
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="lib.dir"     value="lib"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <path id="test.classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+        <pathelement location="${classes.dir}" />
+    </path>
+
+
+    <target name="primaryTabTests" depends="compile">
+        <junit fork="yes" haltonfailure="yes" printsummary="yes">
+            <test name="org.collectionspace.qa.PrimaryRecordTests" />
+            <formatter type="plain" usefile="false" />
+            <classpath refid="test.classpath" />
+
+            <jvmarg value="-Dbaseurl=${baseurl}" />
+            <jvmarg value="-Dportnum=${portnum}" />
+            <jvmarg value="-Dbrowser=${browser}" />
+        </junit>
+    </target>
+
+    <target name="secondaryTabTests" depends="compile">
+        <junit fork="yes" haltonfailure="yes" printsummary="yes" showoutput="yes">
+            <test name="org.collectionspace.qa.SecondaryTabTests" />
+            <formatter type="plain" usefile="false" />
+            <classpath refid="test.classpath" />
+
+            <jvmarg value="-Dbaseurl=${baseurl}" />
+            <jvmarg value="-Dportnum=${portnum}" />
+            <jvmarg value="-Dbrowser=${browser}" />
+        </junit>
+    </target>
+
+    <target name="test" depends="primaryTabTests,secondaryTabTests" />
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <target name="clean-test" depends="clean,test" />
+</project>
