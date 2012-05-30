@@ -4,9 +4,11 @@
 # Script for initializing authorities and
 # vocabulary items in selected tenants.
 #
-# This is not yet working; the initial
-# authentication attempt appears to fail,
-# with a redirect to 
+# This is a general outline of what this script
+# likely needs to do, but is not yet working;
+# the initial authentication attempt appears to
+# fail, with a redirect to a failure login page.
+# - ADR 2012-05-30
 ####################################################
 
 ####################################################
