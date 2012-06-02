@@ -30,9 +30,9 @@ PORT=8180
 
 DEFAULT_ADMIN_ACCTS+=()
 let ACCT_COUNTER=0
-for item in ${TENANTS[*]}
+for tenant in ${TENANTS[*]}
 do
-  DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin%40$item.collectionspace.org"
+  DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin@$tenant.collectionspace.org"
   let ACCT_COUNTER++
 done
 
@@ -60,16 +60,21 @@ do
   #######################################################
   
   $CURL_EXECUTABLE \
-  -i \
-  -s \
+  --include \
+  --silent \
+  --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
   http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
-  -d "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
-  -d "password=$DEFAULT_ADMIN_PASSWORD" > TMPFILE
-  # -X POST
-    
+  --data-urlencode "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
+  --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" > $TMPFILE
+  # AIUI, the following should not be needed in combination with
+  # --data-urlencode or --data, which should do an implicit POST
+  # with the specified Content-Type header:
+  # --request POST \
+  # --header "Content-Type: application/x-www-form-urlencoded" \
+
   # Read the response headers from that file
-  results=( $( < TMPFILE ) )
-  
+  results=( $( < $TMPFILE ) )
+
   # Extract the session cookie from the response headers
   COOKIE_REGEX="CSPACESESSID=.*;"
   cookie=""
@@ -81,18 +86,17 @@ do
     fi
   done
   
-  rm TMPFILE
+  rm $TMPFILE
   
   # If we got a session cookie, then initialize authorities using that cookie
   if [ "xcookie" != "x" ]
     then
         $CURL_EXECUTABLE \
-        -X GET \
-        -i \
+        --request GET \
+        -include \
         --connect-timeout 60 \
-        -H "Cookie: $cookie" \
+        --header "Cookie: $cookie" \
         http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
-        # -u "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD"
   fi
   
   let TENANT_COUNTER++
