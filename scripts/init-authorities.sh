@@ -63,9 +63,10 @@ do
   --include \
   --silent \
   --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
-  http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
   --data-urlencode "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
-  --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" > $TMPFILE
+  --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" \
+  http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
+  > $TMPFILE
   # AIUI, the following should not be needed in combination with
   # --data-urlencode or --data, which should do an implicit POST
   # with the specified Content-Type header:
@@ -83,6 +84,7 @@ do
     if [[ $results_item =~ $COOKIE_REGEX ]]; then
       cookie="$results_item"
       cookie="${cookie%?}" # Strip the trailing ';' from the cookie
+      break
     fi
   done
   
@@ -97,6 +99,8 @@ do
         --connect-timeout 60 \
         --header "Cookie: $cookie" \
         http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
+        # If the user name and password credentials must be included in this call:
+        # --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
   fi
   
   let TENANT_COUNTER++
