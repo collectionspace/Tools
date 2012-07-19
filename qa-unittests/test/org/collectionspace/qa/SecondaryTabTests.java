@@ -280,7 +280,8 @@ public class SecondaryTabTests {
 
         //Find the delete symbol in list and click it:
 //        String listDeleteSelector = findListDeleteButton(secondaryType, secondaryID, selenium);
-        String listDeleteSelector = "css=span:contains(\""+secondaryID+"\") ~ span .csc-recordList-deleteRelation";
+        String listDeleteSelector = "css=input.cs-deleteRelationButton";
+        elementPresent(listDeleteSelector, selenium);
         selenium.click(listDeleteSelector);
         assertTrue(selenium.isTextPresent("exact:Delete this relation?"));
         selenium.click("//img[@alt='close dialog']");
@@ -371,7 +372,7 @@ public class SecondaryTabTests {
         saveSecondary(secondaryType, secondaryID, selenium);
 
         //Find the delete symbol in list and click it:
-        String deleteButtonSelector = "css=.csc-relatedRecordsTab-" + Record.getRecordTypeShort(secondaryType) + " .csc-delete";
+        String deleteButtonSelector = "css=.csc-relatedRecordsTab-togglable input.cs-deleteRelationButton";
         selenium.click(deleteButtonSelector);
         assertTrue(selenium.isTextPresent("exact:Delete this relation?"));
         selenium.click("//img[@alt='close dialog']");
