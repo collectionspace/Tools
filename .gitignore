@@ -1,0 +1,3 @@
+.DS_Store
+qa-unittests/build/*
+qa-unittests/junit*
