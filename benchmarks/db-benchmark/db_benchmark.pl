@@ -208,7 +208,7 @@ sub print_usage {
     print "-n number_of_runs (10)\n";
     print "-o output_directory ('runs')\n";
     print "-p database_password (DB_PASSWORD enviroment variable)\n";
-    print "-u database_username (DB_HOST environment variable)\n";
+    print "-u database_username (DB_USER environment variable)\n";
     print "Additional option to generate reports:\n";
     print "-r\n";
 }
