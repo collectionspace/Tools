@@ -6,11 +6,18 @@ use Getopt::Std;
 use List::Util qw(min max sum);
 use POSIX qw(strftime);
 
+# FIXME: We might consider adding the ability to dynamically identify the
+# local system path to the executable 'psql' utility here.
 my $SQL_COMMAND = '/opt/PostgreSQL/9.1/bin/psql';
 my $ANALYZE_OUTPUT_FILE_SUFFIX = '.analyze.txt';
 
 my $opts = {};
 getopt('dhnopru', $opts);
+
+if ( @ARGV == 0 ) {
+    print_usage();
+    exit 0;
+}
 
 if ($opts->{r}) {
 	generate_report(
@@ -51,6 +58,10 @@ sub run_benchmarks() {
 	my $number_of_runs = $args{number_of_runs};
 	my $output_dir = $args{output_dir};
 	my $sql_files = $args{sql_files};
+	
+	# FIXME: We might consider adding a check for zero SQL files found, perhaps
+	# with a message similar to:
+	# "No SQL files found; will only generate output for database and OS settings.\n";
 
 	my $db_host = $db_connection_info->{db_host};
 	my $db_name = $db_connection_info->{db_name};
@@ -157,7 +168,9 @@ sub create_run_output_dir {
 	my $now_string = strftime('%Y-%m-%d-%H%M%S', localtime());
 	my $run_output_dir = "$output_dir/$now_string";
 
-	-d $output_dir || die "Directory not found: $output_dir";
+	if (! -d $output_dir) {
+	    mkdir $output_dir || die "Directory not found: $output_dir";
+	}
 	mkdir $run_output_dir || die "Can't create directory: $run_output_dir";
 
 	return $run_output_dir;
@@ -183,4 +196,19 @@ sub get_sql_files {
 	}
 
 	return @sql_files;
+}
+
+# For possible enhancements, see "Help texts" in 
+# http://www.vromans.org/johan/articles/getopt.html
+sub print_usage {
+    print "Usage: $0 [options] sql_file_or_directory\n";
+    print "Options taking parameters (defaults in parens):\n";
+    print "-d database_name (DB_NAME environment variable or 'nuxeo')\n";
+    print "-h database_host (DB_HOST environment variable or 'localhost')\n";
+    print "-n number_of_runs (10)\n";
+    print "-o output_directory ('runs')\n";
+    print "-u database_password (DB_PASSWORD enviroment variable)\n";
+    print "-u database_username (DB_HOST environment variable)\n";
+    print "Additional option to generate reports:\n";
+    print "-r\n";
 }
