@@ -1,25 +1,28 @@
 #!/usr/bin/perl
 
 use strict;
-use File::Spec;
+use File::Basename;
 use File::Find;
+use File::Spec;
 use Getopt::Std;
 use List::Util qw(min max sum);
 use POSIX qw(strftime);
-
-my $SQL_COMMAND = undef;
-get_sql_command();
-defined($SQL_COMMAND) || die "Could not find executable file for SQL client program";
-
-my $ANALYZE_OUTPUT_FILE_SUFFIX = '.analyze.txt';
-
-my $opts = {};
-getopt('dhnopru', $opts);
 
 if (@ARGV == 0) {
     print_usage();
     exit 0;
 }
+
+my $SQL_COMMAND_NAME = 'psql'; # Change this to use a different SQL CLI client
+my $SQL_COMMAND = undef;
+get_sql_command();
+defined($SQL_COMMAND) ||
+    die "Could not find executable file '$SQL_COMMAND_NAME' to run SQL benchmarks";
+
+my $ANALYZE_OUTPUT_FILE_SUFFIX = '.analyze.txt';
+
+my $opts = {};
+getopt('dhnopru', $opts);
 
 if ($opts->{r}) {
 	generate_report(
@@ -171,7 +174,7 @@ sub create_run_output_dir {
 	my $run_output_dir = "$output_dir/$now_string";
 
 	if (! -d $output_dir) {
-	    mkdir $output_dir || die "Directory not found: $output_dir";
+	    mkdir $output_dir || die "Directory not found and can't be created: $output_dir";
 	}
 	mkdir $run_output_dir || die "Can't create directory: $run_output_dir";
 
@@ -217,20 +220,31 @@ sub find_sql_executable
     
     # If the SQL executable was found, set a global variable with its path 
     $SQL_COMMAND = $File::Find::name if
-        /^psql$/ && (-x $File::Find::name);
+        /^$SQL_COMMAND_NAME$/ && (-x $File::Find::name);
 }
 
 # For possible enhancements, see "Help texts" in 
 # http://www.vromans.org/johan/articles/getopt.html
 sub print_usage {
-    print "Usage: $0 [options] sql_file_or_directory\n";
-    print "Options taking parameters (defaults in parens):\n";
-    print "-d database_name (DB_NAME environment variable or 'nuxeo')\n";
-    print "-h database_host (DB_HOST environment variable or 'localhost')\n";
-    print "-n number_of_runs (10)\n";
-    print "-o output_directory ('runs')\n";
-    print "-p database_password (DB_PASSWORD environment variable)\n";
-    print "-u database_username (DB_USER environment variable)\n";
-    print "Additional option to generate reports:\n";
-    print "-r\n";
+    my $script_name = basename($0);
+    print <<"END_USAGE";
+$script_name: a database benchmark utility
+Executes a set of SQL command(s) with EXPLAIN ANALYZE, and generate
+reports on their execution times and environment settings when run.
+
+Usages:
+
+To run benchmarks:
+$script_name [options] sql_file_or_directory
+Options (defaults in parens)
+-d database_name (DB_NAME environment variable or 'nuxeo')
+-h database_host (DB_HOST environment variable or 'localhost')
+-n number_of_runs ('10')
+-o output_directory ('runs')
+-p database_password (DB_PASSWORD environment variable)
+-u database_username (DB_USER environment variable)
+
+To (re)run reports on previously-run benchmarks:
+$script_name -r existing_benchmark_output_directory
+END_USAGE
 }
