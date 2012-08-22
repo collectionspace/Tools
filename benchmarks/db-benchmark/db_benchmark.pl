@@ -227,10 +227,10 @@ sub find_sql_executable
 # http://www.vromans.org/johan/articles/getopt.html
 sub print_usage {
     my $script_name = basename($0);
-    print <<"END_USAGE";
+    print <<"END_USAGE_INSTRUCTIONS";
 $script_name: a database benchmark utility
-Executes a set of SQL command(s) with EXPLAIN ANALYZE, and generate
-reports on their execution times and environment settings when run.
+Executes a set of SQL command(s) with EXPLAIN ANALYZE, and generates
+reports on their execution times and their environment settings when run.
 
 Usages:
 
@@ -246,5 +246,5 @@ Options (defaults in parens)
 
 To (re)run reports on previously-run benchmarks:
 $script_name -r existing_benchmark_output_directory
-END_USAGE
+END_USAGE_INSTRUCTIONS
 }
