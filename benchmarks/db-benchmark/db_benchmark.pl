@@ -2,19 +2,21 @@
 
 use strict;
 use File::Spec;
+use File::Find;
 use Getopt::Std;
 use List::Util qw(min max sum);
 use POSIX qw(strftime);
 
-# FIXME: We might consider adding the ability to dynamically identify the
-# local system path to the executable 'psql' utility here.
-my $SQL_COMMAND = '/opt/PostgreSQL/9.1/bin/psql';
+my $SQL_COMMAND = undef;
+get_sql_command();
+defined($SQL_COMMAND) || die "Could not find executable file for SQL client program";
+
 my $ANALYZE_OUTPUT_FILE_SUFFIX = '.analyze.txt';
 
 my $opts = {};
 getopt('dhnopru', $opts);
 
-if ( @ARGV == 0 ) {
+if (@ARGV == 0) {
     print_usage();
     exit 0;
 }
@@ -198,6 +200,26 @@ sub get_sql_files {
 	return @sql_files;
 }
 
+sub get_sql_command {
+    # Get the path(s) to executable files
+    my @PATH = File::Spec->path();
+    # Search for the SQL executable within each of those paths
+    find(
+        {wanted => \&find_sql_executable},
+        @PATH);
+}
+
+sub find_sql_executable
+{
+    # Stop descending into subdirectories and stop checking
+    # any other files if the SQL executable has already been found
+    $File::Find::prune = 1 and return if defined($SQL_COMMAND);
+    
+    # If the SQL executable was found, set a global variable with its path 
+    $SQL_COMMAND = $File::Find::name if
+        /^psql$/ && (-x $File::Find::name);
+}
+
 # For possible enhancements, see "Help texts" in 
 # http://www.vromans.org/johan/articles/getopt.html
 sub print_usage {
@@ -207,7 +229,7 @@ sub print_usage {
     print "-h database_host (DB_HOST environment variable or 'localhost')\n";
     print "-n number_of_runs (10)\n";
     print "-o output_directory ('runs')\n";
-    print "-p database_password (DB_PASSWORD enviroment variable)\n";
+    print "-p database_password (DB_PASSWORD environment variable)\n";
     print "-u database_username (DB_USER environment variable)\n";
     print "Additional option to generate reports:\n";
     print "-r\n";

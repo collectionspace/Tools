@@ -11,6 +11,11 @@ also store the postgres configuration settings, database descriptions
 (including indexes that exist), and OS kernel parameters (e.g. shmmax,
 shmall) at the time of execution.
 
+To display usage instructions, run the script without arguments.
+e.g. from the current directory:
+
+./db_benchmark.pl
+
 Ray Lee
 Informatics Services
 University of California, Berkeley
