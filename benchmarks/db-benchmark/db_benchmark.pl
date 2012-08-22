@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Executes a set of SQL command(s) with EXPLAIN ANALYZE, and generates
+# reports on their execution times and their environment settings when run.
+
 use strict;
 use File::Basename;
 use File::Find;
@@ -13,7 +16,11 @@ if (@ARGV == 0) {
     exit 0;
 }
 
-my $SQL_COMMAND_NAME = 'psql'; # Change this to use a different SQL CLI client
+# Change the following value to use a different SQL CLI client.
+# If you do so, you may also need to tweak one or more relevant commands
+# in run_benchmarks(), below.
+my $SQL_COMMAND_NAME = 'psql';
+
 my $SQL_COMMAND = undef;
 get_sql_command();
 defined($SQL_COMMAND) ||
@@ -43,6 +50,12 @@ else {
 
 	my $run_output_dir = create_run_output_dir($output_dir);
 	my @sql_files = get_sql_files(@ARGV);
+	
+	if (grep {defined($_)} @sql_files) {
+	} else {
+        print "No SQL files found in the path(s) provided: cannot run benchmarks\n";
+        print "Will generate output only for environment settings\n";
+    }
 
 	run_benchmarks(
 		db_connection_info => $db_connection_info,
@@ -63,10 +76,6 @@ sub run_benchmarks() {
 	my $number_of_runs = $args{number_of_runs};
 	my $output_dir = $args{output_dir};
 	my $sql_files = $args{sql_files};
-	
-	# FIXME: We might consider adding a check for zero SQL files found, perhaps
-	# with a message similar to:
-	# "No SQL files found; will only generate output for database and OS settings.\n";
 
 	my $db_host = $db_connection_info->{db_host};
 	my $db_name = $db_connection_info->{db_name};
