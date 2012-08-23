@@ -1,9 +1,9 @@
 README.txt
 For the database benchmarking script, db_benchmark.pl
-Updated 2012-08-17
+Updated 2012-08-22
 
 In an effort to obtain better data about the database optimizations
-wetry, I've written a benchmarking script. The script takes as
+we try, I've written a benchmarking script. The script takes as
 arguments one or more sql files, and/or directories containing sql
 files. For the query contained in each sql file, it will run EXPLAIN
 ANALYZE a number of times (default 10), and store the results. It will
@@ -12,7 +12,7 @@ also store the postgres configuration settings, database descriptions
 shmall) at the time of execution.
 
 To display usage instructions, run the script without arguments.
-e.g. from the current directory:
+E.g. from the current directory:
 
 ./db_benchmark.pl
 
