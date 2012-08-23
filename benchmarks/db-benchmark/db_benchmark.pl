@@ -53,9 +53,9 @@ else {
 	
 	if (grep {defined($_)} @sql_files) {
 	} else {
-        print "No SQL files found in the path(s) provided: cannot run benchmarks\n";
-        print "Will generate output only for environment settings\n";
-    }
+		print "No SQL files found in the path(s) provided: cannot run benchmarks\n";
+		print "Will generate output only for environment settings\n";
+	}
 
 	run_benchmarks(
 		db_connection_info => $db_connection_info,
