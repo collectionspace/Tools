@@ -203,7 +203,25 @@ public class SecondaryTabTests {
     @Test
     public void testRemovingValues() throws Exception {
         //generate a record of secondary type
-        String secondaryID = generateRecord(secondaryType, selenium);
+        //HACK - app layer script to create a new record doesn't always work
+        //String secondaryID = generateRecord(secondaryType, selenium);
+
+        String secondaryID = Record.getRecordTypeShort(secondaryType) + (new Date().getTime());
+
+        //log(Record.getRecordTypePP(secondaryType) + ": test fill out record and save\n");
+        selenium.open(Record.getRecordTypeShort(secondaryType) + ".html");
+        waitForRecordLoad(secondaryType, selenium);
+
+        fillForm(secondaryType, secondaryID, selenium);
+        //save record
+        //log(Record.getRecordTypePP(secondaryType) + ": expect save success message and that all fields are valid\n");
+        save(selenium);
+        if (selenium.isElementPresent("css=.csc-confirmationDialog .saveButton")){
+            selenium.click("css=.csc-confirmationDialog .saveButton");
+        }
+
+
+
         String primaryID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
 
         //goto some collectionspace page with a search box - and open new record

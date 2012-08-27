@@ -32,8 +32,8 @@ public class PrimaryRecordTests {
             {Record.LOAN_IN},
             {Record.LOAN_OUT},
             {Record.ACQUISITION},
-            {Record.MEDIA},  
-            {Record.OBJECT_EXIT}, 
+            {Record.MEDIA}, 
+            {Record.OBJECT_EXIT},
             {Record.GROUP},
             {Record.CATALOGING},
             {Record.MOVEMENT}
@@ -133,10 +133,27 @@ public class PrimaryRecordTests {
     @Test
     public void testRemovingValues() throws Exception {
         //generate a record
-        String generatedID = generateRecord(primaryType, selenium);
+
+        //HACK - app layer script to create a new record doesn't always work
+        //String generatedID = generateRecord(primaryType, selenium);
+        String generatedID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
+
+        //log(Record.getRecordTypePP(primaryType) + ": test fill out record and save\n");
+        selenium.open(Record.getRecordTypeShort(primaryType) + ".html");
+        waitForRecordLoad(primaryType, selenium);
+
+        fillForm(primaryType, generatedID, selenium);
+        //save record
+        //log(Record.getRecordTypePP(primaryType) + ": expect save success message and that all fields are valid\n");
+        save(selenium);
+        if (selenium.isElementPresent("css=.csc-confirmationDialog .saveButton")){
+            selenium.click("css=.csc-confirmationDialog .saveButton");
+        }
+
+
         //goto some collectionspace page with a search box - and open new record
-        selenium.open("createnew.html");        
-        open(primaryType, generatedID, selenium);
+        //selenium.open("createnew.html");        
+        //open(primaryType, generatedID, selenium);
         //Delete contents of all fields:
         clearForm(primaryType, selenium);
         //save record - and expect error due to missing ID
@@ -232,6 +249,9 @@ public class PrimaryRecordTests {
         clearForm(primaryType, selenium);
         //click cancel and expect content to change to original\n");
         selenium.click("//input[@value='Cancel changes']");
+        //Wait a few seconds for page to reload. Records with small number of fields
+        //may get false positives
+        Thread.sleep(3000);
         verifyFill(primaryType, uniqueID, selenium);
     }
 
