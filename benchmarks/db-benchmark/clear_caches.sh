@@ -45,12 +45,14 @@ if [ "x$SYNC_PATH" == "x" ];
     echo "sync utility could not be found; will not be able to clear Linux disk caches"
     exit 1
   else
-    echo "Running sync to write all unsaved cache data to disk ..."
+    echo "Running sync to attempt to write most unsaved cache data to disk ..."
     sync && SYNC_RUN_SUCCESSFULLY=1
 fi
 
-if [ $SYNC_RUN_SUCCESSFULLY == 1 ];
-  then if [ -f /proc/sys/vm/drop_caches ];
+if [ $SYNC_RUN_SUCCESSFULLY != 1 ];
+  then
+    echo "sync was not run successfully; Linux disk caches were not dropped"
+  else if [ -f /proc/sys/vm/drop_caches ];
     then
       echo "Displaying current cache stats ..."
       free -m
@@ -61,8 +63,7 @@ if [ $SYNC_RUN_SUCCESSFULLY == 1 ];
       echo "Displaying cache stats after dropping caches ..."
       free -m
     else
-      echo "Could not find necessary file to drop Linux disk caches"
-      exit 1
+      echo "Could not find drop_caches file; Linux disk caches were not dropped"
   fi
 fi
 
