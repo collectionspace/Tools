@@ -54,7 +54,7 @@ do
 
   tempfilename=`basename $0`
   # Three or more 'X's may be required in the template for the
-  # temporary file name, under some Linux OSes (and possibly others)
+  # temporary file name, under at least one or more Linux OSes
   TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
 
   # Log into a tenant as an admin user, saving the response
