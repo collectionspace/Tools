@@ -53,7 +53,9 @@ for tenant in ${TENANTS[*]}
 do
 
   tempfilename=`basename $0`
-  TMPFILE=`mktemp -t ${tempfilename}` || exit 1
+  # Three or more 'X's may be required in the template for the
+  # temporary file name, under some Linux OSes (and possibly others)
+  TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
 
   # Log into a tenant as an admin user, saving the response
   # headers - which include a session cookie - to a temporary file
