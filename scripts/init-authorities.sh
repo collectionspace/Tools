@@ -3,12 +3,6 @@
 ####################################################
 # Script for initializing authorities and
 # vocabulary items in selected tenants.
-#
-# This is a general outline of what this script
-# likely needs to do, but is not yet working;
-# the initial authentication attempt appears to
-# fail, with a redirect to a failure login page.
-# - ADR 2012-05-30
 ####################################################
 
 ####################################################
@@ -18,9 +12,17 @@
 # Enable for verbose output - uncomment only while debugging!
 # set -x verbose
 
-# Enter a space-separated list of tenant identifiers
+# Enter a space-separated list of tenant identifiers below:
 TENANTS+=(core lifesci)
+
+# This script assumes that each tenant's default administrator
+# username follows a consistent pattern:
+#   admin@{tenantidentifier}.collectionspace.org
+# and that the passwords for each such account are identical,
+# as per the variable set below:
 DEFAULT_ADMIN_PASSWORD=Administrator
+
+# Set the CollectionSpace hostname and port below:
 HOST=localhost
 PORT=8180
 
@@ -62,6 +64,7 @@ do
   --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" \
   http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
   > $TMPFILE
+  
   # AIUI, the following should not be needed in combination with
   # --data-urlencode or --data, which should do an implicit POST
   # with the specified Content-Type header:
@@ -96,6 +99,7 @@ do
         --connect-timeout 60 \
         --header "Cookie: $cookie" \
         http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
+        
         # If the user name and password credentials must be included in this call:
         # --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
   fi
