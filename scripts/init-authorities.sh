@@ -53,17 +53,10 @@ do
   # Log into a tenant as an admin user, saving the response
   # headers - which include a session cookie - to a temporary file
   
-  #######################################################
-  # FIXME: This login request is currently failing;
-  # the 303 response is returning in the Location: header
-  # /collectionspace/ui/core/html/index.html?result=fail
-  #######################################################
-  
   $CURL_EXECUTABLE \
   --include \
   --silent \
-  --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
-  --data-urlencode "login=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
+  --data-urlencode "userid=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
   --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" \
   http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
   > $TMPFILE
