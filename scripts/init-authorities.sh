@@ -12,7 +12,7 @@
 # Enable for verbose output - uncomment only while debugging!
 # set -x verbose
 
-# Enter a space-separated list of tenant identifiers below:
+# Set a space-separated list of tenant identifiers below:
 TENANTS+=(core lifesci)
 
 # This script assumes that each tenant's default administrator
@@ -22,7 +22,7 @@ TENANTS+=(core lifesci)
 # as per the variable set below:
 DEFAULT_ADMIN_PASSWORD=Administrator
 
-# Set the CollectionSpace hostname and port below:
+# Set the CollectionSpace hostname or IP address, and port below:
 HOST=localhost
 PORT=8180
 
@@ -44,6 +44,9 @@ if [ "xCURL_EXECUTABLE" == "x" ]
     echo "Could not find 'curl' application"
     exit 1
 fi
+
+LOGIN_FAILURE_REGEX="result=fail"
+COOKIE_REGEX="CSPACESESSID=.*;"
 
 let TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
@@ -73,9 +76,24 @@ do
 
   # Read the response headers from that file
   results=( $( < $TMPFILE ) )
+  
+  # Check for a redirect to a failure page
+  failure_flag=0
+  for results_item in ${results[*]}
+  do
+    if [[ $results_item =~ $LOGIN_FAILURE_REGEX ]]; then
+      failure_flag=1
+      break
+    fi
+  done
+  
+  if [ $failure_flag == 1 ]; then
+    echo "ERROR: Failed to log into the '$tenant' tenant."
+    echo "(Suggestion: check username, password, tenant identifier, host and port.)"
+    continue
+  fi
 
   # Extract the session cookie from the response headers
-  COOKIE_REGEX="CSPACESESSID=.*;"
   cookie=""
   for results_item in ${results[*]}
   do
@@ -87,12 +105,12 @@ do
   done
   
   rm $TMPFILE
-  
-  echo "Initializing authorities in the '$tenant' tenant ..."
-  
+    
   # If we got a session cookie, then initialize authorities using that cookie
   if [ "xcookie" != "x" ]
     then
+        echo "Initializing authorities in the '$tenant' tenant ..."
+
         $CURL_EXECUTABLE \
         --request GET \
         --include \
@@ -102,7 +120,12 @@ do
         
         # If the user name and password credentials must be included in this call:
         # --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
+    else
+        echo "Could not obtain an authorization Cookie for the '$tenant' tenant ..."
+        echo "Skipping the step of initializing authorities for that tenant ..."
   fi
+  
+  # FIXME: Add call to .../vocab/initialize here, after we've identified its purpose
   
   let TENANT_COUNTER++
   
