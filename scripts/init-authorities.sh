@@ -16,7 +16,7 @@
 ####################################################
 
 # Enable for verbose output - uncomment only while debugging!
-set -x verbose
+# set -x verbose
 
 # Enter a space-separated list of tenant identifiers
 TENANTS+=(core lifesci)
@@ -53,6 +53,8 @@ do
   # Log into a tenant as an admin user, saving the response
   # headers - which include a session cookie - to a temporary file
   
+  echo "Logging into the '$tenant' tenant ..."
+  
   $CURL_EXECUTABLE \
   --include \
   --silent \
@@ -83,12 +85,14 @@ do
   
   rm $TMPFILE
   
+  echo "Initializing authorities in the '$tenant' tenant ..."
+  
   # If we got a session cookie, then initialize authorities using that cookie
   if [ "xcookie" != "x" ]
     then
         $CURL_EXECUTABLE \
         --request GET \
-        -include \
+        --include \
         --connect-timeout 60 \
         --header "Cookie: $cookie" \
         http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
