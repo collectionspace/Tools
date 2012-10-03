@@ -82,6 +82,7 @@ do
   
   # Read the response from that file
   read_list_results=( $( < $READ_LIST_TMPFILE ) )
+  rm $READ_LIST_TMPFILE
   
   # Check for possible authentication failure
   authentication_failure_flag=0
@@ -96,7 +97,6 @@ do
   if [ $authentication_failure_flag == 1 ]; then
     echo "ERROR: Failed to authenticate successfully to the '$tenant' tenant."
     echo "(Suggestion: check username, password, tenant identifier, host and port.)"
-    rm $READ_LIST_TMPFILE
     continue
   fi
   

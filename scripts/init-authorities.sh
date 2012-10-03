@@ -71,16 +71,11 @@ do
   --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" \
   http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
   > $TMPFILE
-  
-  # AIUI, the following should not be needed in combination with
-  # --data-urlencode or --data, which should do an implicit POST
-  # with the specified Content-Type header:
-  # --request POST \
-  # --header "Content-Type: application/x-www-form-urlencoded" \
 
   # Read the response headers from that file
   results=( $( < $TMPFILE ) )
-  
+  rm $TMPFILE
+
   # Check for a redirect to a failure page
   failure_flag=0
   for results_item in ${results[*]}
@@ -107,9 +102,7 @@ do
       break
     fi
   done
-  
-  rm $TMPFILE
-    
+      
   # If we got a session cookie, then initialize authorities using that cookie
   if [ "xcookie" != "x" ]
     then
