@@ -31,7 +31,7 @@ PORT=8180
 ####################################################
 
 DEFAULT_ADMIN_ACCTS+=()
-let ACCT_COUNTER=0
+let ACCT_COUNTER=1
 for tenant in ${TENANTS[*]}
 do
   DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin@$tenant.collectionspace.org"
@@ -51,6 +51,8 @@ COOKIE_REGEX="CSPACESESSID=.*;"
 let TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
 do
+
+  let TENANT_COUNTER++
 
   tempfilename=`basename $0`
   # Three or more 'X's may be required in the template for the
@@ -128,8 +130,6 @@ do
   fi
   
   # FIXME: Add call to .../vocab/initialize here, after we've identified its purpose
-  
-  let TENANT_COUNTER++
-  
+    
 done
 

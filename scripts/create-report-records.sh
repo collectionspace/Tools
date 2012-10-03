@@ -35,7 +35,7 @@ PORT=8180
 ####################################################
 
 DEFAULT_ADMIN_ACCTS+=()
-let ACCT_COUNTER=0
+let ACCT_COUNTER=1
 for tenant in ${TENANTS[*]}
 do
   DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin@$tenant.collectionspace.org"
@@ -60,6 +60,8 @@ AUTHENTICATION_FAILURE_REGEX="^401 Unauthorized|^401"
 let TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
 do
+
+  let TENANT_COUNTER++
 
   tempfilename=`basename $0`
   # Three or more 'X's may be required in the template for the
@@ -166,9 +168,7 @@ END_OF_PAYLOAD
   do
     echo results_item
   done
-  
-  let TENANT_COUNTER++
-  
+    
 done
 
 
