@@ -76,6 +76,7 @@ do
   $CURL_EXECUTABLE \
   --include \
   --silent \
+  --show-error \
   --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
   --url http://$HOST:$PORT/cspace-services/reports?kw=$REPORT_KEYWORD_TO_MATCH \
   > $READ_LIST_TMPFILE
@@ -135,6 +136,7 @@ do
   $CURL_EXECUTABLE \
   --include \
   --silent \
+  --show-error \
   --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
   --header "Content-Type: application/xml" \
   --url http://$HOST:$PORT/cspace-services/reports \

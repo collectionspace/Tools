@@ -67,6 +67,7 @@ do
   $CURL_EXECUTABLE \
   --include \
   --silent \
+  --show-error \
   --data-urlencode "userid=${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}" \
   --data-urlencode "password=$DEFAULT_ADMIN_PASSWORD" \
   http://$HOST:$PORT/collectionspace/tenant/$tenant/login \
@@ -111,7 +112,9 @@ do
         $CURL_EXECUTABLE \
         --request GET \
         --include \
-        --connect-timeout 60 \
+        --silent \
+        --show-error \
+        --max-time 120 \
         --header "Cookie: $cookie" \
         http://$HOST:$PORT/collectionspace/tenant/$tenant/authorities/initialise
         
