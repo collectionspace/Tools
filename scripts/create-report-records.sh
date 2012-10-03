@@ -49,6 +49,11 @@ if [ "xCURL_EXECUTABLE" == "x" ]
     exit 1
 fi
 
+LIST_ITEM_REGEX="list-item"
+# Name of report file to match in a keyword search
+REPORT_KEYWORD_TO_MATCH="acq_basic.jasper"
+AUTHENTICATION_FAILURE_REGEX="^401|^401 Unauthorized"
+
 let TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
 do
@@ -56,13 +61,67 @@ do
   tempfilename=`basename $0`
   # Three or more 'X's may be required in the template for the
   # temporary file name, under at least one or more Linux OSes
-  TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
+  READ_LIST_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
 
-  # As an admin user within this tenant, create the report
-  # record, and save the response headers to a temporary file
+  # As an admin user within this tenant, perform a keyword search
+  # to find all existing records, if any, referring to this report
   
-  echo "Creating an Acquisition Summary report record in the '$tenant' tenant ..."
+  echo "Checking for an Acquisition Summary report record in the '$tenant' tenant ..."
+
+  $CURL_EXECUTABLE \
+  --include \
+  --silent \
+  --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
+  --url http://$HOST:$PORT/cspace-services/reports?kw=$REPORT_KEYWORD_TO_MATCH \
+  > $READ_LIST_TMPFILE
   
+  # Read the response from that file
+  read_list_results=( $( < $READ_LIST_TMPFILE ) )
+  
+  # Check for possible authentication failure
+  authentication_failure_flag=0
+  for results_item in ${read_list_results[*]}
+  do
+    if [[ $results_item =~ $AUTHENTICATION_FAILURE_REGEX ]]; then
+      authentication_failure_flag=1
+      break
+    fi
+  done
+  
+  if [ $authentication_failure_flag == 1 ]; then
+    echo "ERROR: Failed to authenticate successfully to the '$tenant' tenant."
+    echo "(Suggestion: check username, password, tenant identifier, host and port.)"
+    rm $READ_LIST_TMPFILE
+    continue
+  fi
+  
+  # Check for the presence of at least one list item in the results returned
+  at_least_one_record_exists=0
+  for results_item in ${read_list_results[*]}
+  do
+    if [[ $results_item =~ $LIST_ITEM_REGEX ]]; then
+      at_least_one_record_exists=1
+      break
+    fi
+  done
+
+  # If there is at least one matching report record already present in
+  # this tenant, don't create a new record, and move on to the next tenant
+  if [ $at_least_one_record_exists == 1 ]; then
+    echo "Found an Acquisition Summary report record in the '$tenant' tenant."
+    echo "Will NOT create a new record."
+    continue
+  fi
+  
+  # Otherwise, create the new report record
+  
+  echo "Creating a new Acquisition Summary report record in the '$tenant' tenant ..."
+  
+  # As an admin user within this tenant, create the report record, and save
+  # the response to this create request to a temporary file
+  
+  CREATE_RECORD_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
+
   # 'data @- << END_OF_PAYLOAD', below, reads the data that is to be sent in a POST
   # request from standard input. This data, in turn, is read from a 'here document'
   # directly inline within the script, ending with the last line prior to the
@@ -93,17 +152,17 @@ do
   </ns2:reports_common>
 </document>
 END_OF_PAYLOAD
-  > $TMPFILE
+  > $CREATE_RECORD_TMPFILE
 
-  # Read the response headers from that file
-  results=( $( < $TMPFILE ) )
-  
-  for results_item in ${results[*]}
+  # Read the response from that file
+  create_record_results=( $( < $CREATE_RECORD_TMPFILE ) )
+  rm $CREATE_RECORD_TMPFILE
+
+  # Echo the response to the create request to the console
+  for results_item in ${create_record_results[*]}
   do
     echo results_item
   done
-  
-  rm $TMPFILE
   
   let TENANT_COUNTER++
   
