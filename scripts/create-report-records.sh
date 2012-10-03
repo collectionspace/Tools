@@ -52,7 +52,10 @@ fi
 LIST_ITEM_REGEX="list-item"
 # Name of report file to match in a keyword search
 REPORT_KEYWORD_TO_MATCH="acq_basic.jasper"
-AUTHENTICATION_FAILURE_REGEX="^401|^401 Unauthorized"
+# FIXME: It may be prudent to add code to verify that any '401'
+# response lines, not followed by 'Unauthorized', are truly
+# response codes and not random occurrences of that number.
+AUTHENTICATION_FAILURE_REGEX="^401 Unauthorized|^401"
 
 let TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
