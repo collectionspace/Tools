@@ -464,6 +464,8 @@ public class Utilities {
             selenium.select(selector, "label=" + selectMap.get(selector));
         }
 
+        //HACK added hardcoded values for movement record because this record type
+        //has a vocab field as required, which is the odd one of the bunch
         if (recordType == Record.MOVEMENT){
             selenium.type(".csc-movement-currentLocation", "Shelf 4b");
             selenium.type(".csc-movement-movementContact", "Frank Sinatra");

@@ -125,7 +125,7 @@ public class SecondaryTabTests {
      *
      * @throws Exception
      */
-    //@Test
+    @Test
     public void tabTestCancel() throws Exception {
         System.out.println("* Starting test: tabTestCancel");
         //create record and fill out all fields
