@@ -572,7 +572,7 @@ public class Record {
 
 		this.fieldMap.put(".csc-movement-movementNote", "Another random note");
 		//Changed value of .csc-movement-currentLocation from "some ref num" to VOCAB - JJM 2/15/12
-                this.fieldMap.put(".csc-movement-currentLocation", "VOCAB");                
+                this.vocabMap.put(".csc-movement-currentLocation", "VOCAB");                
                 
 		this.selectMap.put("css=.csc-movement-currentLocationFitness", "Temporary");
 		this.selectMap.put("css=.csc-movement-movementMethods", "Handcarried");
