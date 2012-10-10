@@ -1,0 +1,43 @@
+PAHMA webapps
+
+v0.9 jbl 10/10/2012
+
+Very short, terse, sketchy notes.
+
+Currently there are 5 webapps in use by PAHMA:
+
+SystematicInventory
+KeyInfoRev
+BarCodePrint
+BarCodeUpload
+PackingList
+
+Add .py to each of these and you get the name of python CGI scripts which run under a webserver (Apache) and communicate with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API. 
+
+From a coding/deployment point of view, these are all the same program (Template.py), but each reads a different config file to decide what it should do.
+
+The config file specifies:
+
+- what webapp to be (i.e. what header to print, what actions to perform)
+- postgres credentials
+- cspace credentials
+- other configuration details: directories to read/write files, etc.
+
+Rather than require url rewriting in Apache (to rewrite "Template.py?app=packinglist" to "PackingList.py"), I have chosen simply to clone a copy of the "base script" (Template.py) and hardcode the name of the config file in the script.  There is a shell script which generate all the varieties (makeAndDeploy.sh).
+
+To deploy (these steps have never been performed as a real deployment...):
+
+- cd py; ./makeAndDeploy.sh to generate the various webapps.
+- ensure the required python modules are available (pgdb, lxml, ConfigParser
+- ensure jQuery is installed and available in ../js and ../css (this is used by the "term matching" (autosuggest) feature).
+- put the other .css and .js files are in the appropriate locations (see extras/)
+- copy all the files in cfg/ and py/ to the server executable directory (e.g. /var/www/cgi-bin) with appropriate permissions
+- ensure that your webserver is configured to execute python scripts.
+- at the moment, some of the scripts expect a .csv file with data from the legacy system to be available in the executable directory. You can make an empty file (tms2.csv) in order to get the program to work
+- change "xxxinsertpasswordherexxx" to appropriate values in the various cfg/.cfg files
+
+Of course, the webapps expect to access a CSpace system customized for PAHMA, and will probably not work if pointed to any other!
+
+This code runs on dev.cspace and has never been tried anywhere else. There is no formal testing or deployment apparatus beyond what is here. Many development choices were predicated on being self-sufficient and the constrained security and resource environment present on the server on which it runs.
+
+Caveat Utilizator!
