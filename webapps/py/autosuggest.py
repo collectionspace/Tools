@@ -11,7 +11,7 @@ timeoutcommand = 'set statement_timeout to 500'
 
 def dbtransaction(form):
 
-    pahmadb  = pgdb.connect('dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r')
+    pahmadb  = pgdb.connect('pahma.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r')
     cursor   = pahmadb.cursor()
     
     q = form.getvalue("q")

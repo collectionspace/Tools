@@ -17,7 +17,6 @@ from lxml import etree
 
 # the only other module: isolate postgres calls and connection
 import SysInvDB
-import tmsCheck
 import getPlaces
 
 def getConfig(fileName):
@@ -132,7 +131,6 @@ def getHeader(updateType):
       <th>Found</th>
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
-      <th width=120px">TMS location</th>
     </tr>"""
     elif updateType == 'keyinfo':
         return """
@@ -175,7 +173,6 @@ def doEnumerateObjects(form,config):
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
     if not validateParameters(form,config): return
-    tmsLocations,museumNumbers = tmsCheck.getTMSlocations('tms2.csv')
         
     try:
         rows = SysInvDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
@@ -185,22 +182,10 @@ def doEnumerateObjects(form,config):
 
     print getHeader(updateType)
 
-    try:
-        TMSobjectsInThisLocation = tmsLocations[form.getvalue("lo.location1")] 
-    except:
-        TMSobjectsInThisLocation = []
-
-    TMSfound = {}
     if True:
         rowcount = len(rows)
         locations = {}
         for r in rows:
-	    currentTMSlocation = tmsCheck.TMSlocation(tmsLocations,museumNumbers,form.getvalue("lo.location1"),r[3])
-            if currentTMSlocation == form.getvalue("lo.location1"):
-	        r.append('')
-		TMSfound[r[3]] = '*'
-            else:
-	        r.append(currentTMSlocation)
             locationheader = formatRow({ 'rowtype':'subheader','data': r },form,config)
             if locations.has_key(locationheader):
                 pass
@@ -214,11 +199,6 @@ def doEnumerateObjects(form,config):
         for header in locs:
             print header
             print '\n'.join(locations[header])
-
-        print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
-	for r in TMSobjectsInThisLocation:
-            if not TMSfound.has_key(r):
-	        print '<tr><td class="objno">%s</td><td colspan="5">%s</td></tr>' % (r,'in TMS at this location, but not here in CSpace')
 
     print """<tr><td align="center" colspan="6"><hr><td></tr>"""
     print """<tr><td align="center" colspan="3">"""
@@ -418,6 +398,12 @@ def downloadCsv(form,config):
         handleTimeout('enumerate',form)
         rows = []
 
+    place = form.getvalue("cp.place")
+    if place != None:
+        places = getPlaces.getPlaces(place)
+    else:
+        places = []
+
     rowcount = len(rows)
     print 'Content-type: application/octet-stream; charset=utf-8'
     print 'Content-Disposition: attachment; filename="packinglist.xls"'
@@ -426,7 +412,8 @@ def downloadCsv(form,config):
     for r in rows:
         objects = SysInvDB.getlocations(r[0],'',1,config,'keyinfo')
 	for o in objects: 
-	    writer.writerow([o[x] for x in [0,2,3,4,5,6,7,9]])
+	    if checkObject(places,o):
+	        writer.writerow([o[x] for x in [0,2,3,4,5,6,7,9]])
     sys.stdout.flush()
     sys.stdout.close()
 
@@ -538,6 +525,7 @@ def uploadFile(form,config):
         # strip leading path from file name to avoid directory traversal attacks
         fn = os.path.basename(fileitem.filename)
         open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
+	os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn,0666)
         message = fn + ' was uploaded successfully'
     else:
         message = 'No file was uploaded'
@@ -681,7 +669,7 @@ def formatRow(result,form,config):
 	link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8] 
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="45" name="n.%s"></td><td>%s</td></tr>""" % (link,rr[3],rr[5],rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3],rr[16])    
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (link,rr[3],rr[5],rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3])    
     elif result['rowtype'] == 'keyinfo':
         rr = result['data']
 	rr = [ x if x != None else '' for x in rr]
@@ -1174,12 +1162,6 @@ if __name__ == "__main__":
     for r in rows:
 	print r
 
-    #locations,museumNumbers = tmsCheck.getTMSlocations('tms2.csv')
-    #print 'locations',len(locations.keys())
-
-    #sys.exit()
-
-    #print rows
     #urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl31520)'Regatta, A150, RiveTier 1, B'
     f = { 'objectCsid'      : '242e9ee7-983a-49e9-b3b5-7b49dd403aa2',
           'subjectCsid'     : '250d75dc-c704-4b3b-abaa',
