@@ -102,7 +102,7 @@ sub run_benchmarks() {
 		for my $sql_file (@$sql_files) {
 			my ($volume, $directories, $file) = File::Spec->splitpath($sql_file); 
 			my $output_file = File::Spec->catfile($output_dir, $file . $ANALYZE_OUTPUT_FILE_SUFFIX);
-			my $command = "echo 'EXPLAIN ANALYZE' | cat - $sql_file | $SQL_COMMAND -U $db_user -d \"host=$db_host password=$db_password dbname=$db_name\" -f - >>$output_file";
+			my $command = "echo 'EXPLAIN (ANALYZE, BUFFERS)' | cat - $sql_file | $SQL_COMMAND -U $db_user -d \"host=$db_host password=$db_password dbname=$db_name\" -f - >>$output_file";
 
 			print "  $sql_file\n";	
 			system $command;
