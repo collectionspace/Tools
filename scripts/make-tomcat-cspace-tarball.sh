@@ -128,11 +128,14 @@ echo "Removing nightly-specific and other host-specific config files ..."
 find $APP_LAYER_CONFIG_DIR -name nightly-settings.xml -delete
 find $APP_LAYER_CONFIG_DIR -name local-settings.xml -delete
 
-# The following command was tested with Fedora 10 and Ubuntu 11; other Linux distros and other
+# The following commands were tested with Fedora 10 and Ubuntu 11; other Linux distros and other
 # Unix-like operating systems may have slight variations on 'execdir', etc.
-echo "Copying settings.xml files to local-settings.xml for each tenant ..."
+echo "Copying settings.xml files to local-{tenantname}-settings.xml for each tenant ..."
 find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d \
-  -execdir /bin/cp -p '{}'/settings.xml '{}'/local-settings.xml \;
+  -execdir /bin/cp -p '{}'/settings.xml '{}'/local-'{}'-settings.xml \;
+echo "Removing obsolete local-settings.xml files for each tenant ..."
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d \
+  -execdir /bin/rm '{}'/local-settings.xml \;
 
 echo "Removing services JAR files ..."
 rm -Rv $CATALINA_LIB_DIR/cspace-services-authz.jar
