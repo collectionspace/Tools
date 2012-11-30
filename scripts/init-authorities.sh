@@ -15,9 +15,13 @@
 # Set a space-separated list of tenant identifiers below:
 TENANTS+=(core lifesci)
 
+# Set a space-separated list of tenant domain names that correspond,
+# in exact 1:1 order, to the identifiers in the TENANTS list above
+TENANT_DOMAINS+=(core.collectionspace.org lifesci.collectionspace.org)
+
 # This script assumes that each tenant's default administrator
 # username follows a consistent pattern:
-#   admin@{tenantidentifier}.collectionspace.org
+#   admin@{tenant_domain}
 # and that the passwords for each such account are identical,
 # as per the variable set below:
 DEFAULT_ADMIN_PASSWORD=Administrator
@@ -32,9 +36,9 @@ PORT=8180
 
 DEFAULT_ADMIN_ACCTS+=()
 let ACCT_COUNTER=1
-for tenant in ${TENANTS[*]}
+for tenant_domain in ${TENANT_DOMAINS[*]}
 do
-  DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin@$tenant.collectionspace.org"
+  DEFAULT_ADMIN_ACCTS[ACCT_COUNTER]="admin@$tenant_domain"
   let ACCT_COUNTER++
 done
 
