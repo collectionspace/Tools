@@ -5,7 +5,7 @@ import sys
 import cgi
 import pgdb
 
-timeoutcommand = 'set statement_timeout to 50000'
+timeoutcommand = 'set statement_timeout to 300000'
 
 def dbtransaction(command,config):
 
@@ -59,7 +59,7 @@ WHERE
    l.termdisplayName = '""" + str(location) + """'
    
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
-LIMIT 3000"""
+LIMIT 30000"""
 
     elif type == 'keyinfo' or type == 'barcodeprint':
 	return """
@@ -116,7 +116,7 @@ AND (h5.pos=0 or h5.pos is null)
 AND (pef.pos=0 or pef.pos is null)
    
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
-LIMIT 3000
+LIMIT 30000
 """
 
 def getlocations(location1,location2,num2ret,config,updateType):
@@ -193,7 +193,7 @@ def getloclist(searchType,location1,location2,num2ret,config):
     pahmadb  = pgdb.connect(config.get('connect','connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
-    if int(num2ret) > 3000: num2ret = 3000
+    if int(num2ret) > 30000: num2ret = 30000
     if int(num2ret) < 1:    num2ret = 1
 
     getobjects = """

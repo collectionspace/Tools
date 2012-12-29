@@ -71,7 +71,7 @@ def doSearch(form,config):
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),1000,config)
+        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
         rowcount = len(rows)
         print """
     <table width="100%%">
@@ -93,7 +93,7 @@ def countLocations(form,config):
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),1000,config)
+        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
     except:
         raise
         handleTimeout('search',form)
@@ -165,6 +165,7 @@ def getHeader(updateType):
     <table width="100%"><tr>
       <th>Location</th>
       <th>Objects found</th>
+      <th>Barcode Filename</th>
       <th>Notes</th>
     </tr>"""
 
@@ -338,7 +339,7 @@ def doPackingList(form,config):
         #form["location1"] = form.getvalue("lo.location2")
         #form["num2ret"] = 1
     
-    num2ret = 100
+    num2ret = 30000
 
     try:
         locationList = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
@@ -360,7 +361,6 @@ def doPackingList(form,config):
 
     print getHeader('keyinfo')
     totalobjects = 0
-    locations = {}
     for l in locationList:
 
         try:
@@ -370,24 +370,21 @@ def doPackingList(form,config):
             return
 
         locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
-        locations[locationheader] = []
-	totalobjects += len(objects)
+        locations = []
 	if len(objects) == 0:
-		locations[locationheader].append('</td><td colspan="3">No objects found at this location.</td>')
+	    locations.append('</td><td colspan="3">No objects found at this location.</td>')
 	else:
             for r in objects:
 		#print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
 		if checkObject(places,r):
-                    locations[locationheader].append(formatRow({ 'rowtype': 'packinglist','data': r },form,config))
+		    totalobjects += 1
+                    locations.append(formatRow({ 'rowtype': 'packinglist','data': r },form,config))
 
-    locs = locations.keys()
-    locs.sort()
-    for header in locs:
-        print header
-        print '\n'.join(locations[header])
+        print locationheader
+        print '\n'.join(locations)
         print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
     print """<tr><td align="center" colspan="6"><hr><td></tr>"""
-    print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(locs))
+    print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(locationList))
     print "\n</table><hr/>"
 
 def downloadCsv(form,config):
@@ -442,21 +439,21 @@ def doBarCodes(form,config):
 	for o in objects:
 	    if o[3]+o[4] in objectsHandled:
 	        objects.remove(o)
-		print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td></tr>' % (o[3],o[4])
+		print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
 	    else:
 	       objectsHandled.append(o[3]+o[4])
-        print '<tr><td>%s</td><td>%s</td></tr>' % (r[0],len(objects))
         totalobjects += len(objects)
-        writeCommanderFile(r[0],form.getvalue("printer"),'objectLabels','objects',objects,config)
+        labelFilename = writeCommanderFile(r[0],form.getvalue("printer"),'objectLabels','objects',objects,config)
+        print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
 
-    print """<tr><td align="center" colspan="3"><hr><td></tr>"""
-    print """<tr><td align="center">"""
+    print """<tr><td align="center" colspan="4"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="4">"""
     if totalobjects != 0:    
         print "<b>%s objects</b> found in %s locations." % (totalobjects,rowcount)
     else:
         print '<span class="save">No objects found in this range.</span>'
         
-    print "\n</table><hr/>"
+    print "\n</td></tr></table><hr/>"
 
 def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
  
@@ -478,9 +475,7 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
         newName = logFile.replace('.tmp','.txt')
         os.rename (logFile,newName) 
     except:
-	raise
-	print 'log failed!'
-	pass
+	newName = '<span style="color:red;">could not write to %s</span>' % logFile
 
     return newName
 
@@ -488,12 +483,13 @@ def writeLog(updateItems,config):
  
     auditFile = config.get('files','auditfile')
     myPid = str(os.getpid())
-    logFile = config.get('files','logfileprefix') + '.' + datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") + myPid + '.csv'
+    # writing individual log files is now disabled. audit file contains the same info.
+    #logFile = config.get('files','logfileprefix') + '.' + datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") + myPid + '.csv'
 
     # yes, it is inefficient open the log to write each row, but in the big picture, it's insignificant
     try:
-        csvlogfh = csv.writer(codecs.open(logFile,'a','utf-8'), delimiter="\t")
-	csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
+        #csvlogfh = csv.writer(codecs.open(logFile,'a','utf-8'), delimiter="\t")
+	#csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
         csvlogfh = csv.writer(codecs.open(auditFile,'a','utf-8'), delimiter="\t")
 	csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
     except:
@@ -799,12 +795,9 @@ def getHandlers(form):
 ("Rowan Gard", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'"),
 ("Ryan Gross", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8737)'Ryan Gross'"),
 ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
-("Joan Knudsen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(4523)'Joan A. Knudsen'"),
 ("Allison Lewis", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8724)'Allison Lewis'"),
 ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
-("Laura Perez", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9003)'Laura Perez'"),
 ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
-("Adriane Tafoya", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9229)'Adriane Tafoya'"),
 ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
 ]
 
