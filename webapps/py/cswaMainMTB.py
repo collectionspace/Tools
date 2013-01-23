@@ -4,7 +4,7 @@ import sys
 import time
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
-from cswaUtils import *
+from cswaUtilsMTB import *
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -15,21 +15,22 @@ config  = getConfig(form)
 debug = form.getvalue("debug")
 
 print starthtml(form,config)
+# MAKE SPECIAL STARTHTML FOR OBJECT INFO WEB APP
 updateType = config.get('info','updatetype')
 action     = form.getvalue("action")
 #print form
 elapsedtime = time.time()
 if action == "Enumerate Objects":
     doEnumerateObjects(form,config)
+elif updateType == 'collectionstats':
+    doCollectionStats(form,config)
 elif action == config.get('info','updateactionlabel'):
-    if updateType == 'packinglist':    doPackingList(form,config)
-    elif updateType == 'barcodeprint': doBarCodes(form,config)
-    elif updateType == 'inventory':    doUpdateLocations(form,config)
-    elif updateType == 'bedlist':      doBedList(form,config)
-    elif updateType == 'locreport':    doBedList(form,config)
-    #if updateType == 'locreport':     doLocationList(form,config)
-    elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
-    elif updateType == 'upload':       uploadFile(form,config)
+    if updateType == 'packinglist':  doPackingList(form,config)
+    if updateType == 'barcodeprint': doBarCodes(form,config)
+    if updateType == 'inventory':    doUpdateLocations(form,config)
+    if updateType == 'bedlist':      doBedList(form,config)
+    if updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
+    if updateType == 'upload':       uploadFile(form,config)
 elif action == "Recent Activity":
     viewLog(form,config)
 # special case: if only one location in range, jump to enumerate
@@ -42,9 +43,9 @@ elif action == "Search":
     if updateType == 'packinglist':  countLocations(form,config)
     if updateType == 'barcodeprint': countLocations(form,config)
     if updateType == 'bedlist':      countLocations(form,config)
-    if updateType == 'locreport':    countTaxa(form,config)
     if updateType == 'inventory':    doSearch(form,config)
     if updateType == 'keyinfo':      doSearch(form,config)
+    if updateType == 'objectinfo':   doObjectList(form,config)
 elif action in ['<<','>>']:
     print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
 else:
