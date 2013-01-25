@@ -61,6 +61,60 @@ WHERE
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
 LIMIT 30000"""
 
+    elif type == 'bedlist' or type == 'locreport':
+
+        if type == 'bedlist':
+            sortkey = 'gardenlocation'
+            searchkey = 'mc.currentlocation'
+        elif type == 'locreport':
+            sortkey = 'determination'
+            searchkey = 'tig.taxon'
+            
+        return """
+select 
+case when (mc.currentlocation is not null and mc.currentlocation <> '')
+     then regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')
+end as gardenlocation,
+lct.termname shortgardenlocation,
+case when (lc.locationtype is not null and lc.locationtype <> '')
+     then regexp_replace(lc.locationtype, '^.*\\)''(.*)''$', '\\1')
+end as locationtype,
+co1.recordstatus,
+co1.objectnumber, 
+case when (tig.taxon is not null and tig.taxon <> '')
+     then regexp_replace(tig.taxon, '^.*\\)''(.*)''$', '\\1')
+end as determination,
+case when (tn.family is not null and tn.family <> '')
+     then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
+end as family,
+h1.name as objectcsid
+from collectionobjects_common co1
+left outer join hierarchy h1 on co1.id=h1.id
+left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
+left outer join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+left outer join movements_common mc on (mc.id=h2.id)
+left outer join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')=lct.termdisplayname)
+inner join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')
+
+join collectionobjects_botgarden cob on (co1.id=cob.id)
+
+left outer join hierarchy htig 
+     on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
+
+join collectionspace_core core on (core.id=co1.id and core.tenantid='35')
+join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted')
+
+left outer join taxon_common tc on (tig.taxon=tc.refname)
+left outer join taxon_naturalhistory tn on (tc.id=tn.id)
+
+left outer join locations_common lc on (mc.currentlocation=lc.refname)
+
+where deadflag='false' and regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
+   
+ORDER BY %s,to_number(objectnumber,'9999.9999')
+LIMIT 6000""" % (searchkey, location, sortkey)
+
     elif type == 'keyinfo' or type == 'barcodeprint':
 	return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
@@ -180,6 +234,41 @@ def getlocations(location1,location2,num2ret,config,updateType):
 
     return result
 
+def getplants(location1,location2,num2ret,config,updateType):
+
+    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = pahmadb.cursor()
+    objects.execute(timeoutcommand)
+
+    debug = True
+
+    result = []
+
+    #for loc in getloclist('set',location1,'',num2ret,config):
+    getobjects = setquery(updateType,location1)
+    #print getobjects
+    try:
+        elapsedtime = time.time()
+        objects.execute(getobjects)
+        elapsedtime = time.time() - elapsedtime
+        #sys.stderr.write('query :: %s\n' % getobjects)
+        if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1,elapsedtime))
+    except pgdb.DatabaseError, e:
+        sys.stderr.write('getlocations select error: %s' % e)
+        return result
+    except:
+        sys.stderr.write("some other getplants database error!")
+        return result
+    
+    # a hack: check each object to make it is really in this location
+    try:
+        result = objects.fetchall()
+        if debug: sys.stderr.write('object count: %s\n' % (len(result)))
+    except pgdb.DatabaseError, e:
+        sys.stderr.write("fetchall getplants database error!")
+        
+    return result
+
 def getloclist(searchType,location1,location2,num2ret,config):
 
     # 'set' means 'next num2ret locations', otherwise prefix match
@@ -265,7 +354,12 @@ def findrefnames(table,termlist,config):
 
 if __name__ == "__main__":
 
-    from SysInvUtils import getConfig
+    from cswaUtils import getConfig
+
+    config = getConfig('ucbgLocationReport.cfg')
+    print getplants('Velleia rosea','',1,config,'locreport')
+    sys.exit()
+    
     config = getConfig('sysinvProd.cfg')
     print '\nrefnames\n'
     print getrefname('concepts_common','zzz',config)

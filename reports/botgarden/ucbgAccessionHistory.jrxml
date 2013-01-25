@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgAccessionHistory" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="csid" class="java.lang.String">
+		<defaultValueExpression><![CDATA["19a344d7-30ce-4a45-b5b2-189472588a4b"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select co1.objectnumber,
+case when (tig.taxon is not null and tig.taxon <> '')
+     then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
+end as determination,
+date(mc.locationdate + interval '8 hours') actiondate,
+mc.reasonformove actionreason,
+mb.labelrequested,
+mb.labelcount,
+mb.labelsize,
+mb.labelstandtype,
+case when (mb.previouslocation is not null and mb.previouslocation <> '')
+     then regexp_replace(mb.previouslocation, '^.*\)''(.*)''$', '\1')
+end as previouslocation,
+case when (mc.currentlocation is not null and mc.currentlocation <> '')
+     then regexp_replace(mc.currentlocation, '^.*\)''(.*)''$', '\1')
+end as currentlocation,
+mc.movementnote
+from collectionobjects_common co1
+join hierarchy h1 on co1.id=h1.id
+left outer join hierarchy htig
+     on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
+join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
+join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is true)
+join movements_common mc on (mc.id=h2.id)
+join movements_botgarden mb on (mc.id=mb.id)
+where h1.name=$P{csid}
+order by locationdate asc, currentlocation]]>
+	</queryString>
+	<field name="objectnumber" class="java.lang.String"/>
+	<field name="determination" class="java.lang.String"/>
+	<field name="actiondate" class="java.sql.Date"/>
+	<field name="actionreason" class="java.lang.String"/>
+	<field name="labelrequested" class="java.lang.String"/>
+	<field name="labelcount" class="java.lang.Long"/>
+	<field name="labelsize" class="java.lang.String"/>
+	<field name="labelstandtype" class="java.lang.String"/>
+	<field name="previouslocation" class="java.lang.String"/>
+	<field name="currentlocation" class="java.lang.String"/>
+	<field name="movementnote" class="java.lang.String"/>
+	<group name="objectnumber">
+		<groupExpression><![CDATA[$F{objectnumber}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="64" splitType="Stretch">
+			<staticText>
+				<reportElement x="-2" y="43" width="540" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Accession History Report]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="63" width="520" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<textField pattern="MM/dd/yyyy">
+				<reportElement x="438" y="0" width="100" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="146" y="0" width="248" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
+				<text><![CDATA[UC Botanical Garden at Berkeley]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="50" splitType="Stretch">
+			<textField>
+				<reportElement x="75" y="6" width="369" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{determination}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="6" width="100" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="30" width="75" height="15" forecolor="#666666"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="75" y="30" width="89" height="15" forecolor="#666666"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Action]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="164" y="30" width="40" height="15" forecolor="#666666"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Label?]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="204" y="30" width="33" height="15" forecolor="#666666"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Count]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="239" y="30" width="37" height="15" forecolor="#666666"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Size]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="276" y="30" width="59" height="15" forecolor="#666666"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Stand Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="30" width="100" height="15" forecolor="#666666"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[From]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="438" y="30" width="100" height="15" forecolor="#666666"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="47" width="520" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="33" splitType="Prevent">
+			<textField isStretchWithOverflow="true" pattern="MM/dd/yyyy">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="75" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[$F{actiondate}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="75" y="0" width="89" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{actionreason}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="164" y="0" width="40" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{labelrequested}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="204" y="0" width="33" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.Long"><![CDATA[$F{labelcount}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="239" y="0" width="37" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{labelsize}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="276" y="0" width="59" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{labelstandtype}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="338" y="0" width="100" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{previouslocation}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="438" y="0" width="100" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{currentlocation}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="75" y="17" width="465" height="15" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{movementnote}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="420" y="2" width="80" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="500" y="2" width="40" height="20"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

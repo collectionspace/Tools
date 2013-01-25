@@ -16,17 +16,18 @@ import re
 from lxml import etree
 
 # the only other module: isolate postgres calls and connection
-import SysInvDB
+import cswaDB
 import getPlaces
+import getTaxname
 
-def getConfig(fileName):
+def getConfig(form):
 
    try:
+       fileName = form.getvalue('webapp') + '.cfg'
        config = ConfigParser.RawConfigParser()
        config.read(fileName)
        return config
    except:
-       raise
        return False
 
 def handleTimeout(source,form):
@@ -71,7 +72,7 @@ def doSearch(form,config):
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
         rowcount = len(rows)
         print """
     <table width="100%%">
@@ -93,7 +94,7 @@ def countLocations(form,config):
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
     except:
         raise
         handleTimeout('search',form)
@@ -114,10 +115,47 @@ def countLocations(form,config):
     print """<tr><td align="center">"""
     msg = config.get('info','updateactionlabel')
     print """<input type="submit" class="save" value="%s" name="action"></td>""" % msg
+    if updateType == 'inventory':    doSearch(form,config)
     if config.get('info','updatetype') == "packinglist":
         print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
     else:
 	print "<td></td>"
+    print "\n</tr></table><hr/>"
+    print """<input type="hidden" name="count" value="%s">""" % rowcount
+
+def countTaxa(form,config):
+
+    #if not validateParameters(form,config): return
+
+    taxName = form.getvalue("ta.taxon")
+    try:
+        rows = getTaxname.getTaxon(taxName)
+    except:
+        raise
+        handleTimeout('countTaxa',form)
+
+    rowcount = len(rows)
+    print """
+    <table width="100%%">
+    <tr>
+      <th>%s taxonomic names under this taxon</th><th/>
+    </tr>""" % rowcount
+    if rowcount == 0:
+	return
+
+    #rows.sort()
+    for r in rows:
+       print '<tr><td class="locations">%s</td><td>%s</td></tr>' % (r[0],r[1])
+       #print '<tr><td class="locations">',r,'</td></tr>'
+       
+    #print '<tr><th>first taxon</th><td class="locations">',rows[0],'</td></tr>'
+    #print '<tr><th>last taxon</th><td class="locations">',rows[-1],'</td></tr>'
+
+    print """<tr><td align="center" colspan="2"><hr><td></tr>"""
+    print """<tr><td align="center">"""
+    msg = config.get('info','updateactionlabel')
+    print """<input type="submit" class="save" value="%s" name="action"></td>""" % msg
+    print "<td></td>"
     print "\n</tr></table><hr/>"
     print """<input type="hidden" name="count" value="%s">""" % rowcount
 
@@ -143,6 +181,24 @@ def getHeader(updateType):
       <th>Ethnographic File Code</th>
       <th>P?</th>
     </tr>"""
+    elif updateType == 'bedlist':
+        return """
+    <table><tr>
+      <th>Object Number</th>
+      <th>Data Quality</th>
+      <th>Taxonomic Name</th>
+      <th>Family</th>
+    </tr>"""
+     
+    elif updateType == 'locreport':
+        return """
+    <table><tr>
+      <th>Object Number</th>
+      <th>Data Quality</th>
+      <th>Taxonomic Name</th>
+      <th>Family</th>
+    </tr>"""
+     
     elif updateType == 'keyinfoResult':
 	return """
     <table width="100%" border="1">
@@ -176,7 +232,7 @@ def doEnumerateObjects(form,config):
     if not validateParameters(form,config): return
         
     try:
-        rows = SysInvDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
+        rows = cswaDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
     except:
         handleTimeout('enumerate',form)
         return
@@ -227,11 +283,11 @@ def doUpdateKeyinfo(form,config):
 
         index = csid # for now, the index is the csid
 	if not refNames2find.has_key(form.getvalue('cp.'+index)):
-            refNames2find[form.getvalue('cp.'+index)] = SysInvDB.getrefname('places_common',form.getvalue('cp.'+index),config)
+            refNames2find[form.getvalue('cp.'+index)] = cswaDB.getrefname('places_common',form.getvalue('cp.'+index),config)
 	if not refNames2find.has_key(form.getvalue('cg.'+index)):
-            refNames2find[form.getvalue('cg.'+index)] = SysInvDB.getrefname('concepts_common',form.getvalue('cg.'+index),config)
+            refNames2find[form.getvalue('cg.'+index)] = cswaDB.getrefname('concepts_common',form.getvalue('cg.'+index),config)
 	if not refNames2find.has_key(form.getvalue('fc.'+index)):
-            refNames2find[form.getvalue('fc.'+index)] = SysInvDB.getrefname('concepts_common',form.getvalue('fc.'+index),config)
+            refNames2find[form.getvalue('fc.'+index)] = cswaDB.getrefname('concepts_common',form.getvalue('fc.'+index),config)
 
     print getHeader('keyinfoResult')
 
@@ -342,10 +398,10 @@ def doPackingList(form,config):
     num2ret = 30000
 
     try:
-        locationList = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
     except:
         raise
-        handleTimeout('enumerate',form)
+        handleTimeout(updateType,form)
         locationList = []
 
     rowcount = len(locationList)
@@ -364,9 +420,9 @@ def doPackingList(form,config):
     for l in locationList:
 
         try:
-            objects = SysInvDB.getlocations(l[0],'',1,config,updateType)
+            objects = cswaDB.getlocations(l[0],'',1,config,updateType)
         except:
-            handleTimeout('enumerate',form)
+            handleTimeout(updateType+' getting objects',form)
             return
 
         locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
@@ -387,12 +443,79 @@ def doPackingList(form,config):
     print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(locationList))
     print "\n</table><hr/>"
 
-def downloadCsv(form,config):
+def doLocationList(form,config):
+
+    updateactionlabel = config.get('info','updateactionlabel')
+    updateType        = config.get('info','updatetype')
+    updateType ='keyinfo'
+    if not validateParameters(form,config): return
+
+    Taxon = form.getvalue("cp.Taxon")
+    if Taxon != None:
+        Taxons = getTaxons.getTaxons(Taxon)
+    else:
+	Taxons = []
+
+    if form.getvalue("lo.location2"):
+	pass
+        #form["location1"] = form.getvalue("lo.location2")
+        #form["num2ret"] = 1
+    
+    num2ret = 30000
+
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
     except:
         raise
-        handleTimeout('enumerate',form)
+        handleTimeout(updateType,form)
+        locationList = []
+
+    rowcount = len(locationList)
+    #print getHeader('keyinfo')
+
+    if rowcount == 0:
+	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
+	return
+    #else:
+    #	showTaxon = Taxon
+    #   if showTaxon == '' : showTaxon = 'all Taxons in this range'
+    #   print '<tr><td width="500px"><h2>%s locations will be listed for %s.</h2></td></tr>' % (rowcount,showTaxon)
+
+    print getHeader('keyinfo')
+    totalobjects = 0
+    for l in locationList:
+
+        try:
+            objects = cswaDB.getlocations(l[0],'',1,config,updateType)
+        except:
+            handleTimeout(updateType+' getting objects',form)
+            return
+
+        locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
+        locations = []
+	if len(objects) == 0:
+	    locations.append('</td><td colspan="3">No objects found at this location.</td>')
+	else:
+            for r in objects:
+		#print "<tr><td>%s<td>%s</tr>" % (len(Taxons),r[6])
+		if checkObject(Taxons,r):
+		    totalobjects += 1
+                    locations.append(formatRow({ 'rowtype': 'packinglist','data': r },form,config))
+
+        print locationheader
+        print '\n'.join(locations)
+        print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(locationList))
+    print "\n</table><hr/>"
+
+
+def downloadCsv(form,config):
+    try:
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+    except:
+        raise
+        handleTimeout('downloadCSV',form)
         rows = []
 
     place = form.getvalue("cp.place")
@@ -407,7 +530,7 @@ def downloadCsv(form,config):
     print
     writer = csv.writer(sys.stdout,quoting=csv.QUOTE_ALL) 
     for r in rows:
-        objects = SysInvDB.getlocations(r[0],'',1,config,'keyinfo')
+        objects = cswaDB.getlocations(r[0],'',1,config,'keyinfo')
 	for o in objects: 
 	    if checkObject(places,o):
 	        writer.writerow([o[x] for x in [0,2,3,4,5,6,7,9]])
@@ -423,10 +546,10 @@ def doBarCodes(form,config):
     print getHeader(updateType)
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
     except:
 	raise
-        handleTimeout('enumerate',form)
+        handleTimeout(updateType,form)
 	rows = []
 
     rowcount = len(rows)
@@ -435,7 +558,7 @@ def doBarCodes(form,config):
     totalobjects = 0
     rows.reverse()
     for r in rows:
-        objects = SysInvDB.getlocations(r[0],'',1,config,updateType)
+        objects = cswaDB.getlocations(r[0],'',1,config,updateType)
 	for o in objects:
 	    if o[3]+o[4] in objectsHandled:
 	        objects.remove(o)
@@ -454,6 +577,57 @@ def doBarCodes(form,config):
         print '<span class="save">No objects found in this range.</span>'
         
     print "\n</td></tr></table><hr/>"
+
+def doBedList(form,config):
+
+    updateactionlabel = config.get('info','updateactionlabel')
+    updateType        = config.get('info','updatetype')
+    if not validateParameters(form,config): return
+
+    if updateType == 'bedlist':
+       try:
+          rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+       except:
+          raise
+          handleTimeout(updateType,form)
+          rows = []
+    elif updateType == 'locreport':
+       taxName = form.getvalue("ta.taxon")
+       try:
+          rows = getTaxname.getTaxon(taxName)
+       except:
+          raise
+          handleTimeout('countTaxa',form)
+          rows = []
+    
+    rowcount = len(rows)
+    print getHeader(updateType)
+    totalobjects = 0
+    for l in rows:
+
+        try:
+            objects = cswaDB.getplants(l[0],'',1,config,updateType)
+        except:
+            raise
+            handleTimeout('getplants',form)
+            objects = []
+
+        print formatRow({ 'rowtype':'subheader','data': l },form,config)
+        #print "<tr><td>",l,"</td></tr>"
+        if len(objects) == 0:
+            print '<tr><td colspan="6">No objects found at this location.</td></tr>'
+        else:
+            for r in objects:
+                #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
+                #if checkObject(places,r):
+                if True:
+                    totalobjects += 1
+                    print formatRow({ 'rowtype': updateType,'data': r },form,config)
+
+        print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="6">Bed List completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(rows))
+    print "\n</table><hr/>"
 
 def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
  
@@ -483,7 +657,7 @@ def writeLog(updateItems,config):
  
     auditFile = config.get('files','auditfile')
     myPid = str(os.getpid())
-    # writing individual log files is now disabled. audit file contains the same info.
+    # writing of individual log files is now disabled. audit file contains the same data.
     #logFile = config.get('files','logfileprefix') + '.' + datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") + myPid + '.csv'
 
     # yes, it is inefficient open the log to write each row, but in the big picture, it's insignificant
@@ -659,6 +833,18 @@ def formatRow(result,form,config):
     elif result['rowtype'] == 'location':
         handler = form.getvalue('handlerRefName')
         return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % (result['data'][0],result['data'][0])
+    elif result['rowtype'] == 'bedlist':
+        rr = result['data']
+	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
+        # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
+        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[4],rr[3],rr[5],rr[6])
+    elif result['rowtype'] == 'locreport':
+        rr = result['data']
+	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
+        # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
+        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[4],rr[3],rr[5],rr[6])
     elif result['rowtype'] == 'inventory':
         rr = result['data']
 	rr = [ x if x != None else '' for x in rr]
@@ -893,16 +1079,33 @@ def getPrinters(form):
     printers = printers + '\n      </select>'
     return printers,selected
 
+def selectWebapp():
+
+    return '''Content-type: text/html; charset=utf-8
+
+    
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Select web app</title>
+<h1>Oops!</h1>
+<h3>you need to pick a webapp<h3>
+</html>'''
+
 def starthtml(form,config):
    
+    if config == False:
+	print selectWebapp()
+        sys.exit(0)
+ 
     writeInfo2log('start',form,config,0.0) 
+    logo = config.get('info','logo')
+    schemacolor1 = config.get('info','schemacolor1')
     serverlabel = config.get('info','serverlabel')
     serverlabelcolor = config.get('info','serverlabelcolor')
     apptitle = config.get('info','apptitle')
     updateType = config.get('info','updatetype')
 
-    location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else 'Kroeber, 20A, AA  1,  1'
-    location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else 'Kroeber, 20A, AA  1,  2'
+    location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
+    location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else ''
     num2ret   = str(form.getvalue('num2ret')) if str(form.getvalue('num2ret')).isdigit() else '50'
 
     button = '''
@@ -921,6 +1124,11 @@ def starthtml(form,config):
     if updateType == 'keyinfo':
 	otherfields += '''
 	  <tr><td/><td/><td/><td/></tr>'''
+    elif updateType == 'locreport':
+        taxName        = str(form.getvalue('ta.taxon')) if form.getvalue('ta.taxon') else ''
+	otherfields = '''
+	  <tr><td><span class="cell">taxonomic name:</span></td>
+	  <td><input id="ob.objectnumber" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></td></tr>'''
     elif updateType == 'search':
         objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
         place        = str(form.getvalue('cp.place')) if form.getvalue('cp.place') else ''
@@ -962,27 +1170,36 @@ def starthtml(form,config):
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>''' + apptitle + ' : ' + serverlabel + '''</title>
 <style type="text/css">
-body {font-family:Arial, Helvetica, sans-serif;}
-.save { background-color: orange; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
-.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
-.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
-.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
-.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
-.shortinput { font-weight: bold; width:150px; }
-.veryshortinput { width:60px; }
-.subheader { background-color: #660000; color: #FFFFFF; font-size: 24px; font-weight: bold; }
-.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
-.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
-.rdo { text-align: center; }
-th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
-td { cell-padding: 3px; }
+body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
 table { width: 100%; }
+td { cell-padding: 3px; }
+th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
+h1 { font-size:32px; float:left; padding:10px; margin:0px; border-bottom: none; }
+h2 { font-size:12px; float:left; color:white; background:black; }
+p { padding:10px 10px 10px 10px; }
+
+button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
+
+.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
+.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
+img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
+.locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
+.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:110px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
+.ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
+.rdo { text-align: center; }
+.save { background-color: orange; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
+.shortinput { font-weight: bold; width:150px; }
+.subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
+.veryshortinput { width:60px; }
+.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
 </style>
 <style type="text/css">
   /*<![CDATA[*/
     @import "../css/autoSuggest.css";
     @import "../css/jquery-ui-1.8.22.custom.css";
-    @import "../css/nocols.css";
   /*]]>*/
   </style>
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
@@ -1014,7 +1231,7 @@ function formSubmit(location)
       <tr>
 	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
         <td><span style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</td>
-	<th style="text-align:right;"><img height="60px" src="http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"></th>
+	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
       </tr>
       <tr><td colspan="3"><hr/></td></tr>
       <tr>
@@ -1036,13 +1253,14 @@ def endhtml(form,config,elapsedtime):
     writeInfo2log('end',form,config,elapsedtime) 
     #user = form.getvalue('user')
     count = form.getvalue('count')
-    return """
+    connect_string = config.get('connect','connect_string')
+    return '''
   <table width="100%">
     <tbody>
     <tr>
-      <td width="180px" class="xspan">""" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + """</td>
+      <td width="180px" class="xspan">''' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + '''</td>
       <td width="160px" class="cell">elapsed time: </td>
-      <td class="xspan">""" + ('%8.2f' % elapsedtime) + """ seconds</td>
+      <td class="xspan">''' + ('%8.2f' % elapsedtime) + ''' seconds</td>
       <td width="200px" class="cell"><input type="submit" value="Recent Activity" name="action"></td>
     </tr>
     </tbody>
@@ -1060,7 +1278,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py",
+                    url: "../cgi-bin/autosuggest2.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
@@ -1078,7 +1296,7 @@ $('[name]').map(function() {
 });
 </script>
 </body></html>
-"""
+'''
 
 def relationsPayload(f):
     payload = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1121,37 +1339,49 @@ def lmiPayload(f):
 
 if __name__ == "__main__":
 
+
     # to test this module on the command line you have to pass in two cgi values:
-    # $ python SysInvUtils.py "lo.location1=Hearst Gym, 30, L 12,  2&lo.location2=Hearst Gym, 30, L 12,  7"
-    # $ python SysInvUtils.py "lo.location1=X&lo.location2=Y"
+    # $ python cswaUtils.py "lo.location1=Hearst Gym, 30, L 12,  2&lo.location2=Hearst Gym, 30, L 12,  7"
+    # $ python cswaUtils.py "lo.location1=X&lo.location2=Y"
 
     # this will load the config file and attempt to update some records in server identified
     # in that config file!
-    #config = getConfig('packlistDev.cfg')
-    config = getConfig('sysinvDev.cfg')
+    import cswaDB
+    
+    form = cgi.FieldStorage()
+    config = getConfig(form)
+
+    config = getConfig('ucbgLocationReport.cfg')
+    print cswaDB.getplants('Velleia rosea','',1,config,'locreport')
+    sys.exit()
+    
     realm    = config.get('connect','realm')
     hostname = config.get('connect','hostname')
     username = config.get('connect','username')
     password = config.get('connect','password')
 
-    form = cgi.FieldStorage()
     starthtml(form,config)
     endhtml(form,config,0.0)
 
     #print "starting packing list"
     #doPackingList(form,config)
     #sys.exit()
+    print '\nlocations\n'
+    for loc in cswaDB.getloclist('range','1001, Green House 1','1003, Tropical House',1000,config):
+        print loc
+    sys.exit()
+
 
     print '\nlocations\n'
-    for loc in SysInvDB.getloclist('set','Kroeber, 20A, W B','',10,config):
+    for loc in cswaDB.getloclist('set','Kroeber, 20A, W B','',10,config):
         print loc
 
     print '\nlocations\n'
-    for loc in SysInvDB.getloclist('set','Kroeber, 20A, CC  4','',3,config):
+    for loc in cswaDB.getloclist('set','Kroeber, 20A, CC  4','',3,config):
         print loc
 
     print '\nobjects\n'
-    rows = SysInvDB.getlocations('Kroeber, 20A, CC  4','',3,config,'keyinfo')
+    rows = cswaDB.getlocations('Kroeber, 20A, CC  4','',3,config,'keyinfo')
     for r in rows:
 	print r
 

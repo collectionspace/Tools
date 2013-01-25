@@ -15,18 +15,365 @@ import cgi
 import re
 from lxml import etree
 
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US')
+
 # the only other module: isolate postgres calls and connection
-import SysInvDB
+import cswaDBMTB
 import getPlaces
 
-def getConfig(fileName):
+# Still to do for the Object Info web app (doObjectList):
+#   * convert functions fetching repeating values to fetchall:
+#      * childlocations/getchildlocations
+#      * altnumresult/getaltnums
+#      * cultresult/getcultures
+#      * proddates/getproddates
+#      * parentaltnums/getparentaltnums
+#      * childinfo/getchildinfo
+#   * trim/strip trailing spaces from alternate number fields
+#   * add parent values for production date
+#   * add parent values for associated cultural group
+#   * force focus onto input field
+
+# Things this web app does that can't be done with CSpace:
+#   * web app uses isprimaryimage to choose primary display image
+#   * shows child locations when viewing parent object
+#   * query and display times are fast
+#   * fits nicely on an iPad
+
+def doObjectList(form,config):
+   scannedObjectNumber = form.getvalue('ob.objectnumber')
+   objresult = cswaDBMTB.getobjinfo(scannedObjectNumber,config)
+   if objresult == None:
+      objectcsid = None
+   else:
+      objectcsid = objresult[15]
+   currlocresult = cswaDBMTB.findcurrentlocation(objectcsid,config)
+   if currlocresult == None or currlocresult == '':
+      currlocresult = "<span class='notentered'>no location entered</span>"
+   accresult = cswaDBMTB.getaccinfo(scannedObjectNumber,config)
+   if accresult == None:
+      accresult = [None,None,None,None]
+   altnumresult = cswaDBMTB.getaltnums(scannedObjectNumber,config)
+   if altnumresult == None:
+      altnumresult = [None,None,None,None]
+   allaltnumresult = cswaDBMTB.getallaltnums(scannedObjectNumber,config)
+   if allaltnumresult == None:
+      allaltnumresult = [None,None,None,None]
+   cultresult = cswaDBMTB.getcultures(scannedObjectNumber,config)
+   if cultresult == None:
+      cultresult = [None,None,None,None]
+   proddates = cswaDBMTB.getproddates(scannedObjectNumber,config)
+   if proddates == None:
+      proddates = [None,None,None]
+   objmedia = cswaDBMTB.getmedia(scannedObjectNumber,config)
+   if objmedia == None:
+      objmedia = [None,None,None]
+   parentinfo = cswaDBMTB.getparentinfo(scannedObjectNumber,config)
+   if parentinfo == None:
+      parentinfo = [None,None,None,None,None,None,None,None,None,None,None,None]
+      parentid = None
+      parentcsid = None
+   else:
+      parentid = parentinfo[12]
+      parentcsid = parentinfo[2]
+   parentaltnums = cswaDBMTB.getparentaltnums(parentid,config)
+   if parentaltnums == None:
+      parentaltnums = [None,None,None,None]
+   parentaccinfo = cswaDBMTB.getparentaccinfo(parentcsid,config)
+   if parentaccinfo == None:
+      parentaccinfo = [None,None,None]
+   childinfo = cswaDBMTB.getchildinfo(scannedObjectNumber,config)
+   if childinfo == None:
+      childinfo = [None,None,None,None]
+      childid = None
+      childcsid = None
+   else:
+      childid = childinfo[3]
+      childcsid = childinfo[2]
+   childlocations = cswaDBMTB.getchildlocations(childcsid,config)
+   if childlocations == None or childlocations == '':
+      childlocations = [None,None,None,None]
+      
+   #loginstatus = urllib2.urlopen('http://pahma.cspace.berkeley.edu:8180/collectionspace/tenant/pahma/loginstatus')
+   #if loginstatus == 'None' or loginstatus == '' or loginstatus == """{"login":false}""":
+   #   loggedin = 'false'
+   #   print loggedin + " FALSE"
+   #else:
+   #   loggedin = 'true'
+   #   print loggedin + " TRUE"
+   #print "Login status: " + loginstatus.read(100)
+
+
+   print "<span class='objtitle'><a href='http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/cataloging.html?csid=""" + (objresult[15]) +"""' target='_blank'>""" + (objresult[0]) + """</a>"""
+
+   if str(objresult[6]) == 'None':
+      print ": <i>(no object name entered)</i></span>"
+   else:
+      print "&mdash; " + str(objresult[6]) + "</span>"
+      
+   print """
+    <div style="width:85%; float:left; ">
+    <table width="100%%">"""
+   
+######### Alternate Number #########
+   print "<tr><td valign='top'><span align='right'><b>Alternate number(s):</b></span></td><td><span align='left'>"
+   if str(altnumresult[1]) == 'None' and str(parentaltnums[1]) <> 'None' and str(objresult[10]) == 'yes':
+      print "<span class='notentered'>{on record for " + str(parentinfo[1]) + "}:  </span>" + str(parentaltnums[1])
+      if str(parentaltnums[2]) <> 'None':
+         print " (" + (parentaltnums[2])
+      if str(parentaltnums[3]) <> 'None':
+         if str(parentaltnums[2]) <> 'None':
+            print ", " + (parentaltnums[3]) + ")</span></td></tr>"
+         else:
+            print "( " + (parentaltnums[3]) + ")</span></td></tr>"
+      else:
+         if str(parentaltnums[2]) <> 'None':
+            print ")</span></td></tr>"
+         else:
+            print "</span></td></tr>"
+   elif str(altnumresult[1]) == 'None' and str(parentaltnums[1]) == 'None':
+      print "<span class='notentered'>none entered</span></td></tr>"
+   elif str(altnumresult[1]) == 'None' and str(objresult[10]) == 'no':
+      print "<span class='notentered'>none entered</span></td></tr>"
+   else:
+      print str(altnumresult[1])
+      if str(altnumresult[2]) <> 'None':
+         print " (" + (altnumresult[2])
+      if str(altnumresult[3]) <> 'None':
+         if str(altnumresult[2]) <> 'None':
+            print ", " + (altnumresult[3]) + ")</span></td></tr>"
+         else:
+            print "( " + (altnumresult[3]) + ")</span></td></tr>"
+      else:
+         if str(altnumresult[2]) <> 'None':
+            print ")</span></td></tr>"
+         else:
+            print "</span></td></tr>"
+
+######### Current Location #########  NEED TO CONVERT getchildlocations TO FETCHALL()
+
+   if str(currlocresult) == "<span class='notentered'>no location entered</span>" and str(objresult[10]) == 'no' and str(childlocations[3]) <> '' and str(childlocations[3]) <> 'None':
+      print "<tr><td valign='top'><span align='right'><b>Current location:</b></span></td><td><span align='left'>" + str(childlocations[0]) + ": " + str(childlocations[3]) + "</span></td></tr>"
+   else:
+      print "<tr><td valign='top'><span align='right'><b>Current location:</b></span></td><td><span align='left'>" + currlocresult + "</span></td></tr>"
+
+######### Object Count #########
+   print """<tr><td valign='top' width="25%%"><span align='right'><b>Object count:</b></span></td><td><span align='left'>"""
+   if str(objresult[3]) == 'None':
+      print "<span class='notentered'>no count entered</span></span></td></tr>"
+   elif str(objresult[3]) == '1':
+      print str(objresult[3]) + " piece</span></td></tr>"
+   else:
+      print str(objresult[3]) + " pieces</span></td></tr>"
+
+######### Object Type #########
+   print "<tr><td valign='top'><span align='right'><b>Object type:</b></span></td><td><span align='left'>"
+   if str(objresult[1]) == 'None':
+      if str(parentinfo[3]) == 'None':
+         print "<span class='notentered'>PARENT: none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[3]) + "</span></td></tr>"
+   elif str(objresult[1]) == '(not specified)':
+      print "<span class='notentered'>(not specified)</span></span></td></tr>"
+   else:
+      print str(objresult[1]) + "</span></td></tr>"
+
+######### Collection Manager #########
+   print "<tr><td valign='top'><span align='right'><b>Collection manager(s):</b></span></td><td><span align='left'>"
+   if str(objresult[14]) == 'None':
+      if str(parentinfo[11]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[11]) + "</span></td></tr>"
+   else:
+      print str(objresult[14]) + "</span></td></tr>"
+
+######### All alternate Numbers #########
+#   print "<tr><td valign='top'><span align='right'><b>All alternate number(s):</b></span></td><td><span align='left'>"
+#   if str(allaltnumresult[0][1]) == 'None' :
+#      print "<span class='notentered'>OOPS</span></span></td></tr>"
+#   else:
+#      for i in allaltnumresult:
+#         print str(allaltnumresult[i][1]) + " (" + str(allaltnumresult[i][2]) + ")"
+#            
+#      print "\n</span></td></tr>"
+
+######### Brief Description #########
+   print "<tr><td valign='top'><span align='right'><b>Brief description:</b></span></td><td><span align='left'>"
+   if str(objresult[8]) == 'None':
+      print "<span class='notentered'>none entered</span></span></td></tr>"
+   else:
+      print str(objresult[8]) + "</span></td></tr>"
+
+######### Distinguishing Features #########
+   print "<tr><td valign='top'><span align='right'><b>Distinguishing features:</b></span></td><td><span align='left'>"
+   if str(objresult[4]) == 'None':
+      if str(parentinfo[4]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print "<span class='notentered'>{on record for " + str(parentinfo[1]) + "}:  </span>" + str(parentinfo[4]) + "</td></tr>"
+   else:
+      print str(objresult[4]) + "</span></td></tr>"
+
+######### Ethnographic File Code #########
+   print "<tr><td valign='top'><span align='right'><b>Ethnographic file code:</b></span></td><td><span align='left'>"
+   if str(objresult[9]) == 'None':
+      if str(parentinfo[7]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[7]) + "</span></td></tr>"
+   else:
+      print str(objresult[9]) + "</span></td></tr>"
+
+######### Associated Cultural Group #########  ADD PARENT
+   print "<tr><td valign='top'><span align='right'><b>Associated cultural group:</b></span></td><td><span align='left'>"
+   if str(cultresult[1]) == 'None':
+      print "<span class='notentered'>none entered</span></span></td></tr>"
+   else:
+      print str(cultresult[1])
+      if str(cultresult[2]) <> 'None':
+         print " (" + str(cultresult[2])
+      if str(cultresult[3]) <> 'None':
+         if str(cultresult[2]) <> 'None':
+            print "; " + (cultresult[3]) + ")</span></td></tr>"
+         else:
+            print "( " + (cultresult[3]) + ")</span></td></tr>"
+      else:
+         if str(cultresult[2]) <> 'None':
+            print ")</span></td></tr>"
+         else:
+            print "</span></td></tr>"
+
+######### Production Date #########  ADD PARENT
+   print "<tr><td valign='top'><span align='right'><b>Production date:</b></span></td><td><span align='left'>"
+   if str(proddates[1]) == 'None':
+      print "<span class='notentered'>none entered</span></span></td></tr>"
+   else:
+      print str(proddates[1])
+      if str(proddates[2]) <> 'None':
+         print " (" + (proddates[2]) + ")</span></td></tr>"
+         
+######### Field Collection Place #########         
+   print "<tr><td valign='top'><span align='right'><b>Field collection place:</b></span></td><td><span align='left'>"
+   if str(objresult[13]) == 'None':
+      if str(parentinfo[10]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[10]) + "</span></td></tr>"
+   else:
+      print str(objresult[13]) + "</span></td></tr>"
+
+######### Field Collection Place (verbatim) #########
+   print "<tr><td valign='top'><span align='right'><b>Field coll. place (verbat.):</b></span></td><td><span align='left'>"
+   if str(objresult[12]) == 'None':
+      if str(parentinfo[9]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[9]) + "</span></td></tr>"
+   else:
+      print str(objresult[12]) + "</span></td></tr>"
+
+######### Collector #########
+   print "<tr><td valign='top'><span align='right'><b>Collector:</b></span></td><td><span align='left'>"
+   if str(objresult[2]) == 'None':
+      if str(parentinfo[5]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[5]) + "</span></td></tr>"
+   else:
+      print str(objresult[2]) + "</span></td></tr>"
+
+######### Donor #########  Tested
+   print "<tr><td valign='top'><span align='right'><b>Donor:</b></span></td><td><span align='left'>"
+   if str(accresult[2]) == 'None':
+      if str(parentaccinfo[1]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentaccinfo[1]) + "</span></td></tr>"
+   else:
+      print str(accresult[2]) + "</span></td></tr>"
+
+######### Accession Number #########  Tested
+   print "<tr><td valign='top'><span align='right'><b>Accession:</b></span></td><td><span align='left'>"
+   if str(accresult[1]) == 'None':
+      if str(parentaccinfo[0]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print """<a href='http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/acquisition.html?csid=""" + str(parentaccinfo[2]) + """' target='_blank'>""" + str(parentaccinfo[0]) + "</a></span></td></tr>"
+   else:
+      print """<a href='http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/acquisition.html?csid=""" + str(accresult[3]) + """' target='_blank'>""" + str(accresult[1]) + "</a></span></td></tr>"
+
+######### PAHMA Legacy Catalog #########
+   print "<tr><td valign='top'><span align='right'><b>PAHMA legacy catalog:</b></span></td><td><span align='left'>"
+   if str(objresult[11]) == 'None':
+      if str(parentinfo[8]) == 'None':
+         print "<span class='notentered'>none entered</span></span></td></tr>"
+      else:
+         print str(parentinfo[8]) + "</span></td></tr>"
+   else:
+      print str(objresult[11]) + "</span></td></tr>"
+
+   print "</table><br/>"
+   print "</div>"
+   print """<div style="width:15%; float:left; ">"""
+
+########## Trying to incorporate media ######### NEED TO SHOW PARENT MEDIA IF NO MEDIA
+   if str(objmedia[1]) <> 'None':
+      print """<a href='http://pahma.cspace.berkeley.edu:8180/collectionspace/chain/download/""" + str(objmedia[1]) + """/OriginalJpeg' target='_blank'>
+         <img src='http://pahma.cspace.berkeley.edu:8180/collectionspace/chain/download/""" + str(objmedia[1]) + """/Thumbnail'></a>"""
+   else:
+      print "no related media"
+   print "</div>"
+      
+   # print "<script>getLastFormElem().focus();</script>"
+
+#   #################################### Collection Stats web app #######################################
+
+# I want to find a way to save these stats along with a time stamp
+# so that we can track progress over time.
+
+# I also need to figure out how to pass global variables to the percentage calculations
+
+def doCollectionStats(form,config):
+   global totalobjcount
+   totalobjcount = cswaDBMTB.gettotalobjcount(config)
+   
+   print "<span class='statsection'>Total counts</span>"
+   print """<table width="400px"><tr><td width="300px">&nbsp;</td><td width="400px" class="statvalue">"""
+   print str(locale.format("%d", int(totalobjcount[0]), grouping=True)) + " Museum numbers</td></tr>"
+   print """<tr><td width="300px">&nbsp;</td><td class="statvalue">"""
+   print str(locale.format("%d", int(totalobjcount[1]), grouping=True)) + " objects</td></tr>"
+   print """<tr><td width="300px">&nbsp;</td><td class="statvalue">"""
+   print str(locale.format("%d", int(totalobjcount[2]), grouping=True)) + " pieces</td></tr></table><hr/>"
+
+   print "<span class='statsection'>Counts by object type</span>"
+   print """<table width="550px">"""
+   objtypecounts = cswaDBMTB.getobjtypecounts(config)
+   print "</table><hr/>"
+
+   print "<span class='statsection'>Counts by legacy catalog</span>"
+   print """<table width="550px">"""
+   objtypecounts = cswaDBMTB.getlegacycatcounts(config)
+   print "</table>"
+   print "<hr/>"
+
+   print "<span class='statsection'>Counts by collection manager</span>"
+   print """<table width="550px">"""
+   objtypecounts = cswaDBMTB.getcollmanobjcount(config)
+   print "</table>"
+   print "<hr/>"
+
+#   ######################################################################################################
+   
+def getConfig(form):
 
    try:
+       fileName = form.getvalue('webapp') + '.cfg'
        config = ConfigParser.RawConfigParser()
        config.read(fileName)
        return config
    except:
-       raise
        return False
 
 def handleTimeout(source,form):
@@ -65,13 +412,12 @@ def search(form,config):
 	else:
 	    print '%s : %s %s\n' % (m,mapping[m],form.getvalue(m))
 
-
 def doSearch(form,config):
 
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
         rowcount = len(rows)
         print """
     <table width="100%%">
@@ -87,13 +433,13 @@ def doSearch(form,config):
     except:
 	raise
         handleTimeout('search',form)
-
+        
 def countLocations(form,config):
 
     if not validateParameters(form,config): return
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
     except:
         raise
         handleTimeout('search',form)
@@ -114,6 +460,7 @@ def countLocations(form,config):
     print """<tr><td align="center">"""
     msg = config.get('info','updateactionlabel')
     print """<input type="submit" class="save" value="%s" name="action"></td>""" % msg
+    if updateType == 'inventory':    doSearch(form,config)
     if config.get('info','updatetype') == "packinglist":
         print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
     else:
@@ -142,6 +489,14 @@ def getHeader(updateType):
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
       <th>P?</th>
+    </tr>"""
+    elif updateType == 'bedlist':
+        return """
+    <table><tr>
+      <th>Object Number</th>
+      <th>Data Quality</th>
+      <th>Determination</th>
+      <th>Family</th>
     </tr>"""
     elif updateType == 'keyinfoResult':
 	return """
@@ -176,7 +531,7 @@ def doEnumerateObjects(form,config):
     if not validateParameters(form,config): return
         
     try:
-        rows = SysInvDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
+        rows = cswaDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
     except:
         handleTimeout('enumerate',form)
         return
@@ -227,11 +582,11 @@ def doUpdateKeyinfo(form,config):
 
         index = csid # for now, the index is the csid
 	if not refNames2find.has_key(form.getvalue('cp.'+index)):
-            refNames2find[form.getvalue('cp.'+index)] = SysInvDB.getrefname('places_common',form.getvalue('cp.'+index),config)
+            refNames2find[form.getvalue('cp.'+index)] = cswaDB.getrefname('places_common',form.getvalue('cp.'+index),config)
 	if not refNames2find.has_key(form.getvalue('cg.'+index)):
-            refNames2find[form.getvalue('cg.'+index)] = SysInvDB.getrefname('concepts_common',form.getvalue('cg.'+index),config)
+            refNames2find[form.getvalue('cg.'+index)] = cswaDB.getrefname('concepts_common',form.getvalue('cg.'+index),config)
 	if not refNames2find.has_key(form.getvalue('fc.'+index)):
-            refNames2find[form.getvalue('fc.'+index)] = SysInvDB.getrefname('concepts_common',form.getvalue('fc.'+index),config)
+            refNames2find[form.getvalue('fc.'+index)] = cswaDB.getrefname('concepts_common',form.getvalue('fc.'+index),config)
 
     print getHeader('keyinfoResult')
 
@@ -342,10 +697,10 @@ def doPackingList(form,config):
     num2ret = 30000
 
     try:
-        locationList = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
     except:
         raise
-        handleTimeout('enumerate',form)
+        handleTimeout(updateType,form)
         locationList = []
 
     rowcount = len(locationList)
@@ -364,9 +719,9 @@ def doPackingList(form,config):
     for l in locationList:
 
         try:
-            objects = SysInvDB.getlocations(l[0],'',1,config,updateType)
+            objects = cswaDB.getlocations(l[0],'',1,config,updateType)
         except:
-            handleTimeout('enumerate',form)
+            handleTimeout(updateType+' getting objects',form)
             return
 
         locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
@@ -389,10 +744,10 @@ def doPackingList(form,config):
 
 def downloadCsv(form,config):
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
     except:
         raise
-        handleTimeout('enumerate',form)
+        handleTimeout('downloadCSV',form)
         rows = []
 
     place = form.getvalue("cp.place")
@@ -407,7 +762,7 @@ def downloadCsv(form,config):
     print
     writer = csv.writer(sys.stdout,quoting=csv.QUOTE_ALL) 
     for r in rows:
-        objects = SysInvDB.getlocations(r[0],'',1,config,'keyinfo')
+        objects = cswaDB.getlocations(r[0],'',1,config,'keyinfo')
 	for o in objects: 
 	    if checkObject(places,o):
 	        writer.writerow([o[x] for x in [0,2,3,4,5,6,7,9]])
@@ -423,10 +778,10 @@ def doBarCodes(form,config):
     print getHeader(updateType)
 
     try:
-        rows = SysInvDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
     except:
 	raise
-        handleTimeout('enumerate',form)
+        handleTimeout(updateType,form)
 	rows = []
 
     rowcount = len(rows)
@@ -435,7 +790,7 @@ def doBarCodes(form,config):
     totalobjects = 0
     rows.reverse()
     for r in rows:
-        objects = SysInvDB.getlocations(r[0],'',1,config,updateType)
+        objects = cswaDB.getlocations(r[0],'',1,config,updateType)
 	for o in objects:
 	    if o[3]+o[4] in objectsHandled:
 	        objects.remove(o)
@@ -454,6 +809,47 @@ def doBarCodes(form,config):
         print '<span class="save">No objects found in this range.</span>'
         
     print "\n</td></tr></table><hr/>"
+
+def doBedList(form,config):
+
+    updateactionlabel = config.get('info','updateactionlabel')
+    updateType        = config.get('info','updatetype')
+    if not validateParameters(form,config): return
+
+    try:
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+    except:
+        raise
+        handleTimeout(updateType,form)
+        rows = []
+
+    rowcount = len(rows)
+    print getHeader('bedlist')
+    totalobjects = 0
+    for l in rows:
+
+        try:
+            objects = cswaDB.getplants(l[0],'',1,config,updateType)
+        except:
+            handleTimeout('getplants',form)
+            return
+
+        print formatRow({ 'rowtype':'subheader','data': l },form,config)
+        #print "<tr><td>",l,"</td></tr>"
+        if len(objects) == 0:
+            print '<tr><td colspan="6">No objects found at this location.</td></tr>'
+        else:
+            for r in objects:
+                #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
+                #if checkObject(places,r):
+                if True:
+                    totalobjects += 1
+                    print formatRow({ 'rowtype': 'bedlist','data': r },form,config)
+
+        print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="6">Bed List completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(rows))
+    print "\n</table><hr/>"
 
 def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
  
@@ -483,7 +879,7 @@ def writeLog(updateItems,config):
  
     auditFile = config.get('files','auditfile')
     myPid = str(os.getpid())
-    # writing individual log files is now disabled. audit file contains the same info.
+    # writing of individual log files is now disabled. audit file contains the same data.
     #logFile = config.get('files','logfileprefix') + '.' + datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") + myPid + '.csv'
 
     # yes, it is inefficient open the log to write each row, but in the big picture, it's insignificant
@@ -659,6 +1055,12 @@ def formatRow(result,form,config):
     elif result['rowtype'] == 'location':
         handler = form.getvalue('handlerRefName')
         return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % (result['data'][0],result['data'][0])
+    elif result['rowtype'] == 'bedlist':
+        rr = result['data']
+	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
+        # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
+        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[4],rr[3],rr[5],rr[6])
     elif result['rowtype'] == 'inventory':
         rr = result['data']
 	rr = [ x if x != None else '' for x in rr]
@@ -893,16 +1295,33 @@ def getPrinters(form):
     printers = printers + '\n      </select>'
     return printers,selected
 
+def selectWebapp():
+
+    return '''Content-type: text/html; charset=utf-8
+
+    
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Select web app</title>
+<h1>Oops!</h1>
+<h3>you need to pick a webapp<h3>
+</html>'''
+
 def starthtml(form,config):
    
+    if config == False:
+	print selectWebapp()
+        sys.exit(0)
+ 
     writeInfo2log('start',form,config,0.0) 
+    logo = config.get('info','logo')
+    schemacolor1 = config.get('info','schemacolor1')
     serverlabel = config.get('info','serverlabel')
     serverlabelcolor = config.get('info','serverlabelcolor')
     apptitle = config.get('info','apptitle')
     updateType = config.get('info','updatetype')
 
-    location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else 'Kroeber, 20A, AA  1,  1'
-    location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else 'Kroeber, 20A, AA  1,  2'
+    location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
+    location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else ''
     num2ret   = str(form.getvalue('num2ret')) if str(form.getvalue('num2ret')).isdigit() else '50'
 
     button = '''
@@ -917,10 +1336,26 @@ def starthtml(form,config):
           <td><span class="cell">end:</span></td>
           <td><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></td></tr>
     '''
+    divsize = '''<div id="sidiv" style="position:relative; width:1000px; height:750px; color:yellow; ">'''
 
     if updateType == 'keyinfo':
 	otherfields += '''
 	  <tr><td/><td/><td/><td/></tr>'''
+    elif updateType == 'objectinfo':
+        objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
+        otherfields = '''
+	  <tr><td><span class="cell">Museum Number:</span></td>
+	  <td><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></td></tr>'''
+        button = '''
+          <input id="actionbutton" class="save" type="submit" value="Search" name="action">'''
+    elif updateType == 'collectionstats':
+        objectnumber = ''
+        #otherfields = '''<tr><td align="center"><h3>Descriptive statistics of the Hearst Museum collections</h3></td></tr>'''
+        otherfields = ''
+        #button = '''
+        #  <input id="actionbutton" class="save" type="submit" value="Show stats" name="action">'''
+        button = ''
+        divsize = '''<div id="sidiv" style="position:relative; width:1000px; height:750px; color:yellow; ">'''
     elif updateType == 'search':
         objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
         place        = str(form.getvalue('cp.place')) if form.getvalue('cp.place') else ''
@@ -962,27 +1397,50 @@ def starthtml(form,config):
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>''' + apptitle + ' : ' + serverlabel + '''</title>
 <style type="text/css">
-body {font-family:Arial, Helvetica, sans-serif;}
-.save { background-color: orange; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
-.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
-.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
-.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
-.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
-.shortinput { font-weight: bold; width:150px; }
-.veryshortinput { width:60px; }
-.subheader { background-color: #660000; color: #FFFFFF; font-size: 24px; font-weight: bold; }
-.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
-.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
-.rdo { text-align: center; }
-th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
-td { cell-padding: 3px; }
+body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
 table { width: 100%; }
+td { cell-padding: 3px; }
+.stattitle { font-weight: normal; text-align:right; }
+.statvalue { font-weight: bold; text-align:left; }
+.statvaluecenter { font-weight: bold; text-align:center; }
+th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
+h1 { font-size:32px; float:left; padding:10px; margin:0px; border-bottom: none; }
+h2 { font-size:12px; float:left; color:white; background:black; }
+p { padding:10px 10px 10px 10px; }
+
+button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
+
+.statsection { font-size:21px; font-weight:bold; border-bottom: thin dotted #aaaaaa; color: ''' + schemacolor1 + '''; }
+.stattitle { font-weight: normal; text-align:right; }
+.statvalue { font-weight: bold; text-align:left; }
+.objtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
+.objsubtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; font-style: italic; color: #999999; }
+.notentered { font-style: italic; color: #999999; }
+.askjohn { font-style: italic; color: #009999; }
+
+.addtoquery { font-style: italic; color: #aa0000; }
+.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
+.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
+img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
+.locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
+.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:110px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
+.ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
+.rdo { text-align: center; }
+.save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
+.shortinput { font-weight: bold; width:150px; }
+.subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
+.veryshortinput { width:60px; }
+.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
+
+
 </style>
 <style type="text/css">
   /*<![CDATA[*/
     @import "../css/autoSuggest.css";
     @import "../css/jquery-ui-1.8.22.custom.css";
-    @import "../css/nocols.css";
   /*]]>*/
   </style>
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
@@ -1007,14 +1465,13 @@ function formSubmit(location)
 <body>
 <form id="sysinv" enctype="multipart/form-data" method="post">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tbody><tr><td width="3%">&nbsp;</td><td align="center">
-  <div id="sidiv" style="position:relative;width:1000px;height:750px;">
+  <tbody><tr><td width="3%">&nbsp;</td><td align="center">''' + divsize + '''
     <table width="100%">
     <tbody>
       <tr>
 	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
         <td><span style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</td>
-	<th style="text-align:right;"><img height="60px" src="http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"></th>
+	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
       </tr>
       <tr><td colspan="3"><hr/></td></tr>
       <tr>
@@ -1036,14 +1493,14 @@ def endhtml(form,config,elapsedtime):
     writeInfo2log('end',form,config,elapsedtime) 
     #user = form.getvalue('user')
     count = form.getvalue('count')
-    return """
+    connect_string = config.get('connect','connect_string')
+    return '''
   <table width="100%">
     <tbody>
     <tr>
-      <td width="180px" class="xspan">""" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + """</td>
+      <td width="180px" class="xspan">''' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + '''</td>
       <td width="160px" class="cell">elapsed time: </td>
-      <td class="xspan">""" + ('%8.2f' % elapsedtime) + """ seconds</td>
-      <td width="200px" class="cell"><input type="submit" value="Recent Activity" name="action"></td>
+      <td class="xspan">''' + ('%8.2f' % elapsedtime) + ''' seconds</td> <td width="200px" class="cell">powered by CSpace</td>
     </tr>
     </tbody>
   </table>
@@ -1060,7 +1517,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py",
+                    url: "../cgi-bin/autosuggest2.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
@@ -1078,7 +1535,7 @@ $('[name]').map(function() {
 });
 </script>
 </body></html>
-"""
+'''
 
 def relationsPayload(f):
     payload = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1122,36 +1579,40 @@ def lmiPayload(f):
 if __name__ == "__main__":
 
     # to test this module on the command line you have to pass in two cgi values:
-    # $ python SysInvUtils.py "lo.location1=Hearst Gym, 30, L 12,  2&lo.location2=Hearst Gym, 30, L 12,  7"
-    # $ python SysInvUtils.py "lo.location1=X&lo.location2=Y"
+    # $ python cswaUtils.py "lo.location1=Hearst Gym, 30, L 12,  2&lo.location2=Hearst Gym, 30, L 12,  7"
+    # $ python cswaUtils.py "lo.location1=X&lo.location2=Y"
 
     # this will load the config file and attempt to update some records in server identified
     # in that config file!
-    #config = getConfig('packlistDev.cfg')
-    config = getConfig('sysinvDev.cfg')
+    form = cgi.FieldStorage()
+    config = getConfig(form)
     realm    = config.get('connect','realm')
     hostname = config.get('connect','hostname')
     username = config.get('connect','username')
     password = config.get('connect','password')
 
-    form = cgi.FieldStorage()
     starthtml(form,config)
     endhtml(form,config,0.0)
 
     #print "starting packing list"
     #doPackingList(form,config)
     #sys.exit()
+    print '\nlocations\n'
+    for loc in cswaDB.getloclist('range','1001, Green House 1','1003, Tropical House',1000,config):
+        print loc
+    sys.exit()
+
 
     print '\nlocations\n'
-    for loc in SysInvDB.getloclist('set','Kroeber, 20A, W B','',10,config):
+    for loc in cswaDB.getloclist('set','Kroeber, 20A, W B','',10,config):
         print loc
 
     print '\nlocations\n'
-    for loc in SysInvDB.getloclist('set','Kroeber, 20A, CC  4','',3,config):
+    for loc in cswaDB.getloclist('set','Kroeber, 20A, CC  4','',3,config):
         print loc
 
     print '\nobjects\n'
-    rows = SysInvDB.getlocations('Kroeber, 20A, CC  4','',3,config,'keyinfo')
+    rows = cswaDB.getlocations('Kroeber, 20A, CC  4','',3,config,'keyinfo')
     for r in rows:
 	print r
 

@@ -3,8 +3,10 @@
 import sys
 import pgdb
 
-connect_string = 'localhost:nuxeo:nuxeo'
-connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+#connect_string = 'localhost:nuxeo:nuxeo'
+#connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:xxxxxx'
+connect_string = 'pahma.cspace.berkeley.edu:nuxeo:reporter:xxxxx'
+#connect_string = 'pahma.cspace.berkeley.edu:nuxeo:xxxx:xxxx'
 conn = None
 
 def openConnection():
@@ -47,15 +49,20 @@ def createPlacenameHierarchyTable(place):
     SELECT *
     INTO placename_temp
     FROM placename_hierarchyquery
-    WHERE broaderplacename = '""" + place + """'
+    WHERE %s ='%s'
   """
 
+  #print query
   index1 = "CREATE INDEX nexcsid_ndx_temp ON placename_temp( broaderplacename )" 
   index2 = "CREATE INDEX placecsid_ndx_temp ON placename_temp( placecsid )" 
 
   cursor = conn.cursor()
-  cursor.execute( query )
+  cursor.execute( query % ('broaderplacename',place) )
   res = cursor.rowcount
+  if res == 0:
+    dropIfExistsPlacenameHierarchyTable()
+    cursor.execute( query % ('placename',place) )
+    res = cursor.rowcount
   cursor.execute( index1 )
   cursor.execute( index2 )
 
@@ -124,9 +131,9 @@ def getPlaces(place):
 
 if __name__ == "__main__":
 
-  for p in ('Europe','North America, The Americas','South America, The Americas','China, Central Asia, Asia','Central Africa, Africa','Africa','Asia'):
+  for p in ('Gebel Garn, Egypt, Northern Africa','Giza, Cemetery 1000, Giza, Giza plateau','Europe','North America, The Americas','South America, The Americas','China, Central Asia, Asia','Central Africa, Africa','Africa','Asia'):
       places = getPlaces(p)  
       print p,':',len(places)  
-      if len(places) < 30:
+      if len(places) < 100:
 	print places
 

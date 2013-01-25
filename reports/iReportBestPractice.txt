@@ -1,0 +1,94 @@
+Managing iReports
+
+D R A F T v0.1 jbl 01/22/2013
+
+OVERVIEW
+
+Each CSpace deployment includes several customized reports created using iReport.  Some of these reports are intended to be generated from within CSpace and so need to be installed as documented in the wiki.  Others are run "standalone", meaning that they are executed on a user's local system and access the CSpace database via a JDBC Postgres connector.
+
+Those that are installed in CSpace need to be maintained alongside the CSpace installation itself -- if the system is upgraded, for example, the reports may needed to upgraded and reinstalled as well.  In addition, installed reports use the .jasper binary version of a report (i.e. the "compiled file"), while the standalone reports can be executed via the iReport desktop application using either the source .jrxml file or the .jasper file.
+
+This document documents the best practice for developing, installing, and maintaining iReports for use with CSpace.
+
+IREPORT DEVELOPMENT
+
+Reports are designed and developed in collaboration with museum staff.  Typically, museum staff provide printed and/or digital versions of existing "legacy" reports, or mockups or other specifications for new reports.  The iReport developer then creates a report using the iReport application.  NB: care must be taken to ensure that the iReport version used is compatible with the JasperSoft runtime installed in CSpace, and that fonts, images, and other dependencies in the report exist on the system used to generate the report.
+
+Typically, the developer configures an iReport datasource to point to the development server for the CSpace deployment in question, and identifies appropriate test data (e.g. CSIDs or lists of CSIDs) to use as defaults during the development process. This often entails logging into the development server and creating suitable cases for reporting.
+
+Once developed, the source .jrxml files are checked into the git repository for the institution, under https://github.com/cspace-deployment/Tools/reports, e.g.
+
+    https://github.com/cspace-deployment/Tools/reports/pahma
+
+Thereafter, the source files can be updated and managed in the usual way.
+
+IREPORT DEPLOYMENT: STANDALONE
+
+For standalone iReports, no defined procedure is necessary: it is the user's responsibility to ensure that the system is suitably configured for the reports needed.  Configuration required includes
+
+* Sufficient RAM and CPU resources for the version of iReport being run.
+* Suitable OS versions
+* Installation of the appropriate version of iReport
+* Installation of the appropriate JDBC connector for CSpace (typically the Postgres JDBC driver)
+* Fonts, graphics, etc. as needed.
+* Printer or other output devices suitable for the reporting task
+
+The user then downloads the desired iReport .jrxml files, either via git on the command line or by browsing the git repository via a web browser.
+
+IREPORT DEPLOYMENT: IN CSPACE
+
+Deploying iReports within CSpace requires:
+
+* checking out the desired .jrxml file(s) from git to a system with iReport installed
+* compiling the .jrxml file(s) (usually individually, by hand) into .jasper files
+* moving those files to the appropriate tomcat directory on the target system.  While this can be accomplished in one step if one has write access to the target directory, it is usually necessary to first stage the file(s) to one's local directory on the target system, ssh in, then sudo cp the files to their final destination.
+* instructing CSpace about the name and context for the report. This involves a call to the REST API with an XML payload containing this information.  Scripts for "loading" iReports (and performing other maintenance) are provided in the git repository. Note that these need to be configured for each target system.
+
+    local $ cd git/Tools/reports/mymuseum
+    local $ git update
+    local $ # compile … compile … compile
+    local $ scp *.jasper target.cspace.berkeley.edu:
+    local $ ssh target.cspace.berkeley.edu
+    target $ sudo cp myireport.jasper /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
+    target $ ./load-report.sh myireport  "my Super iReport" ""
+
+IREPORT ONGOING MAINTENANCE
+
+No specific practices have yet been developed to aid in ongoing maintenance of iReports.  This would be helpful! Having a suite of test cases to use in debugging and QA would help prevent regressions and ensure that the correct results are produced.
+
+When problems are identified or enhancements made, the following tentative suggestions may help smooth the process:
+
+* Identify and record (in a JIRA) the problem data or enhancements desired, with specific CSIDs, etc.
+* Make modifications to the .jrxml file.
+* Test the updated version on your development system using whatever test cases are available.
+* Install the .jasper file on the dev system. For an existing report, it is not necessary to call the REST API and in fact if you do, you'll make a duplicate of the configuration record in CSpace and that will really foul things up.
+* Try the revised report on the dev system; get users to wring it out as well.
+* When tests are passed, check the updated .jrxml version into git and install on the production system using the steps outlined in the previous section.
+
+USEFUL HELPER SCRIPTS
+
+These helper scripts need environment variables containing the hostnames, logins, and passwords for the target system.  There is a script called set-config.sh which sets these values, and the other scripts check to see that they are set.  Therefore, it is only necessary to modify (and call) the set-config.sh script once for all the other scripts.  You may want to put either an invocation of this script or set the variables in your own login profile.
+
+(See https://github.com/cspace-deployment/Tools/reports/helpers/README for details.)
+
+The two variables used are:
+
+REPORTURL="http://hostname:8180"
+REPORTUSER="user@target.cspace.berkeley.edu:password"
+
+They mainly serve as example code for how to do things with reports, and you should plan to make further modifications to suit your own ends.
+
+$ ./load-report.sh reportname  "report name" "doctype"
+
+This script assumes a file reportname.jasper exists and copies it to the tomcat directory, it then configures an XML payload and calls the REST API to install the report. "report name" is the value that will appear in the UI, and "doctype" is the value of <forDocType>, which specifies the context for the report.
+
+$ ./delete-report.sh reports <CSID>
+
+Deletes the report identified by CSID from the CSpace configuration; does *NOT* delete the .jasper file.
+
+$ list-reports.sh
+
+prints the CSID and report names of the reports installed on the target system.
+
+
+
