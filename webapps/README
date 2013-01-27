@@ -1,6 +1,6 @@
 PAHMA webapps
 
-v0.9 jbl 10/10/2012
+v1.0 jbl 01/27/2013
 
 Very short, terse, sketchy notes.
 
@@ -12,32 +12,59 @@ BarCodePrint
 BarCodeUpload
 PackingList
 
-Add .py to each of these and you get the name of python CGI scripts which run under a webserver (Apache) and communicate with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API. 
+and two in development for UCBG:
 
-From a coding/deployment point of view, these are all the same program (Template.py), but each reads a different config file to decide what it should do.
+BedList
+LocationReport
+
+These are all implemented as a single python CGI script, cswaMain.py. 
+
+When this script (and its associated modules and config files) are installed in a directory that is execute-enabled for a webserver (e.g. in cgi-bin with a suitably configured Apache server), it will read the config specified in the "webapp=" parameter and perform the appropriate application activity.
+
+E.g. entering:
+
+    http://dev.cspace.berkeley.edu/cgi-bin/cswaMain.py?webapp=packlistDev
+
+will display the initial screen for the UCB-PAHMA webapp, in development mode, as specified in the config file named packlistDev.cfg. 
+
+The script communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace server to and credentials a configured in the .cfg file.
 
 The config file specifies:
 
-- what webapp to be (i.e. what header to print, what actions to perform)
+- what webapp to be (i.e. what header to print, what actions to perform, look-and-feel settings)
 - postgres credentials
 - cspace credentials
 - other configuration details: directories to read/write files, etc.
 
-Rather than require url rewriting in Apache (to rewrite "Template.py?app=packinglist" to "PackingList.py"), I have chosen simply to clone a copy of the "base script" (Template.py) and hardcode the name of the config file in the script.  There is a shell script which generate all the varieties (makeAndDeploy.sh).
+The organization and values in the config files are pretty much self-explanatory.
 
 To deploy (these steps have never been performed as a real deployment...):
 
-- cd py; ./makeAndDeploy.sh to generate the various webapps.
-- ensure the required python modules are available (pgdb, lxml, ConfigParser
-- ensure jQuery is installed and available in ../js and ../css (this is used by the "term matching" (autosuggest) feature).
-- put the other .css and .js files are in the appropriate locations (see extras/)
-- copy all the files in cfg/ and py/ to the server executable directory (e.g. /var/www/cgi-bin) with appropriate permissions
+- git the webapps directory from to your local machine ("git clone 
+- cd cfg; change "xxxinsertpasswordherexxx" to appropriate values in the various cfg/.cfg files you intend to to use.
+- cd py;
+- ensure the required python modules are installed and available to scripts (pgdb, lxml, ConfigParser, perhaps others)
+- ensure jQuery is installed and available in ../js and ../css on the web server (jQuery is used by the "term matching" (autosuggest) feature).
+- put the other .css and .js files are in the appropriate locations. Currently there are three files required, and *NB*: these are not in github!
+    jquery-1.7.2.min.js
+    jquery-ui-1.8.22.custom.css
+    jquery-ui-1.8.22.custom.min.js
+  (these last two are the "basic" autocomplete components from http://api.jqueryui.com/autocomplete/)
+- copy all the files in cfg/ and py/ to the server executable directory (e.g. /var/www/cgi-bin) with appropriate permissions 
+  (cswaMain.py and autosuggest.py need to be executable. The .cfg files need to be readable by the scripts)
 - ensure that your webserver is configured to execute python scripts.
-- at the moment, some of the scripts expect a .csv file with data from the legacy system to be available in the executable directory. You can make an empty file (tms2.csv) in order to get the program to work
-- change "xxxinsertpasswordherexxx" to appropriate values in the various cfg/.cfg files
+- some of the webapps expect to write files (logs, barcode files, etc.). These files may need to be initials and their permissions set.
 
-Of course, the webapps expect to access a CSpace system customized for PAHMA, and will probably not work if pointed to any other!
+Of course, most of the webapps expect to access a CSpace system customized for PAHMA, and will probably not work if pointed to any other!
 
-This code runs on dev.cspace and has never been tried anywhere else. There is no formal testing or deployment apparatus beyond what is here. Many development choices were predicated on being self-sufficient and the constrained security and resource environment present on the server on which it runs.
+If you have problems, here's a very short troubleshooting guide:
+
+- once you have what you think is a working setup, ssh to the server, cd to the CGI directory and try to execute the main module from the command line:
+   $ python cswaMain.py "webapp=keyinfoDev"
+  this should display html on the screen. If it does not, it should display a helpful python error message!
+- if you open the webapp in a browser and see nothing, or an incomplete page, look in the webserver error (often something like /var/logs/httpd/error_log).
+- indeed, in general, consult the log if you have problems: the program write messages to stderr from time to time.
+
+This code runs on dev.cspace and has never been tried anywhere else. There is no formal testing or deployment apparatus beyond what is here. Many development choices were predicated on being self-sufficient and constrained by the security and resource environment present on the server on which it runs.
 
 Caveat Utilizator!
