@@ -4,9 +4,7 @@ import sys
 import pgdb
 
 #connect_string = 'localhost:nuxeo:nuxeo'
-#connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
-connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
-#connect_string = 'pahma.cspace.berkeley.edu:nuxeo:nuxeo:nuxFRu45'
+connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:xxxxxx'
 conn = None
 
 def openConnection():
