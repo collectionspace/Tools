@@ -59,7 +59,9 @@ order by shortTaxonomicName, objectnumber, gardenlocation]]>
 	<field name="objectnumber" class="java.lang.String"/>
 	<field name="gardenlocation" class="java.lang.String"/>
 	<field name="recordstatus" class="java.lang.String"/>
-	<group name="shorttaxonomicname"/>
+	<group name="shorttaxonomicname" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{shorttaxonomicname}]]></groupExpression>
+	</group>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -136,21 +138,21 @@ order by shortTaxonomicName, objectnumber, gardenlocation]]>
 	<detail>
 		<band height="13" splitType="Prevent">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="164" y="0" width="100" height="11" isPrintWhenDetailOverflows="true" printWhenGroupChanges="shorttaxonomicname"/>
+				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="164" y="0" width="100" height="11" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" printWhenGroupChanges="shorttaxonomicname"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="271" y="0" width="50" height="11" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="271" y="0" width="50" height="11" isPrintWhenDetailOverflows="true" printWhenGroupChanges="shorttaxonomicname"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="321" y="0" width="160" height="11" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToBandHeight" x="321" y="0" width="160" height="11" isPrintWhenDetailOverflows="true" printWhenGroupChanges="shorttaxonomicname"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -164,7 +166,7 @@ order by shortTaxonomicName, objectnumber, gardenlocation]]>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{recordstatus}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="2" y="0" width="162" height="11" isPrintWhenDetailOverflows="true"/>
+				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="2" y="0" width="162" height="11" isPrintWhenDetailOverflows="true" printWhenGroupChanges="shorttaxonomicname"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
