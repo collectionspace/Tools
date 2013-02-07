@@ -41,13 +41,12 @@ join hierarchy h1 on l.id = h1.id
 join locations_common lc on lc.id = h1.parentid
 join movements_common m on m.currentlocation = lc.refname
 
-
 join hierarchy h2 on m.id = h2.id
 join relations_common rc on rc.subjectcsid = h2.name
 join movements_anthropology ma on ma.id = h2.id
 
 join hierarchy h3 on rc.objectcsid = h3.name
-join collectionobjects_common cc on h3.id = cc.id
+join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
 left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name =
 'collectionobjects_common:objectNameList' and h5.pos=0)
@@ -118,8 +117,11 @@ LIMIT 6000""" % (searchkey, location, sortkey)
     elif type == 'keyinfo' or type == 'barcodeprint':
 	return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
-l.termdisplayName AS storageLocation,
-replace(l.termdisplayName,' ','0') AS locationkey,
+(case when ca.computedcrate is Null then l.termdisplayName  
+     else concat(l.termdisplayName,
+     ': ',regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1')) end) AS storageLocation,
+replace(concat(l.termdisplayName,
+     ': ',regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1')),' ','0') AS locationkey,
 m.locationdate,
 cc.objectnumber objectnumber,
 (case when ong.objectName is NULL then '' else ong.objectName end) objectName,
@@ -136,7 +138,8 @@ case when (pef.item is not null and pef.item <> '') then
 end as ethnographicfilecode,
 pfc.item fcpRefName,
 apg.assocpeople cgRefName,
-pef.item efcRefName
+pef.item efcRefName,
+ca.computedcrate
 
 FROM loctermgroup l
 
@@ -148,12 +151,13 @@ join hierarchy h2 on m.id = h2.id
 join relations_common rc on rc.subjectcsid = h2.name
 
 join hierarchy h3 on rc.objectcsid = h3.name
-join collectionobjects_common cc on h3.id = cc.id
+join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
 left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name =
 'collectionobjects_common:objectNameList' and (h4.pos=0 or h4.pos is null))
 left outer join objectnamegroup ong on (ong.id=h4.id)
 
+left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
 left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id)
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id)
@@ -172,6 +176,50 @@ AND (pef.pos=0 or pef.pos is null)
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
 LIMIT 30000
 """
+
+    elif type == 'getalltaxa':
+	return """
+select co1.objectnumber,
+case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
+     then regexp_replace(tig.taxon, '^.*\\)''(.*)''$', '\\1')
+     when tig.hybridflag = 'true' then findhybridname(tig.id)
+end as determination,
+case when (tn.family is not null and tn.family <> '')
+     then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
+end as family,
+case when (mc.currentlocation is not null and mc.currentlocation <> '')
+     then regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')
+end as gardenlocation,
+co1.recordstatus dataQuality,
+case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\\)''(.*)''$', '\\1')
+     when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
+end as locality,
+h1.name as objectcsid
+
+from collectionobjects_common co1
+join hierarchy h1 on co1.id=h1.id
+join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
+join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+
+join movements_common mc on (mc.id=h2.id)
+join collectionobjects_naturalhistory con on (co1.id = con.id %s)
+join collectionobjects_botgarden cob on (co1.id=cob.id %s)
+
+left outer join hierarchy htig
+     on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
+
+left outer join hierarchy hlg
+     on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
+left outer join localitygroup lg on (lg.id = hlg.id)
+
+join collectionspace_core core on (core.id=co1.id and core.tenantid=35)
+join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')   -- movement not deleted
+join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
+
+left outer join taxon_common tc on (tig.taxon=tc.refname)
+left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('','')
+#left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
 def getlocations(location1,location2,num2ret,config,updateType):
 
@@ -206,28 +254,8 @@ def getlocations(location1,location2,num2ret,config,updateType):
 
         if debug: sys.stderr.write('number objects to be checked: %s\n' % len(rows))
         try:
-            # a hack: check each object to make it is really in this location
             for row in rows:
-	        elapsedtime = time.time()
-	        cf = findcurrentlocation(row[8],config)
-	        elapsedtime = time.time() - elapsedtime
-                if debug: sys.stderr.write('currentlocation: %s :: %s\n' % (row[8],elapsedtime))
-                if debug: sys.stderr.write('checking csid %s %s %s\n' % (row[8],cf,row[0]))
-	        if cf  == row[0]:
-	        #if findcurrentlocation(row[8]) == row[0]:
-    	            result.append(row)
-	        elif cf  == 'findcurrentlocation error':
-    	            result.append(row)
-                    sys.stderr.write('%s : %s (%s)\n' % (row[8],cf,str(loc[0])))
-	        elif str(loc[0]) in str(cf):
-		    row[0] = cf
-    	            result.append(row)
-                    if debug: sys.stderr.write('%s found at (%s) : but in a "crate": %s' % (row[8],str(loc[0]),cf))
-	        else:
-		    #print 'not here',row
-                    if debug: sys.stderr.write('%s not here (%s) : found at %s\n' % (row[8],str(loc[0]),cf))
-    	            #result.append(row)
-		    pass
+                result.append(row)
 	except:
            raise
            sys.stderr.write("other getobjects error: %s" % len(rows))
@@ -240,7 +268,7 @@ def getplants(location1,location2,num2ret,config,updateType):
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
-    debug = True
+    debug = False
 
     result = []
 
@@ -330,7 +358,6 @@ def getrefname(table,term,config):
 	return ''
         raise
 
-
 def findrefnames(table,termlist,config):
 
     pahmadb  = pgdb.connect(config.get('connect','connect_string'))
@@ -350,7 +377,6 @@ def findrefnames(table,termlist,config):
             return "findrefnames error"
 
     return result
-
 
 if __name__ == "__main__":
 

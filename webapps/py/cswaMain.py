@@ -22,13 +22,13 @@ elapsedtime = time.time()
 if action == "Enumerate Objects":
     doEnumerateObjects(form,config)
 elif action == config.get('info','updateactionlabel'):
-    if updateType == 'packinglist':    doPackingList(form,config)
+    if   updateType == 'packinglist':  doPackingList(form,config)
     elif updateType == 'barcodeprint': doBarCodes(form,config)
     elif updateType == 'inventory':    doUpdateLocations(form,config)
-    elif updateType == 'bedlist':      doBedList(form,config)
-    elif updateType == 'locreport':    doBedList(form,config)
-    #if updateType == 'locreport':     doLocationList(form,config)
     elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
+    elif updateType == 'bedlist':      doBedList(form,config)
+    elif updateType == 'advsearch':    doBedList(form,config)
+    elif updateType == 'locreport':    doBedList(form,config)
     elif updateType == 'upload':       uploadFile(form,config)
 elif action == "Recent Activity":
     viewLog(form,config)
@@ -37,14 +37,15 @@ elif form.getvalue("lo.location1") != None and str(form.getvalue("lo.location1")
     if updateType in ['keyinfo', 'inventory']: 
 	doEnumerateObjects(form,config)
     else:
-	countLocations(form,config)
+	doSearch(form,config,'nolist')
 elif action == "Search":
-    if updateType == 'packinglist':  countLocations(form,config)
-    if updateType == 'barcodeprint': countLocations(form,config)
-    if updateType == 'bedlist':      countLocations(form,config)
-    if updateType == 'locreport':    countTaxa(form,config)
-    if updateType == 'inventory':    doSearch(form,config)
-    if updateType == 'keyinfo':      doSearch(form,config)
+    if updateType == 'packinglist':  doSearch(form,config,'nolist')
+    if updateType == 'barcodeprint': doSearch(form,config,'nolist')
+    if updateType == 'bedlist':      doComplexSearch(form,config,'select')
+    if updateType == 'locreport':    doLocationList(form,config)
+    if updateType == 'advsearch':    doComplexSearch(form,config,'select')
+    if updateType == 'inventory':    doSearch(form,config,'list')
+    if updateType == 'keyinfo':      doSearch(form,config,'list')
 elif action in ['<<','>>']:
     print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
 else:
