@@ -76,7 +76,7 @@ def doComplexSearch(form,config,displaytype):
     #listAuthorities('taxon',     'TaxonTenant35',  form.getvalue("ob.objectnumber"),config, form, displaytype)
     #listAuthorities('concepts',  'TaxonTenant35',  form.getvalue("cx.concept"),     config, form, displaytype)
 
-    getTableFooter(config)
+    getTableFooter(config,displaytype)
 
 def listAuthorities(authority, primarytype, authItem, config, form, displaytype):
 
@@ -87,7 +87,7 @@ def listAuthorities(authority, primarytype, authItem, config, form, displaytype)
     
     return rows
 
-def doSearch(form,config,displaytype):
+def doLocationSearch(form,config,displaytype):
    
     if not validateParameters(form,config): return
     
@@ -99,7 +99,7 @@ def doSearch(form,config,displaytype):
 
     listSearchResults('locations', config, displaytype, form, rows)
     
-    getTableFooter(config)
+    if len(rows) != 0: getTableFooter(config,displaytype)
 
 def listSearchResults(authority, config, displaytype, form, rows):
 
@@ -108,17 +108,20 @@ def listSearchResults(authority, config, displaytype, form, rows):
     if not rows: rows = []
     rows.sort()
     rowcount = len(rows)
+    
+    label = authority
+    if label[-1] == 's' and rowcount == 1: label = label[:-1]
+    
     if displaytype == 'silent':
-       print """<table width="100%%">"""
-       return
+       print """<table width="100%">"""
     elif displaytype == 'select':
-        print """<div style="float:left; width: 300px;">%s %s in this range</th>""" % (rowcount,authority)
+        print """<div style="float:left; width: 300px;">%s %s in this range</th>""" % (rowcount,label)
     else:
        print """
     <table width="100%%">
     <tr>
       <th>%s %s in this range</th>
-    </tr>""" % (rowcount,authority)
+    </tr>""" % (rowcount,label)
     
     if rowcount == 0:
         print "</table>"
@@ -134,9 +137,13 @@ def listSearchResults(authority, config, displaytype, form, rows):
            print formatRow( { 'boxtype': authority, 'rowtype':rowtype,'data': r },form,config )
 
     elif displaytype == 'nolist':
-        print '<tr><th>first %s</th><td class="authority">%s</td></tr>' % (authority,rows[0][0])
-        print '<tr><th>last %s</th><td class="authority">%s</td></tr>' % (authority,rows[-1][0])
-        print '<tr><td colspan="2"><hr/></td>'
+        label = authority
+        if label[-1] == 's': label = label[:-1]
+        if rowcount == 1:
+            print '<tr><td class="authority">%s</td></tr>' % (rows[0][0])
+        else:
+            print '<tr><th>first %s</th><td class="authority">%s</td></tr>' % (label,rows[0][0])
+            print '<tr><th>last %s</th><td class="authority">%s</td></tr>' % (label,rows[-1][0])
 
     if displaytype == 'select':
         print "\n</div>"
@@ -144,19 +151,32 @@ def listSearchResults(authority, config, displaytype, form, rows):
         print "</table>"
     #print """<input type="hidden" name="count" value="%s">""" % rowcount
 
-def getTableFooter(config):
+def getTableFooter(config,displaytype):
    
     updateType = config.get('info','updatetype')
     
-    print """<table><tr><td align="center" colspan="2"><hr><td></tr>"""
-    print """<tr><td align="center">"""
-    msg = config.get('info','updateactionlabel')
-    print """<input type="submit" class="save" value="%s" name="action"></td>""" % msg
-    #if updateType == 'inventory':    doSearch(form,config)
-    if updateType == "packinglist":
-        print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
+    print """<table width="100%"><tr><td align="center" colspan="2"><hr></tr>"""
+    if displaytype == 'list':
+        print """<tr><td align="center">"""
+        button = 'Enumerate Objects'
+        print """<input type="submit" class="save" value="%s" name="action"></td>""" % button
+        if updateType == "packinglist":
+            print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
+        else:
+            print "<td></td>"
+        print "</tr>"
     else:
-        print "<td></td></tr></table>"
+        print """<tr><td align="center">"""
+        button = config.get('info','updateactionlabel')
+        print """<input type="submit" class="save" value="%s" name="action"></td>""" % button
+        if updateType == "packinglist":
+            print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
+        if updateType == "barcodeprint":
+            print """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Create Labels for Locations Only'
+        else:
+            print "<td></td>"
+        print "</tr>"
+    print "</table>"
 
 def getHeader(updateType):
 
@@ -220,49 +240,66 @@ def getHeader(updateType):
       <th>Barcode Filename</th>
       <th>Notes</th>
     </tr>"""
+    elif updateType == 'barcodeprintlocations':
+        return """
+    <table width="100%"><tr>
+      <th>Locations listed</th>
+      <th>Barcode Filename</th>
+    </tr>"""
 
 def doEnumerateObjects(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
     if not validateParameters(form,config): return
-        
+    
+    num2ret = 30000
+
     try:
-        rows = cswaDB.getlocations(form.getvalue("lo.location1"),form.getvalue("lo.location2"),1,config,updateType)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
     except:
-        handleTimeout('enumerate',form)
-        return
+        raise
+        handleTimeout(updateType,form)
+        locationList = []
+
+    rowcount = len(locationList)
+    #print getHeader('keyinfo')
+
+    if rowcount == 0:
+	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
+	return
+    #else:
+    #	showplace = place
+    #   if showplace == '' : showplace = 'all places in this range'
+    #   print '<tr><td width="500px"><h2>%s locations will be listed for %s.</h2></td></tr>' % (rowcount,showplace)
 
     print getHeader(updateType)
+    totalobjects = 0
+    for l in locationList:
 
-    if True:
-        rowcount = len(rows)
-        locations = {}
-        for r in rows:
-            locationheader = formatRow({ 'rowtype':'subheader','data': r },form,config)
-            if locations.has_key(locationheader):
-                pass
-            else:
-                locations[locationheader] = []
-            
-            locations[locationheader].append(formatRow({ 'rowtype': updateType,'data': r },form,config))
+        try:
+            objects = cswaDB.getlocations(l[0],'',1,config,updateType)
+        except:
+            handleTimeout(updateType+' getting objects',form)
+            return
 
-        locs = locations.keys()
-        locs.sort()
-        for header in locs:
-            print header
-            print '\n'.join(locations[header])
-
-    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
-    print """<tr><td align="center" colspan="3">"""
-    if rowcount != 0:
-	if updateType == 'keyinfo':
-	    msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown on this page!" % rowcount    
+        print formatRow({ 'rowtype':'subheader','data': l },form,config)
+        locations = []
+	if len(objects) == 0:
+	    locations.append('</td><td colspan="3">No objects found at this location.</td>')
 	else:
-            msg = "Caution: clicking on the button at left will change the "+updateType+" of <b>ALL %s objects</b> shown on this page!" % rowcount
-        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td>''' % msg
+            for r in objects:
+                print formatRow({ 'rowtype': updateType, 'data': r },form,config)
+
+        print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
+
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""        
+    print """<tr><td align="center" colspan="3">"""
+    if updateType == 'keyinfo':
+        msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown on this page!" % rowcount    
     else:
-        print '<span class="save">No objects found at this location.</span>'
+        msg = "Caution: clicking on the button at left will change the "+updateType+" of <b>ALL %s objects</b> shown on this page!" % rowcount
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s></td></tr>''' % msg
         
     print "\n</table><hr/>"
 
@@ -376,8 +413,8 @@ def checkObject(places,objectInfo):
 def doPackingList(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
-    #updateType        = config.get('info','updatetype')
-    updateType ='keyinfo' # NB: packing list and key info review use exactly the same fields...
+    updateType        = config.get('info','updatetype')
+    if updateType == 'packinglist': updateType ='keyinfo' # NB: packing list and key info review use exactly the same fields...
     if not validateParameters(form,config): return
 
     place = form.getvalue("cp.place")
@@ -519,9 +556,13 @@ def doBarCodes(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
+    action            = form.getvalue('action')
     if not validateParameters(form,config): return
 
-    print getHeader(updateType)
+    if action == "Create Labels for Locations Only":
+        print getHeader('barcodeprintlocations')
+    else:
+        print getHeader(updateType)
 
     try:
         rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
@@ -535,17 +576,23 @@ def doBarCodes(form,config):
     objectsHandled = []
     totalobjects = 0
     rows.reverse()
-    for r in rows:
-        objects = cswaDB.getlocations(r[0],'',1,config,updateType)
-	for o in objects:
-	    if o[3]+o[4] in objectsHandled:
-	        objects.remove(o)
-		print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
-	    else:
-	       objectsHandled.append(o[3]+o[4])
-        totalobjects += len(objects)
-        labelFilename = writeCommanderFile(r[0],form.getvalue("printer"),'objectLabels','objects',objects,config)
-        print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
+    if action == "Create Labels for Locations Only":
+            labelFilename = writeCommanderFile('locations',form.getvalue("printer"),'locationLabels','locations',rows,config)
+            print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows),labelFilename)
+            print "\n</table>"
+            return
+    else:
+        for r in rows:
+            objects = cswaDB.getlocations(r[0],'',1,config,updateType)
+            for o in objects:
+                if o[3]+o[4] in objectsHandled:
+                    objects.remove(o)
+                    print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
+                else:
+                    objectsHandled.append(o[3]+o[4])
+            totalobjects += len(objects)
+            labelFilename = writeCommanderFile(r[0],form.getvalue("printer"),'objectLabels','objects',objects,config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
 
     print """<tr><td align="center" colspan="4"><hr><td></tr>"""
     print """<tr><td align="center" colspan="4">"""
@@ -612,20 +659,26 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
     slug = re.sub('[^\w-]+', '_', location).strip().lower()
     logFile = config.get('files','cmdrfmtstring') % (config.get('files','cmdrfileprefix'),dataType,printerDir,slug,datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),filenameinfo)
     #logFile = '/tmp/%s.%s.%s.txt' % (re.sub(r'\W+','_',location),datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),filenameinfo)
-
+    
     try:
-	logFh    = codecs.open(logFile,'w','utf-8')
+        logFh    = codecs.open(logFile,'w','utf-8')
         csvlogfh = csv.writer(logFh, delimiter=",",quoting=csv.QUOTE_ALL)
         audlogfh = csv.writer(codecs.open(auditFile,'a','utf-8'), delimiter=",",quoting=csv.QUOTE_ALL)
-	csvlogfh.writerow('MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
-	for d in data:
-	    csvlogfh.writerow(d[3:8])
-	    audlogfh.writerow(d)
-	logFh.close()
+        if dataType == 'locationLabels':
+            csvlogfh.writerow('termdisplayname'.split(','))
+            for d in data:
+                csvlogfh.writerow((d[0],))  # writerow needs a tuple or array
+                audlogfh.writerow(d)
+        elif dataType == 'objectLabels':
+            csvlogfh.writerow('MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
+            for d in data:
+                csvlogfh.writerow(d[3:8])
+                audlogfh.writerow(d)
+        logFh.close()
         newName = logFile.replace('.tmp','.txt')
         os.rename (logFile,newName) 
     except:
-	newName = '<span style="color:red;">could not write to %s</span>' % logFile
+        newName = '<span style="color:red;">could not write to %s</span>' % logFile
 
     return newName
 
@@ -1155,7 +1208,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
 .rdo { text-align: center; }
-.save { background-color: orange; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
+.save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
 .shortinput { font-weight: bold; width:150px; }
 .subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
 .veryshortinput { width:60px; }
@@ -1165,11 +1218,7 @@ th[data-sort]{ cursor:pointer; }
 '''
 
 def starthtml(form,config):
-   
-    if config == False:
-	print selectWebapp()
-        sys.exit(0)
- 
+
     writeInfo2log('start',form,config,0.0) 
     logo = config.get('info','logo')
     schemacolor1 = config.get('info','schemacolor1')
@@ -1181,7 +1230,7 @@ def starthtml(form,config):
     location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
     location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else ''
     groupby   = str(form.getvalue("groupby")) if form.getvalue("groupby") else ''
-    num2ret   = str(form.getvalue('num2ret')) if str(form.getvalue('num2ret')).isdigit() else '50'
+    #num2ret   = str(form.getvalue('num2ret')) if str(form.getvalue('num2ret')).isdigit() else '50'
 
     button = '''<input id="actionbutton" class="save" type="submit" value="Search" name="action">'''
 
