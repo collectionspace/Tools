@@ -19,6 +19,26 @@
 # Set a space-separated list of tenant identifiers below:
 TENANTS+=(core lifesci)
 
+# Set space-separated lists of MIME types and their corresponding
+# MIME type labels, below:
+MIMETYPES+=( 'text/tab-separated-values' \
+    'text/csv' \
+    'application/vnd.ms-powerpoint' \
+    'application/application/vnd.ms-excel' \
+    'application/msword' \
+    'application/pdf' )
+
+MIMETYPE_LABELS+=( 'TSV' \
+    'CSV' \
+    'MS PPT' \
+    'MS Excel' \
+    'MS Word' \
+    'PDF' )
+    
+# Each item in each of the two lists above should correspond 1:1 with
+# its counterpart in the other list. (Associative/hash-style arrays would
+# make this simpler, but those are only implemented in very recent 'bash' versions.)
+
 # This script assumes that each tenant's default administrator
 # username follows a consistent pattern:
 #   admin@{tenantidentifier}.collectionspace.org
@@ -51,7 +71,7 @@ fi
 
 LIST_ITEM_REGEX="list-item"
 # Name of report file to match in a keyword search
-REPORT_KEYWORD_TO_MATCH="acq_basic.jasper"
+REPORT_FILENAME="acq_basic.jasper"
 # FIXME: It may be prudent to add code to verify that any '401'
 # response lines, not followed by 'Unauthorized', are truly
 # response codes and not random occurrences of that number.
@@ -78,7 +98,7 @@ do
   --silent \
   --show-error \
   --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
-  --url http://$HOST:$PORT/cspace-services/reports?kw=$REPORT_KEYWORD_TO_MATCH \
+  --url http://$HOST:$PORT/cspace-services/reports?kw=$REPORT_FILENAME \
   > $READ_LIST_TMPFILE
   
   # Read the response from that file
@@ -119,37 +139,43 @@ do
     continue
   fi
   
-  # Otherwise, create the new report record
+  # Otherwise, create the new report records
+  #
+  # As an admin user within this tenant, create report records specifying
+  # output should be created in each of a number of different MIME types,
+  # and save the responses to these create requests to temporary files
   
-  echo "Creating a new Acquisition Summary report record in the '$tenant' tenant ..."
-  
-  # As an admin user within this tenant, create the report record, and save
-  # the response to this create request to a temporary file
-  
-  CREATE_RECORD_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
+  let MIMETYPE_COUNTER=0
+  for mimetype in ${MIMETYPES[*]}
+  do
 
-  # 'data @- << END_OF_PAYLOAD', below, reads the data that is to be sent in a POST
-  # request from standard input. This data, in turn, is read from a 'here document'
-  # directly inline within the script, ending with the last line prior to the
-  # 'END_OF_PAYLOAD' line.
-  
-  $CURL_EXECUTABLE \
-  --include \
-  --silent \
-  --show-error \
-  --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
-  --header "Content-Type: application/xml" \
-  --url http://$HOST:$PORT/cspace-services/reports \
-  --data @- << END_OF_PAYLOAD
+    echo "Creating a new Acquisition Summary report record for"
+    echo "MIME type ${MIMETYPES[MIMETYPE_COUNTER]} in the '$tenant' tenant ..."
+
+    CREATE_RECORD_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
+    
+    # 'data @- << END_OF_PAYLOAD', below, reads the data that is to be sent in a POST
+    # request from standard input. This data, in turn, is read from a 'here document'
+    # directly inline within the script, ending with the last line prior to the
+    # 'END_OF_PAYLOAD' line.
+    
+    $CURL_EXECUTABLE \
+    --include \
+    --silent \
+    --show-error \
+    --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
+    --header "Content-Type: application/xml" \
+    --url http://$HOST:$PORT/cspace-services/reports \
+    --data @- << END_OF_PAYLOAD
 <?xml version="1.0" encoding="utf-8"?>
 <document name="reports">
   <ns2:reports_common xmlns:ns2="http://collectionspace.org/services/report"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <supportsDocList>false</supportsDocList>
     <supportsNoContext>true</supportsNoContext>
-    <outputMIME>application/pdf</outputMIME>
-    <name>Acquisition Summary</name>
-    <filename>acq_basic.jasper</filename>
+    <outputMIME>${MIMETYPES[MIMETYPE_COUNTER]}</outputMIME>
+    <name>Acquisition Summary (${MIMETYPE_LABELS[MIMETYPE_COUNTER]})</name>
+    <filename>${REPORT_FILENAME}</filename>
     <supportsGroup>false</supportsGroup>
     <supportsSingleDoc>true</supportsSingleDoc>
     <notes>Just a few fields about a single acquisition</notes>
@@ -159,18 +185,22 @@ do
   </ns2:reports_common>
 </document>
 END_OF_PAYLOAD
-  > $CREATE_RECORD_TMPFILE
+    > $CREATE_RECORD_TMPFILE
 
-  # Read the response from that file
-  create_record_results=( $( < $CREATE_RECORD_TMPFILE ) )
-  rm $CREATE_RECORD_TMPFILE
+    # Read the response from that file
+    create_record_results=( $( < $CREATE_RECORD_TMPFILE ) )
+    rm $CREATE_RECORD_TMPFILE
 
-  # Echo the response to the create request to the console
-  for results_item in ${create_record_results[*]}
-  do
-    echo results_item
-  done
+    # Echo the response to the create request to the console
+    for results_item in ${create_record_results[*]}
+    do
+      echo results_item
+    done
     
-done
+    let MIMETYPE_COUNTER++
+    
+  done # End of per-MIME type 'do' loop
+    
+done # End of per-tenant 'do' loop
 
 
