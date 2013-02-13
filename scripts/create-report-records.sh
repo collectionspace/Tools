@@ -21,14 +21,16 @@ TENANTS+=(core lifesci)
 
 # Set space-separated lists of MIME types and their corresponding
 # MIME type labels, below:
-MIMETYPES+=( 'text/tab-separated-values' \
+MIMETYPES+=(
+    'text/tab-separated-values' \
     'text/csv' \
     'application/vnd.ms-powerpoint' \
     'application/vnd.ms-excel' \
     'application/msword' \
     'application/pdf' )
 
-MIMETYPE_LABELS+=( 'TSV' \
+MIMETYPE_LABELS+=(
+    'TSV' \
     'CSV' \
     'MS PPT' \
     'MS Excel' \
