@@ -24,7 +24,7 @@ TENANTS+=(core lifesci)
 MIMETYPES+=( 'text/tab-separated-values' \
     'text/csv' \
     'application/vnd.ms-powerpoint' \
-    'application/application/vnd.ms-excel' \
+    'application/vnd.ms-excel' \
     'application/msword' \
     'application/pdf' )
 
