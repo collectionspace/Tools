@@ -199,6 +199,12 @@ END_OF_PAYLOAD
       echo results_item
     done
     
+    # Help probabilistically ensure that reports are listed
+    # in reverse order of creation - in list results and in
+    # the UI's 'run rports dropdown menu - by waiting at least
+    # 1 second before creating each report
+    sleep 1s
+    
     let MIMETYPE_COUNTER++
     
   done # End of per-MIME type 'do' loop
