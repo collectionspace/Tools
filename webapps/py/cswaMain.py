@@ -14,15 +14,28 @@ config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
 debug = form.getvalue("debug")
 
-print starthtml(form,config)
+# bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
+if config == False:
+    print selectWebapp()
+    sys.exit(0)
+ 
 updateType = config.get('info','updatetype')
-action     = form.getvalue("action")
+action     = form.getvalue('action')
+if updateType == 'packinglist' and action == 'Download as CSV':  
+    downloadCsv(form,config)
+    sys.exit(0)
+else:    
+    print starthtml(form,config)
+
 #print form
 elapsedtime = time.time()
 if action == "Enumerate Objects":
     doEnumerateObjects(form,config)
+elif action == "Create Labels for Locations Only":
+    doBarCodes(form,config)
 elif action == config.get('info','updateactionlabel'):
     if   updateType == 'packinglist':  doPackingList(form,config)
+    elif updateType == 'move':         doUpdateLocations(form,config)
     elif updateType == 'barcodeprint': doBarCodes(form,config)
     elif updateType == 'inventory':    doUpdateLocations(form,config)
     elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
@@ -36,16 +49,19 @@ elif action == "Recent Activity":
 elif form.getvalue("lo.location1") != None and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
     if updateType in ['keyinfo', 'inventory']: 
 	doEnumerateObjects(form,config)
+    elif updateType == 'move':
+        doCheckMove(form,config)
     else:
-	doSearch(form,config,'nolist')
+	doLocationSearch(form,config,'nolist')
 elif action == "Search":
-    if updateType == 'packinglist':  doSearch(form,config,'nolist')
-    if updateType == 'barcodeprint': doSearch(form,config,'nolist')
-    if updateType == 'bedlist':      doComplexSearch(form,config,'select')
-    if updateType == 'locreport':    doLocationList(form,config)
-    if updateType == 'advsearch':    doComplexSearch(form,config,'select')
-    if updateType == 'inventory':    doSearch(form,config,'list')
-    if updateType == 'keyinfo':      doSearch(form,config,'list')
+    if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
+    elif updateType == 'move':         doCheckMove(form,config)
+    elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
+    elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
+    elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
+    elif updateType == 'locreport':    doLocationList(form,config)
+    elif updateType == 'inventory':    doLocationSearch(form,config,'list')
+    elif updateType == 'keyinfo':      doLocationSearch(form,config,'list')
 elif action in ['<<','>>']:
     print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
 else:

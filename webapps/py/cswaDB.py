@@ -18,8 +18,11 @@ def setquery(type,location):
     if type == 'inventory':
 	return  """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
-l.termdisplayName AS storageLocation,
-concat(replace(l.termdisplayName,' ','0'),regexp_replace(ma.crate, '^.*\\)''(.*)''$', '\\1')) AS locationkey,
+(case when ca.computedcrate is Null then l.termdisplayName  
+     else concat(l.termdisplayName,
+     ': ',regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1')) end) AS storageLocation,
+replace(concat(l.termdisplayName,
+     ': ',regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1')),' ','0') AS locationkey,
 m.locationdate,
 cc.objectnumber objectnumber,
 cc.numberofobjects objectCount,
@@ -48,6 +51,7 @@ join movements_anthropology ma on ma.id = h2.id
 join hierarchy h3 on rc.objectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
+left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
 left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name =
 'collectionobjects_common:objectNameList' and h5.pos=0)
 left outer join objectnamegroup ong on (ong.id=h5.id)
@@ -114,7 +118,7 @@ where deadflag='false' and regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
 ORDER BY %s,to_number(objectnumber,'9999.9999')
 LIMIT 6000""" % (searchkey, location, sortkey)
 
-    elif type == 'keyinfo' or type == 'barcodeprint':
+    elif type == 'keyinfo' or type == 'barcodeprint' or type == 'packinglist':
 	return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  
