@@ -35,6 +35,7 @@ elif action == "Create Labels for Locations Only":
     doBarCodes(form,config)
 elif action == config.get('info','updateactionlabel'):
     if   updateType == 'packinglist':  doPackingList(form,config)
+    elif updateType == 'move':         doUpdateLocations(form,config)
     elif updateType == 'barcodeprint': doBarCodes(form,config)
     elif updateType == 'inventory':    doUpdateLocations(form,config)
     elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
@@ -48,10 +49,13 @@ elif action == "Recent Activity":
 elif form.getvalue("lo.location1") != None and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
     if updateType in ['keyinfo', 'inventory']: 
 	doEnumerateObjects(form,config)
+    elif updateType == 'move':
+        doCheckMove(form,config)
     else:
 	doLocationSearch(form,config,'nolist')
 elif action == "Search":
     if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
+    elif updateType == 'move':         doCheckMove(form,config)
     elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
     elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
     elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
