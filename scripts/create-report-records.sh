@@ -37,6 +37,9 @@ MIMETYPE_LABELS+=(
     'MS Word' \
     'PDF' )
     
+REPORT_NAME="Acquisition Summary"
+REPORT_NAME_REGEX="(PDF)"
+    
 # Each item in each of the two lists above should correspond 1:1 with
 # its counterpart in the other list. (Associative/hash-style arrays would
 # make this simpler, but those are only implemented in very recent 'bash' versions.)
@@ -135,7 +138,17 @@ do
 
   # If there is at least one matching report record already present in
   # this tenant, don't create a new record, and move on to the next tenant
+  at_least_one_matching_report_record_exists=0
   if [ $at_least_one_record_exists == 1 ]; then
+      for results_item in ${read_list_results[*]}
+      do
+        if [[ $results_item =~ $REPORT_NAME_REGEX ]]; then
+          at_least_one_matching_report_record_exists=1
+          break
+        fi
+      done
+  fi
+  if [ $at_least_one_matching_report_record_exists == 1 ]; then
     echo "Found an Acquisition Summary report record in the '$tenant' tenant."
     echo "Will NOT create a new record."
     continue
@@ -176,7 +189,7 @@ do
     <supportsDocList>false</supportsDocList>
     <supportsNoContext>true</supportsNoContext>
     <outputMIME>${MIMETYPES[MIMETYPE_COUNTER]}</outputMIME>
-    <name>Acquisition Summary (${MIMETYPE_LABELS[MIMETYPE_COUNTER]})</name>
+    <name>$REPORT_NAME (${MIMETYPE_LABELS[MIMETYPE_COUNTER]})</name>
     <filename>${REPORT_FILENAME}</filename>
     <supportsGroup>false</supportsGroup>
     <supportsSingleDoc>true</supportsSingleDoc>
