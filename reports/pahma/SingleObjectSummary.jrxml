@@ -11,39 +11,56 @@
 		<defaultValueExpression><![CDATA[15]]></defaultValueExpression>
 	</parameter>
 	<parameter name="csid" class="java.lang.String">
-		<defaultValueExpression><![CDATA["c99bddb6-5e09-42df-99e4-e0383f7c6553"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["cf9e67a3-ae8a-4ea2-b723-077c53a910cc"]]></defaultValueExpression>
 	</parameter>
-	<queryString language="SQL">
+	<queryString>
 		<![CDATA[select
-(case when c.fieldcollectionnote is Null then '' else c.fieldcollectionnote end) fieldcollectionnote,
-c.id objectid,
-c.objectnumber objectNumber,
-findcurrentlocation($P{csid}) currentlocation,
-'' site,
-'' culture,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
-findcurrentlocation(c.id) currentlocation,
-(case when bd.item is NULL then '' else bd.item end) description,
+co.fieldcollectionnote fieldcollectionnote,
+co.id objectid,
+co.objectnumber objectNumber,
+case when ca.computedcrate is null then regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
+  else regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
+end as currentlocation,
+CASE WHEN (pfc.item IS NOT NULL AND pfc.item <> '')
+  THEN regexp_replace(pfc.item, '^.*\)''(.*)''$', '\1')
+END AS site,
+case when (apg.assocpeople is not null and apg.assocpeople <> '') then
+  regexp_replace(apg.assocpeople, '^.*\)''(.*)''$', '\1')
+end as culture,
+ong.objectName objectName,
+bd.item description,
 misc.lifecyclestate lifecyclestate
-from collectionobjects_common c
-left outer join hierarchy h1 on (c.id = h1.id)
-left outer join collectionobjects_common_briefdescriptions bd on (c.id = bd.id)
-inner join misc on misc.id = c.id
-inner join collectionspace_core core on core.id=c.id
-left outer join hierarchy h3 on (c.id = h3.parentid)
-inner join objectnamegroup ong on (ong.id=h3.id)
+from collectionobjects_common co
+join collectionobjects_pahma cp on (co.id=cp.id)
+join collectionobjects_anthropology ca on (co.id=ca.id)
+
+left outer join hierarchy h1 on (co.id = h1.id)
+
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=co.id and pfc.pos=0)
+
+left outer join collectionobjects_common_briefdescriptions bd on (co.id = bd.id)
+inner join misc on misc.id = co.id
+inner join collectionspace_core core on core.id=co.id
+
+left outer join hierarchy h3 on (co.id = h3.parentid and h3.name='collectionobjects_common:objectNameList')
+left outer join objectnamegroup ong on (ong.id=h3.id)
+
+left outer join hierarchy h4 on (co.id=h4.parentid and h4.pos=0 and h4.name='collectionobjects_common:assocPeopleGroupList')
+left outer join assocpeoplegroup apg on (apg.id=h4.id)
 where misc.lifecyclestate <> 'deleted'
 and core.tenantid=$P{tenantid}
 and h1.name=$P{csid}
 order by objectnumber]]>
 	</queryString>
-	<field name="objectnumber" class="java.lang.String"/>
-	<field name="objectname" class="java.lang.String"/>
-	<field name="currentlocation" class="java.lang.String"/>
-	<field name="description" class="java.lang.String"/>
 	<field name="fieldcollectionnote" class="java.lang.String"/>
+	<field name="objectid" class="java.lang.String"/>
+	<field name="objectnumber" class="java.lang.String"/>
+	<field name="currentlocation" class="java.lang.String"/>
 	<field name="site" class="java.lang.String"/>
 	<field name="culture" class="java.lang.String"/>
+	<field name="objectname" class="java.lang.String"/>
+	<field name="description" class="java.lang.String"/>
+	<field name="lifecyclestate" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -56,21 +73,15 @@ order by objectnumber]]>
 				</textElement>
 				<text><![CDATA[in CollectionSpace	]]></text>
 			</staticText>
-			<line>
-				<reportElement positionType="FixRelativeToBottom" x="-1" y="65" width="800" height="1"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
-				</graphicElement>
-			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="69" width="269" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="69" width="170" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement>
 					<font fontName="SansSerif" size="14"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="273" y="70" width="280" height="30" backcolor="#CCCCCC"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="273" y="70" width="517" height="30" backcolor="#CCCCCC"/>
 				<textElement>
 					<font fontName="SansSerif" isItalic="true"/>
 				</textElement>
@@ -101,7 +112,7 @@ order by objectnumber]]>
 	<columnHeader>
 		<band height="42" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="21" width="800" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="18" width="800" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
@@ -153,47 +164,47 @@ order by objectnumber]]>
 	<detail>
 		<band height="19" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="-5" width="800" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="-2" width="800" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="-20" width="138" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="138" y="-20" width="138" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="276" y="-20" width="135" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{currentlocation}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="414" y="-20" width="138" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="555" y="-20" width="122" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{site}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="680" y="-20" width="110" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
