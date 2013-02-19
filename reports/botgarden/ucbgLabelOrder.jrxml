@@ -17,7 +17,8 @@ case when (mc.currentlocation is not null and mc.currentlocation <> '')
      then regexp_replace(mc.currentlocation, '^.*\)''(.*)''$', '\1')
 end as gardenlocation,
 findhybridnamehtml(tig.id) Determination,
-case when tt.termdisplayname is not null then tt.termdisplayname
+case when tig.hybridflag = 'true' then findhybridname(tig.id)
+     when tt.termdisplayname is not null then tt.termdisplayname
      when (tig.taxon is not null and tig.taxon <> '') then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
 end as shortTaxonomicName,
 to_char(mb.labelcount, '999') labelCount,

@@ -19,8 +19,10 @@ g.scopeNote, -- iReport has a checkbox for handling nulls (since they print the 
 co1.id objectid,
 co1.objectnumber objectNumber,
 date(con.accessiondate + interval '8 hours') accessiondate, -- only used on Accession report
-case when (tig.taxon is not null and tig.taxon <> '')
+case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
      then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
+     when tig.hybridflag = 'true'
+     then findhybridname(tig.id)
 end as Determination,
 cob.deadflag,
 case when (fc.item is not null and fc.item <> '')
@@ -155,7 +157,7 @@ order by objectNumber]]>
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="129" splitType="Prevent">
+		<band height="153" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
 				<reportElement style="Detail" stretchType="RelativeToBandHeight" x="2" y="43" width="75" height="15"/>
 				<textElement>
@@ -178,14 +180,14 @@ order by objectNumber]]>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="2" y="84" width="53" height="15"/>
+				<reportElement positionType="Float" x="2" y="84" width="53" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{deadflag}.equals(true)? "\"dead\"" : null]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="81" y="84" width="438" height="15" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="Float" x="81" y="84" width="438" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
@@ -220,7 +222,7 @@ order by objectNumber]]>
 				<text><![CDATA[Requested by:]]></text>
 			</staticText>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="-1" y="125" width="520" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="-1" y="150" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
@@ -240,19 +242,19 @@ order by objectNumber]]>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{materialtype}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="81" y="105" width="438" height="15" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="Float" x="81" y="105" width="438" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{accessionnotes}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="2" y="63" width="53" height="15"/>
+				<reportElement positionType="Float" x="2" y="63" width="53" height="15"/>
 				<textElement/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{rarestatus}.equals("rare")? "\"rare\"" : null]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="81" y="63" width="438" height="15" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="Float" x="81" y="63" width="438" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{collectioninfo}]]></textFieldExpression>
 			</textField>

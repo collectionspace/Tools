@@ -2,99 +2,20 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgVoucherLabel46" language="groovy" columnCount="2" pageWidth="612" pageHeight="792" columnWidth="270" columnSpacing="36" leftMargin="18" rightMargin="18" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
-	<queryString language="SQL">
-		<![CDATA[select co1.objectnumber,
-case when (tig.taxon is not null and tig.taxon <> '')
-     then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
-end as determination,
-case when tig.hybridflag = 'false' then tt.termformatteddisplayname
-     when tig.hybridflag = 'true' then findhybridnamehtml(tig.id)
-end as determinationformatted,
-case when (tn.family is not null and tn.family <> '')
-     then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
-end as family,
-case when fc.item is not null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is not null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' '||co1.fieldcollectionnumber||', '||sdg.datedisplaydate
-  when fc.item is not null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' '||co1.fieldcollectionnumber
-  when fc.item is not null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is not null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||', '||sdg.datedisplaydate
-  when fc.item is not null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
-  when fc.item is null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is not null
-        then co1.fieldcollectionnumber||', '||sdg.datedisplaydate
-  when fc.item is null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is null
-        then co1.fieldcollectionnumber
-  when fc.item is null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is not null
-        then sdg.datedisplaydate
-end as collectioninfo,
-case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\)''(.*)''$', '\1')
-     when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
-end as locality,
-lc.loanoutnumber vouchernumber,
-lnh.numlent numbersheets,
-lb.labelrequested,
-case when (lb.gardenlocation is not null and lb.gardenlocation <> '')
-     then regexp_replace(lb.gardenlocation, '^.*\)''(.*)''$', '\1')
-end as gardenlocation,
-case when lb.hortwild='Horticultural' then 'Horticultural voucher:'
-     when lb.hortwild='Wild' then 'Wild voucher:'
-end as vouchertype,
-lb.fieldcollectionnote,
-lb.annotation,
-case when (lbc.item is not null and lbc.item <> '' and lc.loanoutdate is not null)
-      then regexp_replace(lbc.item, '^.*\)''(.*)''$', '\1')||', '||to_char(date(lc.loanoutdate + interval '8 hours'), 'MM/dd/yyyy')
-     when (lbc.item is not null and lbc.item <> '' and lc.loanoutdate is null)
-      then regexp_replace(lbc.item, '^.*\)''(.*)''$', '\1')
-     when (lbc.item is null and lc.loanoutdate is not null)
-      then to_char(date(lc.loanoutdate + interval '8 hours'), 'MM/dd/yyyy')
-end as vouchercollectioninfo
-from loansout_common lc
-join loansout_naturalhistory lnh on (lc.id=lnh.id)
-join loansout_botgarden lb on (lc.id=lb.id)
-left outer join loansout_botgarden_collectorlist lbc on (lbc.id = lc.id and lbc.pos=0)
-
-join hierarchy h1 on lc.id=h1.id
-join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='CollectionObject')
-join hierarchy h2 on (r1.objectcsid=h2.name)
-join collectionobjects_common co1 on (co1.id=h2.id)
-
-left outer join hierarchy htig
-     on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
-left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
-
-join collectionspace_core core on (core.id=co1.id and core.tenantid='35')
-join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted')
-
-left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id)
-
-left outer join hierarchy htt
-    on (tc.id=htt.parentid and htt.name='taxon_common:taxonTermGroupList' and htt.pos=0) -- for now assuming preferred name
-left outer join taxontermgroup tt on (tt.id=htt.id)
-
-left outer join collectionobjects_common_fieldCollectors fc on (co1.id = fc.id and fc.pos = 0)
-
-left outer join hierarchy hfcdg on (co1.id = hfcdg.parentid  and hfcdg.name='collectionobjects_common:fieldCollectionDateGroup')
-left outer join structureddategroup sdg on (sdg.id = hfcdg.id)
-
-left outer join hierarchy hlg
-     on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
-left outer join localitygroup lg on (lg.id = hlg.id)
-
-where lb.labelrequested = 'Yes']]>
+	<property name="ireport.y" value="143"/>
+	<queryString>
+		<![CDATA[select * from findvoucherlabels()]]>
 	</queryString>
 	<field name="objectnumber" class="java.lang.String"/>
-	<field name="determination" class="java.lang.String"/>
 	<field name="determinationformatted" class="java.lang.String"/>
 	<field name="family" class="java.lang.String"/>
 	<field name="collectioninfo" class="java.lang.String"/>
 	<field name="locality" class="java.lang.String"/>
 	<field name="vouchernumber" class="java.lang.String"/>
-	<field name="numbersheets" class="java.lang.Long"/>
+	<field name="numbersheets" class="java.lang.Integer"/>
 	<field name="labelrequested" class="java.lang.String"/>
 	<field name="gardenlocation" class="java.lang.String"/>
+	<field name="gardeninfo" class="java.lang.String"/>
 	<field name="vouchertype" class="java.lang.String"/>
 	<field name="fieldcollectionnote" class="java.lang.String"/>
 	<field name="annotation" class="java.lang.String"/>
@@ -188,18 +109,12 @@ where lb.labelrequested = 'Yes']]>
 				<reportElement positionType="Float" mode="Transparent" x="0" y="357" width="267" height="1"/>
 			</line>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="71" y="283" width="102" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement positionType="FixRelativeToBottom" x="31" y="268" width="200" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Times New Roman" size="8"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchernumber}]]></textFieldExpression>
 			</textField>
-			<componentElement>
-				<reportElement x="67" y="303" width="147" height="50"/>
-				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
-					<jr:codeExpression><![CDATA[$F{objectnumber}]]></jr:codeExpression>
-				</jr:Code39>
-			</componentElement>
 			<textField>
 				<reportElement x="0" y="10" width="267" height="20"/>
 				<textElement textAlignment="Center">
@@ -207,6 +122,12 @@ where lb.labelrequested = 'Yes']]>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
 			</textField>
+			<componentElement>
+				<reportElement positionType="FixRelativeToBottom" x="31" y="288" width="200" height="50"/>
+				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
+					<jr:codeExpression><![CDATA[$F{objectnumber}]]></jr:codeExpression>
+				</jr:Code39>
+			</componentElement>
 		</band>
 	</detail>
 </jasperReport>
