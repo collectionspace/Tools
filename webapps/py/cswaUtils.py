@@ -211,22 +211,31 @@ def getHeader(updateType):
     </tr>"""
     elif updateType == 'bedlist' or updateType == 'advsearch':
         return """
-    <table id="sortTable"><thead><tr>
+    <table class="tablesorter" id="sortTable%s"><thead>
+    <tr>
+      <th>Accession Number</th>
+      <th>Family</th>
+      <th>Taxonomic Name</th>
+    </tr></thead><tbody>"""
+    elif updateType == 'bedlistxxx' or updateType == 'advsearchxxx':
+        return """
+    <table class="tablesorter" id="sortTable%s"><thead>
+    <tr>
       <th data-sort="float">Accession Number</th>
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
     </tr></thead><tbody>"""
     elif updateType == 'bedlistnone' or updateType == 'advsearchnone':
         return """
-    <table id="sortTable"><thead><tr>
-      <th data-sort="float">Accession Number</th>
-      <th data-sort="string">Family</th>
-      <th data-sort="string">Taxonomic Name</th>
-      <th data-sort="string">Garden Location</th>
+    <table class="tablesorter" id="sortTable"><thead><tr>
+      <th>Accession Number</th>
+      <th>Family</th>
+      <th>Taxonomic Name</th>
+      <th>Garden Location</th>
     </tr></thead><tbody>"""
     elif updateType == 'locreport':
         return """
-    <table id="sortTable"><thead><tr>
+    <table class="tablesorter" id="sortTable"><thead><tr>
       <th data-sort="float">Object Number</th>
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
@@ -492,22 +501,22 @@ def doUpdateLocations(form,config):
         updateItems['inventoryNote']   = form.getvalue('n.'+cells[4]) if form.getvalue('n.'+cells[4]) else ''
         updateItems['locationDate']    = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         updateItems['computedSummary'] = updateItems['locationDate'][0:10] + (' (%s)' % form.getvalue('reason'))
+     
+        for i in ('handlerRefName','reason'):
+            updateItems[i] = form.getvalue(i)
 
-
+        # ugh...this logic is rather complicated...
         msg = 'location updated.'
         # if we are moving a crate, use the value of the toLocation's refname, which is stored hidden on the form.
         if config.get('info','updatetype') == 'move':
             updateItems['locationRefname'] = form.getvalue('toRefname')
-            msg = 'moved to %s.' % form.getvalue('toLocAndCrate')
-        
-        for i in ('handlerRefName','reason'):
-            updateItems[i] = form.getvalue(i)
-
+            msg = 'crate moved to %s.' % form.getvalue('toLocAndCrate')
+            
         if updateItems['objectStatus'] == 'not found':
 	    updateItems['locationRefname'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
-            # using the same location for the crate, for now...
-	    updateItems['crate'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
+            updateItems['crate'] = ''
             msg = "moved to 'Not Located'."
+            #updateItems['crate'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(Notlocated1360806150870)'Not located'"
 
         #print updateItems
         try:
@@ -652,7 +661,7 @@ def doLocationList(form,config):
     print '\n'.join(accessions)
     print """</table><table>"""
     print """<tr><td align="center">&nbsp;</tr>"""
-    print """<tr><td align="center"><hr><td></tr>"""
+    print """<tr><td align="center"><hr></tr>"""
     print """<tr><td align="center">Location Report completed. %s objects of %s displayed</td></tr>""" % (len(accessions),len(objects))
     print "\n</table><hr/>"
 
@@ -743,21 +752,23 @@ def doBedList(form,config):
     
     if not validateParameters(form,config): return
     
-    rows = [ form.getvalue(i) for i in form if 'locations.' in i ]
     if updateType == 'bedlist':
-        pass
+       rows = [ form.getvalue(i) for i in form if 'locations.' in i ]
     elif updateType == 'locationreport':
        rows = [ form.getvalue(i) for i in form if 'taxon.' in i ]
     elif updateType == 'advsearch':
+       rows     = [ form.getvalue(i) for i in form if 'locations.' in i ]
        taxNames = [ form.getvalue(i) for i in form if 'taxon.' in i ]
        places   = [ form.getvalue(i) for i in form if 'place.' in i ]
     
-    rowcount = len(rows)
+    rowcount     = len(rows)
     totalobjects = 0
-    #print '''<table class="sortable">'''
-    print getHeader(updateType+groupby if groupby == 'none' else updateType)
+    if groupby == 'none':
+        print getHeader(updateType+groupby)
+    else:
+        print '<table>'
     rows.sort()
-    for l in rows:
+    for headerid,l in enumerate(rows):
 
         try:
             objects = cswaDB.getplants(l,'',1,config,updateType)
@@ -766,24 +777,38 @@ def doBedList(form,config):
             handleTimeout('getplants',form)
             objects = []
 
-        if groupby != 'none':
-           print formatRow({ 'rowtype':'subheader','data': [l,] },form,config)
-        #print "<tr><td>",l,"</td></tr>"
-        if len(objects) == 0:
-            print '<tr><td colspan="6">No objects found at this location.</td></tr>'
+        if groupby == 'none':
+            pass
         else:
-            for r in objects:
-                #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
-                #if checkObject(places,r):
-                if True:
-                    totalobjects += 1
-                    print formatRow({ 'rowtype': updateType,'data': r },form,config)
+            if len(objects) == 0:
+                pass
+            else:
+                print formatRow({ 'rowtype':'subheader','data': [l,] },form,config)
+                #print '<tr><td colspan="6">No objects found at this location.</td></tr>'
+                print '<tr><td colspan="6">'
+                print getHeader(updateType+groupby if groupby == 'none' else updateType) % headerid
+                
+        for r in objects:
+            #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
+            #if checkObject(places,r):
+            if True:
+                totalobjects += 1
+                print formatRow({ 'rowtype': updateType,'data': r },form,config)
 
-        if groupby != 'none':
-            print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
+        if groupby == 'none':
+            pass
+        else:
+            if len(objects) == 0:
+                pass
+            else:
+                print '</tbody></table></td></tr>'
+            #print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
             
-    print "\n</table><table>"
-    print """<tr><td align="center"><hr><td></tr>"""
+    if groupby == 'none':
+        print "\n</tbody></table>"
+    else:
+        print '</table>'
+    print """<table><tr><td align="center"><hr></tr>"""
     print """<tr><td align="center">Bed List completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(rows))
     print "\n</table><hr/>"
 
@@ -1301,7 +1326,7 @@ def selectWebapp():
 </head>
 <body>
 <h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1><table cellpadding="8px">
-<p>The following table lists the webapps available on this server.</p>'''
+<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")  + '''.</p>'''
 
     programName = 'cswaMain.py?webapp='
     for museum in webapps:
@@ -1310,16 +1335,17 @@ def selectWebapp():
            apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
            line += '<tr><th>%s</th><th>%s</th>' % (apptitle,webapp)
            for sys in ['Dev','Prod','Dev2','V321']:
+               available = ''
                if webapp in exceptions and sys not in ['Dev2', 'V321']:
                    if os.path.isfile(exceptions[webapp]+sys+'.py'):
-                       available = '<a target="%s" href="%s">%s</a></td>' % (sys,exceptions[webapp]+sys+'.py',exceptions[webapp]+sys)
+                       available = '<a target="%s" href="%s">%s</a>' % (sys,exceptions[webapp]+sys+'.py',exceptions[webapp]+sys)
                    elif os.path.isfile(exceptions[webapp]+'.py') and sys == 'Prod':
-                       available = '<a target="%s" href="%s">%s</a></td>' % (sys,exceptions[webapp]+'.py',exceptions[webapp])
+                       available = '<a target="%s" href="%s">%s</a>' % (sys,exceptions[webapp]+'.py',exceptions[webapp])
                else:
-                   available = '<a target="%s" href="%s">%s</a></td>' % (sys,programName+webapp+sys,webapp+sys)
+                   available = '<a target="%s" href="%s">%s</a>' % (sys,programName+webapp+sys,webapp+sys)
                if not os.path.isfile(webapp+sys+'.cfg'): available = ''
                line += '<td>%s</td>' % available
-           line += '</tr>'
+           line += '</tr>\n'
     line += '''
 </table>
 <hr/>
@@ -1334,12 +1360,13 @@ def getStyle(schemacolor1):
 <style type="text/css">
 body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
 table { width: 100%; }
-td { cell-padding: 3px; }
+td { cell-padding: 3px; width:200px; }
 th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
 h1 { font-size:32px; padding:10px; margin:0px; border-bottom: none; }
 h2 { font-size:24px; color:white; background:blue; }
 p { padding:10px 10px 10px 10px; }
-li {text-align: left; list-style-type: none}
+li { text-align: left; list-style-type: none; }
+a { text-decoration: none; }
 button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
 .cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
 .enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
@@ -1349,7 +1376,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
 .objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
-.rdo { text-align: center; }
+.rdo { text-align: center; width:60px; }
 .save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
 .shortinput { font-weight: bold; width:150px; }
 .subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
@@ -1369,74 +1396,75 @@ def starthtml(form,config):
     apptitle = config.get('info','apptitle')
     updateType = config.get('info','updatetype')
 
-    groupby   = str(form.getvalue("groupby")) if form.getvalue("groupby") else ''
     #num2ret   = str(form.getvalue('num2ret')) if str(form.getvalue('num2ret')).isdigit() else '50'
 
     button = '''<input id="actionbutton" class="save" type="submit" value="Search" name="action">'''
 
     groupbyelement = '''
-          <td><span class="cell">group by:</span></td>
-          <td>
+          <th><span class="cell">group by:</span></th>
+          <th>
           <span class="cell">none </span><input type="radio" name="groupby" value="none">
-          <span class="cell">name </span><input type="radio" name="groupby" value="name">
+          <span class="cell">name </span><input type="radio" name="groupby" value="determination">
           <span class="cell">family </span><input type="radio" name="groupby" value="family">
-          <span class="cell">location </span><input type="radio" name="groupby" value="location">
-          </td>'''
-
+          <span class="cell">location </span><input type="radio" name="groupby" value="gardenlocation">
+          </th>'''
+    #groupby   = str(form.getvalue("groupby")) if form.getvalue("groupby") else 'gardenlocation'
+    
     # temporary, until the other groupings and sortings work...
     groupbyelement = '''
-          <td><span class="cell">group by:</span></td>
-          <td>
+          <th><span class="cell">group by:</span></th>
+          <th>
           <span class="cell">none </span><input type="radio" name="groupby" value="none">
           <span class="cell">location </span><input type="radio" name="groupby" value="location">
-          </td>'''
+          </th>'''
     
+    groupby   = str(form.getvalue("groupby")) if form.getvalue("groupby") else 'location'
     groupbyelement = groupbyelement.replace(('value="%s"' % groupby),('checked value="%s"' % groupby))
 
     location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
     location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else ''
     otherfields = '''
-	  <tr><td><span class="cell">start:</span></td>
-	  <td><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></td>
-          <td><span class="cell">end:</span></td>
-          <td><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></td></tr>
+	  <tr><th><span class="cell">start:</span></th>
+	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+          <th><span class="cell">end:</span></th>
+          <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th></tr>
     '''
 
     if updateType == 'keyinfo':
 	otherfields += '''
-	  <tr><td/><td/><td/><td/></tr>'''
+	  <tr><th/><th/><th/><th/></tr>'''
         
     elif updateType == 'move':
         crate = str(form.getvalue("lo.crate")) if form.getvalue("lo.crate") else ''
         otherfields = '''
-	  <tr><td><span class="cell">from:</span></td>
-	  <td><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></td>
-          <td><span class="cell">to:</span></td>
-          <td><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></td></tr>
-          <tr><td><span class="cell">crate:</span></td>
-          <td><input id="lo.crate" class="cell" type="text" size="40" name="lo.crate" value="''' + crate + '''" class="xspan"></td></tr>
+	  <tr><th><span class="cell">from:</span></th>
+	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+          <th><span class="cell">to:</span></th>
+          <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th></tr>
+          <tr><th><span class="cell">crate:</span></th>
+          <th><input id="lo.crate" class="cell" type="text" size="40" name="lo.crate" value="''' + crate + '''" class="xspan"></th></tr>
     '''
           
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
 	otherfields += '''
-          <tr><td><span class="cell">reason:</span></td><td>''' + reasons + '''</td>
-          <td><span class="cell">handler:</span></td><td>''' + handlers + '''</td></tr>'''
+          <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+          <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
         
     elif updateType == 'bedlist':
         location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
         otherfields = '''
 	  <tr>
-          <td><span class="cell">bed:</span></td>
-	  <td><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></td>
+          <th><span class="cell">bed:</span></th>
+	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
           ''' + groupbyelement + '''
           </tr>
     '''
     elif updateType == 'locreport':
         taxName      = str(form.getvalue('ta.taxon')) if form.getvalue('ta.taxon') else ''
 	otherfields = '''
-	  <tr><td><span class="cell">taxonomic name:</span></td>
-	  <td><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></td></tr>
+	  <tr><th><span class="cell">taxonomic name:</span></th>
+	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th></tr>
     '''
     elif updateType == 'advsearch':
         location1    = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
@@ -1448,66 +1476,66 @@ def starthtml(form,config):
         alive = str(form.getvalue('alive')) if form.getvalue('alive') else ''
         rare  = str(form.getvalue('rare'))  if form.getvalue('rare') else ''
 	otherfields = '''
-	  <tr><td><span class="cell">taxonomic name:</span></td>
-	  <td><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></td>
+	  <tr><th><span class="cell">taxonomic name:</span></th>
+	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th>
           ''' + groupbyelement +'''</tr>
 	  <tr>
-          <td><span class="cell">bed:</span></td>
-	  <td><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></td>
-          <td><span class="cell">sort by:</span></td>
-          <td>
+          <th><span class="cell">bed:</span></th>
+	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+          <th><span class="cell">sort by:</span></th>
+          <th>
           <span class="cell">name </span><input type="radio" name="sortby" value="name">
           <span class="cell">family </span><input type="radio" name="sortby" value="family">
           <span class="cell">location </span><input type="radio" name="sortby" value="location" checked>
-          </td></tr>
-	  <tr><td><span class="cell">collection place:</span></td>
-	  <td><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></td>
-	  <td><span class="cell">filters:</span></td><td><span class="cell">rare </span>
+          </th></tr>
+	  <tr><th><span class="cell">collection place:</span></th>
+	  <th><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></th>
+	  <th><span class="cell">filters:</span></th><th><span class="cell">rare </span>
 	  <input id="rare" class="cell" type="checkbox" name="rare" value="''' + rare + '''" class="xspan">
 	  <span class="cell">dead </span>
 	  <input id="dead" class="cell" type="checkbox" name=""dead" value="''' + dead + '''" class="xspan">
 	  <span class="cell">alive </span>
-	  <input id="alive" class="cell" type="checkbox" name=""alive" value="''' + alive + '''" class="xspan"></td></tr>
+	  <input id="alive" class="cell" type="checkbox" name=""alive" value="''' + alive + '''" class="xspan"></th></tr>
           '''
 
         saveForNow = '''
-	  <tr><td><span class="cell">concept:</span></td>
-	  <td><input id="cx.concept" class="cell" type="text" size="40" name="cx.concept" value="''' + concept + '''" class="xspan"></td></tr>'''
+	  <tr><th><span class="cell">concept:</span></th>
+	  <th><input id="cx.concept" class="cell" type="text" size="40" name="cx.concept" value="''' + concept + '''" class="xspan"></th></tr>'''
           
     elif updateType == 'search':
         objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
         place        = str(form.getvalue('cp.place')) if form.getvalue('cp.place') else ''
         concept      = str(form.getvalue('co.concept')) if form.getvalue('co.concept') else ''
 	otherfields += '''
-	  <tr><td><span class="cell">museum number:</span></td>
-	  <td><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></td></tr>
-	  <tr><td><span class="cell">concept:</span></td>
-	  <td><input id="co.concept" class="cell" type="text" size="40" name="co.concept" value="''' + concept + '''" class="xspan"></td></tr>
-	  <tr><td><span class="cell">collection place:</span></td>
-	  <td><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></td></tr>'''
+	  <tr><th><span class="cell">museum number:</span></th>
+	  <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>
+	  <tr><th><span class="cell">concept:</span></th>
+	  <th><input id="co.concept" class="cell" type="text" size="40" name="co.concept" value="''' + concept + '''" class="xspan"></th></tr>
+	  <tr><th><span class="cell">collection place:</span></th>
+	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
     elif updateType == 'barcodeprint':
         printers,selected = getPrinters(form)
 	otherfields += '''
-          <tr><td><span class="cell">printer:</span></td><td>''' + printers + '''</td></tr>'''
+          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
     elif updateType == 'inventory':
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
 	otherfields += '''
-          <tr><td><span class="cell">reason:</span></td><td>''' + reasons + '''</td>
-          <td><span class="cell">handler:</span></td><td>''' + handlers + '''</td></tr>'''
+          <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+          <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
     elif updateType == 'packinglist':
         place = str(form.getvalue('cp.place')) if form.getvalue('cp.place') else ''
 	otherfields +='''
-	  <tr><td><span class="cell">collection place:</span></td>
-	  <td><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></td></tr>'''
+	  <tr><th><span class="cell">collection place:</span></th>
+	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
     elif updateType == 'upload':
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
-	otherfields = '''<tr><td><span class="cell">file:</span></td><td><input type="file" name="file"></td><td/></tr>'''
+	otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
     elif False:
         otherfields += '''
-          <td><span class="cell">number to retrieve:</span></td>
-          <td><input id="num2ret" class="cell" type="text" size="4" name="num2ret" value="''' + num2ret + '''" class="xspan"></td></tr>
-          <tr><td/><td/><td/><td/></tr>'''
+          <th><span class="cell">number to retrieve:</span></th>
+          <th><input id="num2ret" class="cell" type="text" size="4" name="num2ret" value="''' + num2ret + '''" class="xspan"></th></tr>
+          <tr><th/><th/><th/><th/></tr>'''
 
     return '''Content-type: text/html; charset=utf-8
 
@@ -1517,18 +1545,16 @@ def starthtml(form,config):
 <style type="text/css">
   /*<![CDATA[*/
     @import "../css/jquery-ui-1.8.22.custom.css";
+    @import "../css/blue/style.css";
   /*]]>*/
   </style>
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
-<script type="text/javascript" src="../js/stupidtable.min.js"></script>
+<script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
 <style>
 .ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
 </style>
 <script type="text/javascript">
-$(function(){
-        $("#sortTable").stupidtable();
-    });
 function formSubmit(location)
 {
     console.log(location);
@@ -1602,6 +1628,14 @@ $(function () {
     });
 
 $(document).ready(function () {
+
+$(function() {
+  $('[id^="sortTable"]').map(function() {
+        console.log(this);
+        $(this).tablesorter({debug: true})
+     });
+  });
+  
 $('[name]').map(function() {
     var elementID = $(this).attr('name');
     if (elementID.indexOf('.') == 2) {
