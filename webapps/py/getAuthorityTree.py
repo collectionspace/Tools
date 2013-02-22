@@ -5,29 +5,33 @@ import pgdb
 
 conn = None
 
-def openConnection(connect_string):
-  global conn
 
-  try:
-    conn = pgdb.connect( connect_string )
-  except Exception:
-    print "In openConnection(), unable to open connection"
-    sys.exit( 1 )
-    
+def openConnection(connect_string):
+    global conn
+
+    try:
+        conn = pgdb.connect(connect_string)
+    except Exception:
+        print "In openConnection(), unable to open connection"
+        sys.exit(1)
+
+
 def closeConnection():
-  if conn:
-    conn.close()
+    if conn:
+        conn.close()
+
 
 def dropIfExistsAuthorityHierarchyTable():
-  query = "DROP TABLE IF exists authorityname_temp CASCADE"
+    query = "DROP TABLE IF exists authorityname_temp CASCADE"
 
-  cursor = conn.cursor()
-  cursor.execute( query )
-  cursor.close()
-  conn.commit()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    cursor.close()
+    conn.commit()
 
-def createAuthorityHierarchyTable(authority,primarytype,term):
-  query = """
+
+def createAuthorityHierarchyTable(authority, primarytype, term):
+    query = """
     WITH authorityname_hierarchyquery as (
     SELECT
       h.name termcsid, 
@@ -48,27 +52,28 @@ def createAuthorityHierarchyTable(authority,primarytype,term):
     WHERE %s ='%s'
   """
 
-  #print query
-  index1 = "CREATE INDEX broaderterm_ndx_temp ON authorityname_temp( broaderterm )" 
-  index2 = "CREATE INDEX termcsid_ndx_temp ON authorityname_temp( termcsid )" 
+    #print query
+    index1 = "CREATE INDEX broaderterm_ndx_temp ON authorityname_temp( broaderterm )"
+    index2 = "CREATE INDEX termcsid_ndx_temp ON authorityname_temp( termcsid )"
 
-  cursor = conn.cursor()
-  cursor.execute( query % (authority, primarytype, primarytype, authority, 'broaderterm', term) )
-  res = cursor.rowcount
-  if res == 0:
-    dropIfExistsAuthorityHierarchyTable()
-    cursor.execute( query % (authority, primarytype, primarytype, authority, 'term', term) )
+    cursor = conn.cursor()
+    cursor.execute(query % (authority, primarytype, primarytype, authority, 'broaderterm', term))
     res = cursor.rowcount
-  #cursor.execute( index1 )
-  cursor.execute( index2 )
+    if res == 0:
+        dropIfExistsAuthorityHierarchyTable()
+        cursor.execute(query % (authority, primarytype, primarytype, authority, 'term', term))
+        res = cursor.rowcount
+        #cursor.execute( index1 )
+    cursor.execute(index2)
 
-  cursor.close()
-  #print "Inserted %d rows" % res
+    cursor.close()
+    #print "Inserted %d rows" % res
 
-  conn.commit()
+    conn.commit()
 
-def updateAuthorityHierarchyTable(authority,primarytype,n):
-  query = """
+
+def updateAuthorityHierarchyTable(authority, primarytype, n):
+    query = """
     INSERT INTO authorityname_temp
     SELECT
       h.name termcsid, 
@@ -83,55 +88,54 @@ def updateAuthorityHierarchyTable(authority,primarytype,n):
                             AND rc.objectcsid = h2.name)
       JOIN %s_common pc2 ON (pc2.id = h2.id)
     WHERE rc.objectcsid IN (SELECT termcsid from authorityname_temp WHERE level = %s)
-  """ % (n+1, authority, primarytype, primarytype, authority, n)
+  """ % (n + 1, authority, primarytype, primarytype, authority, n)
 
-  #print '****',n
-  #print query
-  cursor = conn.cursor()
-  cursor.execute( query )
-  res = cursor.rowcount
-  cursor.close()
-  #print "Updated %d rows for level %s" % (res,n+1)
+    #print '****',n
+    #print query
+    cursor = conn.cursor()
+    cursor.execute(query)
+    res = cursor.rowcount
+    cursor.close()
+    #print "Updated %d rows for level %s" % (res,n+1)
 
-  conn.commit()
+    conn.commit()
 
-  return res
+    return res
+
 
 def getAuthority(authority, primarytype, term, connect_string):
+    openConnection(connect_string)
+    #print 'getting children for ',term
+    dropIfExistsAuthorityHierarchyTable()
 
-  openConnection(connect_string)
-  #print 'getting children for ',term
-  dropIfExistsAuthorityHierarchyTable()
+    createAuthorityHierarchyTable(authority, primarytype, term)
 
-  createAuthorityHierarchyTable(authority, primarytype, term)
+    for i in range(20):
+        res = updateAuthorityHierarchyTable(authority, primarytype, i)
+        if res == 0:
+            #print "performed %d loops" % (i+1)
+            break
 
-  for i in range(20):
-    res = updateAuthorityHierarchyTable(authority, primarytype, i)
-    if res == 0:
-       #print "performed %d loops" % (i+1)
-       break
-
-  query = """
+    query = """
     SELECT term,level FROM authorityname_temp
 """
 
-  cursor = conn.cursor()
-  cursor.execute( query )
-  res = cursor.fetchall()
-  #res = [r[0] for r in res]
-  cursor.close()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    res = cursor.fetchall()
+    #res = [r[0] for r in res]
+    cursor.close()
 
-  conn.commit()
+    conn.commit()
 
-  closeConnection()
-  return res
+    closeConnection()
+    return res
 
 
 def getChildren(authority, primarytype, term, connect_string):
+    openConnection(connect_string)
 
-  openConnection(connect_string)
-  
-  query = """
+    query = """
     WITH authorityname_hierarchyquery as (
     SELECT
       h.name AS authoritycsid, 
@@ -150,63 +154,67 @@ def getChildren(authority, primarytype, term, connect_string):
     FROM authorityname_hierarchyquery
     WHERE %s ='%s'
   """
-  cursor = conn.cursor()
-  cursor.execute( query % (authority, primarytype, primarytype, authority, 'broaderterm', term) )
-  res = cursor.fetchall()
-  cursor.close()
+    cursor = conn.cursor()
+    cursor.execute(query % (authority, primarytype, primarytype, authority, 'broaderterm', term))
+    res = cursor.fetchall()
+    cursor.close()
 
-  closeConnection()
-  return res
+    closeConnection()
+    return res
+
 
 if __name__ == "__main__":
 
-  # get some places and materials from PAHMA-dev
-  connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
-  primarytype = 'Placeitem'
-  authority = 'places'
+    # get some places and materials from PAHMA-dev
+    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+    primarytype = 'Placeitem'
+    authority = 'places'
 
-  for p in ('Gebel Garn, Egypt, Northern Africa','Giza, Cemetery 1000, Giza, Giza plateau','Europe','North America, The Americas','South America, The Americas','China, Central Asia, Asia','Central Africa, Africa','Africa','Asia'):
-      places = getAuthority(authority, primarytype, p, connect_string)   
-      print p,':',len(places)  
-      if len(places) < 100:
-	print places
+    for p in ('Gebel Garn, Egypt, Northern Africa', 'Giza, Cemetery 1000, Giza, Giza plateau', 'Europe',
+              'North America, The Americas', 'South America, The Americas', 'China, Central Asia, Asia',
+              'Central Africa, Africa', 'Africa', 'Asia'):
+        places = getAuthority(authority, primarytype, p, connect_string)
+        print p, ':', len(places)
+        if len(places) < 100:
+            print places
 
-  # get some taxonomic names and locations from botgarden-dev
-  connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+    # get some taxonomic names and locations from botgarden-dev
+    connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
 
-  # test getAuthority
-  primarytype = 'Locationitem'
-  authority = 'locations'
-  for p in ('1002, Green House 2','Californian','Damask, Roses','Crops of the World'):
-      locations = getAuthority(authority, primarytype, p, connect_string)  
-      print p,':',len(locations)  
-      if len(locations) < 100:
-	print locations
+    # test getAuthority
+    primarytype = 'Locationitem'
+    authority = 'locations'
+    for p in ('1002, Green House 2', 'Californian', 'Damask, Roses', 'Crops of the World'):
+        locations = getAuthority(authority, primarytype, p, connect_string)
+        print p, ':', len(locations)
+        if len(locations) < 100:
+            print locations
 
-  sys.exit(1)
+    sys.exit(1)
 
-  # test getAuthority
-  primarytype = 'TaxonTenant35'
-  authority = 'taxon'
-  for p in ('Hebe parviflora','Dracophilus delaetianum','ROSACEAE','Ginkgo','ASTERACEAE'):
-      taxa = getAuthority(authority, primarytype, p, connect_string)  
-      print p,':',len(taxa)  
-      if len(taxa) < 100:
-	print taxa
+    # test getAuthority
+    primarytype = 'TaxonTenant35'
+    authority = 'taxon'
+    for p in ('Hebe parviflora', 'Dracophilus delaetianum', 'ROSACEAE', 'Ginkgo', 'ASTERACEAE'):
+        taxa = getAuthority(authority, primarytype, p, connect_string)
+        print p, ':', len(taxa)
+        if len(taxa) < 100:
+            print taxa
 
-  primarytype = 'Placeitem'
-  authority = 'places'
-  for p in ('Europe','North America, The Americas','South America, The Americas','China, Central Asia, Asia','Central Africa, Africa','Africa','Asia'):
-      places = getAuthority(authority, primarytype, p, connect_string)   
-      print p,':',len(places)  
-      if len(places) < 100:
-	print places
+    primarytype = 'Placeitem'
+    authority = 'places'
+    for p in ('Europe', 'North America, The Americas', 'South America, The Americas', 'China, Central Asia, Asia',
+              'Central Africa, Africa', 'Africa', 'Asia'):
+        places = getAuthority(authority, primarytype, p, connect_string)
+        print p, ':', len(places)
+        if len(places) < 100:
+            print places
 
-  # test getChildren
-  primarytype = 'TaxonTenant35'
-  authority = 'taxon'
-  for p in ('Hebe parviflora','Dracophilus delaetianum','ROSACEAE','Ginkgo','ASTERACEAE'):
-      taxa = getChildren(authority, primarytype, p, connect_string)  
-      print p,':',len(taxa)  
-      if len(taxa) < 100:
-	print taxa
+    # test getChildren
+    primarytype = 'TaxonTenant35'
+    authority = 'taxon'
+    for p in ('Hebe parviflora', 'Dracophilus delaetianum', 'ROSACEAE', 'Ginkgo', 'ASTERACEAE'):
+        taxa = getChildren(authority, primarytype, p, connect_string)
+        print p, ':', len(taxa)
+        if len(taxa) < 100:
+            print taxa
