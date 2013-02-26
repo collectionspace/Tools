@@ -32,8 +32,8 @@ public class PrimaryRecordTests {
             {Record.LOAN_IN},
             {Record.LOAN_OUT},
             {Record.ACQUISITION},
-            {Record.MEDIA},  
-            {Record.OBJECT_EXIT}, 
+            {Record.MEDIA}, 
+            {Record.OBJECT_EXIT},
             {Record.GROUP},
             {Record.CATALOGING},
             {Record.MOVEMENT}
@@ -76,14 +76,16 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testCreateNew() throws Exception {
-        log("CREATE NEW: Testing creating new " + Record.getRecordTypePP(primaryType) + "\n");
+        System.out.println("* Starting test: testCreateNew");
+        log("  CREATE NEW: Testing creating new " + Record.getRecordTypePP(primaryType) + "\n");
         selenium.open("createnew.html");
         elementPresent("css=:input[value='" + Record.getRecordTypeShort(primaryType) + "']", selenium);
         selenium.click("css=:radio[value='" + Record.getRecordTypeShort(primaryType) + "']");
         selenium.click("//input[@value='Create']");
-        log("CREATE NEW: expect correct record page to load and pattern chooser to show\n");
+        log("  CREATE NEW: expect correct record page to load and pattern chooser to show\n");
         waitForRecordLoad(primaryType, selenium);
         assertEquals(Record.getRecordTypePP(primaryType), selenium.getText("css=#title-bar .record-type"));
+        System.out.println("* Ending test: testCreateNew");
     }
 
     /**
@@ -97,15 +99,16 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testPrimarySave() throws Exception {
+        System.out.println("* Starting test: testPrimarySave");
         String primaryID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
 
-        log(Record.getRecordTypePP(primaryType) + ": test fill out record and save\n");
+        log("  " + Record.getRecordTypePP(primaryType) + ": test fill out record and save\n");
         selenium.open(Record.getRecordTypeShort(primaryType) + ".html");
         waitForRecordLoad(primaryType, selenium);
 
         fillForm(primaryType, primaryID, selenium);
         //save record
-        log(Record.getRecordTypePP(primaryType) + ": expect save success message and that all fields are valid\n");
+        log("  " + Record.getRecordTypePP(primaryType) + ": expect save success message and that all fields are valid\n");
 		save(selenium);
 		if (selenium.isElementPresent("css=.csc-confirmationDialog .saveButton")){
 			selenium.click("css=.csc-confirmationDialog .saveButton");
@@ -114,6 +117,7 @@ public class PrimaryRecordTests {
         verifyFill(primaryType, primaryID, selenium);
         //Uncomment below for debugging - gives you 30 secs to check everything is working
         //Thread.sleep(1000 * 30);
+        System.out.println("* Ending test: testPrimarySave");
     }
 
     /**
@@ -132,11 +136,29 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testRemovingValues() throws Exception {
+        System.out.println("* Starting test: testRemovingValues");
         //generate a record
-        String generatedID = generateRecord(primaryType, selenium);
+
+        //HACK - app layer script to create a new record doesn't always work
+        //String generatedID = generateRecord(primaryType, selenium);
+        String generatedID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
+
+        //log(Record.getRecordTypePP(primaryType) + ": test fill out record and save\n");
+        selenium.open(Record.getRecordTypeShort(primaryType) + ".html");
+        waitForRecordLoad(primaryType, selenium);
+
+        fillForm(primaryType, generatedID, selenium);
+        //save record
+        //log(Record.getRecordTypePP(primaryType) + ": expect save success message and that all fields are valid\n");
+        save(selenium);
+        if (selenium.isElementPresent("css=.csc-confirmationDialog .saveButton")){
+            selenium.click("css=.csc-confirmationDialog .saveButton");
+        }
+
+
         //goto some collectionspace page with a search box - and open new record
-        selenium.open("createnew.html");        
-        open(primaryType, generatedID, selenium);
+        //selenium.open("createnew.html");        
+        //open(primaryType, generatedID, selenium);
         //Delete contents of all fields:
         clearForm(primaryType, selenium);
         //save record - and expect error due to missing ID
@@ -154,6 +176,7 @@ public class PrimaryRecordTests {
         save(selenium);
         //check values:
         verifyClear(primaryType, selenium);
+        System.out.println("* Ending test: testRemovingValues");
     }
 
     /**
@@ -175,20 +198,25 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testDeleteRecord() throws Exception {
+        System.out.println("* Starting test: testDeleteRecord");
+        log("  DELETING :  " + Record.getRecordTypePP(primaryType) + "\n");
         String uniqueID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
         createAndSave(primaryType, uniqueID, selenium);
         //test delete confirmation - Close and Cancel
         selenium.click("deleteButton");
         textPresent("Confirmation", selenium);
-        assertTrue(selenium.isTextPresent("exact:Delete this "+Record.getRecordTypePP(primaryType) +"?"));
+        assertTrue(selenium.isTextPresent("Delete this "+Record.getRecordTypePP(primaryType) +"?"));
         selenium.click("//img[@alt='close dialog']");
         selenium.click("deleteButton");
-        selenium.click("//input[@value='Cancel']");
+        elementPresent("css=input.cs-confirmationDialogButton-cancel", selenium);
+        selenium.click("css=input.cs-confirmationDialogButton-cancel");
         selenium.click("deleteButton");
+        
         //Test  successfull delete
-        selenium.click("css=.cs-confirmationDialog :input[value='Delete']");
+        elementPresent("css=.cs-confirmationDialog input.cs-confirmationDialogButton-act", selenium);
+        selenium.click("css=.cs-confirmationDialog input.cs-confirmationDialogButton-act");
         textPresent(Record.getRecordTypePP(primaryType) +" successfully deleted", selenium);
-        selenium.click("css=.cs-confirmationDialog :input[value='OK']");
+        selenium.click("css=.cs-confirmationDialog input.cs-confirmationDialogButton");
         selenium.waitForPageToLoad(MAX_WAIT);
         //expect redirect to AFTER_DELETE_URL 
         assertEquals(BASE_URL + AFTER_DELETE_URL, selenium.getLocation());
@@ -201,7 +229,9 @@ public class PrimaryRecordTests {
         //selenium.waitForPageToLoad(MAX_WAIT);
         //expect no results when searching for the record\n");
         textPresent("Found 0 records for " + uniqueID, selenium);
+        log("  ASSERTING : link=" + uniqueID +"\n");
         assertFalse(selenium.isElementPresent("link=" + uniqueID));
+        System.out.println("* Ending test: testDeleteRecord");
     }
 
     /**
@@ -218,6 +248,7 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testCancel() throws Exception {
+        System.out.println("* Starting test: testCancel");
         //create record and fill out all fields
         String uniqueID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
         createAndSave(primaryType, uniqueID, selenium);
@@ -227,7 +258,11 @@ public class PrimaryRecordTests {
         clearForm(primaryType, selenium);
         //click cancel and expect content to change to original\n");
         selenium.click("//input[@value='Cancel changes']");
+        //Wait a few seconds for page to reload. Records with small number of fields
+        //may get false positives
+        Thread.sleep(3000);
         verifyFill(primaryType, uniqueID, selenium);
+        System.out.println("* Ending test: testCancel");
     }
 
     /**
@@ -250,20 +285,22 @@ public class PrimaryRecordTests {
      */
     @Test
     public void testLeavePageWarning() throws Exception {
+        System.out.println("* Starting test: testLeavePageWarning");
         //create
         String uniqueID = Record.getRecordTypeShort(primaryType) + (new Date().getTime());
         String modifiedID = uniqueID + "modified";
         createAndSave(primaryType, uniqueID, selenium);
         //Test close and cancel buttons of dialog
         navigateWarningClose(primaryType, modifiedID, selenium);
-        System.out.println("CLOSE SUCCESS!!");
+        System.out.println("  CLOSE SUCCESS!!");
         //Test 'Save' button - expect it was properly saved
         navigateWarningSave(primaryType, modifiedID, selenium);
-        System.out.println("SAVE SUCCESS!!");
+        System.out.println("  SAVE SUCCESS!!");
         //go to the record again:
         selenium.click("link=" + modifiedID);
         waitForRecordLoad(primaryType, selenium);
         //Test 'Dont Save' button
         navigateWarningDontSave(primaryType, uniqueID, selenium);
+        System.out.println("* Ending test: testLeavePageWarning");
     }
 }
