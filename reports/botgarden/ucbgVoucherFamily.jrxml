@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<style name="Title" fontName="SansSerif" fontSize="26" isBold="true" pdfFontName="Helvetica-Bold"/>
@@ -11,7 +11,7 @@
 		<defaultValueExpression><![CDATA[35]]></defaultValueExpression>
 	</parameter>
 	<parameter name="family" class="java.lang.String">
-		<parameterDescription><![CDATA[Use form %FAMILYNAME%
+		<parameterDescription><![CDATA[Use form %FAMILYNAME% (e.g., %CACTACEAE%)
 or %'FAMILYNAME' to avoid homonyms]]></parameterDescription>
 		<defaultValueExpression><![CDATA["%CACTACEAE'"]]></defaultValueExpression>
 	</parameter>
@@ -82,41 +82,41 @@ order by determination]]>
 	<pageHeader>
 		<band height="42" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="40" width="520" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="40" width="540" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="3" y="2" width="516" height="20"/>
+				<reportElement x="3" y="2" width="536" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA["Voucher by Family: " + $P{family}.replaceAll( "%", "" )]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="65" y="26" width="116" height="12"/>
+				<reportElement x="77" y="26" width="116" height="12"/>
 				<textElement>
 					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Full Taxonomic Name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="329" y="26" width="116" height="12"/>
+				<reportElement x="342" y="26" width="116" height="12"/>
 				<textElement>
 					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Voucher Institution]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="479" y="26" width="55" height="12"/>
-				<textElement>
+				<reportElement x="484" y="26" width="55" height="12"/>
+				<textElement textAlignment="Right">
 					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Hort/Wild]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="3" y="26" width="116" height="12"/>
+				<reportElement x="13" y="26" width="64" height="12"/>
 				<textElement>
 					<font size="10" isBold="true"/>
 				</textElement>
@@ -127,23 +127,23 @@ order by determination]]>
 	<detail>
 		<band height="22" splitType="Prevent">
 			<textField>
-				<reportElement x="3" y="0" width="62" height="18"/>
+				<reportElement x="13" y="0" width="62" height="18"/>
 				<textElement verticalAlignment="Bottom"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement x="65" y="0" width="262" height="18"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="77" y="0" width="262" height="18"/>
 				<textElement verticalAlignment="Bottom"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{determination}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="329" y="0" width="152" height="18"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="342" y="0" width="152" height="18"/>
 				<textElement verticalAlignment="Bottom"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{voucherinstitution}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="479" y="0" width="61" height="18"/>
-				<textElement verticalAlignment="Bottom"/>
+				<reportElement x="499" y="0" width="41" height="18"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{hortwild}]]></textFieldExpression>
 			</textField>
 			<line>
