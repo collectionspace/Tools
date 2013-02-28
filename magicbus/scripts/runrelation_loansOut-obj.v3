@@ -1,0 +1,21 @@
+#!/bin/bash -x
+
+# USE new counting method (directly from Postgres call)
+
+RUNDATE=$1
+SEQUENCE=$2
+SAVEDIR=$3
+
+#
+SYS='loansOut2obj'
+./ok2run.v2            ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_loansOut-obj.log
+time ./importrel.v2    loansOut2obj.${RUNDATE}${SEQUENCE}.xml
+./cleanup_loansOut2obj.v2    ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3          ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_loansOut-obj.log
+#
+SYS='obj2loansOut'
+./ok2run.v2            ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_loansOut-obj.log
+time ./importrel.v2    obj2loansOut.${RUNDATE}${SEQUENCE}.xml
+./cleanup_obj2loansOut.v2    ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3          ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_loansOut-obj.log
+
