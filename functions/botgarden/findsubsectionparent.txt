@@ -1,0 +1,14 @@
+CREATE OR REPLACE FUNCTION findsubsectionparent(character varying) RETURNS character varying AS
+'
+select regexp_replace(tc2.refname, ''^.*\)''''(.*)''''$'', ''\1'') subsectionparent
+from taxon_common tc1
+join hierarchy h1 on tc1.id=h1.id
+join relations_common rc1 on (h1.name=rc1.subjectcsid and rc1.relationshiptype=''hasBroader''
+   and rc1.subjectdocumenttype=''Taxon'')
+join hierarchy h2 on h2.name=rc1.objectcsid
+join taxon_common tc2 on tc2.id=h2.id
+where tc2.taxonrank in (''subsection'', ''subsect'')
+and tc1.refname=$1
+' LANGUAGE SQL
+    IMMUTABLE
+    RETURNS NULL ON NULL INPUT;
