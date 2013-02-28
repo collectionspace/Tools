@@ -1,0 +1,5 @@
+These files contain functions and SQL commands needed for botgarden reports and make things more performant.
+
+The .sql files can simply be executed with something like "psql -d nuxeo < findhybridnamehtml.sql" as long as you have the appropriate permissions.
+
+The find*.sql commands should be done first, then grants.sql and indexes.sql
