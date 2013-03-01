@@ -290,7 +290,6 @@ def doEnumerateObjects(form,config):
         locationList = []
 
     rowcount = len(locationList)
-    #print getHeader('keyinfo')
 
     if rowcount == 0:
 	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -360,6 +359,7 @@ def doCheckMove(form,config):
 
     sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,'toRefName',toRefname))
 
+    # DEBUG
     #print '<table cellpadding="8px" border="1">'
     #print '<tr><td>%s</td><td>%s</td></tr>' % ('From',fromLocation)
     #print '<tr><td>%s</td><td>%s</td></tr>' % ('Crate',crate)
@@ -574,10 +574,6 @@ def doPackingList(form,config):
     if rowcount == 0:
 	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
 	return
-    #else:
-    #	showplace = place
-    #   if showplace == '' : showplace = 'all places in this range'
-    #   print '<tr><td width="500px"><h2>%s locations will be listed for %s.</h2></td></tr>' % (rowcount,showplace)
 
     print getHeader(updateType)
     totalobjects   = 0
@@ -650,7 +646,6 @@ def doAuthorityScan(form,config):
         objects = []
 
     rowcount = len(objects)
-    #print getHeader('keyinfo')
 
     if rowcount == 0:
 	print '<h2>No plants in this range!</h2>'
@@ -666,8 +661,6 @@ def doAuthorityScan(form,config):
     for t in objects:
        if t[column] in tList:
            accessions.append(formatRow({ 'rowtype': updateType,'data': t },form,config))
-       #else:
-       #   accessions.append('<tr><td width="500px">'+t[1]+'</td></tr>')
 
     print '\n'.join(accessions)
     print """</table><table>"""
@@ -792,10 +785,10 @@ def doBedList(form,config):
             pass
         else:
             if len(objects) == 0:
+                #print '<tr><td colspan="6">No objects found at this location.</td></tr>'
                 pass
             else:
                 print formatRow({ 'rowtype':'subheader','data': [l,] },form,config)
-                #print '<tr><td colspan="6">No objects found at this location.</td></tr>'
                 print '<tr><td colspan="6">'
                 print getHeader(updateType+groupby if groupby == 'none' else updateType) % headerid
                 
