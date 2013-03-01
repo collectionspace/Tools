@@ -18,7 +18,7 @@ debug = form.getvalue("debug")
 if config == False:
     print selectWebapp()
     sys.exit(0)
- 
+
 updateType = config.get('info','updatetype')
 action     = form.getvalue('action')
 if updateType == 'packinglist' and action == 'Download as CSV':  
@@ -40,8 +40,9 @@ elif action == config.get('info','updateactionlabel'):
     elif updateType == 'inventory':    doUpdateLocations(form,config)
     elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
     elif updateType == 'bedlist':      doBedList(form,config)
+    # elif updateType == 'holdings':     doBedList(form,config)
+    # elif updateType == 'locreport':    doBedList(form,config)
     elif updateType == 'advsearch':    doBedList(form,config)
-    elif updateType == 'locreport':    doBedList(form,config)
     elif updateType == 'upload':       uploadFile(form,config)
 elif action == "Recent Activity":
     viewLog(form,config)
@@ -58,8 +59,9 @@ elif action == "Search":
     elif updateType == 'move':         doCheckMove(form,config)
     elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
     elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
+    elif updateType == 'holdings':     doAuthorityScan(form,config)
+    elif updateType == 'locreport':    doAuthorityScan(form,config)
     elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
-    elif updateType == 'locreport':    doLocationList(form,config)
     elif updateType == 'inventory':    doLocationSearch(form,config,'list')
     elif updateType == 'keyinfo':      doLocationSearch(form,config,'list')
 elif action in ['<<','>>']:

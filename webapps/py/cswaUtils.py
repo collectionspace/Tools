@@ -233,13 +233,14 @@ def getHeader(updateType):
       <th>Taxonomic Name</th>
       <th>Garden Location</th>
     </tr></thead><tbody>"""
-    elif updateType == 'locreport':
+    elif updateType == 'locreport' or updateType == 'holdings':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
-      <th data-sort="float">Object Number</th>
+      <th data-sort="float">Accession Number</th>
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
       <th data-sort="string">Garden Location</th>
+      <th data-sort="string">Locality</th>
     </tr></thead><tbody>"""
     elif updateType == 'keyinfoResult':
 	return """
@@ -617,19 +618,29 @@ def doPackingList(form,config):
     print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations, %s including crates</td></tr>""" % (totalobjects,len(locationList),totallocations)
     print "\n</table><hr/>"
 
-def doLocationList(form,config):
+def doAuthorityScan(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
     if not validateParameters(form,config): return
 
-    Taxon = form.getvalue("ta.taxon")
-    if Taxon != None:
-        Taxa = listAuthorities('taxon', 'TaxonTenant35', form.getvalue("ta.taxon"), config, form, 'silent')
-    else:
-	Taxa = []
-
-    tList = [ t[0] for t in Taxa ]
+    if updateType == 'locreport':
+       Taxon = form.getvalue("ta.taxon")
+       if Taxon != None:
+           Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'silent')
+       else:
+           Taxa = []
+       tList = [ t[0] for t in Taxa ]
+       column = 1
+       
+    elif updateType == 'holdings':
+       Place = form.getvalue("px.place")
+       if Place != None:
+           Places = listAuthorities('places', 'Placeitem', Place, config, form, 'silent')
+       else:
+           Places = []
+       tList = [ t[0] for t in Places ]
+       column = 5
     
     try:
         objects = cswaDB.getplants('','',1,config,'getalltaxa')
@@ -653,7 +664,7 @@ def doLocationList(form,config):
     totalobjects = 0
     accessions = []
     for t in objects:
-       if t[1] in tList:
+       if t[column] in tList:
            accessions.append(formatRow({ 'rowtype': updateType,'data': t },form,config))
        #else:
        #   accessions.append('<tr><td width="500px">'+t[1]+'</td></tr>')
@@ -662,7 +673,7 @@ def doLocationList(form,config):
     print """</table><table>"""
     print """<tr><td align="center">&nbsp;</tr>"""
     print """<tr><td align="center"><hr></tr>"""
-    print """<tr><td align="center">Location Report completed. %s objects of %s displayed</td></tr>""" % (len(accessions),len(objects))
+    print """<tr><td align="center">Report completed. %s objects of %s displayed</td></tr>""" % (len(accessions),len(objects))
     print "\n</table><hr/>"
 
 
@@ -1038,11 +1049,11 @@ def formatRow(result,form,config):
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
         #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td>%s</tr>''' % (link,rr[4],rr[6],rr[5],location)
-    elif result['rowtype'] == 'locreport':
+    elif result['rowtype'] == 'locreport' or result['rowtype'] == 'holdings':
         rr = result['data']
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6] 
         #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3])
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3],rr[5])
         #return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[4],rr[1],rr[2],rr[3])
     elif result['rowtype'] == 'advsearch':
         rr = result['data']
@@ -1287,7 +1298,7 @@ def getPrinters(form):
 def selectWebapp():
 
     webapps = { 'pahma': ['sysinv', 'keyinfo', 'packlist', 'move', 'upload', 'barcodeprint', 'collectionStats', 'objectInfo'],
-                'ucbg':	['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport'],
+                'ucbg':	['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
                 'ucjeps': ['ucjepsBedList', 'ucjepsLocationReport'] }
 
     exceptions = { "barcodeprint": "BarcodePrint",
@@ -1301,6 +1312,7 @@ def selectWebapp():
                   "move": "Move Crates",
                   "upload": "Barcode Scan File Upload",
                   "ucbgBedList": "Bed List Report",
+                  "ucbgCollHoldings": "Collection Holdings Report",
                   "bedlist": "Bed List Report",
                   "ucjepsBedList": "Bed List Report",
                   "collectionstats": "Collection Stats",
@@ -1360,7 +1372,7 @@ def getStyle(schemacolor1):
 <style type="text/css">
 body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
 table { width: 100%; }
-td { cell-padding: 3px; width:200px; }
+td { cell-padding: 3px; }
 th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
 h1 { font-size:32px; padding:10px; margin:0px; border-bottom: none; }
 h2 { font-size:24px; color:white; background:blue; }
@@ -1466,6 +1478,14 @@ def starthtml(form,config):
 	  <tr><th><span class="cell">taxonomic name:</span></th>
 	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th></tr>
     '''
+          
+    elif updateType == 'holdings':
+        place        = str(form.getvalue('px.place')) if form.getvalue('px.place') else ''
+	otherfields = '''
+	  <tr><th><span class="cell">collection place:</span></th>
+	  <th><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></th></tr>
+    '''
+          
     elif updateType == 'advsearch':
         location1    = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
         taxName      = str(form.getvalue('ta.taxon')) if form.getvalue('ta.taxon') else ''
@@ -1569,7 +1589,8 @@ function formSubmit(location)
 <body>
 <form id="sysinv" enctype="multipart/form-data" method="post">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tbody><tr><td width="1%">&nbsp;</td><td align="center">
+  <tbody><tr><td width="2%">&nbsp;</td>
+  <td align="center">
   <div id="sidiv" style="position:relative;width:1000px;height:750px;">
     <table width="100%">
     <tbody>
@@ -1579,16 +1600,18 @@ function formSubmit(location)
 	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
       </tr>
       <tr><td colspan="3"><hr/></td></tr>
-      <tr>
-	<td colspan="3">
-	<table>
-	  <tr><td><table>
+      <tr><th colspan="3">
+        <table>
+        <tr>
+        <th>
+        <table>
 	  ''' + otherfields + '''
-	</table>
-        </td><td style="width:3%"/>
-	<td style="width:120px;text-align:center;">''' + button + '''</td>
-      </tr>
-      </table></td></tr>
+        </table>
+        </th>
+        <td style="width:80px;text-align:center;">''' + button + '''</td>
+        </tr>
+        </table>
+      </th></tr>
       <tr><td colspan="3"><div id="status"><hr/></div></td></tr>
     </tbody>
     </table>
@@ -1612,7 +1635,7 @@ def endhtml(form,config,elapsedtime):
     </tbody>
   </table>
 </div>
-</td><td width="1%">&nbsp;</td></tr>
+</td><td width="2%">&nbsp;</td></tr>
 </tbody></table>
 </form>
 <script>
