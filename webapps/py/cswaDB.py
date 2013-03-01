@@ -7,16 +7,16 @@ import pgdb
 
 timeoutcommand = 'set statement_timeout to 300000'
 
-def dbtransaction(command,config):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    cursor   = pahmadb.cursor()
+def dbtransaction(command, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    cursor = pahmadb.cursor()
     cursor.execute(command)
 
-def setquery(type,location):
 
+def setquery(type, location):
     if type == 'inventory':
-	return  """
+        return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  
      else concat(l.termdisplayName,
@@ -72,7 +72,7 @@ LIMIT 30000"""
         elif type == 'locreport':
             sortkey = 'determination'
             searchkey = 'tig.taxon'
-            
+
         return """
 select 
 case when (mc.currentlocation is not null and mc.currentlocation <> '')
@@ -119,7 +119,7 @@ ORDER BY %s,to_number(objectnumber,'9999.9999')
 LIMIT 6000""" % (searchkey, location, sortkey)
 
     elif type == 'keyinfo' or type == 'barcodeprint' or type == 'packinglist':
-	return """
+        return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  
      else concat(l.termdisplayName,
@@ -182,7 +182,7 @@ LIMIT 30000
 """
 
     elif type == 'getalltaxa':
-	return """
+        return """
 select co1.objectnumber,
 case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
      then regexp_replace(tig.taxon, '^.*\\)''(.*)''$', '\\1')
@@ -222,54 +222,54 @@ join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')   -- m
 join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('','')
+left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('', '')
+
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
-def getlocations(location1,location2,num2ret,config,updateType):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getlocations(location1, location2, num2ret, config, updateType):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
-   
+
     debug = False
- 
+
     result = []
 
-    for loc in getloclist('set',location1,'',num2ret,config):
-        getobjects = setquery(updateType,loc[0])
+    for loc in getloclist('set', location1, '', num2ret, config):
+        getobjects = setquery(updateType, loc[0])
 
         try:
-	    elapsedtime = time.time()
+            elapsedtime = time.time()
             objects.execute(getobjects)
-	    elapsedtime = time.time() - elapsedtime
-            if debug: sys.stderr.write('all objects: %s :: %s\n' % (loc[0],elapsedtime))
-	except pgdb.DatabaseError, e:
+            elapsedtime = time.time() - elapsedtime
+            if debug: sys.stderr.write('all objects: %s :: %s\n' % (loc[0], elapsedtime))
+        except pgdb.DatabaseError, e:
             sys.stderr.write('getlocations select error: %s' % e)
-            return result       
+            return result
         except:
-	    sys.stderr.write("some other getlocations database error!")
-            return result       
+            sys.stderr.write("some other getlocations database error!")
+            return result
 
-        # a hack: check each object to make it is really in this location
-	try:
-	    rows = objects.fetchall()
-	except pgdb.DatabaseError, e:
+            # a hack: check each object to make it is really in this location
+        try:
+            rows = objects.fetchall()
+        except pgdb.DatabaseError, e:
             sys.stderr.write("fetchall getlocations database error!")
 
         if debug: sys.stderr.write('number objects to be checked: %s\n' % len(rows))
         try:
             for row in rows:
                 result.append(row)
-	except:
-           raise
-           sys.stderr.write("other getobjects error: %s" % len(rows))
+        except:
+            raise
+            sys.stderr.write("other getobjects error: %s" % len(rows))
 
     return result
 
-def getplants(location1,location2,num2ret,config,updateType):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getplants(location1, location2, num2ret, config, updateType):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     debug = False
@@ -277,42 +277,42 @@ def getplants(location1,location2,num2ret,config,updateType):
     result = []
 
     #for loc in getloclist('set',location1,'',num2ret,config):
-    getobjects = setquery(updateType,location1)
+    getobjects = setquery(updateType, location1)
     #print getobjects
     try:
         elapsedtime = time.time()
         objects.execute(getobjects)
         elapsedtime = time.time() - elapsedtime
         #sys.stderr.write('query :: %s\n' % getobjects)
-        if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1,elapsedtime))
+        if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1, elapsedtime))
     except pgdb.DatabaseError, e:
         sys.stderr.write('getlocations select error: %s' % e)
         return result
     except:
         sys.stderr.write("some other getplants database error!")
         return result
-    
+
     # a hack: check each object to make it is really in this location
     try:
         result = objects.fetchall()
         if debug: sys.stderr.write('object count: %s\n' % (len(result)))
     except pgdb.DatabaseError, e:
         sys.stderr.write("fetchall getplants database error!")
-        
+
     return result
 
-def getloclist(searchType,location1,location2,num2ret,config):
 
+def getloclist(searchType, location1, location2, num2ret, config):
     # 'set' means 'next num2ret locations', otherwise prefix match
     if searchType == 'set':
-	whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0')"
+        whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0')"
     elif searchType == 'prefix':
-	whereclause = "WHERE locationkey LIKE replace('" + location1 + "%',' ','0')"
+        whereclause = "WHERE locationkey LIKE replace('" + location1 + "%',' ','0')"
     elif searchType == 'range':
-	whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0') AND locationkey <= replace('" + location2 + "',' ','0')"
+        whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0') AND locationkey <= replace('" + location2 + "',' ','0')"
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
     if int(num2ret) > 30000: num2ret = 30000
     if int(num2ret) < 1:    num2ret = 1
@@ -323,92 +323,93 @@ select termdisplayname,replace(termdisplayname,' ','0') locationkey from locterm
 """ + whereclause + """
 order by locationkey
 limit """ + str(num2ret)
-    
+
     objects.execute(getobjects)
     #for object in objects.fetchall():
-        #print object
+    #print object
     return objects.fetchall()
 
-def findcurrentlocation(csid,config):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def findcurrentlocation(csid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getloc = "select findcurrentlocation('" + csid + "')"
-   
-    try: 
+
+    try:
         objects.execute(getloc)
     except:
-	return "findcurrentlocation error"
+        return "findcurrentlocation error"
 
     return objects.fetchone()[0]
 
-def getrefname(table,term,config):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getrefname(table, term, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     if term == None or term == '':
-	return ''
+        return ''
 
-    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table,term)
+    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term)
 
     try:
         objects.execute(query)
         return objects.fetchone()[0]
     except:
-	return ''
+        return ''
         raise
 
-def findrefnames(table,termlist,config):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def findrefnames(table, termlist, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     result = []
     for t in termlist:
-        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table,t)
+        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t)
 
         try:
             objects.execute(query)
-	    refname = objects.fetchone()
-	    result.append([t,refname])
+            refname = objects.fetchone()
+            result.append([t, refname])
         except:
-	    raise
+            raise
             return "findrefnames error"
 
     return result
+
 
 if __name__ == "__main__":
 
     from cswaUtils import getConfig
 
     config = getConfig('ucbgLocationReport.cfg')
-    print getplants('Velleia rosea','',1,config,'locreport')
+    print getplants('Velleia rosea', '', 1, config, 'locreport')
     sys.exit()
-    
+
     config = getConfig('sysinvProd.cfg')
     print '\nrefnames\n'
-    print getrefname('concepts_common','zzz',config)
-    print getrefname('concepts_common','',config)
-    print getrefname('concepts_common','Yurok',config)
-    print findrefnames('places_common',['zzz','Sudan, Northern Africa, Africa'],config)
+    print getrefname('concepts_common', 'zzz', config)
+    print getrefname('concepts_common', '', config)
+    print getrefname('concepts_common', 'Yurok', config)
+    print findrefnames('places_common', ['zzz', 'Sudan, Northern Africa, Africa'], config)
     print '\ncurrentlocation\n'
-    print findcurrentlocation('c65b2ffa-6e5f-4a6d-afa4-e0b57fc16106',config)
+    print findcurrentlocation('c65b2ffa-6e5f-4a6d-afa4-e0b57fc16106', config)
 
     print '\nset of locations\n'
-    for loc in getloclist('set','Kroeber, 20A, W B','',10,config):
+    for loc in getloclist('set', 'Kroeber, 20A, W B', '', 10, config):
         print loc
 
     print '\nlocations by prefix\n'
-    for loc in getloclist('prefix','Kroeber, 20A, W B','',1000,config):
+    for loc in getloclist('prefix', 'Kroeber, 20A, W B', '', 1000, config):
         print loc
 
     print '\nlocations by range\n'
-    for loc in getloclist('range','Kroeber, 20A, W B2, 1','Kroeber, 20A, W B5, 11',1000,config):
+    for loc in getloclist('range', 'Kroeber, 20A, W B2, 1', 'Kroeber, 20A, W B5, 11', 1000, config):
         print loc
 
     print '\nobjects\n'
@@ -417,9 +418,9 @@ if __name__ == "__main__":
     #for i,loc in enumerate(getlocations('Kroeber, 20A, W 23,  9',1,config,'inventory')):
     #for i,loc in enumerate(getlocations('Regatta, A150, RiveTier 27, C',1,config,'inventory')):
     #for i,loc in enumerate(getlocations('Kroeber, 20AMez, 128 A','',1,config,'inventory')):
-    for i,loc in enumerate(getlocations('Regatta, A150, South Nexel Unit 6, C','',1,config,'inventory')):
-	print 'location',i+1,loc[0:6]
+    for i, loc in enumerate(getlocations('Regatta, A150, South Nexel Unit 6, C', '', 1, config, 'inventory')):
+        print 'location', i + 1, loc[0:6]
 
     print '\nkeyinfo\n'
-    for i,loc in enumerate(getlocations('Kroeber, 20AMez, 128 A','',1,config,'keyinfo')):
-	print 'location',i+1,loc[0:12]
+    for i, loc in enumerate(getlocations('Kroeber, 20AMez, 128 A', '', 1, config, 'keyinfo')):
+        print 'location', i + 1, loc[0:12]
