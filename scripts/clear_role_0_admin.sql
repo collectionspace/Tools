@@ -42,17 +42,22 @@
 --
 -- 2. Shut down that newer CollectionSpace system, if it is running.
 --
--- 3. Wipe and then create an empty 'cspace' database, by running the
---    'init_cspace_db.sql' script against your *newer*, freshly-installed
---    CollectionSpace system.
+-- 3. Wipe and then create an empty 'cspace' database on your newer
+--    system, by running the copy of the 'init_cspace_db.sql' script
+--    that has been deployed to your Tomcat server folder.
 --
 --    E.g. on a Linux or other Unix-like system (enter your 'postgres'
---    database user password when prompted.)
+--    database user password when prompted):
 --
 --    cd $CATALINA_HOME/cspace/services/db/postgresql
 --    psql -U postgres -f init_cspace_db.sql
 --
---    WARNING: Any existing data in that 'cspace' database will be deleted.
+--    WARNING: Any existing data in the 'cspace' database will be deleted.
+--    Be sure to run this script against your *newer*, freshly-installed
+--    CollectionSpace system, rather than against an older system that
+--    contains 'real' data. (If you wish to be further cautious, see the step
+--    below for instructions on first making a backup of your older system's
+--    data, just in case, by performing step 4 prior to step 3.)
 --
 -- 4. Export your 'cspace' database from your older system via 'pg_dump'
 --    using a command similar to the following. (Enter your 'cspace'
