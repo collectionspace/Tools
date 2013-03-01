@@ -55,19 +55,19 @@
 --    WARNING: Any existing data in the 'cspace' database will be deleted.
 --    Be sure to run this script against your *newer*, freshly-installed
 --    CollectionSpace system, rather than against an older system that
---    contains 'real' data. (If you wish to be further cautious, see the step
---    below for instructions on first making a backup of your older system's
---    data, just in case, by performing step 4 prior to step 3.)
+--    contains 'real' data. (If you wish to be further cautious, see the
+--    step below for instructions on first making a backup of your older
+--    system's data, just in case.)
 --
--- 4. Export your 'cspace' database from your older system via 'pg_dump'
---    using a command similar to the following. (Enter your 'cspace'
---    database user password when prompted.)
+-- 4. Export a copy of your 'cspace' database from your older system via
+--    'pg_dump' using a command similar to the following. (Enter your
+--    'cspace' database user password when prompted.)
 --
 --    pg_dump -U cspace cspace > my_cspace_database_dump_file.sql
 --
--- 5. On your newer system, import the contents of your older 'cspace'
---    database by executing the commands in your export file.
---    (Enter your 'cspace' database user password when prompted.)
+-- 5. On your newer system, import your older 'cspace' database
+--    by executing the commands in your export file. (Enter your 'cspace'
+--    database user password when prompted.)
 --
 --    psql -U cspace -d cspace -f my_cspace_database_dump_file.sql
 --
