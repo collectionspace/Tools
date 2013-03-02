@@ -923,7 +923,7 @@ def viewLog(form,config):
 
 def alreadyExists(txt,elements):
     for e in elements:
-        if txt in str(e.text):
+        if txt == str(e.text):
             #print "    found,skipping: ",txt
             return True
     return False
