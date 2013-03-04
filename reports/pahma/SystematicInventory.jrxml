@@ -18,48 +18,34 @@
 		<defaultValueExpression><![CDATA["Kroeber, 20A, AA  1, 10"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT * FROM (
-SELECT
-case when (m.currentlocation is not null and m.currentlocation <> '') then substring(m.currentlocation, position(')''' IN
-m.currentlocation)+2, LENGTH(m.currentlocation)-position(')''' IN
-m.currentlocation)-2) end AS storageLocation,
-case when (m.currentlocation is not null and m.currentlocation <> '') then replace(substring(m.currentlocation, position(')''' IN
-m.currentlocation)+2, LENGTH(m.currentlocation)-position(')''' IN
-m.currentlocation)-2),' ','0') end AS locationkey,
-m.locationdate locationdate,
+		<![CDATA[SELECT
+case when ca.computedcrate is null then regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
+  else regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
+end as storageLocation,
+case when ca.computedcrate is null then replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0')
+  else replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0')||'0'||replace(regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1'), ' ', '0')
+end as locationkey,
+regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1') computedcrate,
 c.objectnumber objectNumber,
+cp.sortableobjectnumber,
 c.numberofobjects objectCount,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
-r.subjectcsid movementCsid,
-m.currentlocation movementRefname,
-r.objectcsid  objectCsid,
-r.objectrefname  objectRefname
-FROM movements_common m, HIERARCHY h1, relations_common r, HIERARCHY h2, collectionobjects_common c
-left outer join hierarchy h5 on (c.id = h5.parentid and h5.pos=0 and h5.name='collectionobjects_common:objectNameList')
-left outer join objectnamegroup ong on (ong.id=h5.id)
-WHERE m.ID = h1.ID AND r.subjectcsid = h1.NAME
-AND r.subjectdocumenttype = 'Movement' AND r.objectdocumenttype = 'CollectionObject'
-AND r.objectcsid = h2.name AND h2.ID = c.ID
-AND m.locationdate = (
-SELECT MAX(m_2.locationdate)
-FROM movements_common m_2, HIERARCHY h1_2, relations_common r_2
-WHERE m_2.ID = h1_2.ID AND r_2.subjectcsid = h1_2.NAME
-AND r_2.subjectdocumenttype='Movement' AND r_2.objectdocumenttype='CollectionObject'
-AND r_2.objectcsid = h2.name
-)
-) AS locationlist
-WHERE locationkey >= replace($P{location1},' ','0')
-  AND locationkey <= replace($P{location2},' ','0')
-order by locationkey,objectnumber,objectName desc]]>
+ong.objectName objectName
+FROM collectionobjects_common c
+left outer join hierarchy h1 on (c.id = h1.parentid and h1.pos=0 and h1.name='collectionobjects_common:objectNameList')
+left outer join objectnamegroup ong on (ong.id=h1.id)
+join collectionobjects_pahma cp on (c.id=cp.id)
+join collectionobjects_anthropology ca on (c.id=ca.id)
+WHERE replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') >= replace($P{location1}, ' ', '0')
+  and replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') <= replace($P{location2}, ' ', '0')
+order by locationkey, sortableobjectnumber, objectName desc]]>
 	</queryString>
-	<field name="objectNumber" class="java.lang.String"/>
-	<field name="objectName" class="java.lang.String"/>
 	<field name="storagelocation" class="java.lang.String"/>
-	<field name="objectCount" class="java.lang.Integer"/>
-	<field name="objectCsid" class="java.lang.String"/>
-	<field name="objectRefname" class="java.lang.String"/>
-	<field name="movementCsid" class="java.lang.String"/>
-	<field name="movementRefname" class="java.lang.String"/>
+	<field name="locationkey" class="java.lang.String"/>
+	<field name="computedcrate" class="java.lang.String"/>
+	<field name="objectnumber" class="java.lang.String"/>
+	<field name="sortableobjectnumber" class="java.lang.String"/>
+	<field name="objectcount" class="java.lang.Long"/>
+	<field name="objectname" class="java.lang.String"/>
 	<group name="storageLocation" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{storagelocation}]]></groupExpression>
 		<groupHeader>
@@ -69,7 +55,7 @@ order by locationkey,objectnumber,objectName desc]]>
 					<textElement>
 						<font fontName="SansSerif" size="11" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{storagelocation}]]></textFieldExpression>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{storagelocation}]]></textFieldExpression>
 				</textField>
 				<rectangle>
 					<reportElement x="553" y="3" width="15" height="15"/>
@@ -84,7 +70,7 @@ order by locationkey,objectnumber,objectName desc]]>
 		<band height="53" splitType="Stretch">
 			<image onErrorType="Blank">
 				<reportElement x="303" y="0" width="270" height="51"/>
-				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement style="Title" x="0" y="0" width="263" height="24"/>
@@ -111,14 +97,14 @@ order by locationkey,objectnumber,objectName desc]]>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{location1}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{location1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="171" y="28" width="129" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{location2}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{location2}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="SubTitle" x="0" y="29" width="28" height="16"/>
@@ -179,26 +165,26 @@ order by locationkey,objectnumber,objectName desc]]>
 	</columnHeader>
 	<detail>
 		<band height="17" splitType="Stretch">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="2" y="1" width="94" height="16" backcolor="#FFFFFF"/>
 				<textElement>
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{objectNumber}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="106" y="1" width="118" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{objectName}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="244" y="1" width="29" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{objectCount}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectcount}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="16" width="555" height="1"/>
@@ -218,35 +204,35 @@ order by locationkey,objectnumber,objectName desc]]>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement style="Column header" x="513" y="47" width="40" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
 				<reportElement style="Column header" x="0" y="47" width="197" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="Column header" x="233" y="47" width="80" height="16"/>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["By: "]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["By: "]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="Detail" mode="Transparent" x="0" y="1" width="552" height="46"/>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Additional notes: "]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["Additional notes: "]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
