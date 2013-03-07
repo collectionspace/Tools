@@ -8,9 +8,10 @@
 	</parameter>
 	<queryString>
 		<![CDATA[select co1.objectnumber,
-case when (tig.taxon is not null and tig.taxon <> '')
+case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
      then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
-end as determination,
+     when tig.hybridflag = 'true' then findhybridname(tig.id)
+end as Determination,
 date(mc.locationdate + interval '8 hours') actiondate,
 mc.reasonformove actionreason,
 mb.labelrequested,
@@ -54,18 +55,18 @@ order by locationdate asc, currentlocation]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="64" splitType="Stretch">
+		<band height="61" splitType="Stretch">
 			<staticText>
-				<reportElement x="-2" y="43" width="540" height="20"/>
+				<reportElement x="0" y="35" width="540" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Accession History Report]]></text>
 			</staticText>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="63" width="520" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="57" width="540" height="1"/>
 				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
+					<pen lineWidth="0.5" lineColor="#CCCCCC"/>
 				</graphicElement>
 			</line>
 			<textField pattern="MM/dd/yyyy">
@@ -83,7 +84,7 @@ order by locationdate asc, currentlocation]]>
 	<columnHeader>
 		<band height="50" splitType="Stretch">
 			<textField>
-				<reportElement x="75" y="6" width="369" height="15"/>
+				<reportElement x="111" y="6" width="427" height="15"/>
 				<textElement verticalAlignment="Bottom">
 					<font size="12"/>
 				</textElement>
@@ -161,7 +162,7 @@ order by locationdate asc, currentlocation]]>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="33" splitType="Prevent">
+		<band height="44" splitType="Prevent">
 			<textField isStretchWithOverflow="true" pattern="MM/dd/yyyy">
 				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="75" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
@@ -207,6 +208,12 @@ order by locationdate asc, currentlocation]]>
 				<textElement/>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{movementnote}]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="0" y="39" width="540" height="1" forecolor="#000000"/>
+				<graphicElement>
+					<pen lineColor="#CCCCCC"/>
+				</graphicElement>
+			</line>
 		</band>
 	</detail>
 	<pageFooter>

@@ -11,45 +11,41 @@
 		<defaultValueExpression><![CDATA[15]]></defaultValueExpression>
 	</parameter>
 	<parameter name="csid" class="java.lang.String">
-		<defaultValueExpression><![CDATA["8721a3c4-274a-4537-859f"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["f27eb345-a55f-409f-b6be"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[select distinct on (cop.sortableobjectnumber)
-
-g.title groupTitle,
-(case when g.scopenote is Null then '' else g.scopenote end) scopeNote,
-co1.id objectid,
-co1.objectnumber objectNumber,
-(case when sd.datedisplaydate is NULL then '' else sd.datedisplaydate end) fieldCollectionDate,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
-(case when bd.item is NULL then '' else bd.item end) description,
+		<![CDATA[select
+gc.title groupTitle,
+gc.scopenote scopeNote,
+co.id objectid,
+co.objectnumber objectNumber,
+sd.datedisplaydate fieldCollectionDate,
+ong.objectName objectName,
+bd.item description,
 misc.lifecyclestate lifecyclestate
+FROM groups_common gc
+JOIN hierarchy h1 ON (gc.id=h1.id)
+JOIN relations_common rc1 ON (h1.name=rc1.subjectcsid)
+JOIN hierarchy h2 ON (rc1.objectcsid=h2.name)
+JOIN collectionobjects_common co ON (h2.id=co.id)
+JOIN collectionobjects_pahma cp ON (co.id=cp.id)
 
-from groups_common g
+LEFT OUTER JOIN hierarchy h3 ON (co.id = h3.parentid AND h3.primarytype='objectNameGroup' AND h3.pos=0)
+LEFT OUTER JOIN objectnamegroup ong ON (ong.id=h3.id)
 
-join hierarchy h1 on (g.id = h1.id)
-join relations_common r on (h1.name = r.objectcsid)
-join hierarchy h2 on (r.subjectcsid = h2.name)
-left outer join hierarchy h3 on (h2.id = h3.parentid and h3.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id and bd.pos=0)
 
-left outer join structureddategroup sd on (h3.id = sd.id)
+left outer join hierarchy h4 on (h2.id = h4.parentid and h4.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+left outer join structureddategroup sd on (h4.id = sd.id)
 
-join collectionobjects_pahma cop on (h2.id = cop.id)
-join collectionobjects_common co1 on (h2.id = co1.id)
-
-join hierarchy h5 on (co1.id = h5.parentid)
-left outer join objectnamegroup ong on (ong.id=h5.id and h5.pos = 0)
-
-join collectionobjects_common_briefdescriptions bd on (co1.id = bd.id)
-
-join collectionspace_core core on core.id=co1.id
-join misc on misc.id = co1.id
+join collectionspace_core core on core.id=co.id
+join misc on misc.id = co.id
 
 where misc.lifecyclestate <> 'deleted'
 AND core.tenantid=$P{tenantid}
 AND h1.name=$P{csid}
 
-order by cop.sortableobjectnumber, objectname desc]]>
+order by cp.sortableobjectnumber, objectname desc]]>
 	</queryString>
 	<field name="grouptitle" class="java.lang.String"/>
 	<field name="scopenote" class="java.lang.String"/>
@@ -63,7 +59,7 @@ order by cop.sortableobjectnumber, objectname desc]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="103" splitType="Stretch">
+		<band height="97" splitType="Stretch">
 			<staticText>
 				<reportElement style="SubTitle" x="116" y="39" width="157" height="22"/>
 				<textElement>
@@ -83,21 +79,21 @@ order by cop.sortableobjectnumber, objectname desc]]>
 				<text><![CDATA[Object Group Report]]></text>
 			</staticText>
 			<line>
-				<reportElement x="0" y="64" width="555" height="1"/>
+				<reportElement x="0" y="69" width="555" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="69" width="269" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement>
+				<reportElement style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="70" width="269" height="24" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement verticalAlignment="Bottom">
 					<font fontName="SansSerif" size="14"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{grouptitle}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="273" y="70" width="280" height="30" backcolor="#CCCCCC"/>
-				<textElement>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="273" y="71" width="280" height="24" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Bottom">
 					<font fontName="SansSerif" isItalic="true"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{scopenote}]]></textFieldExpression>
@@ -157,21 +153,21 @@ order by cop.sortableobjectnumber, objectname desc]]>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="95" y="2" width="120" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="335" y="2" width="217" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="217" y="2" width="114" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>

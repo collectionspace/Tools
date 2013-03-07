@@ -18,68 +18,52 @@
 		<defaultValueExpression><![CDATA["Kroeber, 20A, AA  1, 10"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT * FROM (
-SELECT
-case when (m.currentlocation is not null and m.currentlocation <> '') then substring(m.currentlocation, position(')''' IN
-m.currentlocation)+2, LENGTH(m.currentlocation)-position(')''' IN
-m.currentlocation)-2) end AS storageLocation,
-case when (m.currentlocation is not null and m.currentlocation <> '') then replace(substring(m.currentlocation, position(')''' IN
-m.currentlocation)+2, LENGTH(m.currentlocation)-position(')''' IN
-m.currentlocation)-2),' ','0') end AS locationkey,
-m.locationdate locationdate,
+		<![CDATA[select
+case when ca.computedcrate is null then regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
+  else regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
+end as storageLocation,
+case when ca.computedcrate is null then replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0')
+  else replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0')||'0'||replace(regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1'), ' ', '0')
+end as locationkey,
 c.objectnumber objectNumber,
+cp.sortableobjectnumber,
 c.numberofobjects objectCount,
-c.id objectid,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
+ong.objectName objectName,
 case when (pfc.item is not null and pfc.item <> '') then
- substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+  regexp_replace(pfc.item, '^.*\)''(.*)''$', '\1')
 end AS fieldcollectionplace,
 case when (apg.assocpeople is not null and apg.assocpeople <> '') then
- substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+  regexp_replace(apg.assocpeople, '^.*\)''(.*)''$', '\1')
 end as culturalgroup,
 case when (pef.item is not null and pef.item <> '') then
- substring(pef.item, position(')''' IN pef.item)+2, LENGTH(pef.item)-position(')''' IN pef.item)-2)
-end as ethnographicfilecode,
-r.subjectcsid movementCsid,
-m.currentlocation movementRefname,
-r.objectcsid  objectCsid,
-r.objectrefname  objectRefname
-FROM movements_common m, HIERARCHY h1, relations_common r, HIERARCHY h2, collectionobjects_common c
+  regexp_replace(pef.item, '^.*\)''(.*)''$', '\1')
+end as ethnographicfilecode
+FROM collectionobjects_common c
+join collectionobjects_pahma cp on (c.id=cp.id)
+join collectionobjects_anthropology ca on (c.id=ca.id)
+
 left outer join hierarchy h5 on (c.id = h5.parentid  and h5.pos=0 and h5.name='collectionobjects_common:objectNameList')
 left outer join objectnamegroup ong on (ong.id=h5.id)
+
 left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=c.id and pfc.pos=0)
 left outer join hierarchy h3 on (c.id=h3.parentid and h3.pos=0 and h3.name='collectionobjects_common:assocPeopleGroupList')
+
 left outer join assocpeoplegroup apg on (apg.id=h3.id)
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=c.id and pef.pos=0)
-WHERE m.ID = h1.ID AND r.subjectcsid = h1.NAME
-AND r.subjectdocumenttype = 'Movement' AND r.objectdocumenttype = 'CollectionObject'
-AND r.objectcsid = h2.name AND h2.ID = c.ID
-AND m.locationdate = (
-SELECT MAX(m_2.locationdate)
-FROM movements_common m_2, HIERARCHY h1_2, relations_common r_2
-WHERE m_2.ID = h1_2.ID AND r_2.subjectcsid = h1_2.NAME
-AND r_2.subjectdocumenttype='Movement' AND r_2.objectdocumenttype='CollectionObject'
-AND r_2.objectcsid = h2.name
-)
-) AS locationlist
-WHERE locationkey >= replace($P{location1},' ','0')
-  AND locationkey <= replace($P{location2},' ','0')
-order by locationkey,objectnumber,objectid desc]]>
+
+WHERE replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') >= replace($P{location1}, ' ', '0')
+  and replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') <= replace($P{location2}, ' ', '0')
+order by locationkey, sortableobjectnumber, objectName desc]]>
 	</queryString>
 	<field name="storagelocation" class="java.lang.String"/>
 	<field name="locationkey" class="java.lang.String"/>
-	<field name="locationdate" class="java.sql.Timestamp"/>
 	<field name="objectnumber" class="java.lang.String"/>
+	<field name="sortableobjectnumber" class="java.lang.String"/>
 	<field name="objectcount" class="java.lang.Long"/>
-	<field name="objectid" class="java.lang.String"/>
 	<field name="objectname" class="java.lang.String"/>
 	<field name="fieldcollectionplace" class="java.lang.String"/>
 	<field name="culturalgroup" class="java.lang.String"/>
 	<field name="ethnographicfilecode" class="java.lang.String"/>
-	<field name="movementcsid" class="java.lang.String"/>
-	<field name="movementrefname" class="java.lang.String"/>
-	<field name="objectcsid" class="java.lang.String"/>
-	<field name="objectrefname" class="java.lang.String"/>
 	<group name="storageLocation" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{storagelocation}]]></groupExpression>
 		<groupHeader>
