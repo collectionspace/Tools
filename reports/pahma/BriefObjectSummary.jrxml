@@ -10,69 +10,81 @@
 	<parameter name="tenantid" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[15]]></defaultValueExpression>
 	</parameter>
-	<parameter name="csid" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["35aee97c-c238-45f6-a077"]]></defaultValueExpression>
+	<parameter name="csid" class="java.lang.String">
+		<defaultValueExpression><![CDATA["afd51113-8395-4b9c-ae90"]]></defaultValueExpression>
 	</parameter>
-	<queryString language="SQL">
-		<![CDATA[select
-g.title groupTitle,
-(case when g.scopenote is Null then '' else g.scopenote end) scopeNote,
-c.id objectid,
-c.objectnumber objectNumber,
-c.fieldcollectionnote fieldcollectionnote,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
-sd.datedisplaydate fieldCollectionDate,
-findcurrentlocation(c.id) currentlocation,
-'' site,
-'' culture,
-(case when bd.item is NULL then '' else bd.item end) description,
-r.subjectcsid relationsubjectid,
-r.objectcsid,
-h4.id h4id,
-h4.parentid h4pid,
-h3.id h3id,
-h3.parentid h3pid,
-misc.lifecyclestate lifecyclestate
-from groups_common g
-left outer join hierarchy h1 on (g.id = h1.id)
-inner join relations_common r on (h1.name = r.objectcsid)
-left outer join hierarchy h2 on (r.subjectcsid = h2.name)
-left outer join collectionobjects_common c on (h2.id = c.id)
-left outer join collectionobjects_common_briefdescriptions bd on (c.id = bd.id)
-inner join misc on misc.id = c.id
-inner join hierarchy h3 on (h3.name = r.subjectcsid)
-inner join hierarchy h4 on (h3.id = h4.parentid)
-inner join structureddategroup sd on (h4.id = sd.id)
-inner join collectionspace_core core on core.id=c.id
-left outer join hierarchy h5 on (c.id = h5.parentid)
-inner join objectnamegroup ong on (ong.id=h5.id)
-where misc.lifecyclestate <> 'deleted'
-and core.tenantid=$P{tenantid}
-and h1.name=$P{csid}
-order by objectnumber]]>
+	<queryString>
+		<![CDATA[SELECT  gc.title AS "groupTitle",
+(case when gc.scopenote is Null then '' else gc.scopenote end) AS scopeNote,
+        h1.name AS "csid",
+        co.objectnumber AS "objectnumber",
+        cp.sortableobjectnumber AS "sort",
+co.fieldcollectionnote fieldcollectionnote,
+-- sd.datedisplaydate fieldCollectionDate,
+        ong.objectName AS "objectname",
+case when (bd.item is not null and bd.item <> '') then
+  regexp_replace(bd.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end AS description,
+case when (fcp.item is not null and fcp.item <> '') then
+  regexp_replace(fcp.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end AS site,
+case when (apg.assocpeople is not null and apg.assocpeople <> '') then
+  regexp_replace(apg.assocpeople, '^.*\)''(.*)''$', '\1')
+  else ''
+end as culturalgroup,
+case when (pef.item is not null and pef.item <> '') then
+  regexp_replace(pef.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end as ethnographicfilecode,
+CASE WHEN (fcp.item IS NOT NULL AND fcp.item <> '') THEN
+         regexp_replace(fcp.item, '^.*\)''(.*)''$', '\1')
+END AS "Site",
+case when ca.computedcrate is null then regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
+	  else regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
+	end as "currentlocation"
+FROM groups_common gc
+JOIN hierarchy h1 ON (gc.id=h1.id)
+JOIN relations_common rc1 ON (h1.name=rc1.subjectcsid)
+JOIN hierarchy h2 ON (rc1.objectcsid=h2.name)
+JOIN collectionobjects_common co ON (h2.id=co.id)
+JOIN collectionobjects_pahma cp ON (co.id=cp.id)
+join collectionobjects_anthropology ca on (co.id=ca.id)
+
+LEFT OUTER JOIN hierarchy h3 ON (co.id = h3.parentid AND h3.primarytype='objectNameGroup' AND h3.pos=0)
+LEFT OUTER JOIN objectnamegroup ong ON (ong.id=h3.id)
+
+LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id and bd.pos=0)
+
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+
+left outer join hierarchy h4 on (co.id=h4.parentid and h4.pos=0 and h4.name='collectionobjects_common:assocPeopleGroupList')
+
+left outer join assocpeoplegroup apg on (apg.id=h4.id)
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=co.id and pef.pos=0)
+
+WHERE rc1.subjectcsid = $P{csid}
+
+ORDER BY "currentlocation",sort]]>
 	</queryString>
 	<field name="groupTitle" class="java.lang.String"/>
-	<field name="scopeNote" class="java.lang.String"/>
+	<field name="scopenote" class="java.lang.String"/>
+	<field name="csid" class="java.lang.String"/>
 	<field name="objectnumber" class="java.lang.String"/>
-	<field name="objectname" class="java.lang.String"/>
-	<field name="currentlocation" class="java.lang.String"/>
-	<field name="description" class="java.lang.String"/>
+	<field name="sort" class="java.lang.String"/>
 	<field name="fieldcollectionnote" class="java.lang.String"/>
+	<field name="objectname" class="java.lang.String"/>
+	<field name="description" class="java.lang.String"/>
 	<field name="site" class="java.lang.String"/>
-	<field name="culture" class="java.lang.String"/>
-	<field name="fieldcollectiondate" class="java.lang.String"/>
+	<field name="culturalgroup" class="java.lang.String"/>
+	<field name="ethnographicfilecode" class="java.lang.String"/>
+	<field name="currentlocation" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
 		<band height="105" splitType="Stretch">
-			<staticText>
-				<reportElement style="SubTitle" x="116" y="30" width="157" height="22"/>
-				<textElement>
-					<font fontName="SansSerif" size="14"/>
-				</textElement>
-				<text><![CDATA[in CollectionSpace	]]></text>
-			</staticText>
 			<line>
 				<reportElement x="-1" y="65" width="800" height="1"/>
 				<graphicElement>
@@ -91,7 +103,7 @@ order by objectnumber]]>
 				<textElement>
 					<font fontName="SansSerif" isItalic="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{scopeNote}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{scopenote}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement positionType="FixRelativeToBottom" x="-1" y="102" width="800" height="1"/>
@@ -104,7 +116,7 @@ order by objectnumber]]>
 				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="18"/>
 				</textElement>
-				<text><![CDATA[Object Summary]]></text>
+				<text><![CDATA[Brief Object Summary]]></text>
 			</staticText>
 			<image>
 				<reportElement x="530" y="3" width="270" height="51"/>
@@ -116,113 +128,107 @@ order by objectnumber]]>
 		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
-		<band height="42" splitType="Stretch">
+		<band height="22" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="21" width="800" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="20" width="800" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="1" y="3" width="138" height="15"/>
+				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="1" y="2" width="86" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[object number]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="139" y="3" width="138" height="15"/>
+				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="90" y="2" width="107" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[object name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="276" y="3" width="138" height="15"/>
+				<reportElement style="Column header" x="202" y="2" width="161" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[current location]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="414" y="3" width="138" height="15"/>
+				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="367" y="2" width="176" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[description]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="555" y="3" width="122" height="15"/>
+				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="551" y="2" width="122" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[site]]></text>
+				<text><![CDATA[field collection place	]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="678" y="3" width="123" height="15"/>
+				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="676" y="2" width="123" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[culture]]></text>
+				<text><![CDATA[cultural group]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="19" splitType="Stretch">
-			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="-5" width="800" height="1"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
-				</graphicElement>
-			</line>
+		<band height="18" splitType="Stretch">
 			<textField>
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="-20" width="138" height="15"/>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="2" width="86" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="138" y="-20" width="138" height="15"/>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="90" y="2" width="107" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="276" y="-20" width="135" height="15"/>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="202" y="2" width="161" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{currentlocation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="414" y="-20" width="138" height="15"/>
-				<textElement>
-					<font fontName="SansSerif" size="9"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="555" y="-20" width="122" height="15"/>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="552" y="2" width="122" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{site}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="680" y="-20" width="110" height="15"/>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="366" y="2" width="177" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{culture}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="676" y="2" width="122" height="16"/>
+				<textElement>
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{culturalgroup}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<columnFooter>
 		<band height="14" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="-9" width="800" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="7" width="800" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>

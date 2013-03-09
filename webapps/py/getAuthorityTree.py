@@ -38,7 +38,7 @@ def createAuthorityHierarchyTable(authority, primarytype, term):
       regexp_replace(pc.refname, '^.*\\)''(.*)''$', '\\1') term,  
       rc.objectcsid broaderauthoritycsid,  
       regexp_replace(pc2.refname, '^.*\\)''(.*)''$', '\\1') broaderterm,
-      0 AS level  
+      1 AS level  
     FROM public.%s_common pc 
       JOIN hierarchy h ON (pc.id = h.id AND h.primarytype='%s') 
       JOIN public.relations_common rc ON (h.name = rc.subjectcsid) 
@@ -64,7 +64,7 @@ def createAuthorityHierarchyTable(authority, primarytype, term):
         cursor.execute(query % (authority, primarytype, primarytype, authority, 'term', term))
         res = cursor.rowcount
         #cursor.execute( index1 )
-    cursor.execute(index2)
+        #cursor.execute(index2)
 
     cursor.close()
     #print "Inserted %d rows" % res
@@ -110,20 +110,25 @@ def getAuthority(authority, primarytype, term, connect_string):
 
     createAuthorityHierarchyTable(authority, primarytype, term)
 
-    for i in range(20):
+    for i in range(1,20):
         res = updateAuthorityHierarchyTable(authority, primarytype, i)
         if res == 0:
             #print "performed %d loops" % (i+1)
             break
 
-    query = """
-    SELECT term,level FROM authorityname_temp
-"""
+    query = """SELECT term,level FROM authorityname_temp"""
 
     cursor = conn.cursor()
     cursor.execute(query)
     res = cursor.fetchall()
-    #res = [r[0] for r in res]
+    notFound = True
+    for r in res:
+        if r[0] == term:
+            notFound = False
+            break
+    if notFound:
+        res.append([term,0])
+        
     cursor.close()
 
     conn.commit()
@@ -165,19 +170,6 @@ def getChildren(authority, primarytype, term, connect_string):
 
 if __name__ == "__main__":
 
-    # get some places and materials from PAHMA-dev
-    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
-    primarytype = 'Placeitem'
-    authority = 'places'
-
-    for p in ('Gebel Garn, Egypt, Northern Africa', 'Giza, Cemetery 1000, Giza, Giza plateau', 'Europe',
-              'North America, The Americas', 'South America, The Americas', 'China, Central Asia, Asia',
-              'Central Africa, Africa', 'Africa', 'Asia'):
-        places = getAuthority(authority, primarytype, p, connect_string)
-        print p, ':', len(places)
-        if len(places) < 100:
-            print places
-
     # get some taxonomic names and locations from botgarden-dev
     connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
 
@@ -191,6 +183,19 @@ if __name__ == "__main__":
             print locations
 
     sys.exit(1)
+
+    # get some places and materials from PAHMA-dev
+    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+    primarytype = 'Placeitem'
+    authority = 'places'
+
+    for p in ('Gebel Garn, Egypt, Northern Africa', 'Giza, Cemetery 1000, Giza, Giza plateau', 'Europe',
+              'North America, The Americas', 'South America, The Americas', 'China, Central Asia, Asia',
+              'Central Africa, Africa', 'Africa', 'Asia'):
+        places = getAuthority(authority, primarytype, p, connect_string)
+        print p, ':', len(places)
+        if len(places) < 100:
+            print places
 
     # test getAuthority
     primarytype = 'TaxonTenant35'

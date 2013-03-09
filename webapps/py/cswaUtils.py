@@ -31,6 +31,42 @@ def getConfig(form):
    except:
        return False
 
+def serverCheck(form,config):
+    result  = "<tr><td>start server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    
+    elapsedtime = time.time()
+    # do an sql search...
+    result += "<tr><td>SQL check</td><td>" + cswaDB.testDB(config) + "</td></tr>"
+    elapsedtime = time.time() - elapsedtime
+    result += "<tr><td>SQL time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+
+    # if we are configured for barcodes, try that...
+    try:
+        config.get('files','cmdrfileprefix') + config.get('files','cmdrauditfile')
+        try:
+            elapsedtime = time.time()
+            result += "<tr><td>barcode audit file</td><td>" + config.get('files','cmdrauditfile') + "</td></tr>"
+            result += "<tr><td>trying...</td><td> to write empty test files to commanderWatch directory</td></tr>"
+            result += "<tr><td>location labels</td><td>"+ writeCommanderFile('test','kroeberBCP','locationLabels','locations',[],config) +"</td></tr>"
+            result += "<tr><td>object labels</td><td>"  + writeCommanderFile('test','kroeberBCP','objectLabels',  'objects',  [],config) +"</td></tr>"
+            elapsedtime = time.time() - elapsedtime
+            result += "<tr><td>barcode check time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+        except:
+            result += "<tr><td>barcode funtionality check</td><td>FAILED.</td></tr>"
+    except:
+        result += "<tr><td>barcode funtionality check</td><td>skipped, not configured.</td></tr>"
+
+    elapsedtime = time.time()
+    # rest check...
+    elapsedtime = time.time() - elapsedtime
+    result += "<tr><td>REST check</td><td>Not ready yet.</td></tr>"
+    #result += "<tr><td>REST check</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+    
+    result += "<tr><td>end server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    result += '''<tr><td colspan="2"><hr/></td></tr>'''
+    
+    return '''<table width="100%"><tbody><tr><td><h3>Server Status Check</h3></td></tr>''' + result + '''</tbody></table>'''
+    
 def handleTimeout(source,form):
     print '<h3><span style="color:red;">Time limit exceeded! The problem has been logged and will be examined. Feel free to try again though!</span></h3>'
     sys.stderr.write('TIMEOUT::'+source+'::location::'+str(form.getvalue("lo.location1"))+'::')
@@ -209,7 +245,7 @@ def getHeader(updateType):
       <th>Ethnographic File Code</th>
       <th>P?</th>
     </tr>"""
-    elif updateType == 'bedlist' or updateType == 'advsearch':
+    elif updateType == 'bedlist':
         return """
     <table class="tablesorter" id="sortTable%s"><thead>
     <tr>
@@ -225,7 +261,7 @@ def getHeader(updateType):
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
     </tr></thead><tbody>"""
-    elif updateType == 'bedlistnone' or updateType == 'advsearchnone':
+    elif updateType == 'bedlistnone':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
       <th>Accession Number</th>
@@ -233,7 +269,7 @@ def getHeader(updateType):
       <th>Taxonomic Name</th>
       <th>Garden Location</th>
     </tr></thead><tbody>"""
-    elif updateType == 'locreport' or updateType == 'holdings':
+    elif updateType == 'locreport' or updateType == 'holdings' or updateType == 'advsearch':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
       <th data-sort="float">Accession Number</th>
@@ -241,6 +277,8 @@ def getHeader(updateType):
       <th data-sort="string">Taxonomic Name</th>
       <th data-sort="string">Garden Location</th>
       <th data-sort="string">Locality</th>
+      <th data-sort="string">Rare</th>
+      <th data-sort="string">Dead</th>
     </tr></thead><tbody>"""
     elif updateType == 'keyinfoResult':
 	return """
@@ -292,7 +330,7 @@ def doEnumerateObjects(form,config):
     rowcount = len(locationList)
 
     if rowcount == 0:
-	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
+	print '<h2>No locations in this range!</h2>'
 	return
 
     print getHeader(updateType)
@@ -569,7 +607,6 @@ def doPackingList(form,config):
         locationList = []
 
     rowcount = len(locationList)
-    #print getHeader('keyinfo')
 
     if rowcount == 0:
 	print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -666,7 +703,7 @@ def doAuthorityScan(form,config):
     print """</table><table>"""
     print """<tr><td align="center">&nbsp;</tr>"""
     print """<tr><td align="center"><hr></tr>"""
-    print """<tr><td align="center">Report completed. %s objects of %s displayed</td></tr>""" % (len(accessions),len(objects))
+    print """<tr><td align="center">Report completed. %s objects displayed</td></tr>""" % (len(accessions))
     print "\n</table><hr/>"
 
 
@@ -748,6 +785,54 @@ def doBarCodes(form,config):
         
     print "\n</td></tr></table><hr/>"
 
+def doAdvancedSearch(form,config):
+   
+    updateactionlabel = config.get('info','updateactionlabel')
+    updateType        = config.get('info','updatetype')
+    groupby           = form.getvalue('groupby')
+    rare              = []
+    if form.getvalue('rare'): rare = ['true']
+    dead              = []
+    if form.getvalue('dead'): dead = ['true']
+    
+    if not validateParameters(form,config): return
+    
+    beds   = [ form.getvalue(i) for i in form if 'locations.' in i ]
+    taxa   = [ form.getvalue(i) for i in form if 'taxon.' in i ]
+    places = [ form.getvalue(i) for i in form if 'places.' in i ]
+       
+    #taxa: column = 1
+    #family: column = 2
+    #beds: column = 3
+    #place: column = 5
+    
+    try:
+        objects = cswaDB.getplants('','',1,config,'getalltaxa')
+    except:
+        raise
+        handleTimeout('getalltaxa',form)
+        objects = []
+
+    print getHeader(updateType)
+    totalobjects = 0
+    accessions = []
+    for t in objects:
+       if checkMembership(t[1],taxa) and checkMembership(t[3],beds) and checkMembership(t[5],places) and checkMembership(t[7],rare) and checkMembership(t[8],dead):
+           accessions.append(formatRow({ 'rowtype': updateType,'data': t },form,config))
+
+    print '\n'.join(accessions)
+    print """</table><table>"""
+    print """<tr><td align="center">&nbsp;</tr>"""
+    print """<tr><td align="center"><hr></tr>"""
+    print """<tr><td align="center">Report completed. %s objects displayed</td></tr>""" % (len(accessions))
+    print "\n</table><hr/>"
+
+def checkMembership(item,qlist):
+   if item in qlist or qlist == []:
+      return True
+   else:
+      return False
+ 
 def doBedList(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
@@ -760,10 +845,6 @@ def doBedList(form,config):
        rows = [ form.getvalue(i) for i in form if 'locations.' in i ]
     elif updateType == 'locationreport':
        rows = [ form.getvalue(i) for i in form if 'taxon.' in i ]
-    elif updateType == 'advsearch':
-       rows     = [ form.getvalue(i) for i in form if 'locations.' in i ]
-       taxNames = [ form.getvalue(i) for i in form if 'taxon.' in i ]
-       places   = [ form.getvalue(i) for i in form if 'place.' in i ]
     
     rowcount     = len(rows)
     totalobjects = 0
@@ -826,8 +907,9 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
     
     try:
         logFh    = codecs.open(logFile,'w','utf-8')
-        csvlogfh = csv.writer(logFh, delimiter=",",quoting=csv.QUOTE_ALL)
-        audlogfh = csv.writer(codecs.open(auditFile,'a','utf-8'), delimiter=",",quoting=csv.QUOTE_ALL)
+        alogFh   = codecs.open(auditFile,'a','utf-8')
+        csvlogfh = csv.writer(logFh,  delimiter=",",quoting=csv.QUOTE_ALL)
+        audlogfh = csv.writer(alogFh, delimiter=",",quoting=csv.QUOTE_ALL)
         if dataType == 'locationLabels':
             csvlogfh.writerow('termdisplayname'.split(','))
             for d in data:
@@ -839,10 +921,11 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
                 csvlogfh.writerow(d[3:8])
                 audlogfh.writerow(d)
         logFh.close()
+        alogFh.close()
         newName = logFile.replace('.tmp','.txt')
         os.rename (logFile,newName) 
     except:
-        raise
+        #raise
         newName = '<span style="color:red;">could not write to %s</span>' % logFile
 
     return newName
@@ -1040,15 +1123,16 @@ def formatRow(result,form,config):
         else:
             location = ''
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
-        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
+        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid 
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td>%s</tr>''' % (link,rr[4],rr[6],rr[5],location)
-    elif result['rowtype'] == 'locreport' or result['rowtype'] == 'holdings':
+    elif result['rowtype'] == 'locreport' or result['rowtype'] == 'holdings' or result['rowtype'] == 'advsearch':
         rr = result['data']
+        rare = 'R' if rr[7] == 'true' else 'N'
+        dead = 'D' if rr[8] == 'true' else 'A'
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6] 
-        #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3],rr[5])
-        #return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[4],rr[1],rr[2],rr[3])
-    elif result['rowtype'] == 'advsearch':
+        #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3],rr[5],rare,dead)
+    elif result['rowtype'] == 'was.advsearch':
         rr = result['data']
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
@@ -1485,9 +1569,26 @@ def starthtml(form,config):
         objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
         place        = str(form.getvalue('px.place')) if form.getvalue('px.place') else ''
         concept      = str(form.getvalue('cx.concept')) if form.getvalue('cx.concept') else ''
-        dead  = str(form.getvalue('dead'))  if form.getvalue('dead') else ''
-        alive = str(form.getvalue('alive')) if form.getvalue('alive') else ''
-        rare  = str(form.getvalue('rare'))  if form.getvalue('rare') else ''
+
+        deadoralive = '''
+         <th><span class="cell">filters:</span></th><th><span class="cell">rare </span>
+	  <input id="rare" class="cell" type="checkbox" name="rare" value="rare" class="xspan">
+	  <span class="cell">dead </span>
+	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
+        
+        #alive = str(form.getvalue('alive')) if form.getvalue('alive') else ''
+	#  <span class="cell">alive </span>
+	#  <input id="alive" class="cell" type="checkbox" name=""alive" value="''' + alive + '''" class="xspan"></th>
+        
+        #  <th><span class="cell">sort by:</span></th>
+        #  <th>
+        #  <span class="cell">name </span><input type="radio" name="sortby" value="name">
+        #  <span class="cell">family </span><input type="radio" name="sortby" value="family">
+        #  <span class="cell">location </span><input type="radio" name="sortby" value="location" checked>
+        #  </th>
+        if form.getvalue('rare'): deadoralive = deadoralive.replace('value="rare"','checked value="rare"') 
+        if form.getvalue('dead'): deadoralive = deadoralive.replace('value="dead"','checked value="dead"') 
+        
 	otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
 	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th>
@@ -1495,20 +1596,10 @@ def starthtml(form,config):
 	  <tr>
           <th><span class="cell">bed:</span></th>
 	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
-          <th><span class="cell">sort by:</span></th>
-          <th>
-          <span class="cell">name </span><input type="radio" name="sortby" value="name">
-          <span class="cell">family </span><input type="radio" name="sortby" value="family">
-          <span class="cell">location </span><input type="radio" name="sortby" value="location" checked>
-          </th></tr>
+          ''' + deadoralive + '''</tr>
 	  <tr><th><span class="cell">collection place:</span></th>
 	  <th><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></th>
-	  <th><span class="cell">filters:</span></th><th><span class="cell">rare </span>
-	  <input id="rare" class="cell" type="checkbox" name="rare" value="''' + rare + '''" class="xspan">
-	  <span class="cell">dead </span>
-	  <input id="dead" class="cell" type="checkbox" name=""dead" value="''' + dead + '''" class="xspan">
-	  <span class="cell">alive </span>
-	  <input id="alive" class="cell" type="checkbox" name=""alive" value="''' + alive + '''" class="xspan"></th></tr>
+	  </tr>
           '''
 
         saveForNow = '''
@@ -1619,6 +1710,7 @@ def endhtml(form,config,elapsedtime):
   <table width="100%">
     <tbody>
     <tr>
+      <td width="80px"><input id="checkbutton" class="cell" type="submit" value="check server" name="check"></td>
       <td width="180px" class="xspan">''' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + '''</td>
       <td width="120px" class="cell">elapsed time: </td>
       <td class="xspan">''' + ('%8.2f' % elapsedtime) + ''' seconds</td>

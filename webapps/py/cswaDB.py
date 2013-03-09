@@ -8,9 +8,24 @@ import pgdb
 timeoutcommand = 'set statement_timeout to 300000'
 
 
+def testDB(config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    try:
+        objects.execute('set statement_timeout to 5000')
+        objects.execute('select * from hierarchy limit 30000')
+        return "OK"
+    except pgdb.DatabaseError, e:
+        sys.stderr.write('testDB error: %s' % e)
+        return  '%s' % e
+    except:
+        sys.stderr.write("some other testDB error!")
+        return "Some other failure"
+
+    
 def dbtransaction(command, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    cursor = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    cursor = dbconn.cursor()
     cursor.execute(command)
 
 
@@ -198,7 +213,9 @@ co1.recordstatus dataQuality,
 case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\\)''(.*)''$', '\\1')
      when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
 end as locality,
-h1.name as objectcsid
+h1.name as objectcsid,
+con.rare,
+cob.deadflag
 
 from collectionobjects_common co1
 join hierarchy h1 on co1.id=h1.id
@@ -227,8 +244,8 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('', '')
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
 def getlocations(location1, location2, num2ret, config, updateType):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
     debug = False
@@ -268,8 +285,8 @@ def getlocations(location1, location2, num2ret, config, updateType):
 
 
 def getplants(location1, location2, num2ret, config, updateType):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
     debug = False
@@ -286,7 +303,8 @@ def getplants(location1, location2, num2ret, config, updateType):
         #sys.stderr.write('query :: %s\n' % getobjects)
         if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1, elapsedtime))
     except pgdb.DatabaseError, e:
-        sys.stderr.write('getlocations select error: %s' % e)
+        raise
+        sys.stderr.write('getplants select error: %s' % e)
         return result
     except:
         sys.stderr.write("some other getplants database error!")
@@ -311,8 +329,8 @@ def getloclist(searchType, location1, location2, num2ret, config):
     elif searchType == 'range':
         whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0') AND locationkey <= replace('" + location2 + "',' ','0')"
 
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
     if int(num2ret) > 30000: num2ret = 30000
     if int(num2ret) < 1:    num2ret = 1
@@ -331,8 +349,8 @@ limit """ + str(num2ret)
 
 
 def findcurrentlocation(csid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
     getloc = "select findcurrentlocation('" + csid + "')"
@@ -346,8 +364,8 @@ def findcurrentlocation(csid, config):
 
 
 def getrefname(table, term, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
     if term == None or term == '':
@@ -364,8 +382,8 @@ def getrefname(table, term, config):
 
 
 def findrefnames(table, termlist, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = pahmadb.cursor()
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
     result = []
