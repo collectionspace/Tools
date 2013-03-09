@@ -66,7 +66,7 @@ left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pe
 
 WHERE rc1.subjectcsid = $P{csid}
 
-ORDER BY "currentlocation",sort]]>
+ORDER BY sort,"currentlocation"]]>
 	</queryString>
 	<field name="groupTitle" class="java.lang.String"/>
 	<field name="scopenote" class="java.lang.String"/>
@@ -181,7 +181,7 @@ ORDER BY "currentlocation",sort]]>
 	</columnHeader>
 	<detail>
 		<band height="18" splitType="Stretch">
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="2" width="86" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
@@ -195,7 +195,7 @@ ORDER BY "currentlocation",sort]]>
 				</textElement>
 				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="202" y="2" width="161" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
