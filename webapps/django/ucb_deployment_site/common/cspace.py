@@ -1,6 +1,41 @@
 __author__ = 'remillet'
 
+from os import path
+from ConfigParser import NoOptionError
 import urllib2
+import ConfigParser
+
+CONFIG_SUFFIX = ".cfg"
+AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
+
+
+def getConfig(base_path, filename_nosuffix):
+    """
+        Read in our config file.  Look for it to be a sibling of the current .py file (this authn.py file).
+    :param filename_nosuffix:
+    """
+    fileName = filename_nosuffix + CONFIG_SUFFIX
+    relative_path = path.join(base_path, fileName)  # config file should be one of our siblings
+    config = ConfigParser.RawConfigParser()
+    config.read(relative_path)
+    theSections = config.sections()
+    if len(theSections) is 0:
+        errMsg = "Could not find the required config file %s" % relative_path
+        print(errMsg)
+        raise Exception(errMsg)
+
+    return config
+
+
+def getConfigOptionWithSection(config, section, property_name):
+    result = None
+    try:
+        result = config.get(section, property_name)
+    except NoOptionError:
+        print "Found no option %s" % property_name
+
+    return result
+
 
 
 def make_get_request(realm, uri, hostname, protocol, port, username, password):

@@ -12,7 +12,7 @@ def index(request):
     #return HttpResponse("Hello, world. You're at the poll index.")
     (url, data, statusCode) = cspace.make_get_request(realm, uri, hostname, protocol, port, \
                                                       username='admin@core.collectionspace.org', password='Administrator')
-    return HttpResponse(data)
+    return HttpResponse(data, mimetype='application/xml')
 
 
 def detail(request, poll_id):
