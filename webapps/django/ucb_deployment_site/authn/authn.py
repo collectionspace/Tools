@@ -1,58 +1,21 @@
 __author__ = 'remillet'
 
 from os import path
-from ConfigParser import NoOptionError
 from django.contrib.auth.models import User
-import urllib2
-import ConfigParser
+from common import cspace
 
 HTTP_PROTOCOL = "http"
 CSPACE_AUTHN_CONFIG_FILENAME = 'authn'
-CONFIG_SUFFIX = ".cfg"
-
-AUTHN_INFO = 'info'  # The [info] section of the config file
-CSPACE_AUTHN_OVERRIDE_PROPERTY = 'override'
 
 AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
-CSPACE_AUTHN_REALM_PROPERTY = 'realm'
-CSPACE_AUTHN_URI_PROPERTY = 'uri'
-CSPACE_AUTHN_HOSTNAME_PROPERTY = 'hostname'
-CSPACE_AUTHN_PROTOCOL_PROPERTY = 'protocol'
-CSPACE_AUTHN_PORT_PROPERTY = 'port'
-
-
-def getConfig(filename_nosuffix):
-    """
-        Read in our config file.  Look for it to be a sibling of the current .py file (this authn.py file).
-    :param filename_nosuffix:
-    """
-    fileName = filename_nosuffix + CONFIG_SUFFIX
-    relative_path = path.join(path.dirname(__file__), fileName)  # config file should be one of our siblings
-    config = ConfigParser.RawConfigParser()
-    config.read(relative_path)
-    theSections = config.sections()
-    if len(theSections) is 0:
-        errMsg = "Could not find the required config file %s" % relative_path
-        print(errMsg)
-        raise Exception(errMsg)
-
-    return config
-
-
-def getConfigOptionWithSection(config, section, property_name):
-    result = None
-    try:
-        result = config.get(section, property_name)
-    except NoOptionError:
-        print "Found no option %s" % property_name
-
-    return result
+AUTHN_INFO = 'info'  # The [info] section of the config file
+CSPACE_AUTHN_OVERRIDE_PROPERTY = 'override'
 
 
 def getConfigOption(config, property_name):
     """
     """
-    return getConfigOptionWithSection(config, AUTHN_CONNECT, property_name)
+    return cspace.getConfigOptionWithSection(config, AUTHN_CONNECT, property_name)
 
 
 class CSpaceAuthN(object):
@@ -67,7 +30,7 @@ class CSpaceAuthN(object):
 
     def isInitialzed(self):
         """
-
+            This method tests to see if the required fields are all set.
         :type self: CSpaceAuthN
         :return:
         """
@@ -77,19 +40,19 @@ class CSpaceAuthN(object):
 
         if self.realm is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_REALM_PROPERTY
+            print errMsg % cspace.CSPACE_REALM_PROPERTY
         if self.uri is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_URI_PROPERTY
+            print errMsg % cspace.CSPACE_URI_PROPERTY
         if self.hostname is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_HOSTNAME_PROPERTY
+            print errMsg % cspace.CSPACE_HOSTNAME_PROPERTY
         if self.protocol is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_PROTOCOL_PROPERTY
+            print errMsg % cspace.CSPACE_PROTOCOL_PROPERTY
         if self.port is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_PORT_PROPERTY
+            print errMsg % cspace.CSPACE_PORT_PROPERTY
 
         if isMissingProperties is True:
             result = False
@@ -104,28 +67,28 @@ class CSpaceAuthN(object):
         """
 
         try:
-            config = getConfig(CSPACE_AUTHN_CONFIG_FILENAME)
-            if getConfigOptionWithSection(config, AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":
+            config = cspace.getConfig(path.dirname(__file__), CSPACE_AUTHN_CONFIG_FILENAME)
+            if cspace.getConfigOptionWithSection(config, AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":
                 self.overrideWithConfig = True
 
             if self.__class__.realm is None or self.overrideWithConfig:
-                self.__class__.realm = getConfigOption(config, CSPACE_AUTHN_REALM_PROPERTY)
+                self.__class__.realm = getConfigOption(config, cspace.CSPACE_REALM_PROPERTY)
             if self.__class__.uri is None or self.overrideWithConfig:
-                self.__class__.uri = getConfigOption(config, CSPACE_AUTHN_URI_PROPERTY)
+                self.__class__.uri = getConfigOption(config, cspace.CSPACE_URI_PROPERTY)
             if self.__class__.hostname is None or self.overrideWithConfig:
-                self.__class__.hostname = getConfigOption(config, CSPACE_AUTHN_HOSTNAME_PROPERTY)
+                self.__class__.hostname = getConfigOption(config, cspace.CSPACE_HOSTNAME_PROPERTY)
             if self.__class__.protocol is None or self.overrideWithConfig:
-                self.__class__.protocol = getConfigOption(config, CSPACE_AUTHN_PROTOCOL_PROPERTY)
+                self.__class__.protocol = getConfigOption(config, cspace.CSPACE_PROTOCOL_PROPERTY)
             if self.__class__.port is None or self.overrideWithConfig:
-                self.__class__.port = getConfigOption(config, CSPACE_AUTHN_PORT_PROPERTY)
+                self.__class__.port = getConfigOption(config, cspace.CSPACE_PORT_PROPERTY)
 
             self.configFileExists = True
         except Exception, e:
             self.configFileExists = False
             print "Warning: The CSpaceAuthN authenticate back-end config file %s was missing." % \
-                  CSPACE_AUTHN_CONFIG_FILENAME + CONFIG_SUFFIX
+                  CSPACE_AUTHN_CONFIG_FILENAME + cspace.CONFIG_SUFFIX
 
-        if self.isInitialzed() is False:
+        if self.isInitialzed() == False:
             errMsg = "The CSpaceAuthN Django authentication back-end was not properly initialized.  \
             Please check the log files for details."
             raise Exception(errMsg)
@@ -148,42 +111,42 @@ class CSpaceAuthN(object):
         if port is not None:
             cls.port = port
 
-    def make_get_request(self, realm, uri, hostname, protocol, port, username, password):
-        """
-            Makes HTTP GET request to a URL using the supplied username and password credentials.
-        :rtype : a 3-tuple of the target URL, the data of the response, and an error code
-        :param realm:
-        :param uri:
-        :param hostname:
-        :param protocol:
-        :param port:
-        :param username:
-        :param password:
-        """
-
-        server = protocol + "://" + hostname + ":" + port
-        passMgr = urllib2.HTTPPasswordMgr()
-        passMgr.add_password(realm, server, username, password)
-        authhandler = urllib2.HTTPBasicAuthHandler(passMgr)
-        opener = urllib2.build_opener(authhandler)
-        urllib2.install_opener(opener)
-        url = "%s/%s" % (server, uri)
-
-        try:
-            f = urllib2.urlopen(url)
-            statusCode = f.getcode()
-            data = f.read()
-            result = (url, data, statusCode)
-        except urllib2.HTTPError, e:
-            print 'The server couldn\'t fulfill the request.'
-            print 'Error code: ', e.code
-            result = (url, None, e.code)
-        except urllib2.URLError, e:
-            print 'We failed to reach a server.'
-            print 'Reason: ', e.reason
-            result = (url, None, e.reason)
-
-        return result
+    # def make_get_request(self, realm, uri, hostname, protocol, port, username, password):
+    #     """
+    #         Makes HTTP GET request to a URL using the supplied username and password credentials.
+    #     :rtype : a 3-tuple of the target URL, the data of the response, and an error code
+    #     :param realm:
+    #     :param uri:
+    #     :param hostname:
+    #     :param protocol:
+    #     :param port:
+    #     :param username:
+    #     :param password:
+    #     """
+    #
+    #     server = protocol + "://" + hostname + ":" + port
+    #     passMgr = urllib2.HTTPPasswordMgr()
+    #     passMgr.add_password(realm, server, username, password)
+    #     authhandler = urllib2.HTTPBasicAuthHandler(passMgr)
+    #     opener = urllib2.build_opener(authhandler)
+    #     urllib2.install_opener(opener)
+    #     url = "%s/%s" % (server, uri)
+    #
+    #     try:
+    #         f = urllib2.urlopen(url)
+    #         statusCode = f.getcode()
+    #         data = f.read()
+    #         result = (url, data, statusCode)
+    #     except urllib2.HTTPError, e:
+    #         print 'The server couldn\'t fulfill the request.'
+    #         print 'Error code: ', e.code
+    #         result = (url, None, e.code)
+    #     except urllib2.URLError, e:
+    #         print 'We failed to reach a server.'
+    #         print 'Reason: ', e.reason
+    #         result = (url, None, e.reason)
+    #
+    #     return result
 
     def authenticateWithCSpace(self, username=None, password=None):
         """
@@ -194,7 +157,7 @@ class CSpaceAuthN(object):
         """
         result = False
 
-        (url, data, statusCode) = self.make_get_request(self.realm, self.uri, self.hostname, self.protocol, self.port,
+        (url, data, statusCode) = cspace.make_get_request(self.realm, self.uri, self.hostname, self.protocol, self.port,
                                                         username, password)
         print "Request to %s: %s" % (url, statusCode)
         if statusCode is 200:
