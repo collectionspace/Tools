@@ -6,8 +6,18 @@ import urllib2
 import ConfigParser
 
 CONFIG_SUFFIX = ".cfg"
-AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
+SERVICES_CONNECT = 'cspace_services_connect'
+AUTHN_CONNECT = 'cspace_authn_connect'
 
+CSPACE_REALM_PROPERTY = 'realm'
+CSPACE_URI_PROPERTY = 'uri'
+CSPACE_HOSTNAME_PROPERTY = 'hostname'
+CSPACE_PROTOCOL_PROPERTY = 'protocol'
+CSPACE_PORT_PROPERTY = 'port'
+
+
+def myLogin():
+    print "Hi there!"
 
 def getConfig(base_path, filename_nosuffix):
     """
@@ -35,7 +45,6 @@ def getConfigOptionWithSection(config, section, property_name):
         print "Found no option %s" % property_name
 
     return result
-
 
 
 def make_get_request(realm, uri, hostname, protocol, port, username, password):
@@ -74,3 +83,43 @@ def make_get_request(realm, uri, hostname, protocol, port, username, password):
         result = (url, None, e.reason)
 
     return result
+
+
+class connection:
+    def __init__(self, realm, uri, hostname, protocol, port, username, password):
+        self.realm = realm
+        self.uri = uri
+        self.hostname = hostname
+        self.protocol = protocol
+        self.port = port
+        self.username = username
+        self.password = password
+
+    @classmethod
+    def create_connection(cls, config, user):
+        """
+            Factory method for creating a new connection.
+        :param user:
+        :param config:
+        :return:
+        """
+        realm = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_REALM_PROPERTY)
+        hostname = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_HOSTNAME_PROPERTY)
+        protocol = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_PROTOCOL_PROPERTY)
+        port = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_PORT_PROPERTY)
+        return connection(realm, None, hostname, protocol, port, user.username, user.cspace_password)
+
+    def make_get_request(self, uri=None):
+        """
+
+        :param uri:
+        :return:
+        """
+        requestUri = uri
+        if requestUri is None:
+            requestUri = self.uri
+
+        result = make_get_request(self.realm, requestUri, self.hostname, self.protocol, self.port,
+                                  self.username, self.password)
+
+        return result

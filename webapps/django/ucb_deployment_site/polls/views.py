@@ -1,18 +1,8 @@
 from django.http import HttpResponse
-from common import cspace
 
 
 def index(request):
-    user = request.user
-    realm             = 'org.collectionspace.services'
-    uri               = 'cspace-services/accounts/0/accountperms'
-    hostname          = 'demo.collectionspace.org'
-    protocol          = 'http'
-    port              = '8180'
-    #return HttpResponse("Hello, world. You're at the poll index.")
-    (url, data, statusCode) = cspace.make_get_request(realm, uri, hostname, protocol, port, \
-                                                      username='admin@core.collectionspace.org', password='Administrator')
-    return HttpResponse(data, mimetype='application/xml')
+    return HttpResponse("You're looking at poll index page.")
 
 
 def detail(request, poll_id):

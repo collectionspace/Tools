@@ -11,12 +11,6 @@ AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
 AUTHN_INFO = 'info'  # The [info] section of the config file
 CSPACE_AUTHN_OVERRIDE_PROPERTY = 'override'
 
-CSPACE_AUTHN_REALM_PROPERTY = 'realm'
-CSPACE_AUTHN_URI_PROPERTY = 'uri'
-CSPACE_AUTHN_HOSTNAME_PROPERTY = 'hostname'
-CSPACE_AUTHN_PROTOCOL_PROPERTY = 'protocol'
-CSPACE_AUTHN_PORT_PROPERTY = 'port'
-
 
 def getConfigOption(config, property_name):
     """
@@ -46,19 +40,19 @@ class CSpaceAuthN(object):
 
         if self.realm is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_REALM_PROPERTY
+            print errMsg % cspace.CSPACE_REALM_PROPERTY
         if self.uri is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_URI_PROPERTY
+            print errMsg % cspace.CSPACE_URI_PROPERTY
         if self.hostname is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_HOSTNAME_PROPERTY
+            print errMsg % cspace.CSPACE_HOSTNAME_PROPERTY
         if self.protocol is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_PROTOCOL_PROPERTY
+            print errMsg % cspace.CSPACE_PROTOCOL_PROPERTY
         if self.port is None:
             isMissingProperties = True
-            print errMsg % CSPACE_AUTHN_PORT_PROPERTY
+            print errMsg % cspace.CSPACE_PORT_PROPERTY
 
         if isMissingProperties is True:
             result = False
@@ -78,15 +72,15 @@ class CSpaceAuthN(object):
                 self.overrideWithConfig = True
 
             if self.__class__.realm is None or self.overrideWithConfig:
-                self.__class__.realm = getConfigOption(config, CSPACE_AUTHN_REALM_PROPERTY)
+                self.__class__.realm = getConfigOption(config, cspace.CSPACE_REALM_PROPERTY)
             if self.__class__.uri is None or self.overrideWithConfig:
-                self.__class__.uri = getConfigOption(config, CSPACE_AUTHN_URI_PROPERTY)
+                self.__class__.uri = getConfigOption(config, cspace.CSPACE_URI_PROPERTY)
             if self.__class__.hostname is None or self.overrideWithConfig:
-                self.__class__.hostname = getConfigOption(config, CSPACE_AUTHN_HOSTNAME_PROPERTY)
+                self.__class__.hostname = getConfigOption(config, cspace.CSPACE_HOSTNAME_PROPERTY)
             if self.__class__.protocol is None or self.overrideWithConfig:
-                self.__class__.protocol = getConfigOption(config, CSPACE_AUTHN_PROTOCOL_PROPERTY)
+                self.__class__.protocol = getConfigOption(config, cspace.CSPACE_PROTOCOL_PROPERTY)
             if self.__class__.port is None or self.overrideWithConfig:
-                self.__class__.port = getConfigOption(config, CSPACE_AUTHN_PORT_PROPERTY)
+                self.__class__.port = getConfigOption(config, cspace.CSPACE_PORT_PROPERTY)
 
             self.configFileExists = True
         except Exception, e:
