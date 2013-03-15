@@ -6,18 +6,17 @@ import urllib2
 import ConfigParser
 
 CONFIG_SUFFIX = ".cfg"
-SERVICES_CONNECT = 'cspace_services_connect'
-AUTHN_CONNECT = 'cspace_authn_connect'
+CONFIGSECTION_SERVICES_CONNECT = 'cspace_services_connect'
+CONFIGSECTION_AUTHN_CONNECT = 'cspace_authn_connect'
+CONFIGSECTION_INFO = 'info'
 
+CSPACE_SHOULD_RELOAD_CONFIG = 'shouldReloadConfig'
 CSPACE_REALM_PROPERTY = 'realm'
 CSPACE_URI_PROPERTY = 'uri'
 CSPACE_HOSTNAME_PROPERTY = 'hostname'
 CSPACE_PROTOCOL_PROPERTY = 'protocol'
 CSPACE_PORT_PROPERTY = 'port'
 
-
-def myLogin():
-    print "Hi there!"
 
 def getConfig(base_path, filename_nosuffix):
     """
@@ -103,10 +102,10 @@ class connection:
         :param config:
         :return:
         """
-        realm = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_REALM_PROPERTY)
-        hostname = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_HOSTNAME_PROPERTY)
-        protocol = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_PROTOCOL_PROPERTY)
-        port = getConfigOptionWithSection(config, SERVICES_CONNECT, CSPACE_PORT_PROPERTY)
+        realm = getConfigOptionWithSection(config, CONFIGSECTION_SERVICES_CONNECT, CSPACE_REALM_PROPERTY)
+        hostname = getConfigOptionWithSection(config, CONFIGSECTION_SERVICES_CONNECT, CSPACE_HOSTNAME_PROPERTY)
+        protocol = getConfigOptionWithSection(config, CONFIGSECTION_SERVICES_CONNECT, CSPACE_PROTOCOL_PROPERTY)
+        port = getConfigOptionWithSection(config, CONFIGSECTION_SERVICES_CONNECT, CSPACE_PORT_PROPERTY)
         return connection(realm, None, hostname, protocol, port, user.username, user.cspace_password)
 
     def make_get_request(self, uri=None):
