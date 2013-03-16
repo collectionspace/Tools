@@ -25,32 +25,30 @@ class ucb_deployment_site:
         return result
 
     @classmethod
-    def handleAuthNRequest(cls):
-        if cls.should_reload_authn_config:
-            config = cls.loadConfig()
-            cls.initialize_authn(config)
-
+    def initialize_authn(cls, config, authNInstance):
+        cls.should_reload_authn_config = cspace.getConfigOptionWithSection(cls.config, cspace.CONFIGSECTION_AUTHN_CONNECT,
+                                                                           cspace.CSPACE_SHOULD_RELOAD_CONFIG)
+        CSpaceAuthN.initialize(cls.handleAuthNRequest)
+        if config and authNInstance:
+            #
+            # Read the required params from the config file
+            #
+            authNInstance.realm = cspace.getConfigOptionWithSection(config,
+                                                      cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_REALM_PROPERTY)
+            authNInstance.uri = cspace.getConfigOptionWithSection(config,
+                                                    cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_URI_PROPERTY)
+            authNInstance.hostname = cspace.getConfigOptionWithSection(config,
+                                                         cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_HOSTNAME_PROPERTY)
+            authNInstance.protocol = cspace.getConfigOptionWithSection(config,
+                                                         cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PROTOCOL_PROPERTY)
+            authNInstance.port = cspace.getConfigOptionWithSection(config,
+                                                     cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PORT_PROPERTY)
 
     @classmethod
-    def initialize_authn(cls, config):
-        #
-        # Read the required params from the config file
-        #
-        realm = cspace.getConfigOptionWithSection(config,
-                                                  cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_REALM_PROPERTY)
-        uri = cspace.getConfigOptionWithSection(config,
-                                                cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_URI_PROPERTY)
-        hostname = cspace.getConfigOptionWithSection(config,
-                                                     cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_HOSTNAME_PROPERTY)
-        protocol = cspace.getConfigOptionWithSection(config,
-                                                     cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PROTOCOL_PROPERTY)
-        port = cspace.getConfigOptionWithSection(config,
-                                                 cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PORT_PROPERTY)
-        #
-        #  def initialize(realm=None, uri=None, hostname=None, protocol=HTTP_PROTOCOL, port=None):
-        #
-        CSpaceAuthN.initialize(cls.handleAuthNRequest, realm, uri, hostname, protocol, port)
-
+    def handleAuthNRequest(cls, authnInstance):
+        if cls.should_reload_authn_config:
+            config = cls.loadConfig()
+        cls.initialize_authn(config, authnInstance)
 
     @classmethod
     def initialize(cls):
@@ -64,9 +62,7 @@ class ucb_deployment_site:
         cls.config = cls.loadConfig()
         cls.should_reload_config = cspace.getConfigOptionWithSection(cls.config, cspace.CONFIGSECTION_INFO,
                                                                      cspace.CSPACE_SHOULD_RELOAD_CONFIG)
-        cls.should_reload_authn_config = cspace.getConfigOptionWithSection(cls.config, cspace.CONFIGSECTION_AUTHN_CONNECT,
-                                                                           cspace.CSPACE_SHOULD_RELOAD_CONFIG)
-        cls.initialize_authn(cls.config)
+        cls.initialize_authn(None, None)
         cls.is_initialized = True
 
 
