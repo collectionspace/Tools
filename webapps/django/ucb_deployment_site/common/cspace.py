@@ -8,6 +8,8 @@ import ConfigParser
 CONFIG_SUFFIX = ".cfg"
 CONFIGSECTION_SERVICES_CONNECT = 'cspace_services_connect'
 CONFIGSECTION_AUTHN_CONNECT = 'cspace_authn_connect'
+LOGIN_URL = '/accounts/login/'
+LOGIN_URL_REDIRECT = LOGIN_URL + '?next=%s'
 CONFIGSECTION_INFO = 'info'
 
 CSPACE_SHOULD_RELOAD_CONFIG = 'shouldReloadConfig'

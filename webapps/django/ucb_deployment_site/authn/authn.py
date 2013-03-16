@@ -28,17 +28,19 @@ class CSpaceAuthN(object):
     hostname = None
     protocol = None
     port = None
-    authNDictionary = None
+    authNDictionary = dict()
 
     @classmethod
     def resetPasswordCache(cls):
         cls.authNDictionary = dict()  # A dictionary of cached passwords
 
     @classmethod
-    def initialize(cls, handleAuthNRequest):
+    def initialize(cls, handleAuthNRequest, clearPasswordCache=False):
         if handleAuthNRequest:
             cls.handleAuthNRequest = handleAuthNRequest  # this is a delegate method that gets called by our AuthN method
-        cls.resetPasswordCache()
+
+        if clearPasswordCache:
+            cls.resetPasswordCache()
 
         cls.config = cspace.getConfig(path.dirname(__file__), CSPACE_AUTHN_CONFIG_FILENAME)
         if cspace.getConfigOptionWithSection(cls.config, CONFIGSECTION_AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":

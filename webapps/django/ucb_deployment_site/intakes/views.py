@@ -1,6 +1,8 @@
 __author__ = 'remillet'
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.http import Http404
 from common import cspace
@@ -24,6 +26,9 @@ def handle_request(request, targetUrl):
         result = HttpResponse(data, mimetype='application/xml')
     elif statusCode == 404:
         raise Http404
+    elif statusCode == 401:
+        logout(request)
+        result = redirect(cspace.LOGIN_URL_REDIRECT % request.path)
     else:
         result = HttpResponse("HTTP request error: %d." % statusCode)
 
