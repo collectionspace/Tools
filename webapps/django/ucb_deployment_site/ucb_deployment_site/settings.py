@@ -1,9 +1,5 @@
 # Django settings for ucb_deployment_site project.
 import os
-import django
-from django.conf.urls import url, patterns
-#from django.contrib.auth import views
-from common import cspace
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True

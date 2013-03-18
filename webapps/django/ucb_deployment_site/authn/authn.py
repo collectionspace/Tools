@@ -7,28 +7,48 @@ from common import cspace
 HTTP_PROTOCOL = "http"
 CSPACE_AUTHN_CONFIG_FILENAME = 'authn'
 
-AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
-AUTHN_INFO = 'info'  # The [info] section of the config file
+CONFIGSECTION_AUTHN_CONNECT = 'connect'  # The [connect] section of the config file
+CONFIGSECTION_AUTHN_INFO = 'info'  # The [info] section of the config file
 CSPACE_AUTHN_OVERRIDE_PROPERTY = 'override'
 
 
 def getConfigOption(config, property_name):
     """
     """
-    return cspace.getConfigOptionWithSection(config, AUTHN_CONNECT, property_name)
+    return cspace.getConfigOptionWithSection(config, CONFIGSECTION_AUTHN_CONNECT, property_name)
 
 
 class CSpaceAuthN(object):
+    config = None
     overrideWithConfig = False
-    configFileExists = False
+    handleAuthNRequest = None  # a callback method to the main site
+    configFileUsed = False
     realm = None
     uri = None
     hostname = None
     protocol = None
     port = None
-    authNDictionary = dict()  # a transient map of cspace username/password tuples (not persisted)
+    authNDictionary = dict()
 
-    def isInitialzed(self):
+    @classmethod
+    def resetPasswordCache(cls):
+        cls.authNDictionary = dict()  # A dictionary of cached passwords
+
+    @classmethod
+    def initialize(cls, handleAuthNRequest, clearPasswordCache=False):
+        if handleAuthNRequest:
+            cls.handleAuthNRequest = handleAuthNRequest  # this is a delegate method that gets called by our AuthN method
+
+        if clearPasswordCache:
+            cls.resetPasswordCache()
+
+        cls.config = cspace.getConfig(path.dirname(__file__), CSPACE_AUTHN_CONFIG_FILENAME)
+        if cspace.getConfigOptionWithSection(cls.config, CONFIGSECTION_AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":
+            cls.overrideWithConfig = True
+        else:
+            cls.overrideWithConfig = False
+
+    def isSetup(self):
         """
             This method tests to see if the required fields are all set.
         :type self: CSpaceAuthN
@@ -53,100 +73,57 @@ class CSpaceAuthN(object):
         if self.port is None:
             isMissingProperties = True
             print errMsg % cspace.CSPACE_PORT_PROPERTY
+        if self.authNDictionary is None:
+            isMissingProperties = True
+            print errMsg % "CSpaceAuthN.authNDictionary"
 
         if isMissingProperties is True:
             result = False
 
         return result
 
-    def __init__(self):
+    def setupForRequest(self):
         """
             This constructor will look for a config file named authn.cfg that must be a directory sibling of this class
             file.  If the class static property members have not already been set by the class method initialize()
             or the 'override' property is True then the values in the config file will be used.
         """
 
+        if self.handleAuthNRequest is not None:
+            self.handleAuthNRequest(self)  #  Give our delegate a chance to setup our connection params
+
+        if self.isSetup() is True and self.overrideWithConfig is False:
+            return  #  The delegate set all the params and we're not configured to override the delegate
+
         try:
-            config = cspace.getConfig(path.dirname(__file__), CSPACE_AUTHN_CONFIG_FILENAME)
-            if cspace.getConfigOptionWithSection(config, AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":
-                self.overrideWithConfig = True
+            if self.realm is None or self.overrideWithConfig:
+                self.realm = getConfigOption(self.config, cspace.CSPACE_REALM_PROPERTY)
+                self.configFileUsed = True
 
-            if self.__class__.realm is None or self.overrideWithConfig:
-                self.__class__.realm = getConfigOption(config, cspace.CSPACE_REALM_PROPERTY)
-            if self.__class__.uri is None or self.overrideWithConfig:
-                self.__class__.uri = getConfigOption(config, cspace.CSPACE_URI_PROPERTY)
-            if self.__class__.hostname is None or self.overrideWithConfig:
-                self.__class__.hostname = getConfigOption(config, cspace.CSPACE_HOSTNAME_PROPERTY)
-            if self.__class__.protocol is None or self.overrideWithConfig:
-                self.__class__.protocol = getConfigOption(config, cspace.CSPACE_PROTOCOL_PROPERTY)
-            if self.__class__.port is None or self.overrideWithConfig:
-                self.__class__.port = getConfigOption(config, cspace.CSPACE_PORT_PROPERTY)
+            if self.uri is None or self.overrideWithConfig:
+                self.uri = getConfigOption(self.config, cspace.CSPACE_URI_PROPERTY)
+                self.configFileUsed = True
 
-            self.configFileExists = True
+            if self.hostname is None or self.overrideWithConfig:
+                self.hostname = getConfigOption(self.config, cspace.CSPACE_HOSTNAME_PROPERTY)
+                self.configFileUsed = True
+
+            if self.protocol is None or self.overrideWithConfig:
+                self.protocol = getConfigOption(self.config, cspace.CSPACE_PROTOCOL_PROPERTY)
+                self.configFileUsed = True
+
+            if self.port is None or self.overrideWithConfig:
+                self.port = getConfigOption(self.config, cspace.CSPACE_PORT_PROPERTY)
+                self.configFileUsed = True
+
         except Exception, e:
-            self.configFileExists = False
             print "Warning: The CSpaceAuthN authenticate back-end config file %s was missing." % \
                   CSPACE_AUTHN_CONFIG_FILENAME + cspace.CONFIG_SUFFIX
 
-        if self.isInitialzed() == False:
+        if self.isSetup() is False:
             errMsg = "The CSpaceAuthN Django authentication back-end was not properly initialized.  \
             Please check the log files for details."
             raise Exception(errMsg)
-
-    @classmethod
-    def initialize(cls, realm=None, uri=None, hostname=None, protocol=HTTP_PROTOCOL, port=None):
-        """
-            Some of the required properties may have already been set in the constructor.  We need to make this a class
-            method (see @classmethod annotation) so we can call it from our Django application code -this is our only
-            way to override the config file values.
-        """
-        if realm is not None:
-            cls.realm = realm
-        if uri is not None:
-            cls.uri = uri
-        if hostname is not None:
-            cls.hostname = hostname
-        if protocol is not None:
-            cls.protocol = protocol
-        if port is not None:
-            cls.port = port
-
-    # def make_get_request(self, realm, uri, hostname, protocol, port, username, password):
-    #     """
-    #         Makes HTTP GET request to a URL using the supplied username and password credentials.
-    #     :rtype : a 3-tuple of the target URL, the data of the response, and an error code
-    #     :param realm:
-    #     :param uri:
-    #     :param hostname:
-    #     :param protocol:
-    #     :param port:
-    #     :param username:
-    #     :param password:
-    #     """
-    #
-    #     server = protocol + "://" + hostname + ":" + port
-    #     passMgr = urllib2.HTTPPasswordMgr()
-    #     passMgr.add_password(realm, server, username, password)
-    #     authhandler = urllib2.HTTPBasicAuthHandler(passMgr)
-    #     opener = urllib2.build_opener(authhandler)
-    #     urllib2.install_opener(opener)
-    #     url = "%s/%s" % (server, uri)
-    #
-    #     try:
-    #         f = urllib2.urlopen(url)
-    #         statusCode = f.getcode()
-    #         data = f.read()
-    #         result = (url, data, statusCode)
-    #     except urllib2.HTTPError, e:
-    #         print 'The server couldn\'t fulfill the request.'
-    #         print 'Error code: ', e.code
-    #         result = (url, None, e.code)
-    #     except urllib2.URLError, e:
-    #         print 'We failed to reach a server.'
-    #         print 'Reason: ', e.reason
-    #         result = (url, None, e.reason)
-    #
-    #     return result
 
     def authenticateWithCSpace(self, username=None, password=None):
         """
@@ -157,13 +134,23 @@ class CSpaceAuthN(object):
         """
         result = False
 
+        self.setupForRequest()
         (url, data, statusCode) = cspace.make_get_request(self.realm, self.uri, self.hostname, self.protocol, self.port,
-                                                        username, password)
+                                                          username, password)
         print "Request to %s: %s" % (url, statusCode)
         if statusCode is 200:
             result = True
 
         return result
+
+    def getCSpacePassword(self, username):
+        result = None
+        if self.authNDictionary is not None:
+            result = self.authNDictionary[username]  # If they're a cspace user that's been authenticated, then we
+        return result
+
+    def setCSpacePassword(self, username, password):
+        self.authNDictionary[username] = password
 
     #
     # Django AuthN/AuthZ methods to implement.
@@ -180,10 +167,6 @@ class CSpaceAuthN(object):
             attempt by the application to use the cached password to connect to the back-end will fail until the user
             logs out and logs back in with the updated/correct password.
         """
-        if self.isInitialzed() is False:
-            raise Exception("The CSpaceAuthN authentication provider was not initialized properly.  \
-            Please check the log files for details.")
-
         result = None
         # Check the username/password and return a User.
         authenticatedWithCSpace = self.authenticateWithCSpace(username=username, password=password)
@@ -198,8 +181,8 @@ class CSpaceAuthN(object):
                 result = newUser
 
         if result is not None:
+            self.setCSpacePassword(username, password)
             result.cspace_password = password
-            self.authNDictionary[username] = password
 
         return result
 
@@ -214,7 +197,7 @@ class CSpaceAuthN(object):
         try:
             user = User.objects.get(pk=user_id)  # Lookup the user from Django's built-in list of users
             username = user.username
-            passwd = self.authNDictionary[username]  # If they're a cspace user that's been authenticated, then we
+            passwd = self.getCSpacePassword(username)
             # should already have their password cached
             if passwd is not None:
                 user.cspace_password = passwd  # Attach the user's cspace password to the User instance
