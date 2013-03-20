@@ -140,7 +140,7 @@ $script_name [options] logfile
 Options (defaults in parens)
 -d path to output directory to be created (./$DEFAULT_OUTPUT_DIR_NAME)
 -n number of queries to extract ($DEFAULT_NUM_QUERIES_TO_EXTRACT)
--L minimum length in chars of any SELECT queries to be exacted ($DEFAULT_MIN_QUERY_LENGTH)
+-L minimum length in chars of any SELECT queries to be extracted ($DEFAULT_MIN_QUERY_LENGTH)
 or
 --help  prints this set of help instructions, then exits without running script
 END_USAGE_INSTRUCTIONS
