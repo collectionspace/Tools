@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 # Extracts a set of SQL SELECT queries from a PostgreSQL database logfile.
+# Fills in the values of replaceable parameters in those queries, as needed.
 
 use strict;
 use warnings;
@@ -21,10 +22,11 @@ my $CONTAINS_REPLACEABLE_PARAMS_REGEX = ".*?(\\\$[0-9]{1,3}).*";
 my $PARAMETER_VALUES_REGEX = ".*?PDT DETAIL:  parameters: (.*)";
 
 my $DEFAULT_OUTPUT_DIR_NAME = "sql";
-my $DEFAULT_MIN_QUERY_LENGTH = 100;
+my $DEFAULT_MIN_QUERY_LENGTH = 200;
+my $DEFAULT_NUM_QUERIES_TO_EXTRACT = 1000;
 
 my %options=();
-getopt('d:L:', \%options);
+getopt('d:n:L:', \%options);
 
 # Pathname of PostgreSQL logfile to open
 #(assumed to be in local directory if no path provided)
@@ -38,11 +40,14 @@ if (! defined $logfile_name || $logfile_name eq "") {
 my $output_dir = $options{d} || $DEFAULT_OUTPUT_DIR_NAME;
 my $query_output_dir = create_query_output_dir($output_dir);
 
+# Number of queries to extract
+my $num_queries_to_extract = $options{n} || $DEFAULT_NUM_QUERIES_TO_EXTRACT;
+
 # Minimum length for queries of interest; shorter queries will be filtered out
 my $min_query_length = $options{L} || $DEFAULT_MIN_QUERY_LENGTH;
 
 my $stashed_query = "";
-my $query_number = 0;
+my $query_count = 0;
 
 open (LOGFILE, "<", $logfile_name) or die "Couldn't open PostgreSQL logfile $logfile_name: $!";
 while (<LOGFILE>) {
@@ -61,8 +66,8 @@ while (<LOGFILE>) {
         } else {
             if (length($select_statement) > $min_query_length) {
                 $stashed_query = "";
-                $query_number++;
-                print_query("$select_statement", $query_number, $query_output_dir);
+                $query_count++;
+                print_query("$select_statement", $query_count, $query_output_dir);
             }
         }
 
@@ -70,7 +75,6 @@ while (<LOGFILE>) {
     # replaceable parameters in a just-stashed query
     } elsif (($current_line =~ /$PARAMETER_VALUES_REGEX/) && ($stashed_query ne "")) {
         my @parameter_pairs = split(',', $1);
-        my $count = 0;
         foreach (@parameter_pairs) {
             my ($replaceable_parameter, $parameter_value) = split(" = ", $_);
             # Strip leading whitespace and the leading dollar sign from the string to match
@@ -79,25 +83,29 @@ while (<LOGFILE>) {
         }
         # Print the query after replacing parameters with their values
         if (length($stashed_query) > $min_query_length) {
-            $query_number++;
-            print_query("$stashed_query", $query_number, $query_output_dir);
+            $query_count++;
+            print_query("$stashed_query", $query_count, $query_output_dir);
         }
     } else {
         # Do nothing; this line of the logfile isn't of interest
     }
     
+    if (($num_queries_to_extract > 0) && ($query_count >= $num_queries_to_extract)) {
+        last;
+    }
+    
 }
 close LOGFILE;
-print "Wrote $query_number SELECT queries within directory $query_output_dir ...\n";
+print "Wrote $query_count SELECT queries within directory $query_output_dir ...\n";
 
 sub print_query {
     my $select_statement = shift;
-    my $query_number = shift;
+    my $query_count = shift;
     my $query_output_dir = shift;
     if ($echo_to_console) {
         print "$select_statement\n";
     }
-    my $query_filename = $DEFAULT_QUERY_FILENAME . $query_number . $DEFAULT_SQL_FILENAME_EXTENSION;
+    my $query_filename = $DEFAULT_QUERY_FILENAME . $query_count . $DEFAULT_SQL_FILENAME_EXTENSION;
     my $query_filepath = File::Spec->catfile($query_output_dir, $query_filename);
     open (QUERYFILE, ">", "$query_filepath") ||
         die "Could not create PostgreSQL query file $query_filepath: $!";
@@ -124,12 +132,14 @@ sub print_usage {
     print <<"END_USAGE_INSTRUCTIONS";
 $script_name:
 Extracts a set of SQL SELECT queries from a PostgreSQL database logfile.
+Fills in the values of replaceable parameters in those queries, as needed.
 
 Usage:
 
 $script_name [options] logfile
 Options (defaults in parens)
 -d path to output directory to be created (./$DEFAULT_OUTPUT_DIR_NAME)
+-n number of queries to extract ($DEFAULT_NUM_QUERIES_TO_EXTRACT)
 -L minimum length in chars of any SELECT queries to be exacted ($DEFAULT_MIN_QUERY_LENGTH)
 or
 --help  prints this set of help instructions, then exits without running script
