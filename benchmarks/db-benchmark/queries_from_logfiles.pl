@@ -4,28 +4,38 @@
 
 use strict;
 use warnings;
+
 use File::Basename;
+use File::Spec;
 use Getopt::Std;
 use POSIX qw(strftime);
 
 # Whether to echo printing of SELECT queries to the console.
 # Set to '1' when doing interactive debugging.
-my $echo_to_console = 1;
+my $echo_to_console = 0;
 
-my $DEFAULT_MIN_QUERY_LENGTH = 50;
+my $DEFAULT_QUERY_FILENAME = "query";
+my $DEFAULT_SQL_FILENAME_EXTENSION = ".sql";
 my $SELECT_STATEMENT_REGEX = ".*?PDT LOG:.*?(SELECT.*)";
 my $CONTAINS_REPLACEABLE_PARAMS_REGEX = ".*?(\\\$[0-9]{1,3}).*";
 my $PARAMETER_VALUES_REGEX = ".*?PDT DETAIL:  parameters: (.*)";
+
+my $DEFAULT_OUTPUT_DIR_NAME = "sql";
+my $DEFAULT_MIN_QUERY_LENGTH = 100;
 
 my %options=();
 getopt('d:L:', \%options);
 
 # Pathname of PostgreSQL logfile to open
 #(assumed to be in local directory if no path provided)
-my $logfile_name = $ARGV[0] || 'postgresql.log';
+my $logfile_name = $ARGV[0]; # || 'postgresql.log';
+if (! defined $logfile_name || $logfile_name eq "") {
+    print_usage();
+    exit(0);
+}
 
 # Output directory to which query files will be written
-my $output_dir = $options{d} || 'sql';
+my $output_dir = $options{d} || $DEFAULT_OUTPUT_DIR_NAME;
 my $query_output_dir = create_query_output_dir($output_dir);
 
 # Minimum length for queries of interest; shorter queries will be filtered out
@@ -34,7 +44,7 @@ my $min_query_length = $options{L} || $DEFAULT_MIN_QUERY_LENGTH;
 my $stashed_query = "";
 my $query_number = 0;
 
-open (LOGFILE, $logfile_name) or die "Couldn't open PostgreSQL logfile $logfile_name: $!";
+open (LOGFILE, "<", $logfile_name) or die "Couldn't open PostgreSQL logfile $logfile_name: $!";
 while (<LOGFILE>) {
 
     my $current_line = $_;
@@ -78,6 +88,7 @@ while (<LOGFILE>) {
     
 }
 close LOGFILE;
+print "Wrote $query_number SELECT queries within directory $query_output_dir ...\n";
 
 sub print_query {
     my $select_statement = shift;
@@ -86,6 +97,12 @@ sub print_query {
     if ($echo_to_console) {
         print "$select_statement\n";
     }
+    my $query_filename = $DEFAULT_QUERY_FILENAME . $query_number . $DEFAULT_SQL_FILENAME_EXTENSION;
+    my $query_filepath = File::Spec->catfile($query_output_dir, $query_filename);
+    open (QUERYFILE, ">", "$query_filepath") ||
+        die "Could not create PostgreSQL query file $query_filepath: $!";
+    print QUERYFILE "$select_statement\n";
+    close(QUERYFILE);
 }
 
 # Borrowed from db_benchmark.pl script
@@ -94,9 +111,11 @@ sub create_query_output_dir {
 	my $now_string = strftime('%Y-%m-%d-%H%M%S', localtime());
 	my $query_output_dir = "$output_dir/$now_string";
 	if (! -d $output_dir) {
-	    mkdir $output_dir || die "Directory not found and can't be created: $output_dir $!";
+	    mkdir $output_dir ||
+	        die "Could not find or create query output directory $output_dir: $!";
 	}
-	mkdir $query_output_dir || die "Can't create directory: $query_output_dir $!";
+	mkdir $query_output_dir ||
+	    die "Can't create query output directory $query_output_dir: $!";
 	return $query_output_dir;
 }
 
@@ -110,8 +129,8 @@ Usage:
 
 $script_name [options] logfile
 Options (defaults in parens)
--d name of output directory within the current directory (sql)
--L minimum length in chars of any SELECT queries to be exacted (50)
+-d path to output directory to be created (./$DEFAULT_OUTPUT_DIR_NAME)
+-L minimum length in chars of any SELECT queries to be exacted ($DEFAULT_MIN_QUERY_LENGTH)
 or
 --help  prints this set of help instructions, then exits without running script
 END_USAGE_INSTRUCTIONS
