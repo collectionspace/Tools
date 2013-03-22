@@ -138,7 +138,7 @@ unset a i
 while IFS= read -r -u3 -d $'\0' tenantpath; do
     tenantname=${tenantpath##*/} # Get last directory in relative path as tenant name
     echo "Copying settings.xml file to local-$tenantname-settings.xml ..."
-    cp -p $tenantpath/settings.xml $tenantname/local-$tenantname-settings.xml
+    cp -p $tenantpath/settings.xml $tenantpath/local-$tenantname-settings.xml
     echo "Removing obsolete local-settings.xml files for $tenantname tenant ..."
     rm $tenantpath/local-settings.xml
     echo "Resetting hostnames to 'localhost' in local-$tenantname-settings.xml ..."
