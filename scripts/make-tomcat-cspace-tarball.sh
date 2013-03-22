@@ -2,6 +2,11 @@
 
 ####################################################
 # Script for rolling up a daily tarball from nightly
+#
+# Only tested under Linux. There are command line
+# options used below that are not supported on
+# some other Unix-like OSes.
+# e.g. 'sed -r' (Linux) versus 'sed -E' (Mac OS X)
 ####################################################
 
 ####################################################
@@ -81,7 +86,7 @@ echo "Cleaning up temporary copy of the Tomcat directory ..."
 # Some of the files below are now excluded from being copied via rsync, so the
 # attempted 'sed' replacement(s) targeting those files will harmlessly fail.
 echo "Removing passwords from various config files ..."
-sed -ri "s/nuxeo\.db\.(user|password)=.*/nuxeo.db.\\1=/" $NUXEO_CONF_FILE
+sed -r -i "s/nuxeo\.db\.(user|password)=.*/nuxeo.db.\\1=/" $NUXEO_CONF_FILE
 # Note: using sed to edit XML is potentially brittle - ADR
 sed -i 's#\(<password>\)[^<].*\(</password>\)#\1\2#g' $CSPACE_DS_FILE
 # FIXME: We might look into acting on an array of file paths when
@@ -131,15 +136,32 @@ find $APP_LAYER_CONFIG_DIR -name local-settings.xml -delete
 # The following commands were tested with Fedora 10 and Ubuntu 11; other Linux distros and other
 # Unix-like operating systems may have slight variations on 'execdir', etc.
 echo "Copying settings.xml files to local-{tenantname}-settings.xml for each tenant ..."
-find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d \
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -prune -type d \
   -execdir /bin/cp -p '{}'/settings.xml '{}'/local-'{}'-settings.xml \;
 echo "Removing obsolete local-settings.xml files for each tenant ..."
-find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d \
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -prune -type d \
   -execdir /bin/rm '{}'/local-settings.xml \;
+  
+echo "Resetting hostnames to 'localhost' in local-{tenantname}-settings.xml for each tenant ..."
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -prune -type d \
+  -execdir sed -r -i -e \
+  's#<baseurl>http://[^:]*:8180</baseurl>#<baseurl>http://localhost:8180</baseurl>#' \
+  '{}'/local-'{}'-settings.xml \;
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -prune -type d \
+  -execdir sed -r -i -e \
+  's#<url>http://[^:]*:8180/cspace-services</url>#<url>http://localhost:8180/cspace-services</url>#' \
+  '{}'/local-'{}'-settings.xml \;
+find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -prune -type d \
+  -execdir sed -r -i -e \
+  's#<ims-url>http://[^:]*:8180/#<ims-url>http://localhost:8180/#' \
+  '{}'/local-'{}'-settings.xml \;
 
 echo "Removing services JAR files ..."
 rm -Rv $CATALINA_LIB_DIR/cspace-services-authz.jar
 rm -Rv $CATALINA_LIB_DIR/cspace-services-authn.jar
+
+echo "Exiting early ..."
+exit(0);
 
 echo "Rolling up tarball ..."
 cd $TMP_DIR
