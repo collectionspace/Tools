@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgVoucherLabel46" language="groovy" columnCount="2" pageWidth="612" pageHeight="792" columnWidth="270" columnSpacing="36" leftMargin="18" rightMargin="18" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgVoucherLabel46" language="groovy" columnCount="2" pageWidth="612" pageHeight="792" columnWidth="270" columnSpacing="36" leftMargin="18" rightMargin="18" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="81181619-c0d0-41f8-8f23-7a17e0e71f10">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -21,93 +21,94 @@
 	<detail>
 		<band height="358" splitType="Prevent">
 			<line>
-				<reportElement x="0" y="3" width="267" height="1"/>
+				<reportElement uuid="4a554606-fa7a-44be-ab2d-047f968e2985" x="0" y="3" width="267" height="1"/>
 			</line>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="0" y="115" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="ff54281d-e197-45e3-a457-d191a5fe319a" positionType="Float" x="0" y="115" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{collectioninfo}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{collectioninfo}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="49" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="dea0ee02-a3c5-4d58-9481-f8616bb36eeb" positionType="Float" x="0" y="49" width="267" height="14" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{family}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="0" y="196" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="90701bd8-7e21-4a9a-8cc9-4bc761107c86" positionType="Float" x="0" y="196" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{annotation}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{annotation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="93" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f3f0bebb-2c28-4647-a379-2b3e0a796eab" positionType="Float" x="0" y="93" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{fieldcollectionnote}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{fieldcollectionnote}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="0" y="137" width="267" height="14" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="6fe21027-8b56-4b1b-bbbb-65cc97231020" positionType="Float" x="0" y="137" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchertype}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{vouchertype}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="0" y="152" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d8879157-dc03-4f37-a7ae-d5510e839a3f" positionType="Float" x="0" y="152" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchercollectioninfo}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{vouchercollectioninfo}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="71" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="8b333188-e685-4fef-acb9-9a96941ce3d8" positionType="Float" x="0" y="71" width="267" height="14" isPrintWhenDetailOverflows="true"/>
 				<textElement markup="html">
 					<font fontName="Times New Roman" size="9"/>
 					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{determinationformatted}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{determinationformatted}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="Float" mode="Transparent" x="0" y="357" width="267" height="1"/>
+				<reportElement uuid="7303a665-88f4-44e1-896f-83cbf2189818" positionType="Float" mode="Transparent" x="0" y="357" width="267" height="1"/>
 			</line>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="FixRelativeToBottom" x="31" y="268" width="200" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="a6364ece-bf72-4b51-b714-40e8f3d7e3c0" positionType="FixRelativeToBottom" x="31" y="273" width="200" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Times New Roman" size="8"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchernumber}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{vouchernumber}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="10" width="267" height="20"/>
+				<reportElement uuid="c8b44217-04b8-4626-91c6-77d44c77f4f7" x="0" y="10" width="267" height="20"/>
 				<textElement textAlignment="Center">
 					<font fontName="Times New Roman" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement positionType="FixRelativeToBottom" x="75" y="288" width="164" height="50"/>
+				<reportElement uuid="e6aebc07-c6d6-4a9c-b38f-ea834e3c7d2f" positionType="FixRelativeToBottom" x="75" y="288" width="164" height="50"/>
 				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
 					<jr:codeExpression><![CDATA[$F{objectnumber}]]></jr:codeExpression>
 				</jr:Code39>
 			</componentElement>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="0" y="174" width="267" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="0cb52daf-95fb-486e-9889-a17b8c5291c4" positionType="Float" x="0" y="174" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Times New Roman" size="9"/>
+					<paragraph spacingBefore="2"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{gardeninfo}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{gardeninfo}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
