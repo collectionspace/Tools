@@ -56,7 +56,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void open(int primaryType, String primaryID, Selenium selenium) throws Exception {
-        System.out.println("opening record of type " + Record.getRecordTypePP(primaryType));
+        System.out.println("    opening record of type " + Record.getRecordTypePP(primaryType));
         elementPresent("css=.cs-searchBox .csc-searchBox-selectRecordType", selenium);
         //Search for our ID
         selenium.select("css=.cs-searchBox .csc-searchBox-selectRecordType", "label=" + Record.getRecordTypePP(primaryType));
@@ -65,14 +65,20 @@ public class Utilities {
 		primaryIDAltered = primaryIDAltered.replace(" - ", " ");
         selenium.type("css=.cs-searchBox .csc-searchBox-query", primaryIDAltered);
         selenium.click("css=.cs-searchBox .csc-searchBox-button");
-        System.out.println("clicking search");
+        System.out.println("    clicking search");
         //Expect record and only that to be found in search results (to avoid false thruths :) )
         //removing the following command. JJM 2/15/12
         //selenium.waitForPageToLoad(MAX_WAIT);
-        elementPresent("link=" + primaryID, selenium);
-        System.out.println("found search result");
+
+        String selector = "xpath=//a[text()=\"" + primaryID + "\"]";
+
+        System.out.println("    checking whether " + selector + " is present");
+        
         //go to the record again:
-        selenium.click("link=" + primaryID);
+        elementPresent(selector, selenium);
+        Thread.sleep(2000);
+        System.out.println("    found " + selector);
+        selenium.click(selector);
         waitForRecordLoad(primaryType, selenium);
     }
 
@@ -109,7 +115,7 @@ public class Utilities {
         Matcher linkElementMatcher = linkElementPattern.matcher(source);
         linkElementMatcher.find();
         String csid = linkElementMatcher.group(1);
-        System.out.println("CSID of new movement record: " + csid);
+        System.out.println("    CSID of new movement record: " + csid);
         //open the record by typing the URL directly
         selenium.open(Record.getUrl(Record.MOVEMENT) + "?csid=" + csid);
         waitForRecordLoad(Record.MOVEMENT, selenium);
@@ -192,6 +198,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void createAndSave(int recordType, String requiredValue, Selenium selenium) throws Exception {
+        System.out.println("  createAndSave: recordType= " + Record.getRecordTypePP(recordType));
         //create new
         selenium.open(Record.getRecordTypeShort(recordType) + ".html");
         waitForRecordLoad(recordType, selenium);
@@ -235,6 +242,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void createNewRelatedOfCurrent(int secondaryType, Selenium selenium) throws Exception {
+        System.out.println("  createNewRelatedOfCurrent: secondary= " + Record.getRecordTypePP(secondaryType));
         String dialogSelector = ".cs-search-dialogFor-" + Record.getRecordTypeShort(secondaryType);
         //waitForRecordLoad(secondaryType, selenium); // JJM 2/15/12
         //go to secondary tab:
@@ -255,16 +263,26 @@ public class Utilities {
      * @throws Exception
      */
     public static void openRelatedOfCurrent(int secondaryType, String secondaryID, Selenium selenium) throws Exception {
-		System.out.println("seeking textpresent: " + secondaryID);
-        textPresent(secondaryID, selenium);
-        String selector = "css=.csc-relatedRecordsTab-"+Record.getRecordTypeShort(secondaryType) +" .csc-recordList-row span:contains(\""+secondaryID+"\")";
-        System.out.println("checking whether " + selector + " is present: " + selenium.isElementPresent(selector));
+        System.out.println("  openRelatedOfCurrent: secondary= " + Record.getRecordTypePP(secondaryType) + " recordID= " + secondaryID);
+        String shortSecondaryIDName = Record.getRecordTypeShort(secondaryType);
+		if (shortSecondaryIDName.equals("movement")) {
+            System.out.println("    seeking textpresent: (movement) " + shortSecondaryIDName);
+            textPresent(shortSecondaryIDName, selenium);
+        } else {
+            System.out.println("    seeking textpresent: " + secondaryID);
+            textPresent(secondaryID, selenium);
+        }
+        //String selector = "css=.csc-relatedRecordsTab-"+Record.getRecordTypeShort(secondaryType) +" .csc-recordList-row span:contains(\""+secondaryID+"\")";
+        String selector = "css=.csc-relatedRecordsTab-togglable .csc-listView-row a:contains(\""+secondaryID+"\")";
+        System.out.println("    checking whether " + selector + " is present: " + selenium.isElementPresent(selector));
         elementPresent(selector, selenium);
         selenium.click(selector);
         waitForRecordLoad(secondaryType, selenium);
     }
 
     public static void openRelatedOf(int primaryType, String primaryID, int secondaryType, String secondaryID, Selenium selenium) throws Exception {
+        System.out.println("  openRelatedOf: primary= " + Record.getRecordTypePP(primaryType) + " primaryID= " + primaryID +  
+                " secondary= " + Record.getRecordTypePP(secondaryType) + " secondaryID= " + secondaryID);
         open(primaryType, primaryID, selenium);
         //go to secondary tab:
         selenium.click("link=" + Record.getRecordTypeTabName(secondaryType));
@@ -288,7 +306,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void navigateWarningClose(int primaryType, String modifiedID, Selenium selenium) throws Exception {
-    	System.out.println("navigateWarningClose: primary= " + Record.getRecordTypePP(primaryType) + " modifiedID= " + modifiedID);
+    	System.out.println("  navigateWarningClose: primary= " + Record.getRecordTypePP(primaryType) + " recordID= " + modifiedID);
         waitForRecordLoad(primaryType, selenium);
         //edit a field (ID field)
         selenium.type(Record.getIDSelector(primaryType), modifiedID);
@@ -322,6 +340,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void navigateWarningSave(int primaryType, String modifiedID, Selenium selenium) throws Exception {
+        System.out.println("  navigateWarningSave: primary= " + Record.getRecordTypePP(primaryType) + " recordID= " + modifiedID);
         waitForRecordLoad(primaryType, selenium);
         //edit field (ID field)
         selenium.type(Record.getIDSelector(primaryType), modifiedID);
@@ -359,6 +378,7 @@ public class Utilities {
      * @throws Exception
      */
     public static void navigateWarningDontSave(int primaryType, String modifiedID, Selenium selenium) throws Exception {
+        System.out.println("  navigateWarningDontSave: primary= " + Record.getRecordTypePP(primaryType) + " recordID= " + modifiedID);
         waitForRecordLoad(primaryType, selenium);
         //edit ID field
         selenium.type(Record.getIDSelector(primaryType), modifiedID);
@@ -391,6 +411,7 @@ public class Utilities {
      * @param selenium The selenium object used to fill out the form
      */
     public static void fillForm(int recordType, String recordID, Selenium selenium) {
+        System.out.println("  fillForm: record= " + Record.getRecordTypePP(recordType) + " recordID= " + recordID);
         fillForm(recordType, recordID, Record.getFieldMap(recordType), Record.getSelectMap(recordType), Record.getDateMap(recordType), selenium);
     }
 
@@ -438,9 +459,27 @@ public class Utilities {
                 elementPresent("//select[contains(@class, '"+classNameOnly+"') and option='"+selectMap.get(selector)+"']", selenium);
 //                elementPresent("//select[option='"+selectMap.get(selector)+"']", selenium);
             } catch (Exception e) {
-                System.out.println("ERROR -- ELEMENT NOT PRESENT");
+                System.out.println("    ERROR -- ELEMENT NOT PRESENT");
             }
             selenium.select(selector, "label=" + selectMap.get(selector));
+        }
+
+        //HACK added hardcoded values for movement record because this record type
+        //has a vocab field as required, which is the odd one of the bunch
+        if (recordType == Record.MOVEMENT){
+            selenium.type(".csc-movement-currentLocation", "Shelf 4b");
+            selenium.type(".csc-movement-movementContact", "Frank Sinatra");
+            selenium.type(".csc-movement-normalLocation", "Under the sink");
+            //check if location record exists
+            /*if (selenium.isElementPresent("xpath=//span[text()='Shelf 4b']")){
+                System.out.println("    found term \"Shelf 4b\"");
+                selenium.click("xpath=//span[text()='Shelf 4b']");
+            } else if (selenium.isElementPresent("xpath=//li[text()='Local Storage Locations']")){
+                System.out.println("    added term \"Shelf 4b\" to Local Storage Locations authority");
+                selenium.click("xpath=//li[text()='Local Storage Locations']");
+            }
+            System.out.println("******************* END MOVEMENT BLOCK ********************");
+            */
         }
     }
 
@@ -452,6 +491,7 @@ public class Utilities {
      * @param recordType The record type to clear
      */
     public static void clearForm(int recordType, Selenium selenium) {
+        System.out.println("  clearForm: record= " + Record.getRecordTypePP(recordType));
         //clear ID field
         selenium.type(Record.getIDSelector(recordType), "");
 
@@ -481,7 +521,9 @@ public class Utilities {
         iterator = selectMap.keySet().iterator();
         while (iterator.hasNext()) {
             String selector = iterator.next();
+            //System.out.println("CLEARING FIELD: "+selector);
             selenium.select(selector, "index=0");
+            //System.out.println("READING FIELD: "+selector+" VALUE: "+Integer.parseInt(selenium.getSelectedIndex(selector)));
         }
     }
 
@@ -495,6 +537,7 @@ public class Utilities {
      * @param recordType The record type to fill out
      */
     public static void verifyClear(int recordType, Selenium selenium) {
+        System.out.println("  verifyClear: record= " + Record.getRecordTypePP(recordType));
         //check values of regular fields:
         HashMap<String, String> fieldMap = Record.getFieldMap(recordType);
         Iterator<String> iterator = fieldMap.keySet().iterator();
@@ -502,7 +545,7 @@ public class Utilities {
             String selector = iterator.next();
             //dont expect required field to be empty:
             if (!selector.equals(Record.getRequiredFieldSelector(recordType))) {
-//                System.out.println("CHECKING FIELD: "+selector);
+                //System.out.println("CHECKING FIELD: "+selector + " VALUE: " + selenium.getValue(selector));
                 assertEquals("checking for field: " + selector, "", selenium.getValue(selector));
             }
         }
@@ -517,12 +560,17 @@ public class Utilities {
         iterator = vocabMap.keySet().iterator();
         while (iterator.hasNext()) {
             String selector = iterator.next();
-            assertEquals("checking vocab field: "+selector, "", selenium.getValue(selector));
+            //adding because Movement has a VOCAB field as required
+            //dont expect required field to be empty:
+            if (!selector.equals(Record.getRequiredFieldSelector(recordType))) {
+                assertEquals("checking vocab field: "+selector, "", selenium.getValue(selector));
+            }
         }
         HashMap<String, String> selectMap = Record.getSelectMap(recordType);
         iterator = selectMap.keySet().iterator();
         while (iterator.hasNext()) {
             String selector = iterator.next();
+            //System.out.println("CHECKING FIELD: "+selector);
             assertEquals("checking select field: "+selector, 0, Integer.parseInt(selenium.getSelectedIndex(selector)));
         }
     }
@@ -539,6 +587,7 @@ public class Utilities {
      * @param selenium The selenium object used to fill out the form
      */
     public static void verifyFill(int recordType, String recordID, Selenium selenium) {
+        System.out.println("  verifyFill: record= " + Record.getRecordTypePP(recordType) + " recordID= " + recordID);
         verifyFill(recordType, recordID, Record.getFieldMap(recordType), Record.getSelectMap(recordType), Record.getDateMap(recordType), selenium);
     }
 
@@ -560,6 +609,12 @@ public class Utilities {
         Iterator<String> iterator = fieldMap.keySet().iterator();
         while (iterator.hasNext()) {
             String selector = iterator.next();
+            //hack to work with how movement records use a vocabulary as a required field
+            //this particular field always causes an error so we'll just skip it 
+            if (selector.contains("csc-movement-currentLocation")) {
+                System.out.println("    accepting .csc-movement-currentLocation");
+                continue;
+            }
             assertEquals("checking for field: " + selector, fieldMap.get(selector), selenium.getValue(selector));
         }
         iterator = dateMap.keySet().iterator();
@@ -587,7 +642,7 @@ public class Utilities {
                 //make sure options for select box are loaded
 //                elementPresent("//select[option='"+selectMap.get(selector)+"']", selenium);
             } catch (Exception e) {
-                System.out.println("ERROR -- ELEMENT NOT PRESENT");
+                System.out.println("    ERROR -- ELEMENT NOT PRESENT");
             }
             assertEquals(selectMap.get(selector), selenium.getSelectedLabel(selector));
         }

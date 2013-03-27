@@ -190,7 +190,7 @@ public class Record {
 				this.selectMap.put("css=.csc-dimension-measuredPart", "mount");
 				this.fieldMap.put("repeat::.csc-dimension-dimensionSummary", "No clue");
 				this.selectMap.put("css=.csc-dimension-dimension", "count");
-				this.fieldMap.put("repeat::.csc-dimension-value", "22.0");
+				this.fieldMap.put("repeat::.csc-dimension-value", "22.1");
 				this.selectMap.put("css=.csc-dimension-measurementMethod", "Protractor");
 				this.vocabMap.put("repeat::.csc-dimension-measuredBy", "VOCAB");
 				this.selectMap.put("css=.csc-dimension-measurementUnit", "millimeters");
@@ -526,7 +526,7 @@ public class Record {
                 this.fieldMap.put(".csc-acquisition-object-offer-price-value", "12.98");
                 this.fieldMap.put(".csc-acquisition-object-purchase-offer-price-value", "43.32");
                 this.fieldMap.put(".csc-acquisition-object-purchase-price-value", "43.3");
-                this.fieldMap.put(".csc-acquisition-original-object-purchase-price-value", "1200.0");
+                this.fieldMap.put(".csc-acquisition-original-object-purchase-price-value", "1200.1");
                 this.fieldMap.put(".csc-acquisition-acquisition-reason", "Cause I wanted it");
                 this.fieldMap.put(".csc-acquisition-acquisition-note", "Here I put my notes");
                 this.fieldMap.put(".csc-acquisition-acquisition-provisos", "Yes Please");
@@ -572,7 +572,7 @@ public class Record {
 
 		this.fieldMap.put(".csc-movement-movementNote", "Another random note");
 		//Changed value of .csc-movement-currentLocation from "some ref num" to VOCAB - JJM 2/15/12
-                this.fieldMap.put(".csc-movement-currentLocation", "VOCAB");                
+                this.vocabMap.put(".csc-movement-currentLocation", "VOCAB");                
                 
 		this.selectMap.put("css=.csc-movement-currentLocationFitness", "Temporary");
 		this.selectMap.put("css=.csc-movement-movementMethods", "Handcarried");
@@ -618,7 +618,7 @@ public class Record {
 				this.fieldMap.put("repeat::.csc-dimension-dimensionSummary", "No clue");
 				
 				this.selectMap.put("css=.csc-dimension-dimension", "count");
-				this.fieldMap.put("repeat::.csc-dimension-value", "22.0");
+				this.fieldMap.put("repeat::.csc-dimension-value", "22.1");
 				this.selectMap.put("css=.csc-dimension-measurementMethod", "Protractor");
 				this.vocabMap.put("repeat::.csc-dimension-measuredBy", "VOCAB");
 				this.selectMap.put("css=.csc-dimension-measurementUnit", "millimeters");

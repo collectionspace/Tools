@@ -1,0 +1,5 @@
+.DS_Store
+qa-unittests/build/*
+qa-unittests/junit*
+benchmarks/db-benchmark/runs/*
+benchmarks/db-benchmark/sql/*

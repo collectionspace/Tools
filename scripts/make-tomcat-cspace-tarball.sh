@@ -81,23 +81,38 @@ echo "Cleaning up temporary copy of the Tomcat directory ..."
 # Some of the files below are now excluded from being copied via rsync, so the
 # attempted 'sed' replacement(s) targeting those files will harmlessly fail.
 echo "Removing passwords from various config files ..."
-sed -ri "s/nuxeo\.db\.(user|password)=.*/nuxeo.db.\\1=/" $NUXEO_CONF_FILE
+
+# Assumes we're running under either Mac OS X or Linux,
+# with a presumed default version of 'sed' under either OS
+SED_CMD=
+# Assumes we're running under Mac OS X, with BSD 'sed'
+if [[ $OSTYPE == darwin* ]]
+  then
+    SED_CMD="sed -i .bak"
+# Defaults to assuming we're running under Linux, with GNU 'sed'
+else
+    SED_CMD="sed -i"
+fi
+
+$SED_CMD "s/nuxeo\.db\.user=.*/nuxeo.db.user=/" $NUXEO_CONF_FILE
+$SED_CMD "s/nuxeo\.db\.password=.*/nuxeo.db.password=/" $NUXEO_CONF_FILE
+
 # Note: using sed to edit XML is potentially brittle - ADR
-sed -i 's#\(<password>\)[^<].*\(</password>\)#\1\2#g' $CSPACE_DS_FILE
+$SED_CMD 's#\(<password>\)[^<].*\(</password>\)#\1\2#g' $CSPACE_DS_FILE
 # FIXME: We might look into acting on an array of file paths when
 # performing identical replacements, with these three below ...
-sed -i 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_REPO_CONF_FILE
-sed -i 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_DEFAULT_REPO_CONF_FILE
-sed -i 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_DATASOURCES_CONF_FILE
+$SED_CMD 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_REPO_CONF_FILE
+$SED_CMD 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_DEFAULT_REPO_CONF_FILE
+$SED_CMD 's#\(<property name\=\"[Pp]assword\">\)[^<].*\(</property>\)#\1\2#g' $NUXEO_DATASOURCES_CONF_FILE
 # ... and with the identical replacements within this group as well:
-sed -i 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $WEB_INF_CONTEXT_FILE
-sed -i 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $WEB_INF_PERSISTENCE_FILE
-sed -i 's#\(<property name\=\"hibernate.connection.password" value\=\"\)[^"].*\(\"/>\)#\1\2#g' \
+$SED_CMD 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $WEB_INF_CONTEXT_FILE
+$SED_CMD 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $WEB_INF_PERSISTENCE_FILE
+$SED_CMD 's#\(<property name\=\"hibernate.connection.password" value\=\"\)[^"].*\(\"/>\)#\1\2#g' \
   $WEB_INF_PERSISTENCE_FILE
-sed -i 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $META_INF_CONTEXT_FILE
-sed -i 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $CATALINA_CONF_FILE
-sed -i 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $TOMCAT_USERS_FILE
-sed -i 's#\(roles\=\"\)[^\"]*\(\".*\)#\1\2#g' $TOMCAT_USERS_FILE
+$SED_CMD 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $META_INF_CONTEXT_FILE
+$SED_CMD 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $CATALINA_CONF_FILE
+$SED_CMD 's#\(password\=\"\)[^\"]*\(\".*\)#\1\2#g' $TOMCAT_USERS_FILE
+$SED_CMD 's#\(roles\=\"\)[^\"]*\(\".*\)#\1\2#g' $TOMCAT_USERS_FILE
 # Note that the above may fail if a double-quote char is part of the password
 
 echo "Removing temporary directories ..."
@@ -128,11 +143,23 @@ echo "Removing nightly-specific and other host-specific config files ..."
 find $APP_LAYER_CONFIG_DIR -name nightly-settings.xml -delete
 find $APP_LAYER_CONFIG_DIR -name local-settings.xml -delete
 
-# The following command was tested with Fedora 10 and Ubuntu 11; other Linux distros and other
-# Unix-like operating systems may have slight variations on 'execdir', etc.
-echo "Copying settings.xml files to local-settings.xml for each tenant ..."
-find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d \
-  -execdir /bin/cp -p '{}'/settings.xml '{}'/local-settings.xml \;
+# See http://stackoverflow.com/a/1120952
+unset a i
+while IFS= read -r -u3 -d $'\0' tenantpath; do
+    tenantname=${tenantpath##*/} # Get last directory in relative path as tenant name
+    echo "Copying settings.xml file to local-$tenantname-settings.xml ..."
+    cp -p $tenantpath/settings.xml $tenantpath/local-$tenantname-settings.xml
+    echo "Removing obsolete local-settings.xml files for $tenantname tenant ..."
+    rm $tenantpath/local-settings.xml
+    echo "Resetting hostnames to 'localhost' in local-$tenantname-settings.xml ..."
+    $SED_CMD 's#<baseurl>http://[^:]*:8180</baseurl>#<baseurl>http://localhost:8180</baseurl>#' \
+        $tenantpath/local-$tenantname-settings.xml;
+    $SED_CMD 's#<url>http://[^:]*:8180/cspace-services</url>#<url>http://localhost:8180/cspace-services</url>#' \
+        $tenantpath/local-$tenantname-settings.xml;
+    $SED_CMD 's#<ims-url>http://[^:]*:8180/#<ims-url>http://localhost:8180/#' \
+        $tenantpath/local-$tenantname-settings.xml;
+done 3< <(find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d -print0)
+cd ..
 
 echo "Removing services JAR files ..."
 rm -Rv $CATALINA_LIB_DIR/cspace-services-authz.jar
@@ -165,6 +192,5 @@ if [ -e $DESTINATION_DIR/$TARBALL_NAME ]
     echo "Deleting all similar tarballs in destination directory older than 7 days ..."
     find $DESTINATION_DIR -name "$ARCHIVE_DIR_NAME-*tar.gz" -mtime +7 -delete
 fi
-
 
 

@@ -18,7 +18,7 @@ Open this page in a browser: http://www.oracle.com/technetwork/java/javase/downl
 click the "Java Download" button with the text "Java Platform (JDK)" written underneath it.
 This will bring you to a listing of downloads. If you are on a 32-bit machine, select the Windows x86 link, if you are under 64-bit, download Windows x64 .. Or if in doubt just default to the x86 one.
 Once you accept licence terms agreement, download should start, and once done the program should guide you through the installation. Make sure you notice (or choose) where java is installed - you'll need that info for when installing ant.
-Finally set the JAVA_HOME environment variable by opening the console and typing: set JAVA_HOME=C:\path_to\java\jdk1.6.0_02 - typing in the location where you install java
+Finally set the JAVA_HOME environment variable by opening the console and typing: set JAVA_HOME=C:\path_to\java\jdk1.6.0_XX - typing in the location where you install java
 
 Download and install ant
 
@@ -42,13 +42,15 @@ Starting the Selenium server
 Change to the qa-unittests/lib directory of the code downloaded from git:
 ----
 home$ cd Tools/qa-unittests/lib
-home$ java -jar selenium-server-standalone-2.3.0.jar
+home$ java -jar selenium-server-standalone-2.25.0.jar
 ----
 
 tip: If you want to run the Selenium server on a specific port, use:
    ----
-   home$ java -jar selenium-server-standalone-2.3.0 -port 8888
+   home$ java -jar selenium-server-standalone-2.25.0 -port 8888
    ----
+
+Additional startup parameters can be found on the http://seleniumhq.org/docs/05_selenium_rc.html website. 
 
 
 Running Primary Tab Tests:
