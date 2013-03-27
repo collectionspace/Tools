@@ -1,0 +1,21 @@
+#!/bin/bash -x
+
+# USE new counting method (directly from Postgres call)
+
+RUNDATE=$1
+SEQUENCE=$2
+SAVEDIR=$3
+
+#
+SYS='MH2obj'
+./ok2run.v2            ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_MHobj.log
+time ./importrel.v2         MH2obj.${RUNDATE}${SEQUENCE}.xml
+./cleanup_MH2obj.v2    ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3          ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_MHobj.log
+#
+SYS='obj2MH'
+./ok2run.v2            ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_MHobj.log
+time ./importrel.v2         obj2MH.${RUNDATE}${SEQUENCE}.xml
+./cleanup_obj2MH.v2    ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3          ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_MHobj.log
+

@@ -1,0 +1,48 @@
+CREATE OR REPLACE FUNCTION findsectionparent(character varying) RETURNS character varying AS
+'
+    WITH RECURSIVE taxon_hierarchyquery as (
+	-- Anchor member definition
+    SELECT
+      h.name taxoncsid,
+      getdispl(tc.refname) taxon,
+      tc.taxonrank taxonrank,
+      rc.objectcsid broadertaxoncsid,
+      getdispl(tc2.refname) broadertaxon,
+      tc2.taxonrank broadertaxonrank,
+      0 AS level
+    FROM taxon_common tc
+      JOIN hierarchy h ON (tc.id = h.id AND h.primarytype=''TaxonTenant35'')
+      LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+      LEFT OUTER JOIN hierarchy h2 ON (h2.primarytype = ''TaxonTenant35''
+          AND rc.relationshiptype=''hasBroader'' AND rc.objectcsid = h2.name)
+      LEFT OUTER JOIN taxon_common tc2 ON (tc2.id = h2.id)
+      WHERE tc.refname LIKE ''%(taxon)%'' AND tc.refname = $1
+    UNION ALL
+    -- Recursive member definition
+    SELECT
+      h.name taxoncsid,
+      getdispl(tc.refname) taxon,
+      tc.taxonrank taxonrank,
+      rc.objectcsid broadertaxoncsid,
+      getdispl(tc2.refname) broadertaxon,
+      tc2.taxonrank broadertaxonrank,
+      th.level - 1 AS level
+    FROM taxon_common tc
+      JOIN hierarchy h ON (tc.id = h.id AND h.primarytype=''TaxonTenant35'')
+      LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+      LEFT OUTER JOIN hierarchy h2 ON (h2.primarytype = ''TaxonTenant35''
+		 AND rc.relationshiptype=''hasBroader'' AND rc.objectcsid = h2.name)
+      LEFT OUTER JOIN taxon_common tc2 ON (tc2.id = h2.id)
+      -- recursive join: current CSID is = prior level parent
+      -- (i.e. now obtaining the parent of prior level)
+      -- use h.name instead of rc.subjectcsid will allow final parent
+      -- (no hasbroader relationship) to show up
+      INNER JOIN taxon_hierarchyquery AS th
+			 ON h.name = th.broadertaxoncsid
+    )
+    SELECT DISTINCT taxon sectionparent
+    FROM taxon_hierarchyquery
+    WHERE taxonrank =''section''
+' LANGUAGE SQL
+    IMMUTABLE
+    RETURNS NULL ON NULL INPUT;

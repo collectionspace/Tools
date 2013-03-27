@@ -1,0 +1,83 @@
+# Scripts to help with maintaining iReports on CSpace servers.
+#
+# these shell scripts have been tested on IST RHEL Linux boxes.
+#
+# they help you add, delete, enumerate, and configure iReport files.
+# they depend on the user setting two environment variables specifying
+# the server and credentials they wish to target.
+#
+# to target different servers, simply make different config files
+# and source them as needed.
+#
+# using this technique, it is possible to update any CSpace server
+# you have the credentials for from one place.
+#
+# Some Important Caveats
+#
+# 1. the script assumes that the user is authorized to scp files
+#    into the tomcat report directory. This may require that 
+#    chown/chgrp the .jasper files on the target servers.
+#    Otherwise, you may have to accomplish this copy step
+#    by hand.
+#
+# 2. the scripts attempt to record activity in a log file.
+#    this is easily defeated if you modify or update reports
+#    by other means (manually, or from another server)
+#
+# THE SCRIPTS
+#
+#  set-config-default.sh      basic environment var setting script
+#  load-report.sh report "report name" "forDocType" copies .jasper file, configures report
+#  delete-report.sh csid     deletes report having specified csid (deletes config only!)
+#  list-reports.sh > reports.csv  lists the reports installed
+#  delete-all-reports.sh reports.csv deletes all the reports listed in reports.csv
+# 
+# EXAMPLES
+#
+# script to set environment variables.
+# this should be customized for the systems you are using.
+
+$ cat set-config-default.sh 
+#!/bin/bash
+#
+export REPORTURL="http://xxx.cspace.berkeley.edu:8180"
+export REPORTUSER="xxx@xxx.cspace.berkeley.edu:xxx"
+echo
+echo ">>>>> Environment variables set:"
+echo REPORTURL  $REPORTURL
+echo REPORTUSER $REPORTUSER
+echo
+
+# copy the default config file.
+$ cp set-config-default.sh set-pahma-dev.sh
+
+# edit it so that it has the values for the system you want to work with.
+$ vi set-pahma-dev.sh 
+
+# source it to set the environment variables
+$ source set-pahma-prod.sh 
+
+>>>>> Environment variables set:
+REPORTURL pahma.cspace.berkeley.edu
+REPORTUSER xxxx@pahma.cspace.berkeley.edu:xxxx
+
+# now go to town!
+
+# load and config report (assumes you have a file zzz.jasper in this directory)
+$ ./load-report.sh zzz "example" ""
+zzz.jasper -- not found.
+
+# put the .jasper file where it belongs (use this command when you have modified the report)
+# but it still works the same.
+sudo cp zzz.jasper /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
+
+# make a list of installed reports
+$ ./list-reports.sh > listofreports.csv
+
+$ cat listofreports.csv
+74c64b69-40c6-4f36-9638	Group Report with sites and locations
+f45de201-3429-4d67-a1b2	Basic Object Report
+c82b4c85-88ac-4b20-90d1	Basic Group Report
+
+# delete a report (e.g. the Basic Group Report above)
+./delete-report.sh c82b4c85-88ac-4b20-90d1

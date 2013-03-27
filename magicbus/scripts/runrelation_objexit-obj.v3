@@ -1,0 +1,21 @@
+#!/bin/bash -x
+
+# USE new counting method (directly from Postgres call)
+
+RUNDATE=$1
+SEQUENCE=$2
+SAVEDIR=$3
+
+#
+SYS='objexit2obj'
+./ok2run.v2             ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_objexit-obj.log
+time ./importrel.v2     exit2obj.${RUNDATE}${SEQUENCE}.xml
+./cleanup_exit2obj.v2   ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3      ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_objexit-obj.log
+#
+SYS='obj2objexit'
+./ok2run.v2             ${RUNDATE} ${SEQUENCE} ${SAVEDIR} ${SYS} >> magicbus_objexit-obj.log
+time ./importrel.v2     obj2exit.${RUNDATE}${SEQUENCE}.xml
+./cleanup_obj2exit.v2   ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./countrel.v3      ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus_objexit-obj.log
+

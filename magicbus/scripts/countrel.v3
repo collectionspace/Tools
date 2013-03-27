@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#URL="http://pahma.cspace.berkeley.edu:8180/cspace-services/relations?pgSz=1"
+#CONTENT_TYPE="Content-Type: application/xml"
+#USER="import@pahma.cspace.berkeley.edu:xxxxxxxxxxxx"
+#curl -i -s -S --stderr - --basic -u "$USER" -X GET -H "Content-Type:application/xml" $URL | perl -ne 's/<totalItems>(\d+)<\/totalItems>// && (print "$1 records ")'
+
+psql -U reporter -d "host=pahma.cspace.berkeley.edu dbname=nuxeo password=zzzreporterpasswordzzz" -c "select count(*) from relations_common" | grep "^ [0-9]" | perl -ne 'chomp; s/^ +//; print "$_ records"' 
+
+echo " $1 $2 $3"
+echo == Done         `date`
+echo ==================================================================================
