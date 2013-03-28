@@ -44,6 +44,7 @@ else:
         elif updateType == 'move':         doUpdateLocations(form,config)
         elif updateType == 'barcodeprint': doBarCodes(form,config)
         elif updateType == 'inventory':    doUpdateLocations(form,config)
+        elif updateType == 'objinfo':      doUpdateObjinfo(form,config)
         elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
         elif updateType == 'bedlist':      doBedList(form,config)
         # elif updateType == 'holdings':     doBedList(form,config)
@@ -70,6 +71,7 @@ else:
         elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
         elif updateType == 'inventory':    doLocationSearch(form,config,'list')
         elif updateType == 'keyinfo':      doLocationSearch(form,config,'list')
+        elif updateType == 'objinfo':      doObjectSearch(form,config,'list')
     elif action in ['<<','>>']:
         print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
     else:

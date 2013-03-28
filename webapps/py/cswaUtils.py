@@ -13,10 +13,29 @@ import httplib, urllib2
 import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
-from lxml import etree
+
+try:
+    import xml.etree.ElementTree as etree
+    #print("running with ElementTree")
+except ImportError:
+    try:
+        from lxml import etree
+        #print("running with lxml.etree")
+    except ImportError:
+        try:
+            # normal cElementTree install
+            import cElementTree as etree
+            #print("running with cElementTree")
+        except ImportError:
+            try:
+                # normal ElementTree install
+                import elementtree.ElementTree as etree
+                #print("running with ElementTree")
+            except ImportError:
+                print("Failed to import ElementTree from any known place")
 
 # the only other module: isolate postgres calls and connection
-import cswaDB
+import cswaDBNV as cswaDB
 import getPlaces
 import getTaxname
 import getAuthorityTree
@@ -27,6 +46,8 @@ def getConfig(form):
        fileName = form.getvalue('webapp') + '.cfg'
        config = ConfigParser.RawConfigParser()
        config.read(fileName)
+       # test to see if it seems like it is really a config file
+       updateType  = config.get('info','updatetype')
        return config
    except:
        return False
@@ -949,12 +970,17 @@ def writeLog(updateItems,config):
 
 def writeInfo2log(request,form,config,elapsedtime):
 
+    checkServer = form.getvalue('check')
     location1 = str(form.getvalue("lo.location1"))
     location2 = str(form.getvalue("lo.location2"))
     action = str(form.getvalue("action"))
     serverlabel = config.get('info','serverlabel')
     apptitle = config.get('info','apptitle')
     updateType = config.get('info','updatetype')
+    checkServer = form.getvalue('check')
+    # override updateType if we are just checking the server
+    if checkServer == 'check server':
+       updateType = checkServer
     sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType,action,request,elapsedtime,serverlabel,location1,location2))
   
 def uploadFile(form,config):
@@ -1374,15 +1400,18 @@ def getPrinters(form):
 
 def selectWebapp():
 
-    webapps = { 'pahma': ['sysinv', 'keyinfo', 'packlist', 'move', 'upload', 'barcodeprint', 'collectionStats', 'objectInfo'],
+    webapps = { 'pahma': ['sysinv', 'keyinfo', 'objrev', 'packlist', 'move', 'upload', 'barcodeprint', 'collectionStats'],
                 'ucbg':	['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
                 'ucjeps': ['ucjepsBedList', 'ucjepsLocationReport'] }
 
-    exceptions = { "barcodeprint": "BarcodePrint",
-                   "upload": "BarcodeUpload",
-                   "keyinfo": "KeyInfoRev",
-                   "packlist": "PackingList",
-                   "sysinv": "SystematicInventory" }
+    #exceptions = { "barcodeprint": "BarcodePrint",
+    #               "upload": "BarcodeUpload",
+    #               "keyinfo": "KeyInfoRev",
+    #               "packlist": "PackingList",
+    #               "sysinv": "SystematicInventory" }
+    
+    exceptions = {}
+    
     apptitles = { "ucbgAdvancedSearch": "Advanced Search",
                   "advsearch": "Advanced Search",
                   "barcodeprint": "Barcode Label Generator",
@@ -1394,10 +1423,10 @@ def selectWebapp():
                   "ucjepsBedList": "Bed List Report",
                   "collectionstats": "Collection Stats",
                   "keyinfo": "Key Information Review",
+                  "objrev": "Object Information Review",
+                  "objectinfo": "Object Info",
                   "locreport": "Location Report",
                   "ucbgLocationReport": "Location Report",
-                  "objectinfo": "Object Info",
-                  "objectInfo": "Object Info",
                   "packlist": "Packing List Report",
                   "packinglist": "Packing List Report",
                   "search": "Search",
@@ -1419,13 +1448,13 @@ def selectWebapp():
 
     programName = 'cswaMain.py?webapp='
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v2.4 Dev "Legacy"<th>v2.4 Production ("Legacy")</th><th>v3.2.1 Dev "Test"</th><th>v3.2.1 Production</th></tr>\n' % museum
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.1 Production</th><th>v3.2.1 Dev "Test"</th><th>v2.4 Production ("Legacy")</th></tr>\n' % museum
         for webapp in webapps[museum]:
            apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
            line += '<tr><th>%s</th><th>%s</th>' % (apptitle,webapp)
-           for sys in ['Dev','Prod','Dev2','V321']:
+           for sys in ['V321', 'Dev', 'Prod']:
                available = ''
-               if webapp in exceptions and sys not in ['Dev2', 'V321']:
+               if webapp in exceptions and sys not in ['Dev', 'V321']:
                    if os.path.isfile(exceptions[webapp]+sys+'.py'):
                        available = '<a target="%s" href="%s">%s</a>' % (sys,exceptions[webapp]+sys+'.py',exceptions[webapp]+sys)
                    elif os.path.isfile(exceptions[webapp]+'.py') and sys == 'Prod':
@@ -1513,15 +1542,28 @@ def starthtml(form,config):
     location1 = str(form.getvalue("lo.location1")) if form.getvalue("lo.location1") else ''
     location2 = str(form.getvalue("lo.location2")) if form.getvalue("lo.location2") else ''
     otherfields = '''
-	  <tr><th><span class="cell">start:</span></th>
+	  <tr><th><span class="cell">start location:</span></th>
 	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
-          <th><span class="cell">end:</span></th>
+          <th><span class="cell">end location:</span></th>
           <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th></tr>
     '''
 
     if updateType == 'keyinfo':
 	otherfields += '''
 	  <tr><th/><th/><th/><th/></tr>'''
+
+
+    elif updateType == 'objinfo':
+        objno1 = str(form.getvalue("ob.objno1")) if form.getvalue("ob.objno1") else ''
+        objno2 = str(form.getvalue("ob.objno2")) if form.getvalue("ob.objno2") else ''
+        otherfields = '''
+        <tr><th><span class="cell">start object no:</span></th>
+        <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
+        <th><span class="cell">end object no:</span></th>
+        <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></th></tr>
+        '''
+        otherfields += '''
+        <tr><th/><th/><th/><th/></tr>'''
         
     elif updateType == 'move':
         crate = str(form.getvalue("lo.crate")) if form.getvalue("lo.crate") else ''
