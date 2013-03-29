@@ -35,7 +35,7 @@ except ImportError:
                 print("Failed to import ElementTree from any known place")
 
 # the only other module: isolate postgres calls and connection
-import cswaDBNV as cswaDB
+import cswaDB as cswaDB
 import getPlaces
 import getTaxname
 import getAuthorityTree
