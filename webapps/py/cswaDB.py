@@ -73,6 +73,8 @@ left outer join objectnamegroup ong on (ong.id=h5.id)
 
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
 
+join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
+
 WHERE 
    l.termdisplayName = '""" + str(location) + """'
    
@@ -184,6 +186,8 @@ left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pe
 left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
 left outer join assocpeoplegroup apg on (apg.id=h5.id)
+
+join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
 WHERE 
    l.termdisplayName = '""" + str(location) + """'
@@ -337,7 +341,15 @@ def getloclist(searchType, location1, location2, num2ret, config):
 
     getobjects = """
 select * from (
-select termdisplayname,replace(termdisplayname,' ','0') locationkey from loctermgroup) as t
+select termdisplayname,replace(termdisplayname,' ','0') locationkey 
+FROM loctermgroup ltg
+INNER JOIN hierarchy h_ltg
+        ON h_ltg.id=ltg.id
+INNER JOIN hierarchy h_loc
+        ON h_loc.id=h_ltg.parentid
+INNER JOIN misc
+        ON misc.id=h_loc.id and misc.lifecyclestate <> 'deleted'
+) as t
 """ + whereclause + """
 order by locationkey
 limit """ + str(num2ret)

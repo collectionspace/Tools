@@ -25,11 +25,12 @@ case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
 end as family,
 regexp_replace(lc.borrower, '^.*\)''(.*)''$', '\1') voucherinstitution,
-case when con.cultivated = 'false' or con.cultivated is null then 'wild'
-     else 'hort'
+case when lb.hortwild='Horticultural' then 'hort'
+     when lb.hortwild='Wild' then 'wild'
 end as hortwild
 from loansout_common lc
 join loansout_naturalhistory lnh on (lc.id=lnh.id)
+join loansout_botgarden lb on (lc.id=lb.id)
 
 join hierarchy h1 on lc.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='CollectionObject')

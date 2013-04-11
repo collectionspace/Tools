@@ -22,27 +22,21 @@ end as family,
 case when fc.item is not null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is not null
         then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' '||co1.fieldcollectionnumber||', '||sdg.datedisplaydate
   when fc.item is not null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' '||co1.fieldcollectionnumber
+        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' '||co1.fieldcollectionnumber||', s.d.'
   when fc.item is not null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is not null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||', '||sdg.datedisplaydate
+        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' s.n., '||sdg.datedisplaydate
   when fc.item is not null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is null
-        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
+        then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')||' s.n., s.d.'
   when fc.item is null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is not null
         then co1.fieldcollectionnumber||', '||sdg.datedisplaydate
   when fc.item is null and co1.fieldcollectionnumber is not null and sdg.datedisplaydate is null
-        then co1.fieldcollectionnumber
+        then co1.fieldcollectionnumber||', s.d.'
   when fc.item is null and co1.fieldcollectionnumber is null and sdg.datedisplaydate is not null
-        then sdg.datedisplaydate
+        then 's.n., '||sdg.datedisplaydate
 end as collectioninfo,
-case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\)''(.*)''$', '\1')
-     when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
-end as locality,
 lc.loanoutnumber vouchernumber,
 lnh.numlent numbersheets,
 lb.labelrequested,
-case when (lb.gardenlocation is not null and lb.gardenlocation <> '')
-     then regexp_replace(lb.gardenlocation, '^.*\)''(.*)''$', '\1')
-end as gardenlocation,
 case when (lb.gardenlocation is not null and lb.gardenlocation <> '')
      then 'Garden No. '||co1.objectnumber||', Bed '||regexp_replace(lb.gardenlocation, '^.*\)''(.*)''$', '\1')
      else 'Garden No. '||co1.objectnumber||', Bed unknown'
@@ -80,17 +74,13 @@ left outer join taxon_common tc on (tig.taxon=tc.refname)
 left outer join taxon_naturalhistory tn on (tc.id=tn.id)
 
 left outer join hierarchy htt
-    on (tc.id=htt.parentid and htt.name='taxon_common:taxonTermGroupList' and htt.pos=0) -- for now assuming preferred name
+    on (tc.id=htt.parentid and htt.name='taxon_common:taxonTermGroupList' and htt.pos=0)
 left outer join taxontermgroup tt on (tt.id=htt.id)
 
 left outer join collectionobjects_common_fieldCollectors fc on (co1.id = fc.id and fc.pos = 0)
 
 left outer join hierarchy hfcdg on (co1.id = hfcdg.parentid  and hfcdg.name='collectionobjects_common:fieldCollectionDateGroup')
 left outer join structureddategroup sdg on (sdg.id = hfcdg.id)
-
-left outer join hierarchy hlg
-     on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
-left outer join localitygroup lg on (lg.id = hlg.id)
 
 where lb.labelrequested = 'Yes'
 order by objectnumber
