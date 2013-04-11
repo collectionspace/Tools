@@ -2,6 +2,7 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_PARENT_DIR = os.path.dirname(BASE_DIR)
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -14,12 +15,12 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sqlite3',  # Or path to database file if using sqlite3.
+        'NAME': BASE_PARENT_DIR + os.sep + 'db.sqlite3',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'HOST': '',              # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',              # Set to empty string for default.
     }
 }
 
@@ -140,12 +141,41 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console', 'logfile'],
+    },
+    'formatters': {
+        'standard': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
     'handlers': {
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_PARENT_DIR + os.sep + 'logfile.txt',
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+        'console': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -153,16 +183,38 @@ LOGGING = {
         }
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            },
         'django.request': {
             'handlers': ['mail_admins'],
-            'level': 'ERROR',
+            'level': 'WARNING',
             'propagate': True,
-        },
+            },
     }
 }
 
-#LOGIN_URL = (url(r'^accounts/login/$', django.contrib.auth.views.login, name='login'),)
+import logging
+logging.basicConfig(filename=BASE_PARENT_DIR + os.sep + 'settings.log', level=logging.DEBUG)
+logging.debug('Settings log file started.')
 
+#
+# If the application's WSGI setup script added an environment variable to tell us
+# the WSGI mount point path then we should use it; otherwise, we'll assume that
+# the application was mounted at the root of the current server
+#
+WSGI_BASE = os.environ.get(__package__ + ".WSGI_BASE")
+try:
+    WSGI_BASE
+    logging.debug('WSGI_BASE was found in environment variable: ' + __package__ + ".WSGI_BASE")
+except NameError:
+    logging.debug('WSGI_BASE was not set.')
+    WSGI_BASE = ''
+
+logging.debug('WSGI_BASE =' + WSGI_BASE)
+LOGIN_URL = WSGI_BASE + '/accounts/login'
 #LOGIN_REDIRECT_URL = LOGIN_URL
 
 #
@@ -172,4 +224,3 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'authn.authn.CSpaceAuthN',
 )
-

@@ -3,7 +3,9 @@ __author__ = 'remillet'
 from os import path
 from django.contrib.auth.models import User
 from common import cspace
+import logging
 
+logger = logging.getLogger(__name__)
 HTTP_PROTOCOL = "http"
 CSPACE_AUTHN_CONFIG_FILENAME = 'authn'
 
@@ -37,13 +39,14 @@ class CSpaceAuthN(object):
     @classmethod
     def initialize(cls, handleAuthNRequest, clearPasswordCache=False):
         if handleAuthNRequest:
-            cls.handleAuthNRequest = handleAuthNRequest  # this is a delegate method that gets called by our AuthN method
+            cls.handleAuthNRequest = handleAuthNRequest  # a delegate method that gets called by our AuthN method
 
         if clearPasswordCache:
             cls.resetPasswordCache()
 
         cls.config = cspace.getConfig(path.dirname(__file__), CSPACE_AUTHN_CONFIG_FILENAME)
-        if cspace.getConfigOptionWithSection(cls.config, CONFIGSECTION_AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) == "True":
+        if cspace.getConfigOptionWithSection(cls.config, CONFIGSECTION_AUTHN_INFO, CSPACE_AUTHN_OVERRIDE_PROPERTY) \
+                == "True":
             cls.overrideWithConfig = True
         else:
             cls.overrideWithConfig = False
@@ -60,22 +63,22 @@ class CSpaceAuthN(object):
 
         if self.realm is None:
             isMissingProperties = True
-            print errMsg % cspace.CSPACE_REALM_PROPERTY
+            logger.error(errMsg % cspace.CSPACE_REALM_PROPERTY)
         if self.uri is None:
             isMissingProperties = True
-            print errMsg % cspace.CSPACE_URI_PROPERTY
+            logger.error(errMsg % cspace.CSPACE_URI_PROPERTY)
         if self.hostname is None:
             isMissingProperties = True
-            print errMsg % cspace.CSPACE_HOSTNAME_PROPERTY
+            logger.error(errMsg % cspace.CSPACE_HOSTNAME_PROPERTY)
         if self.protocol is None:
             isMissingProperties = True
-            print errMsg % cspace.CSPACE_PROTOCOL_PROPERTY
+            logger.error(errMsg % cspace.CSPACE_PROTOCOL_PROPERTY)
         if self.port is None:
             isMissingProperties = True
-            print errMsg % cspace.CSPACE_PORT_PROPERTY
+            logger.error(errMsg % cspace.CSPACE_PORT_PROPERTY)
         if self.authNDictionary is None:
             isMissingProperties = True
-            print errMsg % "CSpaceAuthN.authNDictionary"
+            logger.error(errMsg % "CSpaceAuthN.authNDictionary")
 
         if isMissingProperties is True:
             result = False
@@ -117,8 +120,8 @@ class CSpaceAuthN(object):
                 self.configFileUsed = True
 
         except Exception, e:
-            print "Warning: The CSpaceAuthN authenticate back-end config file %s was missing." % \
-                  CSPACE_AUTHN_CONFIG_FILENAME + cspace.CONFIG_SUFFIX
+            logger.warning("The CSpaceAuthN authenticate back-end config file %s was missing." % \
+                  CSPACE_AUTHN_CONFIG_FILENAME + cspace.CONFIG_SUFFIX)
 
         if self.isSetup() is False:
             errMsg = "The CSpaceAuthN Django authentication back-end was not properly initialized.  \
@@ -137,9 +140,14 @@ class CSpaceAuthN(object):
         self.setupForRequest()
         (url, data, statusCode) = cspace.make_get_request(self.realm, self.uri, self.hostname, self.protocol, self.port,
                                                           username, password)
-        print "Request to %s: %s" % (url, statusCode)
+        logger.info("Request to %s: %s" % (url, statusCode))
         if statusCode is 200:
             result = True
+
+        if result:
+            logger.debug('User: {} authenticated with Host: {}'.format(username, self.hostname))
+        else:
+            logger.debug('User: {} could not authenticate with Host: {}'.format(username, self.hostname))
 
         return result
 
