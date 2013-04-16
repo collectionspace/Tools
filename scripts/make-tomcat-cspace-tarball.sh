@@ -47,10 +47,10 @@ CATALINA_LOG_FILE=$CATALINA_LOG_DIR/catalina.out
 DEFAULT_TMP_DIR=/tmp
 TMP_DIR=
 
-if [ -d $DEFAULT_TMP_DIR ] && [ -w $DEFAULT_TMP_DIR ]
+if [[ -d $DEFAULT_TMP_DIR && -w $DEFAULT_TMP_DIR ]]
   then
     TMP_DIR=$DEFAULT_TMP_DIR
-elif [ "x$TMPDIR" != "x" ] && [ -d $TMPDIR ] && [ -w $TMPDIR ]
+elif [[ "x$TMPDIR" != "x"  && -d $TMPDIR && -w $TMPDIR ]]
   then
     TMP_DIR=$TMPDIR
 else
@@ -170,14 +170,14 @@ cd $TMP_DIR
 tar -zcf $TARBALL_NAME $ARCHIVE_DIR_NAME || \
   { echo "Creating tarball $ARCHIVE_DIR_NAME/$TARBALL_NAME failed"; exit 1; }
 
-if [ -d $TMP_DIR/$ARCHIVE_DIR_NAME ] && [ -w $TMP_DIR/$ARCHIVE_DIR_NAME ]
+if [[ -d $TMP_DIR/$ARCHIVE_DIR_NAME && -w $TMP_DIR/$ARCHIVE_DIR_NAME ]]
   then
     echo "Removing temporary copy of the Tomcat directory ..."
     rm -R $TMP_DIR/$ARCHIVE_DIR_NAME || \
       { echo "Removing $TMP_DIR/$ARCHIVE_DIR_NAME failed"; } 
 fi
 
-if [ -d $DESTINATION_DIR ] && [ -w $DESTINATION_DIR ]
+if [[ -d $DESTINATION_DIR && -w $DESTINATION_DIR ]]
   then
     echo "Moving tarball to destination directory ..."
     mv $TARBALL_NAME $DESTINATION_DIR || \
