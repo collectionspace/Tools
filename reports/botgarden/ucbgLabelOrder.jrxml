@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36" uuid="8cfd83db-4693-4ca2-9299-5f70614cea72">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -16,8 +16,7 @@ mb.labelrequested, h2.isversion,
 case when (mc.currentlocation is not null and mc.currentlocation <> '')
      then regexp_replace(mc.currentlocation, '^.*\)''(.*)''$', '\1')
 end as gardenlocation,
-findhybridnamehtml(tig.id) Determination,
-case when tig.hybridflag = 'true' then findhybridname(tig.id)
+case when (tig.hybridflag = 'true' or tig.affinitytaxon is not null or tig.affinitytaxon='') then findhybridaffinname(tig.id)
      when tt.termdisplayname is not null then tt.termdisplayname
      when (tig.taxon is not null and tig.taxon <> '') then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
 end as shortTaxonomicName,
@@ -82,7 +81,6 @@ order by gardenLocation, objectnumber]]>
 	<field name="labelrequested" class="java.lang.String"/>
 	<field name="isversion" class="java.lang.Boolean"/>
 	<field name="gardenlocation" class="java.lang.String"/>
-	<field name="determination" class="java.lang.String"/>
 	<field name="shorttaxonomicname" class="java.lang.String"/>
 	<field name="labelcount" class="java.lang.String"/>
 	<field name="labelsize" class="java.lang.String"/>
@@ -101,32 +99,32 @@ order by gardenLocation, objectnumber]]>
 	<title>
 		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement x="-1" y="0" width="115" height="20"/>
+				<reportElement uuid="c47d5684-e175-48dc-bc7e-16b4e245f93c" x="-1" y="0" width="115" height="20"/>
 				<textElement>
 					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Label Orders]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="151" y="0" width="216" height="20"/>
+				<reportElement uuid="a7f1c5e4-296b-430f-bb11-c7a1e059c74b" x="151" y="0" width="216" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[UC Botanical Garden at Berkeley]]></text>
 			</staticText>
 			<textField pattern="dd-MMM-yyyy">
-				<reportElement style="Column header" x="378" y="0" width="145" height="20" forecolor="#000000"/>
+				<reportElement uuid="a3bee289-db92-4696-ac0d-7102d215db00" style="Column header" x="378" y="0" width="145" height="20" forecolor="#000000"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<pageHeader>
 		<band height="4" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="1" width="520" height="1"/>
+				<reportElement uuid="328e14b6-04da-4a88-be90-ac9d237f6663" positionType="FixRelativeToBottom" x="0" y="1" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
@@ -136,75 +134,75 @@ order by gardenLocation, objectnumber]]>
 	<detail>
 		<band height="156" splitType="Prevent">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="3" y="154" width="520" height="1"/>
+				<reportElement uuid="372709f5-da9d-4463-8b76-707eeae6d21c" positionType="FixRelativeToBottom" x="3" y="154" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="2" width="100" height="18"/>
+				<reportElement uuid="1bdfad2c-1683-41b8-b929-ec02c5758fff" x="0" y="2" width="100" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{gardenlocation}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{gardenlocation}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="132" y="2" width="216" height="18"/>
+				<reportElement uuid="18ba87d2-b51d-4f87-9beb-775eb4c8eab7" x="132" y="2" width="216" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{family}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="19" width="100" height="18"/>
+				<reportElement uuid="050b54fe-f5ac-4d80-935f-1d110b2d35cd" x="0" y="19" width="100" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Label count: " + $F{labelcount}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Label count: " + $F{labelcount}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="132" y="19" width="100" height="18"/>
+				<reportElement uuid="1de27d66-9635-499f-8d5a-b85f0b578968" x="132" y="19" width="100" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="295" y="19" width="100" height="18"/>
+				<reportElement uuid="20b267aa-a302-4378-a01a-808da6230c6c" x="295" y="19" width="100" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Size: " + $F{labelsize}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Size: " + $F{labelsize}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="420" y="19" width="100" height="18"/>
+				<reportElement uuid="266f960a-039f-4a4d-be10-e4d315610258" x="420" y="19" width="100" height="18"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Stand: " + $F{labelstandtype}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Stand: " + $F{labelstandtype}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="105" width="388" height="18" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f21547ea-e4ba-4773-afc5-9d85300ca99d" stretchType="RelativeToBandHeight" x="132" y="105" width="388" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{locality}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{locality}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="105" width="100" height="18"/>
+				<reportElement uuid="b5891abf-9f93-46aa-a4ef-dd9e9d0986ab" x="0" y="105" width="100" height="18"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{rarestatus}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{rarestatus}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="122" width="388" height="18" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="b455bd98-25b9-42f7-9065-164ea5f67a46" stretchType="RelativeToBandHeight" x="132" y="122" width="388" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{accessionnotes}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{accessionnotes}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="36" width="388" height="18" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="35712989-b7cb-4b24-b961-7f8f3a84bbc1" stretchType="RelativeToBandHeight" x="132" y="36" width="388" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{commonname}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{commonname}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="70" width="388" height="18" isRemoveLineWhenBlank="true"/>
+				<reportElement uuid="4dfdaa89-93cf-4ed8-997b-9802bc98e874" stretchType="RelativeToBandHeight" x="132" y="70" width="388" height="18" isRemoveLineWhenBlank="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{sectionparent}.isEmpty() ? null : "Section: " + $F{sectionparent}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{sectionparent}.isEmpty() ? null : "Section: " + $F{sectionparent}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="88" width="388" height="18" isRemoveLineWhenBlank="true"/>
+				<reportElement uuid="5d4430ef-c720-4dc6-abb5-4402af0d9c05" stretchType="RelativeToBandHeight" x="132" y="88" width="388" height="18" isRemoveLineWhenBlank="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{subsectionparent}.isEmpty() ? null : "Subsection: " + $F{subsectionparent}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{subsectionparent}.isEmpty() ? null : "Subsection: " + $F{subsectionparent}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="132" y="54" width="388" height="18" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="eda197b1-f9b0-4f5b-afe2-f66c01019224" stretchType="RelativeToBandHeight" x="132" y="54" width="388" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{shorttaxonomicname}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{shorttaxonomicname}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
