@@ -1,4 +1,15 @@
 #!/usr/bin/perl
+
+# Script to extract software licensing summaries from Maven dependencies reports
+# (See the print_usage subroutine, below, for usage instructions.)
+#
+# For instructions on generating Maven dependencies reports, and on running this
+# script to process output from those reports, see comments on the following issues:
+# * Services layer (http://issues.collectionspace.org/browse/CSPACE-5953)
+# * Application layer (http://issues.collectionspace.org/browse/CSPACE-5976)
+#
+# This is an adaptation of a script originally written by Kasper Galschiot Markus.
+
 use File::Basename;
 use File::Find;
 use Getopt::Long;
