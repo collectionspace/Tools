@@ -353,10 +353,17 @@ sub print_usage {
     my $script_name = basename($0);
     print <<"END_USAGE_INSTRUCTIONS";
 $script_name:
-Provides a concise summary of licensing information
-for a project. Requires that you first run
-'mvn project-info-reports:dependencies' (or an
-equivalent Ant task which runs that Maven report).
+Reads the licensing section of Maven dependencies reports and
+provides a concise summary of software licenses used by those
+dependencies, in text or HTML formats.
+
+(This script includes normalizations of the names of licenses
+used by dependencies of CollectionSpace project code.)
+
+To use this script, you must first run either
+'mvn project-info-reports:dependencies -Ddependency.locations.enabled=false'
+or an equivalent Ant task, script, etc. which runs that Maven goal 
+and optionally gathers the report file(s) into a single directory.
 
 Usages:
 
