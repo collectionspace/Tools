@@ -356,7 +356,6 @@ $script_name:
 Reads the licensing section of Maven dependencies reports and
 provides a concise summary of software licenses used by those
 dependencies, in text or HTML formats.
-
 (This script includes normalizations of the names of licenses
 used by dependencies of CollectionSpace project code.)
 
@@ -366,7 +365,6 @@ or an equivalent Ant task, script, etc. which runs that Maven goal
 and optionally gathers the report file(s) into a single directory.
 
 Usages:
-
 $script_name [--html|--text] [options] (default values in parens)
 Required argument (choose only one):
 --html Generate HTML output to the console
@@ -375,7 +373,6 @@ or
 Options:
 --no-normalize Disable normalization of license names (enabled by default)
 --separator [separator string] Separator to use with text output ($default_separator)
-
 END_USAGE_INSTRUCTIONS
     exit(0);
 }
