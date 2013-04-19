@@ -20,11 +20,14 @@ my %licenses = ();
 my %normalized_licenses = populate_normalized_licenses();
 
 my $html = '';
+my $inputdir = ".";
 my $normalize = 1;
+my $outputfile = "";
 my $default_separator = ' | ';
 my $separator = $default_separator;
 my $text = '';
-GetOptions ('html' => \$html, 'normalize!' => \$normalize, 'separator=s' => \$separator, 'text' => \$text);
+GetOptions ('html' => \$html, 'inputdir=s' => \$inputdir, 'normalize!' => \$normalize,
+  'outputfile=s' => \$outputfile, 'separator=s' => \$separator, 'text' => \$text);
 if ($text eq '' && $html eq '') {
   &print_usage;
 }
@@ -32,8 +35,12 @@ if ($text ne '' && $html ne '') {
   print "Please choose only one output option.\n\n";
   &print_usage;
 }
+if (! (-d $inputdir && -r $inputdir) ) {
+  print "Input directory $inputdir could not be found or is not readable.\n";
+  &print_usage;
+}
 
-find(\&read_file, ".");
+find(\&read_file, $inputdir);
 
 print_result(\%licenses) if $text;
 print_html(\%licenses) if $html;
@@ -356,8 +363,6 @@ $script_name:
 Reads the licensing section of Maven dependencies reports and
 provides a concise summary of software licenses used by those
 dependencies, in text or HTML formats.
-(This script includes normalizations of the names of licenses
-used by dependencies of CollectionSpace project code.)
 
 To use this script, you must first run either
 'mvn project-info-reports:dependencies -Ddependency.locations.enabled=false'
@@ -367,11 +372,12 @@ and optionally gathers the report file(s) into a single directory.
 Usages:
 $script_name [--html|--text] [options] (default values in parens)
 Required argument (choose only one):
---html Generate HTML output to the console
-or
---text Generate text output to the console
+--html Generate HTML output (by default to the console); or
+--text Generate text output (by default to the console)
 Options:
+--inputdir Path to directory containing dependencies reports for input
 --no-normalize Disable normalization of license names (enabled by default)
+--outputfile Path to file to which to write output (to console if option omitted)
 --separator [separator string] Separator to use with text output ($default_separator)
 END_USAGE_INSTRUCTIONS
     exit(0);
