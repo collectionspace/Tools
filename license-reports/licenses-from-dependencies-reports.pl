@@ -101,6 +101,14 @@ sub parse_file {
 sub print_html  {
     my ($licenses_ref) = @_;
     my %licenses = %{$licenses_ref};
+    my $OUTPUT;
+    if ($outputfile) {
+      open($OUTPUT, ">", $outputfile)
+        or die "Cannot open > $outputfile for writing: $!";
+      # Selects the new current filehandle for all subsequent print statements
+      # See http://stackoverflow.com/a/7059189
+      select $OUTPUT;
+    }
     print "<html><body><h1>License Dependencies</h1>\n";
     #make a hash variable based on reference and step through sorted
     foreach my $key (sort (keys(%licenses))) {
@@ -115,7 +123,11 @@ sub print_html  {
         }
         print "</table><BR>\n";
     }
-    print "</body></html>";
+    print "</body></html>\n";
+    if ($OUTPUT) {
+      close $OUTPUT or warn "Error closing $outputfile"
+    }
+    
 }
 
 ####
@@ -135,6 +147,12 @@ sub print_html  {
 sub print_result  {
     my ($licenses_ref) = @_;
     my %licenses = %{$licenses_ref};
+    my $OUTPUT;
+    if ($outputfile) {
+      open($OUTPUT, ">", $outputfile)
+        or die "Cannot open $outputfile for writing: $!";
+      select $OUTPUT;
+    }
     #make a hash variable based on reference and step through sorted
     foreach my $key (sort (keys(%licenses))) {
            #loop through keys in inner hash
@@ -145,6 +163,9 @@ sub print_result  {
              print $separator;
              print "$art_key\n";
         }
+    }
+    if ($OUTPUT) {
+      close $OUTPUT or warn "Error closing $outputfile";
     }
 }
 
@@ -362,22 +383,22 @@ sub print_usage {
 $script_name:
 Reads the licensing section of Maven dependencies reports and
 provides a concise summary of software licenses used by those
-dependencies, in text or HTML formats.
+dependencies, in text or HTML.
 
-To use this script, you must first run either
+To use this script, you must first generate dependencies reports, either via
 'mvn project-info-reports:dependencies -Ddependency.locations.enabled=false'
 or an equivalent Ant task, script, etc. which runs that Maven goal 
 and optionally gathers the report file(s) into a single directory.
 
 Usages:
-$script_name [--html|--text] [options] (default values in parens)
+$script_name [--html|--text] [options] (default)
 Required argument (choose only one):
 --html Generate HTML output (by default to the console); or
 --text Generate text output (by default to the console)
 Options:
---inputdir Path to directory containing dependencies reports for input
+--inputdir Path to directory containing dependencies reports (current dir)
 --no-normalize Disable normalization of license names (enabled by default)
---outputfile Path to file to which to write output (to console if option omitted)
+--outputfile Path to file for writing output (to console if omitted)
 --separator [separator string] Separator to use with text output ($default_separator)
 END_USAGE_INSTRUCTIONS
     exit(0);
