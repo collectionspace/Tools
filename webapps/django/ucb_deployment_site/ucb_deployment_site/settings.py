@@ -185,7 +185,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': True,
             },
         'django.request': {
@@ -206,10 +206,9 @@ logging.debug('Settings log file started.')
 # the application was mounted at the root of the current server
 #
 WSGI_BASE = os.environ.get(__package__ + ".WSGI_BASE")
-try:
-    WSGI_BASE
+if WSGI_BASE is not None:
     logging.debug('WSGI_BASE was found in environment variable: ' + __package__ + ".WSGI_BASE")
-except NameError:
+else:
     logging.debug('WSGI_BASE was not set.')
     WSGI_BASE = ''
 
