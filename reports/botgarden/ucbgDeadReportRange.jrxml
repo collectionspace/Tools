@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36" uuid="19d6f4bc-81ee-4b6e-8486-3b83aefd8d14">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -18,10 +18,7 @@
 	</parameter>
 	<queryString>
 		<![CDATA[select co1.objectnumber,
-case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
-     then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
-     when tig.hybridflag = 'true' then findhybridname(tig.id)
-end as Determination,
+findhybridaffinname(tig.id) Determination,
 deaddate
 from collectionobjects_common co1
 
@@ -46,71 +43,71 @@ order by objectnumber]]>
 	<title>
 		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement x="151" y="0" width="216" height="20"/>
+				<reportElement uuid="49f30908-e6be-4cd6-b6ce-f394a91c1a33" x="151" y="0" width="216" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[UC Botanical Garden at Berkeley]]></text>
 			</staticText>
 			<textField pattern="dd-MMM-yyyy">
-				<reportElement style="Column header" x="0" y="0" width="145" height="20" forecolor="#000000"/>
+				<reportElement uuid="8a1f82f0-85e5-4316-b6c3-394fd673a7a2" style="Column header" x="0" y="0" width="145" height="20" forecolor="#000000"/>
 				<textElement>
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="367" y="0" width="156" height="20"/>
+				<reportElement uuid="e5e13a0a-c296-4211-9224-95149c87a7d0" x="367" y="0" width="156" height="20"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{startdate-yyyy-mm-dd} + " to " + $P{enddate-yyyy-mm-dd}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{startdate-yyyy-mm-dd} + " to " + $P{enddate-yyyy-mm-dd}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<pageHeader>
 		<band height="22" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="19" width="520" height="1"/>
+				<reportElement uuid="11a95058-9ba8-4d2d-a405-9e1b4a7429e7" positionType="FixRelativeToBottom" x="0" y="19" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="3" y="2" width="516" height="20"/>
+				<reportElement uuid="0780b295-a512-42fa-b640-1fecef3e5695" x="3" y="2" width="516" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["Dead List"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Dead List"]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
 	<detail>
 		<band height="19" splitType="Prevent">
 			<textField>
-				<reportElement x="3" y="0" width="62" height="18"/>
+				<reportElement uuid="87be5c47-f388-45b9-af16-eed07b902aff" x="3" y="0" width="62" height="18"/>
 				<textElement verticalAlignment="Bottom"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="88" y="0" width="406" height="18"/>
+				<reportElement uuid="882cfac6-d5b7-4603-87c8-4b946d05b153" x="88" y="0" width="406" height="18"/>
 				<textElement verticalAlignment="Bottom"/>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{determination}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{determination}]]></textFieldExpression>
 			</textField>
 			<rectangle>
-				<reportElement x="68" y="4" width="12" height="12"/>
+				<reportElement uuid="0f538b83-45c1-4979-9c4e-53db30944ed8" x="68" y="4" width="12" height="12"/>
 			</rectangle>
 		</band>
 	</detail>
 	<pageFooter>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="399" y="0" width="80" height="20"/>
+				<reportElement uuid="2a636bd1-0a90-4461-9e00-32e82f841d72" x="399" y="0" width="80" height="20"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="479" y="0" width="40" height="20"/>
+				<reportElement uuid="1e405f05-fd72-48ee-83cc-3295344ca36f" x="479" y="0" width="40" height="20"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
