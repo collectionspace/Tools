@@ -13,9 +13,7 @@ BEGIN
 
 FOR r IN
 select co1.objectnumber,
-case when tig.hybridflag = 'false' then tt.termformatteddisplayname
-     when tig.hybridflag = 'true' then findhybridnamehtml(tig.id)
-end as determinationformatted,
+findhybridaffinhtml(tig.id) determinationformatted,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
 end as family,
