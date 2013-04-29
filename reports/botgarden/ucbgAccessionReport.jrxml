@@ -53,7 +53,7 @@ end as collectioninfo
 from collectionobjects_common co1
 left outer join hierarchy h1 on co1.id=h1.id
 
-join collectionobjects_common_briefdescriptions bd on (co1.id = bd.id)
+left outer join collectionobjects_common_briefdescriptions bd on (co1.id = bd.id)
 
 join collectionobjects_naturalhistory con on (co1.id = con.id)
 
