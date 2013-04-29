@@ -323,7 +323,7 @@ def getplants(location1, location2, num2ret, config, updateType):
 
     return result
 
-
+    
 def getloclist(searchType, location1, location2, num2ret, config):
     # 'set' means 'next num2ret locations', otherwise prefix match
     if searchType == 'set':
@@ -359,6 +359,91 @@ limit """ + str(num2ret)
     #print object
     return objects.fetchall()
 
+def getobjlist(searchType, object1, object2, num2ret, config):
+    query1 = """
+    SELECT objectNumber,
+cp.sortableobjectnumber
+FROM collectionobjects_common cc
+left outer join collectionobjects_pahma cp on (cp.id=cc.id)
+INNER JOIN hierarchy h1
+        ON cc.id=h1.id
+INNER JOIN misc
+        ON misc.id=h1.id and misc.lifecyclestate <> 'deleted'
+WHERE
+     cc.objectNumber = '%s'"""
+    
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    if int(num2ret) > 1000: num2ret = 1000
+    if int(num2ret) < 1:    num2ret = 1
+
+    objects.execute(query1 % object1)
+    (object1,sortkey1) = objects.fetchone()
+    objects.execute(query1 % object2)
+    (object2,sortkey2) = objects.fetchone()
+    
+    # 'set' means 'next num2ret objects', otherwise prefix match
+    if searchType == 'set':
+        whereclause = "WHERE sortableobjectnumber >= '" + sortkey1 + "'"
+    elif searchType == 'prefix':
+        whereclause = "WHERE sortableobjectnumber LIKE '" + sortkey1 + "%'"
+    elif searchType == 'range':
+        whereclause = "WHERE sortableobjectnumber >= '" + sortkey1 + "' AND sortableobjectnumber <= '" + sortkey2 + "'"
+
+    getobjects = """SELECT DISTINCT ON (sortableobjectnumber)
+(case when ca.computedcrate is Null then regexp_replace(cc.computedcurrentlocation, '^.*\\)''(.*)''$', '\\1') 
+     else concat(regexp_replace(cc.computedcurrentlocation, '^.*\\)''(.*)''$', '\\1'),
+     ': ',regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1')) end) AS storageLocation,
+cc.computedcurrentlocation AS locrefname,
+'' AS locdate,
+cc.objectnumber objectnumber,
+(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
+cc.numberofobjects objectCount,
+case when (pfc.item is not null and pfc.item <> '') then
+ substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+end AS fieldcollectionplace,
+case when (apg.assocpeople is not null and apg.assocpeople <> '') then
+ substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+end as culturalgroup,
+h1.name  objectCsid,
+case when (pef.item is not null and pef.item <> '') then
+ substring(pef.item, position(')''' IN pef.item)+2, LENGTH(pef.item)-position(')''' IN pef.item)-2)
+end as ethnographicfilecode,
+pfc.item fcpRefName,
+apg.assocpeople cgRefName,
+pef.item efcRefName,
+ca.computedcrate crateRefname,
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
+
+FROM collectionobjects_pahma cp
+left outer join collectionobjects_common cc on (cp.id=cc.id)
+
+left outer join hierarchy h1 on (cp.id = h1.id)
+
+left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name =
+'collectionobjects_common:objectNameList' and (h4.pos=0 or h4.pos is null))
+left outer join objectnamegroup ong on (ong.id=h4.id)
+
+left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id)
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id)
+
+left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
+'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
+left outer join assocpeoplegroup apg on (apg.id=h5.id)
+
+join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
+
+""" + whereclause + """
+ORDER BY sortableobjectnumber
+limit """ + str(num2ret)
+
+    objects.execute(getobjects)
+    #for object in objects.fetchall():
+    #print object
+    return objects.fetchall()
+
 
 def findcurrentlocation(csid, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
@@ -383,7 +468,7 @@ def getrefname(table, term, config):
     if term == None or term == '':
         return ''
 
-    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term)
+    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term.replace("'","''"))
 
     try:
         objects.execute(query)
@@ -400,7 +485,7 @@ def findrefnames(table, termlist, config):
 
     result = []
     for t in termlist:
-        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t)
+        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t.replace("'","''"))
 
         try:
             objects.execute(query)

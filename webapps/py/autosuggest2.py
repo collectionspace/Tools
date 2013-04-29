@@ -44,7 +44,7 @@ def dbtransaction(form):
             template = "select distinct(termdisplayname),replace(termdisplayName,' ','0') locationkey from %s where termdisplayname like '%s%%' order by locationkey limit 30;"
         elif srchindex == 'object':
             table = 'collectionobjects_common'
-            template = "select distinct(objectnumber) from %s where objectnumber ilike '%%%s%%' order by objectnumber limit 30;"
+            template = "select objectnumber from %s where objectnumber like '%s%%' order by objectnumber limit 30;"
         elif srchindex == 'place':
             table = 'placetermgroup'
             template = "select distinct(termname) from %s where termname ilike '%%%s%%' and termtype='descriptor' order by termname limit 30;"
@@ -64,7 +64,10 @@ def dbtransaction(form):
             table = 'taxontermgroup'
             template = "select distinct(termdisplayname) from %s where termdisplayname like '%s%%' order by termdisplayname limit 30;"
 
+        # double single quotes that appear in the data, to make psql happy
+        q = q.replace("'","''")
         query = template % (table, q)
+        #sys.stderr.write("autosuggest query: %s" % query)
         cursor.execute(query)
         result = []
         for r in cursor.fetchall():
@@ -73,7 +76,7 @@ def dbtransaction(form):
         result.append({'s': srchindex})
 
         print 'Content-Type: application/json\n\n'
-        #print 'xxx', srchindex,elementID
+        #print 'debug autosuggest', srchindex,elementID
         print json.dumps(result)    # or "json.dump(result, sys.stdout)"
 
     except pgdb.DatabaseError, e:

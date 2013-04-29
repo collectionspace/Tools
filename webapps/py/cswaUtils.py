@@ -14,6 +14,8 @@ import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
 
+MAXLOCATIONS = 1000
+
 try:
     import xml.etree.ElementTree as etree
     #print("running with ElementTree")
@@ -149,7 +151,7 @@ def doLocationSearch(form,config,displaytype):
     if not validateParameters(form,config): return
     
     try:
-        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),20000,config)
+        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),MAXLOCATIONS,config)
     except:
         raise
         handleTimeout('search',form)
@@ -157,6 +159,55 @@ def doLocationSearch(form,config,displaytype):
     listSearchResults('locations', config, displaytype, form, rows)
     
     if len(rows) != 0: getTableFooter(config,displaytype)
+
+def doObjectSearch(form,config,displaytype):
+   
+    if not validateParameters(form,config): return
+    
+    updateType = config.get('info','updatetype')
+    updateactionlabel = config.get('info','updateactionlabel')
+
+    if updateType == 'moveobject':
+        crate      = verifyLocation(form.getvalue("lo.crate"),form,config)
+        toLocation = verifyLocation(form.getvalue("lo.location1"),form,config)
+
+        if str(form.getvalue("lo.crate")) != '' and crate == '':
+            print '<span style="color:red;">Crate is not valid! Sorry!</span><br/>'
+        if toLocation == '':
+            print '<span style="color:red;">Destination is not valid! Sorry!</span><br/>'
+        if (str(form.getvalue("lo.crate")) != '' and crate == '') or toLocation == '':
+            return
+     
+        toRefname = cswaDB.getrefname('locations_common',toLocation,config)
+        toCrate   = cswaDB.getrefname('locations_common',crate,config)
+
+    try:
+        rows = cswaDB.getobjlist('range',form.getvalue("ob.objno1"),form.getvalue("ob.objno2"),500,config)
+    except:
+        raise
+        handleTimeout('search',form)
+
+    if len(rows) == 0:
+        print '<span style="color:red;">No objects in this range! Sorry!</span>'
+    else:
+        totalobjects   = 0
+        print getHeader(updateType)
+        for r in rows:
+            totalobjects +=1
+            print formatRow({ 'rowtype': updateType,'data': r },form,config)
+
+        print """<tr><td align="center" colspan="6"><hr><td></tr>"""        
+        print """<tr><td align="center" colspan="3">"""
+        msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+        
+        print "\n</table><hr/>"
+        if updateType == 'moveobject':
+            print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+            print '<input type="hidden" name="toCrate" value="%s">' % toCrate
+            print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation,crate)
+    
+    #if len(rows) != 0: getTableFooter(config,displaytype)
 
 def listSearchResults(authority, config, displaytype, form, rows):
 
@@ -246,7 +297,7 @@ def getHeader(updateType):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'move':
+    elif updateType == 'movecrate':
     	return """
     <table><tr>
       <th>Museum #</th>
@@ -255,7 +306,7 @@ def getHeader(updateType):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'keyinfo' or updateType == 'packinglist':
+    elif updateType == 'keyinfo' or updateType == 'packinglist' or updateType == 'objinfo':
         return """
     <table><tr>
       <th>Museum #</th>
@@ -265,6 +316,15 @@ def getHeader(updateType):
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
       <th>P?</th>
+    </tr>"""
+    elif updateType == 'moveobject':
+        return """
+    <table><tr>
+      <th>Move?</th>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th>Location</th>
     </tr>"""
     elif updateType == 'bedlist':
         return """
@@ -338,11 +398,9 @@ def doEnumerateObjects(form,config):
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
     if not validateParameters(form,config): return
-    
-    num2ret = 30000
 
     try:
-        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),MAXLOCATIONS,config)
     except:
         raise
         handleTimeout(updateType,form)
@@ -387,14 +445,17 @@ def doEnumerateObjects(form,config):
             print header
             print '\n'.join(locations[header])
 
-    print """<tr><td align="center" colspan="6"><hr><td></tr>"""        
-    print """<tr><td align="center" colspan="3">"""
-    if updateType == 'keyinfo':
-        msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (totalobjects, totallocations)
+    if totalobjects == 0:
+        pass
     else:
-        msg = "Caution: clicking on the button at left will change the "+updateType+" of <b>ALL %s objects</b> shown in these %s locations!" % (totalobjects, totallocations)
-    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
-        
+        print """<tr><td align="center" colspan="7"><hr><td></tr>"""        
+        print """<tr><td align="center" colspan="3">"""
+        if updateType == 'keyinfo':
+            msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (totalobjects, totallocations)
+        else:
+            msg = "Caution: clicking on the button at left will change the "+updateType+" of <b>ALL %s objects</b> shown in these %s locations!" % (totalobjects, totallocations)
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="4">%s</td></tr>''' % msg
+
     print "\n</table><hr/>"
 
 def verifyLocation(loc,form,config):
@@ -530,9 +591,10 @@ def doUpdateKeyinfo(form,config):
             updateKeyInfo(updateItems,config)
             numUpdated += 1
         except:
+            raise
             msg = '<span style="color:red;">problem updating</span>'
         print ('<tr>'+ (3 * '<td class="ncell">%s</td>') +'</tr>\n') % (updateItems['objectNumber'],updateItems['objectCsid'],msg)
-        #writeLog(updateItems,config)
+        # print 'place %s' % updateItems['pahmaFieldCollectionPlace']
 
     print "\n</table>"
     print '<h4>',numUpdated,'of',row+1,'object had key information updated</h4>'
@@ -565,12 +627,17 @@ def doUpdateLocations(form,config):
         for i in ('handlerRefName','reason'):
             updateItems[i] = form.getvalue(i)
 
-        # ugh...this logic is rather complicated...
+        # ugh...this logic is in fact rather complicated...
         msg = 'location updated.'
         # if we are moving a crate, use the value of the toLocation's refname, which is stored hidden on the form.
-        if config.get('info','updatetype') == 'move':
+        if config.get('info','updatetype') == 'movecrate':
             updateItems['locationRefname'] = form.getvalue('toRefname')
             msg = 'crate moved to %s.' % form.getvalue('toLocAndCrate')
+
+        if config.get('info','updatetype') == 'moveobject':
+            updateItems['locationRefname'] = form.getvalue('toRefname')
+            updateItems['crate']           = form.getvalue('toCrate')
+            msg = 'object moved to %s.' % form.getvalue('toLocAndCrate')
             
         if updateItems['objectStatus'] == 'not found':
 	    updateItems['locationRefname'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
@@ -618,10 +685,8 @@ def doPackingList(form,config):
         #form["location1"] = form.getvalue("lo.location2")
         #form["num2ret"] = 1
     
-    num2ret = 30000
-
     try:
-        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),num2ret,config)
+        locationList = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),MAXLOCATIONS,config)
     except:
         raise
         handleTimeout(updateType,form)
@@ -1030,11 +1095,19 @@ def viewLog(form,config):
 
     print '</table>'
 
-def alreadyExists(txt,elements):
+def OldalreadyExists(txt,elements):
     for e in elements:
         if txt == str(e.text):
             #print "    found,skipping: ",txt
             return True
+    return False
+
+def alreadyExists(txt,elements):
+    # print 'type',type(elements)
+    if elements == [] : return False
+    if txt == str(elements[0].text):
+        #print "    found,skipping: ",txt
+        return True
     return False
 
 def updateKeyInfo(updateItems,config):
@@ -1060,11 +1133,12 @@ def updateKeyInfo(updateItems,config):
 	else:
 	    extra = ''
 	#print ">>> ",'.//'+relationType+extra+'List'
-        metadata = root.find('.//'+relationType+extra+'List')
+        metadata = root.findall('.//'+relationType+extra+'List')
 	# check if value is already present. if so, skip
 	#print(etree.tostring(metadata, pretty_print=True))
 	#print ">>> ",relationType,':',updateItems[relationType]
         if alreadyExists(updateItems[relationType],metadata): continue
+        metadata = metadata[0] # there had better be only one!
         if relationType in ['assocPeople','objectName']:
             #group = metadata.findall('.//'+relationType+'Group')
 	    if not alreadyExists(updateItems[relationType],metadata.findall('.//'+relationType)):
@@ -1073,9 +1147,9 @@ def updateKeyInfo(updateItems,config):
                 leafElement.text = updateItems[relationType]
                 newElement.append(leafElement)
 	        if relationType == 'assocPeople':
-                    apgNote = etree.Element('assocPeopleNote')
-                    apgNote.text = 'made by'
-                    newElement.append(apgNote)
+                    apgType = etree.Element('assocPeopleType')
+                    apgType.text = 'made by'
+                    newElement.append(apgType)
                 metadata.insert(0,newElement)
         else:
 	    newElement = etree.Element(relationType)
@@ -1130,6 +1204,9 @@ def updateLocations(updateItems,config):
     
 def formatRow(result,form,config):
     hostname = config.get('connect','hostname')
+    rr = result['data']
+    rr = [ x if x != None else '' for x in rr]
+    
     if result['rowtype'] == 'subheader':
         #return """<tr><td colspan="4" class="subheader">%s</td><td>%s</td></tr>""" % result['data'][0:1]
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
@@ -1142,7 +1219,6 @@ def formatRow(result,form,config):
         #return '''<tr><td class="xspan"><input type="checkbox" name="%s.%s" value="%s" checked> <a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % ((boxType,) + (rr[0],) * 4)
     elif result['rowtype'] == 'bedlist':
         groupby = str(form.getvalue("groupby"))
-        rr = result['data']
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
         if groupby == 'none':
             location = '<td>%s</td>' % rr[0]
@@ -1152,28 +1228,28 @@ def formatRow(result,form,config):
         #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid 
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td>%s</tr>''' % (link,rr[4],rr[6],rr[5],location)
     elif result['rowtype'] == 'locreport' or result['rowtype'] == 'holdings' or result['rowtype'] == 'advsearch':
-        rr = result['data']
         rare = 'R' if rr[7] == 'true' else 'N'
         dead = 'D' if rr[8] == 'true' else 'A'
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6] 
         #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3],rr[5],rare,dead)
     elif result['rowtype'] == 'was.advsearch':
-        rr = result['data']
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
         #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[4],rr[3],rr[5],rr[6])
     elif result['rowtype'] == 'inventory':
-        rr = result['data']
-	rr = [ x if x != None else '' for x in rr]
 	link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8] 
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (link,rr[3],rr[5],rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3])    
-    elif result['rowtype'] == 'keyinfo':
-        rr = result['data']
-	rr = [ x if x != None else '' for x in rr]
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (link,rr[3],rr[5],rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3], rr[8],rr[7],rr[6],rr[3],rr[14], rr[3])
+    elif result['rowtype'] == 'moveobject':
+	link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8] 
+        # 0 storageLocation | 1 lockey | 2 locdate | 3 objectnumber | 4 objectName | 5 objectCount | 6 fieldcollectionplace | 7 culturalgroup |
+        # 8 objectCsid | 9 ethnographicfilecode | 10 fcpRefName | 11 cgRefName | 12 efcRefName | 13 computedcraterefname | 14 computedcrate
+        # f/nf | objcsid | locrefname | [loccsid] | objnum
+        return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td>%s</td></tr>""" % (rr[3], rr[8],rr[1],'',rr[3],rr[13], link,rr[3],rr[4],rr[5],rr[0])    
+    elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
 	link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8] 
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
@@ -1191,11 +1267,10 @@ def formatRow(result,form,config):
 <input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
 <td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
 <td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
+<td><input type="checkbox"></td>
 </tr>""" % (link,rr[3], rr[8],rr[4], rr[8],rr[5], rr[8],rr[3], rr[8],rr[8], rr[8],rr[6], rr[8],rr[7], rr[8],rr[9])
 
     elif result['rowtype'] == 'packinglist':
-        rr = result['data']
-        rr = [ x if x != None else '' for x in rr]
         link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
@@ -1395,14 +1470,59 @@ def getPrinters(form):
             printerOption = printerOption.replace('option','option selected')
         printers = printers + printerOption
 
-    printers = printers + '\n      </select>'
+    printers + '\n      </select>'
     return printers,selected
 
-def selectWebapp():
 
-    webapps = { 'pahma': ['sysinv', 'keyinfo', 'objrev', 'packlist', 'move', 'upload', 'barcodeprint', 'collectionStats'],
+def getFieldset(form):
+
+    selected = form.getvalue('fieldset')
+
+    fields = [ \
+        ("Key Info", "keyinfo"),
+    #    ("Basic Info", "basicinfo"),
+    #    ("Registration", "registration")
+        ]
+
+    fieldset = '''
+          <select class="cell" name="fieldset">'''
+              
+    for field in fields:
+        fieldsetOption = """<option value="%s">%s</option>""" % (field[1],field[0])
+        if selected and str(selected) in field[1]:
+            fieldsetOption = fieldsetOption.replace('option','option selected')
+        fieldset = fieldset + fieldsetOption
+
+    fieldset += '\n      </select>'
+    return fieldset,selected
+
+def selectWebapp():
+    
+    files = os.listdir(".")
+
+    programName = os.path.basename(__file__).replace('Utils','Main') + '?webapp=' # yes, this is fragile!
+    apptitles = {}
+    serverlabels = {}
+    badconfigfiles = ''
+    for f in files:
+        if '.cfg' in f:
+            config = ConfigParser.RawConfigParser()
+            config.read(f)
+            try:
+                configfile = f.replace('.cfg','')
+                logo = config.get('info','logo')
+                updateType = config.get('info','updatetype')
+                schemacolor1 = config.get('info','schemacolor1')
+                serverlabel = config.get('info','serverlabel')
+                serverlabelcolor = config.get('info','serverlabelcolor')
+                serverlabels[f] = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (serverlabelcolor,serverlabel,programName+configfile,configfile)
+                apptitles[updateType] = config.get('info','apptitle')
+            except:
+                badconfigfiles += '<tr><td>%s</td></tr>' % f
+            
+    webapps = { 'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', 'barcodeprint', 'collectionstats'],
                 'ucbg':	['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
-                'ucjeps': ['ucjepsBedList', 'ucjepsLocationReport'] }
+                'ucjeps': ['ucjepsLocationReport'] }
 
     #exceptions = { "barcodeprint": "BarcodePrint",
     #               "upload": "BarcodeUpload",
@@ -1411,29 +1531,6 @@ def selectWebapp():
     #               "sysinv": "SystematicInventory" }
     
     exceptions = {}
-    
-    apptitles = { "ucbgAdvancedSearch": "Advanced Search",
-                  "advsearch": "Advanced Search",
-                  "barcodeprint": "Barcode Label Generator",
-                  "move": "Move Crates",
-                  "upload": "Barcode Scan File Upload",
-                  "ucbgBedList": "Bed List Report",
-                  "ucbgCollHoldings": "Collection Holdings Report",
-                  "bedlist": "Bed List Report",
-                  "ucjepsBedList": "Bed List Report",
-                  "collectionstats": "Collection Stats",
-                  "keyinfo": "Key Information Review",
-                  "objrev": "Object Information Review",
-                  "objectinfo": "Object Info",
-                  "locreport": "Location Report",
-                  "ucbgLocationReport": "Location Report",
-                  "packlist": "Packing List Report",
-                  "packinglist": "Packing List Report",
-                  "search": "Search",
-                  "storedstats": "Stored Collection Stats",
-                  "collectionStats": "Stored Collection Stats",
-                  "sysinv": "Systematic Inventory",
-                  "inventory": "Systematic Inventory" }
        
     line = '''Content-type: text/html; charset=utf-8
 
@@ -1443,16 +1540,15 @@ def selectWebapp():
 <title>Select web app</title>
 </head>
 <body>
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1><table cellpadding="8px">
+<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1><table cellpadding="4px">
 <p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")  + '''.</p>'''
 
-    programName = 'cswaMain.py?webapp='
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.1 Production</th><th>v3.2.1 Dev "Test"</th><th>v2.4 Production ("Legacy")</th></tr>\n' % museum
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.x Production</th><th>v3.2.x Dev "Test"</th></tr>\n' % museum
         for webapp in webapps[museum]:
            apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
            line += '<tr><th>%s</th><th>%s</th>' % (apptitle,webapp)
-           for sys in ['V321', 'Dev', 'Prod']:
+           for sys in ['V321', 'Dev']:
                available = ''
                if webapp in exceptions and sys not in ['Dev', 'V321']:
                    if os.path.isfile(exceptions[webapp]+sys+'.py'):
@@ -1461,9 +1557,17 @@ def selectWebapp():
                        available = '<a target="%s" href="%s">%s</a>' % (sys,exceptions[webapp]+'.py',exceptions[webapp])
                else:
                    available = '<a target="%s" href="%s">%s</a>' % (sys,programName+webapp+sys,webapp+sys)
-               if not os.path.isfile(webapp+sys+'.cfg'): available = ''
-               line += '<td>%s</td>' % available
+               if os.path.isfile(webapp+sys+'.cfg'):
+                   available = serverlabels[webapp+sys+'.cfg']
+                   #available = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span><span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (sys,programName+webapp+sys,webapp+sys)
+                   #''' + apptitle + ' : ' + serverlabel + '''</title>''' + getStyle(schemacolor1) + '''
+               else:
+                   available = ''
+               line += ' <td>%s</td>\n' % available
            line += '</tr>\n'
+    if badconfigfiles != '':
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr>' % 'bad config files'
+        line += badconfigfiles
     line += '''
 </table>
 <hr/>
@@ -1501,6 +1605,12 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .veryshortinput { width:60px; }
 .xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
 th[data-sort]{ cursor:pointer; }
+
+.imagecell { padding: 8px ; align: center; }
+.rightlabel { text-align: right ; vertical-align: top; padding: 2px 12px 2px 2px; width: 30%; }
+.objtitle { font-size:28px; float:left; padding:4px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
+.objsubtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; font-style: italic; color: #999999; }
+.notentered { font-style: italic; color: #999999; }
 </style>
 '''
 
@@ -1552,10 +1662,34 @@ def starthtml(form,config):
 	otherfields += '''
 	  <tr><th/><th/><th/><th/></tr>'''
 
-
     elif updateType == 'objinfo':
         objno1 = str(form.getvalue("ob.objno1")) if form.getvalue("ob.objno1") else ''
         objno2 = str(form.getvalue("ob.objno2")) if form.getvalue("ob.objno2") else ''
+        fieldset,selected  = getFieldset(form)
+        
+        otherfields = '''
+        <tr><th><span class="cell">start object no:</span></th>
+        <th><input id="ob.objno1" class="cell" type="text" size="32" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
+        <th><span class="cell">end object no:</span></th>
+        <th><input id="ob.objno2" class="cell" type="text" size="32" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></th>
+        <th><th><span class="cell">set:</span></th><th>''' + fieldset + '''</th></tr>
+        '''
+        otherfields += '''
+        <tr><th/><th/><th/><th/></tr>'''
+
+    elif updateType == 'objdetails':
+        objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
+        otherfields = '''
+	  <tr><td><span class="cell">Museum Number:</span></td>
+	  <td><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></td></tr>'''
+        
+    elif updateType == 'moveobject':
+        objno1 = str(form.getvalue("ob.objno1")) if form.getvalue("ob.objno1") else ''
+        objno2 = str(form.getvalue("ob.objno2")) if form.getvalue("ob.objno2") else ''
+        crate = str(form.getvalue("lo.crate")) if form.getvalue("lo.crate") else ''
+        handlers,selected = getHandlers(form)
+        reasons,selected  = getReasons(form)
+        
         otherfields = '''
         <tr><th><span class="cell">start object no:</span></th>
         <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
@@ -1563,9 +1697,15 @@ def starthtml(form,config):
         <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></th></tr>
         '''
         otherfields += '''
-        <tr><th/><th/><th/><th/></tr>'''
+	  <tr><th><span class="cell">destination:</span></th>
+	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+          <th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+          <tr><th><span class="cell">crate:</span></th>
+          <th><input id="lo.crate" class="cell" type="text" size="40" name="lo.crate" value="''' + crate + '''" class="xspan"></th>
+          <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>
+        '''
         
-    elif updateType == 'move':
+    elif updateType == 'movecrate':
         crate = str(form.getvalue("lo.crate")) if form.getvalue("lo.crate") else ''
         otherfields = '''
 	  <tr><th><span class="cell">from:</span></th>
@@ -1663,6 +1803,10 @@ def starthtml(form,config):
         printers,selected = getPrinters(form)
 	otherfields += '''
           <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
+        # objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
+        #otherfields += '''
+	#  <th><span class="cell">museum number:</span></th>
+	#  <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>'''
     elif updateType == 'inventory':
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
@@ -1706,7 +1850,6 @@ function formSubmit(location)
     console.log(location);
     document.getElementById('lo.location1').value = location
     document.getElementById('lo.location2').value = location
-    //document.getElementById('num2ret').value = 1
     //document.getElementById('actionbutton').value = "Next"
     document.forms['sysinv'].submit();
 }
