@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgAccessionGroupExcel" language="groovy" pageWidth="968" pageHeight="572" orientation="Landscape" columnWidth="968" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="eba97814-8ccd-41d8-937d-f3dabb8237dd">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="551"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="true"/>
 	<parameter name="csid" class="java.lang.String">
-		<defaultValueExpression><![CDATA["d1148efd-5624-4213-af67"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["9a222828-c1a8-434c-99e5"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="tenantid" class="java.lang.String">
 		<defaultValueExpression><![CDATA[35]]></defaultValueExpression>
@@ -59,7 +59,7 @@ join relations_common r on (h1.name = r.objectcsid)
 join hierarchy h2 on (r.subjectcsid = h2.name)
 join collectionobjects_common co1 on (h2.id = co1.id)
 
-join collectionobjects_common_briefdescriptions bd on (co1.id = bd.id)
+left outer join collectionobjects_common_briefdescriptions bd on (co1.id = bd.id)
 
 join collectionobjects_naturalhistory con on (co1.id = con.id)
 
