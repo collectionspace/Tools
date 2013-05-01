@@ -1105,6 +1105,7 @@ def OldalreadyExists(txt,elements):
 def alreadyExists(txt,elements):
     # print 'type',type(elements)
     if elements == [] : return False
+    #print 'txt <br/>%s<br/>%s<br/>\n' % (txt,str(elements[0].text))
     if txt == str(elements[0].text):
         #print "    found,skipping: ",txt
         return True
@@ -1134,11 +1135,12 @@ def updateKeyInfo(updateItems,config):
 	    extra = ''
 	#print ">>> ",'.//'+relationType+extra+'List'
         metadata = root.findall('.//'+relationType+extra+'List')
+        metadata = metadata[0] # there had better be only one!
 	# check if value is already present. if so, skip
 	#print(etree.tostring(metadata, pretty_print=True))
+	#print(etree.tostring(metadata))
 	#print ">>> ",relationType,':',updateItems[relationType]
         if alreadyExists(updateItems[relationType],metadata): continue
-        metadata = metadata[0] # there had better be only one!
         if relationType in ['assocPeople','objectName']:
             #group = metadata.findall('.//'+relationType+'Group')
 	    if not alreadyExists(updateItems[relationType],metadata.findall('.//'+relationType)):
@@ -1157,6 +1159,10 @@ def updateKeyInfo(updateItems,config):
             metadata.insert(0,newElement)
         #print(etree.tostring(metadata, pretty_print=True))
     objectCount = root.find('.//numberOfObjects')
+    if objectCount is None:
+        objectCount = etree.Element('numberOfObjects')
+        collectionobjects_common = root.find('.//{http://collectionspace.org/services/collectionobject}collectionobjects_common')
+        collectionobjects_common.insert(0,objectCount)
     objectCount.text = updateItems['objectCount']
     #print(etree.tostring(root, pretty_print=True))
  

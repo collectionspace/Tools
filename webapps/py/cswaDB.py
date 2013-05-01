@@ -100,10 +100,8 @@ case when (lc.locationtype is not null and lc.locationtype <> '')
      then regexp_replace(lc.locationtype, '^.*\\)''(.*)''$', '\\1')
 end as locationtype,
 co1.recordstatus,
-co1.objectnumber, 
-case when (tig.taxon is not null and tig.taxon <> '')
-     then regexp_replace(tig.taxon, '^.*\\)''(.*)''$', '\\1')
-end as determination,
+co1.objectnumber,
+findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
 end as family,
@@ -180,8 +178,8 @@ left outer join objectnamegroup ong on (ong.id=h4.id)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
-left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id)
-left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id)
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and pfc.pos=0)
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and pef.pos=0)
 
 left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
@@ -203,10 +201,7 @@ LIMIT 30000
     elif type == 'getalltaxa':
         return """
 select co1.objectnumber,
-case when (tig.taxon is not null and tig.taxon <> '' and tig.hybridflag = 'false')
-     then regexp_replace(tig.taxon, '^.*\\)''(.*)''$', '\\1')
-     when tig.hybridflag = 'true' then findhybridname(tig.id)
-end as determination,
+findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
 end as family,
@@ -426,8 +421,8 @@ left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name =
 left outer join objectnamegroup ong on (ong.id=h4.id)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
-left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id)
-left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id)
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and pfc.pos=0)
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and pef.pos=0)
 
 left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
@@ -500,7 +495,7 @@ def findrefnames(table, termlist, config):
 
 if __name__ == "__main__":
 
-    from cswaUtils import getConfig
+    from cswaUtilsNV import getConfig
 
     config = getConfig('ucbgLocationReport.cfg')
     print getplants('Velleia rosea', '', 1, config, 'locreport')

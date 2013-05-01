@@ -41,7 +41,12 @@ def dbtransaction(form):
     try:
         if srchindex == 'location':
             table = 'loctermgroup'
-            template = "select distinct(termdisplayname),replace(termdisplayName,' ','0') locationkey from %s where termdisplayname like '%s%%' order by locationkey limit 30;"
+            template = """select termdisplayname,replace(termdisplayname,' ','0') locationkey 
+            FROM %s ltg
+            INNER JOIN hierarchy h_ltg ON h_ltg.id=ltg.id
+            INNER JOIN hierarchy h_loc ON h_loc.id=h_ltg.parentid
+            INNER JOIN misc ON misc.id=h_loc.id and misc.lifecyclestate <> 'deleted'
+            WHERE termdisplayname like '%s%%' order by locationkey limit 30;"""
         elif srchindex == 'object':
             table = 'collectionobjects_common'
             template = "select objectnumber from %s where objectnumber like '%s%%' order by objectnumber limit 30;"
