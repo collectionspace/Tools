@@ -50,6 +50,7 @@ def dbtransaction(form):
             template = "select distinct(termdisplayname) from %s where termdisplayname like '%s%%' and termtype='descriptor' order by termdisplayname limit 30;"
 
         query = template % (table, q)
+        sys.stderr.write("autosuggest query",query)
         cursor.execute(query)
         result = []
         for r in cursor.fetchall():

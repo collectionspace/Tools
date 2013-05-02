@@ -41,8 +41,10 @@ Deploying iReports within CSpace requires:
 
 * checking out the desired .jrxml file(s) from git to a system with iReport installed
 * compiling the .jrxml file(s) (usually individually, by hand) into .jasper files
-* moving those files to the appropriate tomcat directory on the target system.  While this can be accomplished in one step if one has write access to the target directory, it is usually necessary to first stage the file(s) to one's local directory on the target system, ssh in, then sudo cp the files to their final destination.
+* moving the .jrxml files to the appropriate tomcat directory on the target system.  While this can be accomplished in one step if one has write access to the target directory, it is usually necessary to first stage the file(s) to one's local directory on the target system, ssh in, then sudo cp the files to their final destination. (Note: CSpace will compile the .jrxml file when it is first called into a .jasper file)
 * instructing CSpace about the name and context for the report. This involves a call to the REST API with an XML payload containing this information.  Scripts for "loading" iReports (and performing other maintenance) are provided in the git repository. Note that these need to be configured for each target system.
+
+Note: These instructions are a bit out of date.  As of CSpace 3, one only needs to copy in the .jrxml file to the target directory.  The XML payload can also be posted to the report service in a separate step via a curl command.  
 
     local $ cd git/Tools/reports/mymuseum
     local $ git update
@@ -61,7 +63,7 @@ When problems are identified or enhancements made, the following tentative sugge
 * Identify and record (in a JIRA) the problem data or enhancements desired, with specific CSIDs, etc.
 * Make modifications to the .jrxml file.
 * Test the updated version on your development system using whatever test cases are available.
-* Install the .jasper file on the dev system. For an existing report, it is not necessary to call the REST API and in fact if you do, you'll make a duplicate of the configuration record in CSpace and that will really foul things up.
+* Install the .jrxml file on the dev system, and remove the corresponding .jasper file (the server will only create the .jasper file if it does not already exist). For an existing report, it is not necessary to call the REST API and in fact if you do, you'll make a duplicate of the configuration record in CSpace and that will really foul things up.
 * Try the revised report on the dev system; get users to wring it out as well.
 * When tests are passed, check the updated .jrxml version into git and install on the production system using the steps outlined in the previous section.
 
@@ -86,9 +88,16 @@ $ ./delete-report.sh reports <CSID>
 
 Deletes the report identified by CSID from the CSpace configuration; does *NOT* delete the .jasper file.
 
+Note: You can also delete individual reports using the Firefox plugin, Poster.  The URL will be the full URL for the report service on the host followed by the CSID of the report to delete, e.g., 
+  http://botgarden.cspace.berkeley.edu:8180/cspace-services/reports/b3743540-8c99-412f-b851
+Enter the credentials; select Delete from the dropdown of Actions; and click the green circular "go" button.
+
 $ list-reports.sh
 
 prints the CSID and report names of the reports installed on the target system.
+
+Note: You can also get a list of reports by making a call directly to the report service API, e.g., 
+  http://botgarden.cspace.berkeley.edu:8180/cspace-services/reports/
 
 
 

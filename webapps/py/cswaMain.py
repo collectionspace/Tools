@@ -5,6 +5,7 @@ import time
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 from cswaUtils import *
+from cswaObjDetails import *
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -41,10 +42,11 @@ else:
         doBarCodes(form,config)
     elif action == config.get('info','updateactionlabel'):
         if   updateType == 'packinglist':  doPackingList(form,config)
-        elif updateType == 'move':         doUpdateLocations(form,config)
+        elif updateType == 'movecrate':    doUpdateLocations(form,config)
         elif updateType == 'barcodeprint': doBarCodes(form,config)
         elif updateType == 'inventory':    doUpdateLocations(form,config)
-        elif updateType == 'objinfo':      doUpdateObjinfo(form,config)
+        elif updateType == 'moveobject':   doUpdateLocations(form,config)
+        elif updateType == 'objinfo':      doUpdateKeyinfo(form,config)
         elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
         elif updateType == 'bedlist':      doBedList(form,config)
         # elif updateType == 'holdings':     doBedList(form,config)
@@ -57,13 +59,13 @@ else:
     elif form.getvalue("lo.location1") != None and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
         if updateType in ['keyinfo', 'inventory']: 
             doEnumerateObjects(form,config)
-        elif updateType == 'move':
+        elif updateType == 'movecrate':
             doCheckMove(form,config)
         else:
             doLocationSearch(form,config,'nolist')
     elif action == "Search":
         if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
-        elif updateType == 'move':         doCheckMove(form,config)
+        elif updateType == 'movecrate':    doCheckMove(form,config)
         elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
         elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
         elif updateType == 'holdings':     doAuthorityScan(form,config)
@@ -72,6 +74,9 @@ else:
         elif updateType == 'inventory':    doLocationSearch(form,config,'list')
         elif updateType == 'keyinfo':      doLocationSearch(form,config,'list')
         elif updateType == 'objinfo':      doObjectSearch(form,config,'list')
+        elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
+        elif updateType == 'objdetails':   doObjectDetails(form,config)
+
     elif action in ['<<','>>']:
         print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
     else:

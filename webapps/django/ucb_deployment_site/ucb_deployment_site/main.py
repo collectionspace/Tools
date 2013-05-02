@@ -1,7 +1,9 @@
 from os import path
 from authn.authn import CSpaceAuthN
 from common import cspace
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ucb_deployment_site:
     """
@@ -43,6 +45,7 @@ class ucb_deployment_site:
                                                          cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PROTOCOL_PROPERTY)
             authNInstance.port = cspace.getConfigOptionWithSection(config,
                                                      cspace.CONFIGSECTION_AUTHN_CONNECT, cspace.CSPACE_PORT_PROPERTY)
+            logger.info('AuthN initialized');
 
     @classmethod
     def handleAuthNRequest(cls, authnInstance):
@@ -57,7 +60,7 @@ class ucb_deployment_site:
 
         """
         if ucb_deployment_site.shouldInitialize() is False:
-            print "Warning.  Reinitializing the site."
+            logger.warning('Reinitializing the site.')
 
         cls.config = cls.loadConfig()
         cls.should_reload_config = cspace.getConfigOptionWithSection(cls.config, cspace.CONFIGSECTION_INFO,
