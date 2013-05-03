@@ -1102,11 +1102,12 @@ def OldalreadyExists(txt,elements):
             return True
     return False
 
-def alreadyExists(txt,elements):
-    # print 'type',type(elements)
-    if elements == [] : return False
-    #print 'txt <br/>%s<br/>%s<br/>\n' % (txt,str(elements[0].text))
-    if txt == str(elements[0].text):
+def alreadyExists(txt,element):
+    if element == [] : return False
+    # only examine first (preferred) element
+    if type(elements) == type([]):
+        element = element[0]
+    if txt == str(element.text):
         #print "    found,skipping: ",txt
         return True
     return False
