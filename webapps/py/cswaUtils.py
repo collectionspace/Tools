@@ -1105,7 +1105,7 @@ def OldalreadyExists(txt,elements):
 def alreadyExists(txt,element):
     if element == [] : return False
     # only examine first (preferred) element
-    if type(elements) == type([]):
+    if type(element) == type([]):
         element = element[0]
     if txt == str(element.text):
         #print "    found,skipping: ",txt
