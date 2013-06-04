@@ -495,7 +495,7 @@ def findrefnames(table, termlist, config):
 
 if __name__ == "__main__":
 
-    from cswaUtilsNV import getConfig
+    from cswaUtils import getConfig
 
     config = getConfig('ucbgLocationReport.cfg')
     print getplants('Velleia rosea', '', 1, config, 'locreport')
