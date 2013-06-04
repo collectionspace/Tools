@@ -1898,6 +1898,10 @@ def endhtml(form,config,elapsedtime):
     #user = form.getvalue('user')
     count = form.getvalue('count')
     connect_string = config.get('connect','connect_string')
+    otherfields = ""
+    updateType = config.get('info','updatetype')
+    if updateType == 'objdetails':
+        otherfields = '''$('input:text:first').focus().val("");'''
     return '''
   <table width="100%">
     <tbody>
@@ -1928,6 +1932,8 @@ $(function () {
     });
 
 $(document).ready(function () {
+
+''' + otherfields + '''
 
 $(function() {
   $('[id^="sortTable"]').map(function() {
