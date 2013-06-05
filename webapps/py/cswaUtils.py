@@ -149,9 +149,17 @@ def listAuthorities(authority, primarytype, authItem, config, form, displaytype)
 def doLocationSearch(form,config,displaytype):
    
     if not validateParameters(form,config): return
+    updatetype = config.get("info", "updatetype")
     
     try:
-        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),MAXLOCATIONS,config)
+        #If barcode print, assume empty end location is start location
+        if updatetype == "barcodeprint":
+            if form.getvalue("lo.location2"):
+                rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+            else:
+                rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location1"),500,config)
+        else:
+            rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),MAXLOCATIONS,config)
     except:
         raise
         handleTimeout('search',form)
@@ -833,7 +841,11 @@ def doBarCodes(form,config):
         print getHeader(updateType)
 
     try:
-        rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        #If no end location, assume single location
+        if form.getvalue("lo.location2"):
+            rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location2"),500,config)
+        else:
+            rows = cswaDB.getloclist('range',form.getvalue("lo.location1"),form.getvalue("lo.location1"),500,config)
     except:
 	raise
         handleTimeout(updateType,form)
@@ -1463,7 +1475,6 @@ def getPrinters(form):
 
     printerlist = [ \
         ("Kroeber Hall", "kroeberBCP"),
-        ("Hearst Gym Basement", "hearstBCP"),
         ("Regatta Building", "regattaBCP")
         ]
 
@@ -1808,12 +1819,12 @@ def starthtml(form,config):
 	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
     elif updateType == 'barcodeprint':
         printers,selected = getPrinters(form)
-	otherfields += '''
-          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
-        # objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
+        #objectnumber = str(form.getvalue('ob.objectnumber')) if form.getvalue('ob.objectnumber') else ''
         #otherfields += '''
-	#  <th><span class="cell">museum number:</span></th>
-	#  <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>'''
+	  #<tr><th><span class="cell">museum number:</span></th>
+	  #<th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>
+        otherfields += '''
+          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
     elif updateType == 'inventory':
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
@@ -1898,6 +1909,10 @@ def endhtml(form,config,elapsedtime):
     #user = form.getvalue('user')
     count = form.getvalue('count')
     connect_string = config.get('connect','connect_string')
+    otherfields = ""
+    updateType = config.get('info','updatetype')
+    if updateType == 'objdetails':
+        otherfields = '''$('input:text:first').focus().val("");'''
     return '''
   <table width="100%">
     <tbody>
@@ -1928,6 +1943,8 @@ $(function () {
     });
 
 $(document).ready(function () {
+
+''' + otherfields + '''
 
 $(function() {
   $('[id^="sortTable"]').map(function() {
