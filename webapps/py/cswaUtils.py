@@ -1079,14 +1079,14 @@ def writeInfo2log(request,form,config,elapsedtime):
        updateType = checkServer
     sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType,action,request,elapsedtime,serverlabel,location1,location2))
   
-def uploadFile(form,config):
+def uploadFile(actualform,config):
 
     barcodedir = config.get('files','barcodedir')
     barcodeprefix = config.get('files','barcodeprefix')
     #print form
     # we are using <form enctype="multipart/form-data"...>, so the file contents are now in the FieldStorage.
     # we just need to save it somewhere...
-    fileitem = form['file']
+    fileitem = actualform['file']
 
     # Test if the file was uploaded
     if fileitem.filename:

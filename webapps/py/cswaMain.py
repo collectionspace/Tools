@@ -10,8 +10,9 @@ from cswaObjDetails import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-# NB we convert FieldStorage to a dict
-form    = cgiFieldStorageToDict(cgi.FieldStorage())
+# NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
+actualform = cgi.FieldStorage()
+form    = cgiFieldStorageToDict(actualform)
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
 debug = form.get("debug")
@@ -57,7 +58,7 @@ else:
         # elif updateType == 'holdings':     doBedList(form,config)
         # elif updateType == 'locreport':    doBedList(form,config)
         elif updateType == 'advsearch':    doAdvancedSearch(form,config)
-        elif updateType == 'upload':       uploadFile(form,config)
+        elif updateType == 'upload':       uploadFile(actualform,config)
         elif action == "Recent Activity":
             viewLog(form,config)
     # special case: if only one location in range, jump to enumerate
