@@ -10,10 +10,11 @@ from cswaObjDetails import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-form    = cgi.FieldStorage()
+# NB we convert FieldStorage to a dict
+form    = cgiFieldStorageToDict(cgi.FieldStorage())
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
-debug = form.getvalue("debug")
+debug = form.get("debug")
 
 # bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
 if config == False:
@@ -21,8 +22,12 @@ if config == False:
     sys.exit(0)
 
 updateType  = config.get('info','updatetype')
-action      = form.getvalue('action')
-checkServer = form.getvalue('check')
+action      = form.get('action')
+checkServer = form.get('check')
+
+# if location2 was not specified, default it to location1
+if str(form.get('lo.location2')) == '':
+    form['lo.location2'] = form.get('lo.location1')
     
 if updateType == 'packinglist' and action == 'Download as CSV':  
     downloadCsv(form,config)
@@ -32,7 +37,7 @@ else:
 
 #print form
 elapsedtime = time.time()
-
+    
 if checkServer == 'check server':
     print serverCheck(form,config)
 else:
@@ -56,7 +61,7 @@ else:
         elif action == "Recent Activity":
             viewLog(form,config)
     # special case: if only one location in range, jump to enumerate
-    elif form.getvalue("lo.location1") != None and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
+    elif form.get("lo.location1") != None and str(form.get("lo.location1")) == str(form.get("lo.location2")) :
         if updateType in ['keyinfo', 'inventory']: 
             doEnumerateObjects(form,config)
         elif updateType == 'movecrate':
