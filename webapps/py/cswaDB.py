@@ -128,7 +128,7 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id)
 
 left outer join locations_common lc on (mc.currentlocation=lc.refname)
 
-where deadflag='false' and regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
+where regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
    
 ORDER BY %s,to_number(objectnumber,'9999.9999')
 LIMIT 6000""" % (searchkey, location, sortkey)
@@ -217,7 +217,7 @@ con.rare,
 cob.deadflag
 
 from collectionobjects_common co1
-join hierarchy h1 on co1.id=h1.id
+right outer join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
 
