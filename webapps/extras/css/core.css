@@ -1,0 +1,22 @@
+body
+{
+  background-color: #eeeeee;
+}
+
+#testSubject
+{
+  background-color: #ffffcc;
+  border: 2px ridge maroon;
+  padding: 8px;
+  font-size: .85em;
+}
+
+h3
+{
+  display: run-in;
+}
+
+h3:after
+{
+  content: "."
+}
