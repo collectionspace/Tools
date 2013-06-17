@@ -339,7 +339,7 @@ def getHeader(updateType):
         return """
     <table class="tablesorter" id="sortTable%s"><thead>
     <tr>
-      <th>Accession Number</th>
+      <th>Accession</th>
       <th>Family</th>
       <th>Taxonomic Name</th>
     </tr></thead><tbody>"""
@@ -354,7 +354,7 @@ def getHeader(updateType):
     elif updateType == 'bedlistnone':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
-      <th>Accession Number</th>
+      <th>Accession</th>
       <th>Family</th>
       <th>Taxonomic Name</th>
       <th>Garden Location</th>
@@ -362,9 +362,9 @@ def getHeader(updateType):
     elif updateType == 'locreport' or updateType == 'holdings' or updateType == 'advsearch':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
-      <th data-sort="float">Accession Number</th>
-      <th data-sort="string">Family</th>
+      <th data-sort="float">Accession</th>
       <th data-sort="string">Taxonomic Name</th>
+      <th data-sort="string">Family</th>
       <th data-sort="string">Garden Location</th>
       <th data-sort="string">Locality</th>
       <th data-sort="string">Rare</th>
@@ -1269,8 +1269,8 @@ def formatRow(result,form,config):
         rare = 'Yes' if rr[7] == 'true' else 'No'
         dead = 'Yes' if rr[8] == 'true' else 'No'
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6] 
-        #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[2],rr[1],rr[3],rr[5],rare,dead)
+        #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead , 9 determination (no author)
+        return '''<tr><td><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (link,rr[0],rr[1],rr[2],rr[3],rr[5],rare,dead)
     elif result['rowtype'] == 'was.advsearch':
 	link = 'http://'+hostname+':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7] 
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
@@ -1406,9 +1406,10 @@ def getHandlers(form):
 
     selected = form.get('handlerRefName')
     handlerlist = [ \
+("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
 ("Thusa Chu", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7654)'Thusa Chu'"),
-("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
 ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
+("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
 ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
 ("Rowan Gard", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'"),
 ("Ryan Gross", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8737)'Ryan Gross'"),
@@ -1416,6 +1417,7 @@ def getHandlers(form):
 ("Allison Lewis", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8724)'Allison Lewis'"),
 ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
 ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
+("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
 ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
 ]
 
@@ -1494,7 +1496,6 @@ def getPrinters(form):
 
     printerlist = [ \
         ("Kroeber Hall", "kroeberBCP"),
-        ("Hearst Gym Basement", "hearstBCP"),
         ("Regatta Building", "regattaBCP")
         ]
 
@@ -1770,18 +1771,17 @@ def starthtml(form,config):
           </tr>
     '''
     elif updateType == 'locreport':
-        taxName      = str(form.get('ta.taxon')) if form.get('ta.taxon') else ''
         
         deadoralive = '''
          <th><span class="cell">rare </span>
-	  <input id="rare" class="cell" type="checkbox" name="rare" checked value="rare" class="xspan">
+	  <input id="rare" class="cell" type="checkbox" name="rare" value="rare" class="xspan">
           <span class="cell">not rare </span>
-	  <input id="notrare" class="cell" type="checkbox" name="notrare" checked value="notrare" class="xspan">
+	  <input id="notrare" class="cell" type="checkbox" name="notrare" value="notrare" class="xspan">
           ||
 	  <span class="cell">alive </span>
-	  <input id="alive" class="cell" type="checkbox" name="alive" checked value="alive" class="xspan">
+	  <input id="alive" class="cell" type="checkbox" name="alive" value="alive" class="xspan">
 	  <span class="cell">dead </span>
-	  <input id="dead" class="cell" type="checkbox" name="dead" checked value="dead" class="xspan"></th>'''
+	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
 
         for v in ['rare','notrare','dead','alive']:
             if form.get(v):
@@ -1789,6 +1789,7 @@ def starthtml(form,config):
             else:
                 deadoralive = deadoralive.replace('checked value="%s"' % v,'value="%s"' % v)
         
+        taxName     = str(form.get('ta.taxon')) if form.get('ta.taxon') else ''
 	otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
 	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th>

@@ -27,7 +27,7 @@ def formatField(label,condition,value,template,notentered):
 def doObjectDetails(form,config):
    scannedObjectNumber = form.get('ob.objectnumber')
    objresult = DBquery.getobjinfo(scannedObjectNumber,config)
-   if objresult == None: ojbectresult = 18 * [None]
+   if objresult == None: objresult = 18 * [None]
    currlocresult = objresult[17]
    accresult = DBquery.getaccinfo(objresult[15],config)
    if accresult == None: accresult = 3 * [None]
