@@ -26,6 +26,10 @@ updateType  = config.get('info','updatetype')
 action      = form.get('action')
 checkServer = form.get('check')
 
+# if action has not been set, this is the first time through, and we need to see defaults. (only 1 right now!)
+if not action:
+    form['alive'] = 'checked'
+    
 # if location2 was not specified, default it to location1
 if str(form.get('lo.location2')) == '':
     form['lo.location2'] = form.get('lo.location1')
