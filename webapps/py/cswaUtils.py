@@ -1019,14 +1019,13 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
     auditFile = config.get('files','cmdrauditfile')
     # slugify the location
     slug = re.sub('[^\w-]+', '_', location).strip().lower()
-    logFile = config.get('files','cmdrfmtstring') % (config.get('files','cmdrfileprefix'),dataType,printerDir,slug,datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),filenameinfo)
-    #logFile = '/tmp/%s.%s.%s.txt' % (re.sub(r'\W+','_',location),datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),filenameinfo)
+    barcodeFile = config.get('files','cmdrfmtstring') % (config.get('files','cmdrfileprefix'),dataType,printerDir,slug,datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),filenameinfo)
     
     try:
-        logFh    = codecs.open(logFile,'w','utf-8')
-        alogFh   = codecs.open(auditFile,'a','utf-8')
-        csvlogfh = csv.writer(logFh,  delimiter=",",quoting=csv.QUOTE_ALL)
-        audlogfh = csv.writer(alogFh, delimiter=",",quoting=csv.QUOTE_ALL)
+        barcodeFh = codecs.open(barcodeFile,'w','utf-8-sig')
+        alogFh    = codecs.open(auditFile,'a','utf-8')
+        csvlogfh  = csv.writer(barcodeFh,  delimiter=",", quoting=csv.QUOTE_ALL)
+        audlogfh  = csv.writer(alogFh,     delimiter=",", quoting=csv.QUOTE_ALL)
         if dataType == 'locationLabels':
             csvlogfh.writerow('termdisplayname'.split(','))
             for d in data:
@@ -1037,13 +1036,13 @@ def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
             for d in data:
                 csvlogfh.writerow(d[3:8])
                 audlogfh.writerow(d)
-        logFh.close()
+        barcodeFh.close()
         alogFh.close()
-        newName = logFile.replace('.tmp','.txt')
-        os.rename (logFile,newName) 
+        newName = barcodeFile.replace('.tmp','.txt')
+        os.rename (barcodeFile,newName) 
     except:
         #raise
-        newName = '<span style="color:red;">could not write to %s</span>' % logFile
+        newName = '<span style="color:red;">could not write to %s</span>' % barcodeFile
 
     return newName
 
@@ -1859,11 +1858,11 @@ def starthtml(form,config):
     elif updateType == 'barcodeprint':
         printers,selected = getPrinters(form)
 	otherfields += '''
-          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th>'''
+          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
-        otherfields += '''
-          <th><span class="cell">museum number:</span></th>
-          <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>'''
+        #otherfields += '''
+        #  <th><span class="cell">museum number:</span></th>
+        #  <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>'''
     elif updateType == 'inventory':
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
