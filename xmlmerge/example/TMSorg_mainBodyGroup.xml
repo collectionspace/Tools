@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<imports>
+  <import>
+    <schema>
+      <organizations_common:shortIdentifier>975</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Denham Trading Company</longName>
+          <shortName/>
+          <nameAdditions>Based on handwriting in ledger, 2-10755 (Acc.562).</nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>2145</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Thomas Keam</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>J. W. Fewkes</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>Alexander Stephen</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>2396</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Phoebe A. Hearst Museum of Anthropology</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>2409</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Francesa W. Bennett Family</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>3353</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Family of Jane E. Church</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>3438</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Roadmarmel</longName>
+          <shortName/>
+          <nameAdditions>Museum documentation? Misspelling in data converted to TMS.</nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>4210</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Related to Mr. and Mrs. Joseph Gregory</longName>
+          <shortName/>
+          <nameAdditions>Related to Mr. and Mrs. Joseph Gregory</nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>4410</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Family of JoAnn Morgan</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>7038</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>South Fork Band Colony</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>7157</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName></longName>
+          <shortName/>
+          <nameAdditions>Culture continued: Klickitat, Wish ham , See ap Cat, Li ay was and Shyiks; Culture continued: Kow way saye ee, Sk'in-pah, Kah-miltpah, Klic</nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>7196</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Estate of Norman Neurberg</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>8107</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Robert H. Lowie Museum of Anthropology</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>Hearst Museum</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>Lowie Museum</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>LMA</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>PAHMA</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>8157</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Macy's</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>Macys</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>8205</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>San Francisco International Airport Museum</longName>
+          <shortName/>
+          <nameAdditions>Older name</nameAdditions>
+        </mainBodyGroup>
+        <mainBodyGroup>
+          <longName>San Francisco Airport Museums, City and County of San Francisco</longName>
+          <shortName/>
+          <nameAdditions>Full current name</nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>8406</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>Language Laboratory</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>8544</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>AAU</longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+    <schema>
+      <organizations_common:shortIdentifier>9212</organizations_common:shortIdentifier>
+      <organizations_common:mainBodyGroupList>
+        <mainBodyGroup>
+          <longName>HAM </longName>
+          <shortName/>
+          <nameAdditions></nameAdditions>
+        </mainBodyGroup>
+      </organizations_common:mainBodyGroupList>
+    </schema>
+  </import>
+</imports>
