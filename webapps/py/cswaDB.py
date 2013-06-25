@@ -215,7 +215,7 @@ end as locality,
 htig.parentid as objectcsid,
 con.rare,
 cob.deadflag,
-regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth 
+regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth
 
 from collectionobjects_common co1
 
@@ -223,6 +223,7 @@ join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
 join movements_common mc on (mc.id=h2.id)
+
 join collectionobjects_naturalhistory con on (co1.id = con.id %s)
 join collectionobjects_botgarden cob on (co1.id=cob.id %s)
 
@@ -232,14 +233,13 @@ left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
 
 left outer join hierarchy htig2
      on (co1.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
-left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id) 
+left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
 
 left outer join hierarchy hlg
      on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 
 join collectionspace_core core on (core.id=co1.id and core.tenantid=35)
-join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')   -- movement not deleted
 join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)

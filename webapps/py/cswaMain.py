@@ -12,7 +12,7 @@ sys.setdefaultencoding('utf-8')
 
 # NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
 actualform = cgi.FieldStorage()
-form    = cgiFieldStorageToDict(actualform) 
+form    = cgiFieldStorageToDict(actualform)
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
 debug = form.get("debug")
@@ -32,7 +32,7 @@ if not action:
     
 # if location2 was not specified, default it to location1
 if str(form.get('lo.location2')) == '':
-    form['lo.location2'] = form.get('lo.location1') 
+    form['lo.location2'] = form.get('lo.location1')
     
 if updateType == 'packinglist' and action == 'Download as CSV':  
     downloadCsv(form,config)
