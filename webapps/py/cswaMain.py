@@ -10,10 +10,12 @@ from cswaObjDetails import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-form    = cgi.FieldStorage()
+# NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
+actualform = cgi.FieldStorage()
+form    = cgiFieldStorageToDict(actualform) 
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
-debug = form.getvalue("debug")
+debug = form.get("debug")
 
 # bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
 if config == False:
@@ -21,8 +23,16 @@ if config == False:
     sys.exit(0)
 
 updateType  = config.get('info','updatetype')
-action      = form.getvalue('action')
-checkServer = form.getvalue('check')
+action      = form.get('action')
+checkServer = form.get('check')
+
+# if action has not been set, this is the first time through, and we need to see defaults. (only 1 right now!)
+if not action:
+    form['alive'] = 'checked'
+    
+# if location2 was not specified, default it to location1
+if str(form.get('lo.location2')) == '':
+    form['lo.location2'] = form.get('lo.location1') 
     
 if updateType == 'packinglist' and action == 'Download as CSV':  
     downloadCsv(form,config)
@@ -37,9 +47,7 @@ if checkServer == 'check server':
     print serverCheck(form,config)
 else:
     if action == "Enumerate Objects":
-        if updateType == 'barcodeprint':
-            print 'Misunderstood'
-            doEnumerateObjects(form,config)
+        doEnumerateObjects(form,config)
     elif action == "Create Labels for Locations Only":
         doBarCodes(form,config)
     elif action == config.get('info','updateactionlabel'):
@@ -54,7 +62,7 @@ else:
         # elif updateType == 'holdings':     doBedList(form,config)
         # elif updateType == 'locreport':    doBedList(form,config)
         elif updateType == 'advsearch':    doAdvancedSearch(form,config)
-        elif updateType == 'upload':       uploadFile(form,config)
+        elif updateType == 'upload':       uploadFile(actualform,config)
         elif action == "Recent Activity":
             viewLog(form,config)
 ##    # special case: if only one location in range, jump to enumerate
