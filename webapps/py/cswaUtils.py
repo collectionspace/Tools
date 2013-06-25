@@ -872,8 +872,8 @@ def downloadCsv(form,config):
 def doBarCodes(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
-    updateType =        config.get('info','updatetype')
-    action =            form.get('action')
+    updateType        = config.get('info','updatetype')
+    action            = form.get('action')
     if not validateParameters(form,config): return
 
     if action == "Create Labels for Locations Only":
