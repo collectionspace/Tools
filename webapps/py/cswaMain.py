@@ -10,12 +10,10 @@ from cswaObjDetails import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-# NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
-actualform = cgi.FieldStorage()
-form    = cgiFieldStorageToDict(actualform)
+form    = cgi.FieldStorage()
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
-debug = form.get("debug")
+debug = form.getvalue("debug")
 
 # bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
 if config == False:
@@ -23,16 +21,8 @@ if config == False:
     sys.exit(0)
 
 updateType  = config.get('info','updatetype')
-action      = form.get('action')
-checkServer = form.get('check')
-
-# if action has not been set, this is the first time through, and we need to see defaults. (only 1 right now!)
-if not action:
-    form['alive'] = 'checked'
-    
-# if location2 was not specified, default it to location1
-if str(form.get('lo.location2')) == '':
-    form['lo.location2'] = form.get('lo.location1')
+action      = form.getvalue('action')
+checkServer = form.getvalue('check')
     
 if updateType == 'packinglist' and action == 'Download as CSV':  
     downloadCsv(form,config)
@@ -42,12 +32,14 @@ else:
 
 #print form
 elapsedtime = time.time()
-    
+
 if checkServer == 'check server':
     print serverCheck(form,config)
 else:
     if action == "Enumerate Objects":
-        doEnumerateObjects(form,config)
+        if updateType == 'barcodeprint':
+            print 'Misunderstood'
+            doEnumerateObjects(form,config)
     elif action == "Create Labels for Locations Only":
         doBarCodes(form,config)
     elif action == config.get('info','updateactionlabel'):
@@ -62,21 +54,25 @@ else:
         # elif updateType == 'holdings':     doBedList(form,config)
         # elif updateType == 'locreport':    doBedList(form,config)
         elif updateType == 'advsearch':    doAdvancedSearch(form,config)
-        elif updateType == 'upload':       uploadFile(actualform,config)
+        elif updateType == 'upload':       uploadFile(form,config)
         elif action == "Recent Activity":
             viewLog(form,config)
-    # special case: if only one location in range, jump to enumerate
-    elif form.get("lo.location1") != None and str(form.get("lo.location1")) == str(form.get("lo.location2")) :
-        if updateType in ['keyinfo', 'inventory']: 
-            doEnumerateObjects(form,config)
-        elif updateType == 'movecrate':
-            doCheckMove(form,config)
-        else:
-            doLocationSearch(form,config,'nolist')
+##    # special case: if only one location in range, jump to enumerate
+##    elif form.getvalue("lo.location1") != '' and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
+##        if updateType in ['keyinfo', 'inventory']: 
+##            doEnumerateObjects(form,config)
+##        elif updateType == 'movecrate':
+##            doCheckMove(form,config)
+##        else:
+##            doLocationSearch(form,config,'nolist')
     elif action == "Search":
         if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
         elif updateType == 'movecrate':    doCheckMove(form,config)
-        elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
+        elif updateType == 'barcodeprint':
+            if form.getvalue('ob.objectnumber'):
+                doSingleObjectSearch(form, config)
+            else:
+                doLocationSearch(form, config, 'nolist')
         elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
         elif updateType == 'holdings':     doAuthorityScan(form,config)
         elif updateType == 'locreport':    doAuthorityScan(form,config)

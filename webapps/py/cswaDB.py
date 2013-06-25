@@ -128,7 +128,7 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id)
 
 left outer join locations_common lc on (mc.currentlocation=lc.refname)
 
-where regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
+where deadflag='false' and regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
    
 ORDER BY %s,to_number(objectnumber,'9999.9999')
 LIMIT 6000""" % (searchkey, location, sortkey)
@@ -212,18 +212,16 @@ co1.recordstatus dataQuality,
 case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\\)''(.*)''$', '\\1')
      when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
 end as locality,
-htig.parentid as objectcsid,
+h1.name as objectcsid,
 con.rare,
-cob.deadflag,
-regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth
+cob.deadflag
 
 from collectionobjects_common co1
-
 join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
-join movements_common mc on (mc.id=h2.id)
 
+join movements_common mc on (mc.id=h2.id)
 join collectionobjects_naturalhistory con on (co1.id = con.id %s)
 join collectionobjects_botgarden cob on (co1.id=cob.id %s)
 
@@ -231,19 +229,16 @@ left outer join hierarchy htig
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
 left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
 
-left outer join hierarchy htig2
-     on (co1.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
-left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
-
 left outer join hierarchy hlg
      on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 
 join collectionspace_core core on (core.id=co1.id and core.tenantid=35)
+join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')   -- movement not deleted
 join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id) order by determination""" % ('', '')
+left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('', '')
 
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
@@ -497,6 +492,31 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def getobjinfo(museumNumber,config):
+
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+   SELECT co.objectnumber,
+    co.numberofobjects,
+    n.objectname,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1'),
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+    
+    objects.execute(getobjects)
+    #for object in objects.fetchone():
+        #print object
+    return objects.fetchone()
 
 if __name__ == "__main__":
 
