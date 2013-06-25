@@ -154,7 +154,9 @@ def doObjectDetails(form,config):
    if objmedia != None:
       for image in objmedia:
           #/blobs/be903851-a2a8-4eee-bf15/derivatives/Thumbnail/content
-          link = "http://pahma.cspace.berkeley.edu:8180/cspace-services/blobs/%s/derivatives/%s/content"
+          #link = "http://pahma.cspace.berkeley.edu:8180/cspace-services/blobs/%s/derivatives/%s/content"
+          # use spiffy, new "public image service", to avoid having to re-authenticate user
+          link = "http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/%s/derivatives/%s/content"
           thumb = link % (image[1],'Thumbnail')
           original = link % (image[1],'OriginalJpeg')
           print '<div class="imagecell"><a href="%s" target="_blank"><img src="%s"></a></div>' % (original,thumb)
