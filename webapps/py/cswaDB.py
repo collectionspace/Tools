@@ -497,6 +497,31 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def getobjinfo(museumNumber,config):
+
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+   SELECT co.objectnumber,
+    co.numberofobjects,
+    n.objectname,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1'),
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+    
+    objects.execute(getobjects)
+    #for object in objects.fetchone():
+        #print object
+    return objects.fetchone()
 
 if __name__ == "__main__":
 

@@ -218,6 +218,33 @@ def doObjectSearch(form,config,displaytype):
     
     #if len(rows) != 0: getTableFooter(config,displaytype)
 
+def doSingleObjectSearch(form, config, displaytype=''):
+    if not validateParameters(form,config): return
+    
+    updateType = config.get('info','updatetype')
+    updateactionlabel = config.get('info','updateactionlabel')
+
+    if updateType == 'barcodeprint':
+        try:
+            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+        except:
+            raise
+            handleTimeout('search', form)
+        print """
+    <table width="100%"><tr>
+    <th>Object</th>
+    <th>Count</th>
+    <th>Object Name</th>
+    <th>Culture</th>
+    <th>Collection Place</th>
+    </tr>"""
+        print '''<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'''.format(obj[0],obj[1],obj[2],obj[4],obj[3])
+        
+        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="6">"""
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td></tr>'''
+        
+
 def listSearchResults(authority, config, displaytype, form, rows):
 
     updateType = config.get('info','updatetype')
@@ -854,42 +881,64 @@ def doBarCodes(form,config):
     else:
         print getHeader(updateType)
 
-    try:
-        rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),500,config)
-    except:
-	raise
-        handleTimeout(updateType,form)
-	rows = []
+    #If the museum number field has input, print by object (this means that museum number overrides location range, which probably isn't the desired behavior
+    if form.get('ob.objectnumber') != '':
+        try:
+            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+            totalobjects = 1
+        except:
+            raise
+            handleTimeout(updateType, form)
+            obj = [0,0,'','','']
+        if action=='Create Labels for Objects':
+            labelFilename = writeCommanderFile(obj[3],form.get("printer"),'objectLabels','objects',obj,config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[0],1,labelFilename)
+            print """<tr><td align="center" colspan="4"><hr><td></tr>"""
+            print """<tr><td align="center" colspan="4">"""
+            if totalobjects == 0:
+                print '<span class="save">No objects found in this range.</span>'
 
-    rowcount = len(rows)
-
-    objectsHandled = []
-    totalobjects = 0
-    rows.reverse()
-    if action == "Create Labels for Locations Only":
-            labelFilename = writeCommanderFile('locations',form.get("printer"),'locationLabels','locations',rows,config)
-            print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows),labelFilename)
-            print "\n</table>"
-            return
     else:
-        for r in rows:
-            objects = cswaDB.getlocations(r[0],'',1,config,updateType)
-            for o in objects:
-                if o[3]+o[4] in objectsHandled:
-                    objects.remove(o)
-                    print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
-                else:
-                    objectsHandled.append(o[3]+o[4])
-            totalobjects += len(objects)
-            labelFilename = writeCommanderFile(r[0],form.get("printer"),'objectLabels','objects',objects,config)
-            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
+        try:
+            #If no end location, assume single location
+            if form.get("lo.location2"):
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),500,config)
+            else:
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location1"),500,config)
+        except:
+            raise
+            handleTimeout(updateType,form)
+            rows = []
 
-    print """<tr><td align="center" colspan="4"><hr><td></tr>"""
-    print """<tr><td align="center" colspan="4">"""
-    if totalobjects != 0:    
-        print "<b>%s objects</b> found in %s locations." % (totalobjects,rowcount)
-    else:
-        print '<span class="save">No objects found in this range.</span>'
+        rowcount = len(rows)
+
+        objectsHandled = []
+        totalobjects = 0
+        rows.reverse()
+        if action == "Create Labels for Locations Only":
+                labelFilename = writeCommanderFile('locations',form.get("printer"),'locationLabels','locations',rows,config)
+                print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows),labelFilename)
+                print "\n</table>"
+                return
+        else:
+            for r in rows:
+                objects = cswaDB.getlocations(r[0],'',1,config,updateType)
+                for o in objects:
+                    if o[3]+o[4] in objectsHandled:
+                        objects.remove(o)
+                        print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
+                    else:
+                        objectsHandled.append(o[3]+o[4])
+                totalobjects += len(objects)
+                labelFilename = writeCommanderFile(r[0],form.get("printer"),'objectLabels','objects',objects,config)
+                print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
+
+        print """<tr><td align="center" colspan="4"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="4">"""
+        if totalobjects != 0:
+            print "<b>%s objects</b> found in %s locations." % (totalobjects,rowcount)
+        else:
+            print '<span class="save">No objects found in this range.</span>'
         
     print "\n</td></tr></table><hr/>"
 
@@ -1390,7 +1439,7 @@ def postxml(requestType,uri,realm,hostname,username,password,payload):
     #print url
     #print payload
     #raise
-    data = f.read()     
+    data = f.read()
     info = f.info()
     # if a POST, the Location element contains the new CSID
     if info.getheader('Location'):
