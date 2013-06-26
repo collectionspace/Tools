@@ -2,6 +2,7 @@
 
 import os
 import sys
+import copy
 
 # for log
 import csv
@@ -324,6 +325,16 @@ def getHeader(updateType):
       <th>Field Collection Place</th>
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
+      <th>P?</th>
+    </tr>"""
+    elif updateType == 'packinglistbyculture':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th width="150px;">Location</th>
+      <th>Field Collection Place</th>
       <th>P?</th>
     </tr>"""
     elif updateType == 'moveobject':
@@ -680,7 +691,8 @@ def doPackingList(form,config):
 
     updateactionlabel = config.get('info','updateactionlabel')
     updateType        = config.get('info','updatetype')
-    #if updateType == 'packinglist': updateType ='keyinfo' # NB: packing list and key info review use exactly the same fields...
+    if form.get('groupbyculture') is not None:
+        updateType    = 'packinglistbyculture'
     if not validateParameters(form,config): return
 
     place = form.get("cp.place")
@@ -688,11 +700,6 @@ def doPackingList(form,config):
         places = getPlaces.getPlaces(place)
     else:
 	places = []
-
-    if form.get("lo.location2"):
-	pass
-        #form["location1"] = form.get("lo.location2")
-        #form["num2ret"] = 1
     
     try:
         locationList = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),MAXLOCATIONS,config)
@@ -710,23 +717,45 @@ def doPackingList(form,config):
     print getHeader(updateType)
     totalobjects   = 0
     totallocations = 0
+    locations = {}
     for l in locationList:
 
         try:
-            objects = cswaDB.getlocations(l[0],'',1,config,updateType)
+            objects = cswaDB.getlocations(l[0],'',1,config,'packinglist')
         except:
             handleTimeout(updateType+' getting objects',form)
             return
          
         rowcount = len(objects)
-        locations = {}
         if rowcount == 0:
-            locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
-            locations[locationheader] = [ '<tr><td colspan="3">No objects found at this location.</td></tr>' ]
+            if updateType != 'packinglistbyculture':
+                locationheader = formatRow({ 'rowtype':'subheader','data': l },form,config)
+                locations[locationheader] = [ '<tr><td colspan="3">No objects found at this location.</td></tr>' ]
         for r in objects:
             if checkObject(places,r):
                 totalobjects += 1
-                locationheader = formatRow({ 'rowtype':'subheader','data': r },form,config)
+                if updateType == 'packinglistbyculture':
+                    temp = copy.deepcopy(r)
+                    cgrefname = r[11]
+                    parentcount = 0
+                    if cgrefname is not None:
+                        parents = cswaDB.findparents(cgrefname, config)
+                        #[sys.stderr.write('term: %s' % x) for x in parents]
+                        if parents is None or len(parents) == 1:
+                            subheader = 'zzzNo parent :: %s' % r[7]
+                        else:
+                            subheader = [term[0] for term in parents]
+                            subheader = ' :: '.join(subheader)
+                            parentcount = len(parents)
+                    else:
+                        subheader = 'zzzNo cultural group specified'
+                    #sys.stderr.write('%s %s' % (str(r[7]), parentcount))
+                    temp[0] = subheader
+                    temp[7] = r[0]
+                    r = temp
+                    locationheader = formatRow({ 'rowtype':'subheader','data': r },form,config)
+                else:
+                    locationheader = formatRow({ 'rowtype':'subheader','data': r },form,config)
                 if locations.has_key(locationheader):
                     pass
                 else:
@@ -735,15 +764,15 @@ def doPackingList(form,config):
             
                 locations[locationheader].append(formatRow({ 'rowtype': updateType,'data': r },form,config))
 
-        locs = locations.keys()
-        locs.sort()
-        for header in locs:
-            print header
-            print '\n'.join(locations[header])
-
+    locs = locations.keys()
+    locs.sort()
+    for header in locs:
+        print header.replace('zzz','')
+        print '\n'.join(locations[header])
         print """<tr><td align="center" colspan="6">&nbsp;</tr>"""
     print """<tr><td align="center" colspan="6"><hr><td></tr>"""
-    print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations, %s including crates</td></tr>""" % (totalobjects,len(locationList),totallocations)
+    headingtypes = 'cultures' if updateType == 'packinglistbyculture' else 'including crates'
+    print """<tr><td align="center" colspan="6">Packing list completed. %s objects, %s locations, %s %s</td></tr>""" % (totalobjects,len(locationList),totallocations, headingtypes)
     print "\n</table><hr/>"
 
 def doAuthorityScan(form,config):
@@ -1321,6 +1350,19 @@ def formatRow(result,form,config):
 <td><input type="checkbox"></td>
 </tr>""" % (link,rr[3], rr[8],rr[4], rr[8],rr[5],  rr[8],rr[6], rr[8],rr[7], rr[8],rr[9])
 
+    elif result['rowtype'] == 'packinglistbyculture':
+        link = 'http://'+hostname+':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7x | objcsid 8 | ethnographicfilecode 9x
+        # f/nf | objcsid | locrefname | [loccsid] | objnum
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname" name="onm.%s">%s</td>
+<td class="xspan" name="ocn.%s">%s</td>
+<td class="xspan">%s</td>
+<td class="xspan" name="fc.%s">%s</td>
+<td><input type="checkbox"></td>
+</tr>""" % (link,rr[3], rr[8],rr[4], rr[8],rr[5], rr[7], rr[8],rr[6])
+
 
 def formatError(cspaceObject):
     return '<tr><th colspan="2" class="leftjust">%s</th><td></td><td>None found.</td></tr>\n' % (cspaceObject)
@@ -1869,11 +1911,17 @@ def starthtml(form,config):
 	otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
-    elif updateType == 'packinglist':
+        
+    elif updateType == 'packinglist' or updateType == 'packinglistbyculture':
         place = str(form.get('cp.place')) if form.get('cp.place') else ''
 	otherfields +='''
 	  <tr><th><span class="cell">collection place:</span></th>
-	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
+	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th>'''
+        otherfields +='''
+          <th><span class="cell">group by culture </span></th>
+	  <th><input id="groupbyculture" class="cell" type="checkbox" name="groupbyculture" value="groupbyculture" class="xspan"></th</tr>'''
+        if form.get('groupbyculture'): otherfields = otherfields.replace('value="groupbyculture"','checked value="groupbyculture"') 
+          
     elif updateType == 'upload':
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
 	otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
