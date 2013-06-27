@@ -498,6 +498,46 @@ def findrefnames(table, termlist, config):
     return result
 
 
+def findparents(refname, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    query = """WITH RECURSIVE ethnculture_hierarchyquery as (
+SELECT regexp_replace(cc.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCulture,
+      cc.refname,
+      rc.objectcsid broaderculturecsid,
+      regexp_replace(cc2.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCultureBroader,
+      0 AS level
+FROM concepts_common cc
+JOIN hierarchy h ON (cc.id = h.id)
+LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+LEFT OUTER JOIN hierarchy h2 ON (rc.relationshiptype='hasBroader' AND rc.objectcsid = h2.name)
+LEFT OUTER JOIN concepts_common cc2 ON (cc2.id = h2.id)
+WHERE cc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name(concept)%%'
+and cc.refname = '%s'
+UNION ALL
+SELECT regexp_replace(cc.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCulture,
+      cc.refname,
+      rc.objectcsid broaderculturecsid,
+      regexp_replace(cc2.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCultureBroader,
+      ech.level-1 AS level
+FROM concepts_common cc
+JOIN hierarchy h ON (cc.id = h.id)
+LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+LEFT OUTER JOIN hierarchy h2 ON (rc.relationshiptype='hasBroader' AND rc.objectcsid = h2.name)
+LEFT OUTER JOIN concepts_common cc2 ON (cc2.id = h2.id)
+INNER JOIN ethnculture_hierarchyquery AS ech ON h.name = ech.broaderculturecsid)
+SELECT ethnCulture, refname, level
+FROM ethnculture_hierarchyquery
+order by level""" % refname.replace("'","''")
+    
+    try:
+        objects.execute(query)
+        return objects.fetchall()
+    except:
+        #raise
+        return [["findparents error"]]
+        
 if __name__ == "__main__":
 
     from cswaUtils import getConfig
