@@ -519,9 +519,51 @@ LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
 WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
     
     objects.execute(getobjects)
-    #for object in objects.fetchone():
-        #print object
+    #for ob in objects.fetchone():
+        #print ob
     return objects.fetchone()
+
+def gethierarchy(query, config):
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if query != 'places':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM concepts_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child""".format(query)
+    else:
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM places_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
+WHERE misc.lifecyclestate <> 'deleted'
+ORDER BY ParentPlace, Place
+
+"""
+        
+    objects.execute(gethierarchy)
+    return objects.fetchall()
 
 if __name__ == "__main__":
 

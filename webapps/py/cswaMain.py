@@ -77,7 +77,7 @@ else:
         if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
         elif updateType == 'movecrate':    doCheckMove(form,config)
         elif updateType == 'barcodeprint':
-            if form.getvalue('ob.objectnumber'):
+            if form.get('ob.objectnumber'):
                 doSingleObjectSearch(form, config)
             else:
                 doLocationSearch(form, config, 'nolist')
@@ -91,6 +91,9 @@ else:
         elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
         elif updateType == 'objdetails':   doObjectDetails(form,config)
 
+    elif action == "View Hierarchy":
+        doHierarchyView(form,config)
+    
     elif action in ['<<','>>']:
         print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
     else:
