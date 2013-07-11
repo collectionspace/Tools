@@ -63,6 +63,22 @@ def getConfig(form):
        return config
    except:
        return False
+   
+def getProhibitedLocations(appconfig):
+    
+    #fileName = appconfig.get('files','prohibitedLocations.csv')
+    fileName = 'prohibitedLocations.csv'
+    locList = []
+    try:
+        with open(fileName, 'rb') as csvfile:
+            csvreader = csv.reader(csvfile,  delimiter="\t")
+            for row in csvreader:
+                locList.append(row[0])
+    except:
+        print 'FAIL'
+        raise
+    
+    return locList
 
 def serverCheck(form,config):
     result  = "<tr><td>start server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
@@ -123,6 +139,19 @@ def validateParameters(form,config):
     if config.get('info','updatetype') == 'barcodeprint':
         if form.get('printer') == 'None':
             print '<h3>Please select a printer before trying to print labels</h3>'
+            valid = False
+
+    prohibitedLocations = getProhibitedLocations(config)
+    if form.get("lo.location1"):
+        loc = form.get("lo.location1")
+        if loc in prohibitedLocations:
+            print '<h3>Location "%s" is unavailable to this webapp. Please contact registration staff for details.</h3>' % form.get("lo.location1")
+            valid = False
+
+    if form.get("lo.location2"):
+        loc = form.get("lo.location2")
+        if loc in prohibitedLocations:
+            print '<h3>Location "%s" is unavailable to this webapp. Please contact registration staff for details.</h3>' % form.get("lo.location2")
             valid = False
 
     return valid
