@@ -497,6 +497,73 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def getobjinfo(museumNumber,config):
+
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+   SELECT co.objectnumber,
+    co.numberofobjects,
+    n.objectname,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1'),
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+    
+    objects.execute(getobjects)
+    #for ob in objects.fetchone():
+        #print ob
+    return objects.fetchone()
+
+def gethierarchy(query, config):
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if query != 'places':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM concepts_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child""".format(query)
+    else:
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM places_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
+WHERE misc.lifecyclestate <> 'deleted'
+ORDER BY ParentPlace, Place
+
+"""
+        
+    objects.execute(gethierarchy)
+    return objects.fetchall()
 
 def findparents(refname, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))

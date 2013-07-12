@@ -42,7 +42,7 @@ else:
 
 #print form
 elapsedtime = time.time()
-    
+
 if checkServer == 'check server':
     print serverCheck(form,config)
 else:
@@ -65,18 +65,22 @@ else:
         elif updateType == 'upload':       uploadFile(actualform,config)
         elif action == "Recent Activity":
             viewLog(form,config)
-    # special case: if only one location in range, jump to enumerate
-    elif form.get("lo.location1") != None and str(form.get("lo.location1")) == str(form.get("lo.location2")) :
-        if updateType in ['keyinfo', 'inventory']: 
-            doEnumerateObjects(form,config)
-        elif updateType == 'movecrate':
-            doCheckMove(form,config)
-        else:
-            doLocationSearch(form,config,'nolist')
+##    # special case: if only one location in range, jump to enumerate
+##    elif form.getvalue("lo.location1") != '' and str(form.getvalue("lo.location1")) == str(form.getvalue("lo.location2")) :
+##        if updateType in ['keyinfo', 'inventory']: 
+##            doEnumerateObjects(form,config)
+##        elif updateType == 'movecrate':
+##            doCheckMove(form,config)
+##        else:
+##            doLocationSearch(form,config,'nolist')
     elif action == "Search":
         if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
         elif updateType == 'movecrate':    doCheckMove(form,config)
-        elif updateType == 'barcodeprint': doLocationSearch(form,config,'nolist')
+        elif updateType == 'barcodeprint':
+            if form.get('ob.objectnumber'):
+                doSingleObjectSearch(form, config)
+            else:
+                doLocationSearch(form, config, 'nolist')
         elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
         elif updateType == 'holdings':     doAuthorityScan(form,config)
         elif updateType == 'locreport':    doAuthorityScan(form,config)
@@ -87,6 +91,9 @@ else:
         elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
         elif updateType == 'objdetails':   doObjectDetails(form,config)
 
+    elif action == "View Hierarchy":
+        doHierarchyView(form,config)
+    
     elif action in ['<<','>>']:
         print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
     else:

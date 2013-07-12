@@ -42,6 +42,7 @@ import cswaDB as cswaDB
 import getPlaces
 import getTaxname
 import getAuthorityTree
+import cswaConceptutils as concept
 
 ## {{{ http://code.activestate.com/recipes/81547/ (r1)
 def cgiFieldStorageToDict( fieldStorage ):
@@ -190,7 +191,14 @@ def doLocationSearch(form,config,displaytype):
     updateType = config.get('info','updatetype')
     
     try:
-        rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),MAXLOCATIONS,config)
+        #If barcode print, assume empty end location is start location
+        if updateType == "barcodeprint":
+            if form.get("lo.location2"):
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),500,config)
+            else:
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location1"),500,config)
+        else:
+            rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),MAXLOCATIONS,config)
     except:
         raise
         handleTimeout('search',form)
@@ -247,6 +255,34 @@ def doObjectSearch(form,config,displaytype):
             print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation,crate)
     
     #if len(rows) != 0: getTableFooter(config,displaytype)
+
+def doSingleObjectSearch(form, config, displaytype=''):
+    if not validateParameters(form,config): return
+    
+    updateType = config.get('info','updatetype')
+    updateactionlabel = config.get('info','updateactionlabel')
+
+    if updateType == 'barcodeprint':
+        try:
+            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+        except:
+            raise
+            handleTimeout('search', form)
+            obj = [-1, -1, '(null)', '(null)', '(null)']
+        print """
+    <table width="100%"><tr>
+    <th>Object</th>
+    <th>Count</th>
+    <th>Object Name</th>
+    <th>Culture</th>
+    <th>Collection Place</th>
+    </tr>"""
+        print '''<tr align="center"><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'''.format(obj[0],obj[1],obj[2],obj[4],obj[3])
+        
+        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="6">"""
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td></tr>'''
+        
 
 def listSearchResults(authority, config, displaytype, form, rows):
 
@@ -912,42 +948,64 @@ def doBarCodes(form,config):
     else:
         print getHeader(updateType)
 
-    try:
-        rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),500,config)
-    except:
-	raise
-        handleTimeout(updateType,form)
-	rows = []
+    #If the museum number field has input, print by object
+    if form.get('ob.objectnumber') != '':
+        try:
+            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+            totalobjects = 1
+        except:
+            raise
+            handleTimeout(updateType, form)
+            obj = [-1,-1,'(null)','(null)','(null)']
+        if action=='Create Labels for Objects':
+            labelFilename = writeCommanderFile('',form.get("printer"),'objectLabels','objects',obj,config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[0],1,labelFilename)
+            print """<tr><td align="center" colspan="4"><hr><td></tr>"""
+            print """<tr><td align="center" colspan="4">"""
+            if totalobjects == 0:
+                print '<span class="save">No objects found in this range.</span>'
 
-    rowcount = len(rows)
-
-    objectsHandled = []
-    totalobjects = 0
-    rows.reverse()
-    if action == "Create Labels for Locations Only":
-            labelFilename = writeCommanderFile('locations',form.get("printer"),'locationLabels','locations',rows,config)
-            print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows),labelFilename)
-            print "\n</table>"
-            return
     else:
-        for r in rows:
-            objects = cswaDB.getlocations(r[0],'',1,config,updateType)
-            for o in objects:
-                if o[3]+o[4] in objectsHandled:
-                    objects.remove(o)
-                    print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
-                else:
-                    objectsHandled.append(o[3]+o[4])
-            totalobjects += len(objects)
-            labelFilename = writeCommanderFile(r[0],form.get("printer"),'objectLabels','objects',objects,config)
-            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
+        try:
+            #If no end location, assume single location
+            if form.get("lo.location2"):
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location2"),500,config)
+            else:
+                rows = cswaDB.getloclist('range',form.get("lo.location1"),form.get("lo.location1"),500,config)
+        except:
+            raise
+            handleTimeout(updateType,form)
+            rows = []
 
-    print """<tr><td align="center" colspan="4"><hr><td></tr>"""
-    print """<tr><td align="center" colspan="4">"""
-    if totalobjects != 0:    
-        print "<b>%s objects</b> found in %s locations." % (totalobjects,rowcount)
-    else:
-        print '<span class="save">No objects found in this range.</span>'
+        rowcount = len(rows)
+
+        objectsHandled = []
+        totalobjects = 0
+        rows.reverse()
+        if action == "Create Labels for Locations Only":
+                labelFilename = writeCommanderFile('locations',form.get("printer"),'locationLabels','locations',rows,config)
+                print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows),labelFilename)
+                print "\n</table>"
+                return
+        else:
+            for r in rows:
+                objects = cswaDB.getlocations(r[0],'',1,config,updateType)
+                for o in objects:
+                    if o[3]+o[4] in objectsHandled:
+                        objects.remove(o)
+                        print '<tr><td>already printed a label for</td><td>%s</td><td>%s</td><td/></tr>' % (o[3],o[4])
+                    else:
+                        objectsHandled.append(o[3]+o[4])
+                totalobjects += len(objects)
+                labelFilename = writeCommanderFile(r[0],form.get("printer"),'objectLabels','objects',objects,config)
+                print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (r[0],len(objects),labelFilename)
+
+        print """<tr><td align="center" colspan="4"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="4">"""
+        if totalobjects != 0:
+            print "<b>%s objects</b> found in %s locations." % (totalobjects,rowcount)
+        else:
+            print '<span class="save">No objects found in this range.</span>'
         
     print "\n</td></tr></table><hr/>"
 
@@ -1071,6 +1129,30 @@ def doBedList(form,config):
     print """<table><tr><td align="center"><hr></tr>"""
     print """<tr><td align="center">Bed List completed. %s objects, %s locations</td></tr>""" % (totalobjects,len(rows))
     print "\n</table><hr/>"
+
+def doHierarchyView(form, config):
+    query = form.get('authority')
+    res = cswaDB.gethierarchy(query, config)
+    print '<div id="tree"></div>\n<script>'
+    lookup = {concept.PARENT:concept.PARENT}
+    for row in res:
+        prettyName = row[0].replace('"', "'")
+        if prettyName[0] == '@':
+            prettyName = '<' + prettyName[1:] + '>'
+        lookup[row[2]] = prettyName
+    print '''var data = ['''
+    print concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
+    print '];'
+    print '''$(function() {
+    $('#tree').tree({
+        data: data,
+        autoOpen: true,
+        useContextMenu: false,
+        selectable: false
+    });
+});</script>'''
+    #print "\n</table><hr/>"
+    print "\n<hr>"
 
 def writeCommanderFile(location,printerDir,dataType,filenameinfo,data,config):
  
@@ -1605,6 +1687,31 @@ def getFieldset(form):
     fieldset += '\n      </select>'
     return fieldset,selected
 
+def getHierarchies(form):
+
+    selected = form.get('hierarchy')
+
+    authoritylist = [ \
+        ("Ethnographic Culture", "concept"),
+        ("Places", "places"),
+        ("Archaeological Culture", "archculture"),
+        ("Ethnographic File Codes", "ethusecode"),
+        ("Materials", "material_ca")
+        ]
+
+    authorities = '''
+<select class="cell" name="authority">
+<option value="None">Select an authority</option>'''
+              
+    for authority in authoritylist:
+        authorityOption = """<option value="%s">%s</option>""" % (authority[1],authority[0])
+        if selected and str(selected) in authoritylist[1]:
+            authorityOption = authorityOption.replace('option','option selected')
+        authorities = authorities + authorityOption
+
+    authorities + '\n </select>'
+    return authorities,selected
+
 def selectWebapp():
     
     files = os.listdir(".")
@@ -1629,7 +1736,8 @@ def selectWebapp():
             except:
                 badconfigfiles += '<tr><td>%s</td></tr>' % f
             
-    webapps = { 'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', 'barcodeprint', 'collectionstats'],
+    webapps = { 'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload',\
+                          'barcodeprint', 'collectionstats', 'hierarchyviewer'],
                 'ucbg':	['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
                 'ucjeps': ['ucjepsLocationReport'] }
 
@@ -1928,12 +2036,11 @@ def starthtml(form,config):
 	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
     elif updateType == 'barcodeprint':
         printers,selected = getPrinters(form)
-	otherfields += '''
-          <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
-        #otherfields += '''
-        #  <th><span class="cell">museum number:</span></th>
-        #  <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>'''
+        otherfields += '''
+<tr><th><span class="cell">museum number:</span></th>
+<th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>
+<tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
     elif updateType == 'inventory':
         handlers,selected = getHandlers(form)
         reasons,selected  = getReasons(form)
@@ -1953,7 +2060,13 @@ def starthtml(form,config):
           
     elif updateType == 'upload':
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
-	otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
+        otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
+    elif updateType == 'hierarchyviewer':
+        hierarchies,selected = getHierarchies(form)
+        button = '''<input id="actionbutton" class="save" type="submit" value="View Hierarchy" name="action">'''
+        authority = str(form.get('authority')) if form.get('authority') else ''
+        otherfields = '''<tr><th><span class="cell">Authority:</span></th><th>''' + hierarchies + '''</th></tr>'''
+        
     elif False:
         otherfields += '''
           <th><span class="cell">number to retrieve:</span></th>
@@ -1966,14 +2079,16 @@ def starthtml(form,config):
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>''' + apptitle + ' : ' + serverlabel + '''</title>''' + getStyle(schemacolor1) + '''
 <style type="text/css">
-  /*<![CDATA[*/
-    @import "../css/jquery-ui-1.8.22.custom.css";
-    @import "../css/blue/style.css";
-  /*]]>*/
-  </style>
+/*<![CDATA[*/
+@import "../css/jquery-ui-1.8.22.custom.css";
+@import "../css/blue/style.css";
+@import "../css/jqtree.css";
+/*]]>*/
+</style>
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
 <script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
+<script src="../js/tree.jquery.js"></script>
 <style>
 .ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
 </style>
