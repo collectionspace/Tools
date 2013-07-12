@@ -47,19 +47,21 @@ def buildConceptDict(l):
     """
     return dictBuilder(nullStrip(l))
 
+
 def nullStrip(l):
     """Strips out all the null values in the third column of a list L, replacing them with PARENT."""
     for pair in l:
         if pair[3] == None:
             pair[3] = PARENT
     return l
-    
+
+
 def dictBuilder(l, root=PARENT):
     """
     Takes in a list of child-parent pairs L and a root value ROOT and returns a hierarchical dictionary, maintaing sorting.
     """
     seen = 0
-    d = {root:[]}
+    d = {root: []}
     for pair in l:
         if pair[3] != root and seen:
             break
@@ -67,32 +69,35 @@ def dictBuilder(l, root=PARENT):
             if seen == 0:
                 seen = 1
             d[root].append(dictBuilder(l, pair[2]))
-    if d == {root:[]}:
+    if d == {root: []}:
         return root
     return d
+
 
 def stripRoot(res):
     """Removes the ROOT level from the JSON tree"""
     res = res[:res.rfind(',]}')]
-    return res.replace('{ label: "' + PARENT + '",\n    children: [','')
+    return res.replace('{ label: "' + PARENT + '",\n    children: [', '')
 
-def buildJSON(d, indent = 0, lookup = None):
+
+def buildJSON(d, indent=0, lookup=None):
     """
     Given a dictionary D, an optional initial indent INDENT, and a lookup table LOOKUP,
     returns a string representation of the tree needed for jqTree without a root level.
     """
     return stripRoot(makeJSON(d, indent, lookup))
 
-def makeJSON(d, indent = 0, lookup = None):
+
+def makeJSON(d, indent=0, lookup=None):
     """
     Given a dictionary D, an optional initial indent INDENT, and a lookup table LOOKUP,
     returns a string representation of the tree needed for jqTree.
     """
     res = ''
-    if not(lookup):
+    if not (lookup):
         print '<tr>NO LOOKUP TABLE!</tr>'
     space = ' '
-    if not(isinstance(d, dict)):
+    if not (isinstance(d, dict)):
         res += space * indent + '{ label: "' + str(lookup[d]) + '"}\n'
     for key in d:
         res += space * indent + '{ label: "' + str(lookup[key]) + '",\n'
@@ -104,7 +109,7 @@ def makeJSON(d, indent = 0, lookup = None):
                 if isinstance(val, dict):
                     res += makeJSON(val, indent + 4, lookup)
                 else:
-                    res += space * (indent + 4) + '{ label: "' +  str(lookup[val]) + '"},\n'
+                    res += space * (indent + 4) + '{ label: "' + str(lookup[val]) + '"},\n'
         if indent:
             res = res[:-2]
             res += ']},\n'
@@ -113,7 +118,8 @@ def makeJSON(d, indent = 0, lookup = None):
             res += ']}'
     return res
 
-def printDict(dictionary, indent=0, lookupTable = None):
+
+def printDict(dictionary, indent=0, lookupTable=None):
     """
     Given a dictionary and an optional initial indent, prints the dictionary hierarchically, i.e.:
     <ROOT>
@@ -126,15 +132,16 @@ def printDict(dictionary, indent=0, lookupTable = None):
         <LEVEL 1>
         ... etc...
     """
-    if not(lookupTable):
+    if not (lookupTable):
         print '<tr>NO LOOKUP TABLE!</tr>'
     space = ' '
-    if not(isinstance(dictionary, dict)):
+    if not (isinstance(dictionary, dict)):
         print '<tr><th align="left"><pre>' + space * indent + str(lookupTable[dictionary]) + '</pre></tr>'
     for key in dictionary:
         print '<tr><th align="left"><pre>' + space * indent + str(lookupTable[key]) + '</pre></tr>'
         if isinstance(dictionary[key], basestring):
-            print '<tr><th align="left"><pre>' + space * (indent + 4) + str(lookupTable[dictionary[key]]) + '</pre></tr>'
+            print '<tr><th align="left"><pre>' + space * (indent + 4) + str(
+                lookupTable[dictionary[key]]) + '</pre></tr>'
         else:
             for val in dictionary[key]:
                 if isinstance(val, dict):
@@ -145,6 +152,7 @@ def printDict(dictionary, indent=0, lookupTable = None):
 
 if __name__ == '__main__':
     import sys
+
     d = buildConceptDict(sys.argv[1])
     if sys.argv[2] == '-j' or sys.argv[2] == '-J':
         print makeJSON(d) #doesn't actually work anymore without lookup table
