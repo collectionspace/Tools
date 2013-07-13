@@ -58,7 +58,7 @@ def nullStrip(l):
 
 def dictBuilder(l, root=PARENT):
     """
-    Takes in a list of child-parent pairs L and a root value ROOT and returns a hierarchical dictionary, maintaing sorting.
+    Takes in a list of child-parent pairs L and a root value ROOT and returns a hierarchical dictionary, maintaining sorting.
     """
     seen = 0
     d = {root: []}
@@ -77,7 +77,7 @@ def dictBuilder(l, root=PARENT):
 def stripRoot(res):
     """Removes the ROOT level from the JSON tree"""
     res = res[:res.rfind(',]}')]
-    return res.replace('{ label: "' + PARENT + '",\n    children: [', '')
+    return res.replace('{ label: "' + PARENT + '",\nchildren: [', '')
 
 
 def buildJSON(d, indent=0, lookup=None):
@@ -102,9 +102,9 @@ def makeJSON(d, indent=0, lookup=None):
     for key in d:
         res += space * indent + '{ label: "' + str(lookup[key]) + '",\n'
         if isinstance(d[key], basestring):
-            res += space * (indent + 4) + '{ label: "' + str(lookup(d[key])) + '"}\n'
+            res += space * indent + '{ label: "' + str(lookup(d[key])) + '"}\n'
         else:
-            res += space * (indent + 4) + 'children: [\n'
+            res += space * indent + 'children: [\n'
             for val in d[key]:
                 if isinstance(val, dict):
                     res += makeJSON(val, indent + 4, lookup)
@@ -151,10 +151,41 @@ def printDict(dictionary, indent=0, lookupTable=None):
 
 
 if __name__ == '__main__':
-    import sys
 
-    d = buildConceptDict(sys.argv[1])
-    if sys.argv[2] == '-j' or sys.argv[2] == '-J':
-        print makeJSON(d) #doesn't actually work anymore without lookup table
-    else:
-        printDict(d) #doesn't work either for the same reason
+    import sys
+    import cswaDB as cswaDB
+    from cswaUtils import getConfig, doHierarchyView
+
+    #authoritylist = [ \
+    #    ("Ethnographic Culture", "concept"),
+    #    ("Places", "places"),
+    #    ("Archaeological Culture", "archculture"),
+    #    ("Ethnographic File Codes", "ethusecode"),
+    #    ("Materials", "material_ca")
+    #]
+
+    form = {'authority': 'material_ca', 'webapp': 'hierarchyViewerDev' }
+    config = getConfig(form)
+
+    doHierarchyView(form, config)
+    #sys.exit()
+
+    res = cswaDB.gethierarchy('material_ca', config)
+
+    PARENT = 'ROOT'
+    lookup = {PARENT: PARENT}
+    #for row in res:
+    #    prettyName = row[0].replace('"', "'")
+    #    if prettyName[0] == '@':
+    #        prettyName = '<' + prettyName[1:] + '>'
+    #    lookup[row[2]] = prettyName
+    #print '''var data = ['''
+    #print concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
+    d = buildConceptDict(res)
+    for top in d[PARENT]:
+        if type(top) == type('str'): print top
+    #print d
+    #if sys.argv[2] == '-j' or sys.argv[2] == '-J':
+    #    print makeJSON(d) #doesn't actually work anymore without lookup table
+    #else:
+    #    printDict(d) #doesn't work either for the same reason

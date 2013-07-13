@@ -1174,7 +1174,9 @@ def doHierarchyView(form, config):
             prettyName = '<' + prettyName[1:] + '>'
         lookup[row[2]] = prettyName
     print '''var data = ['''
-    print concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
+    #print concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
+    res = concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
+    print re.sub(r'\n    { label: "(.*?)"},', r'''\n    { label: "no parent >> \1"},''', res)
     print '];'
     print '''$(function() {
     $('#tree').tree({
