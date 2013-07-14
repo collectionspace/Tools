@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="08c07c03-a97f-496c-ba55-729ff2d71763">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -10,105 +10,117 @@
 	<parameter name="tenantid" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[15]]></defaultValueExpression>
 	</parameter>
-	<parameter name="csid" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["35aee97c-c238-45f6-a077"]]></defaultValueExpression>
+	<parameter name="csid" class="java.lang.String">
+		<defaultValueExpression><![CDATA["afd51113-8395-4b9c-ae90"]]></defaultValueExpression>
 	</parameter>
-	<queryString language="SQL">
-		<![CDATA[select
-g.title groupTitle,
-(case when g.scopenote is Null then '' else g.scopenote end) scopeNote,
-c.id objectid,
-c.objectnumber objectNumber,
-c.fieldcollectionnote fieldcollectionnote,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
-sd.datedisplaydate fieldCollectionDate,
-findcurrentlocation(c.id) currentlocation,
-'' site,
-'' culture,
-(case when bd.item is NULL then '' else bd.item end) description,
-r.subjectcsid relationsubjectid,
-r.objectcsid,
-h4.id h4id,
-h4.parentid h4pid,
-h3.id h3id,
-h3.parentid h3pid,
-misc.lifecyclestate lifecyclestate
-from groups_common g
-left outer join hierarchy h1 on (g.id = h1.id)
-inner join relations_common r on (h1.name = r.objectcsid)
-left outer join hierarchy h2 on (r.subjectcsid = h2.name)
-left outer join collectionobjects_common c on (h2.id = c.id)
-left outer join collectionobjects_common_briefdescriptions bd on (c.id = bd.id)
-inner join misc on misc.id = c.id
-inner join hierarchy h3 on (h3.name = r.subjectcsid)
-inner join hierarchy h4 on (h3.id = h4.parentid)
-inner join structureddategroup sd on (h4.id = sd.id)
-inner join collectionspace_core core on core.id=c.id
-left outer join hierarchy h5 on (c.id = h5.parentid)
-inner join objectnamegroup ong on (ong.id=h5.id)
-where misc.lifecyclestate <> 'deleted'
-and core.tenantid=$P{tenantid}
-and h1.name=$P{csid}
-order by objectnumber]]>
+	<queryString>
+		<![CDATA[SELECT  gc.title AS "groupTitle",
+(case when gc.scopenote is Null then '' else gc.scopenote end) AS scopeNote,
+        h1.name AS "csid",
+        co.objectnumber AS "objectnumber",
+        cp.sortableobjectnumber AS "sort",
+co.fieldcollectionnote fieldcollectionnote,
+-- sd.datedisplaydate fieldCollectionDate,
+        ong.objectName AS "objectname",
+case when (bd.item is not null and bd.item <> '') then
+  regexp_replace(bd.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end AS description,
+case when (fcp.item is not null and fcp.item <> '') then
+  regexp_replace(fcp.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end AS site,
+case when (apg.assocpeople is not null and apg.assocpeople <> '') then
+  regexp_replace(apg.assocpeople, '^.*\)''(.*)''$', '\1')
+  else ''
+end as culturalgroup,
+case when (pef.item is not null and pef.item <> '') then
+  regexp_replace(pef.item, '^.*\)''(.*)''$', '\1')
+  else ''
+end as ethnographicfilecode,
+CASE WHEN (fcp.item IS NOT NULL AND fcp.item <> '') THEN
+         regexp_replace(fcp.item, '^.*\)''(.*)''$', '\1')
+END AS "Site",
+case when ca.computedcrate is null then regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
+	  else regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
+	end as "currentlocation"
+FROM groups_common gc
+JOIN hierarchy h1 ON (gc.id=h1.id)
+JOIN relations_common rc1 ON (h1.name=rc1.subjectcsid)
+JOIN hierarchy h2 ON (rc1.objectcsid=h2.name)
+JOIN collectionobjects_common co ON (h2.id=co.id)
+JOIN collectionobjects_pahma cp ON (co.id=cp.id)
+join collectionobjects_anthropology ca on (co.id=ca.id)
+
+LEFT OUTER JOIN hierarchy h3 ON (co.id = h3.parentid AND h3.primarytype='objectNameGroup' AND h3.pos=0)
+LEFT OUTER JOIN objectnamegroup ong ON (ong.id=h3.id)
+
+LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id and bd.pos=0)
+
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+
+left outer join hierarchy h4 on (co.id=h4.parentid and h4.pos=0 and h4.name='collectionobjects_common:assocPeopleGroupList')
+
+left outer join assocpeoplegroup apg on (apg.id=h4.id)
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=co.id and pef.pos=0)
+
+WHERE rc1.subjectcsid = $P{csid}
+
+ORDER BY sort,"currentlocation"]]>
 	</queryString>
 	<field name="groupTitle" class="java.lang.String"/>
-	<field name="scopeNote" class="java.lang.String"/>
+	<field name="scopenote" class="java.lang.String"/>
+	<field name="csid" class="java.lang.String"/>
 	<field name="objectnumber" class="java.lang.String"/>
-	<field name="objectname" class="java.lang.String"/>
-	<field name="currentlocation" class="java.lang.String"/>
-	<field name="description" class="java.lang.String"/>
+	<field name="sort" class="java.lang.String"/>
 	<field name="fieldcollectionnote" class="java.lang.String"/>
+	<field name="objectname" class="java.lang.String"/>
+	<field name="description" class="java.lang.String"/>
 	<field name="site" class="java.lang.String"/>
-	<field name="culture" class="java.lang.String"/>
-	<field name="fieldcollectiondate" class="java.lang.String"/>
+	<field name="culturalgroup" class="java.lang.String"/>
+	<field name="ethnographicfilecode" class="java.lang.String"/>
+	<field name="currentlocation" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
 		<band height="105" splitType="Stretch">
-			<staticText>
-				<reportElement style="SubTitle" x="116" y="30" width="157" height="22"/>
-				<textElement>
-					<font fontName="SansSerif" size="14"/>
-				</textElement>
-				<text><![CDATA[in CollectionSpace	]]></text>
-			</staticText>
 			<line>
-				<reportElement x="-1" y="65" width="800" height="1"/>
+				<reportElement uuid="3f21e627-ad41-42b7-aa6f-288a3ff23ad0" x="0" y="65" width="751" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="69" width="269" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="84aa8fff-608d-4c31-a918-14b813036fd7" style="SubTitle" stretchType="RelativeToTallestObject" x="2" y="69" width="269" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement>
 					<font fontName="SansSerif" size="14"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{groupTitle}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{groupTitle}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="273" y="70" width="280" height="30" backcolor="#CCCCCC"/>
+				<reportElement uuid="7fbe9d26-6c00-4726-a25a-9a448f2d9898" style="Detail" stretchType="RelativeToTallestObject" x="273" y="70" width="479" height="30" backcolor="#CCCCCC"/>
 				<textElement>
 					<font fontName="SansSerif" isItalic="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{scopeNote}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{scopenote}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="-1" y="102" width="800" height="1"/>
+				<reportElement uuid="25be4036-6594-4ff4-b19b-4ac24f814f25" positionType="FixRelativeToBottom" x="0" y="102" width="752" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement style="Title" x="10" y="3" width="263" height="24"/>
+				<reportElement uuid="69990504-b50a-48e9-88fc-19a1010bbae4" x="0" y="0" width="263" height="30"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="SansSerif" size="18"/>
+					<font fontName="SansSerif" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Object Summary]]></text>
+				<text><![CDATA[Brief Object Summary]]></text>
 			</staticText>
 			<image>
-				<reportElement x="530" y="3" width="270" height="51"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<reportElement uuid="4fa3545f-7e8c-4a64-a7bb-02fe5fced05b" x="480" y="3" width="270" height="51"/>
+				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
@@ -116,113 +128,107 @@ order by objectnumber]]>
 		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
-		<band height="42" splitType="Stretch">
+		<band height="22" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="21" width="800" height="1"/>
+				<reportElement uuid="1ce943ae-cab4-4309-8e47-305d860c1690" positionType="FixRelativeToBottom" x="0" y="20" width="752" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="1" y="3" width="138" height="15"/>
+				<reportElement uuid="92a14667-488b-4088-a178-3b8c005e0932" style="Column header" stretchType="RelativeToTallestObject" x="1" y="2" width="86" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[object number]]></text>
+				<text><![CDATA[Museum no.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="139" y="3" width="138" height="15"/>
+				<reportElement uuid="9865ca77-7ebc-4103-a359-9ed1e9902c36" style="Column header" stretchType="RelativeToTallestObject" x="90" y="2" width="107" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[object name]]></text>
+				<text><![CDATA[Object name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="276" y="3" width="138" height="15"/>
+				<reportElement uuid="624bcb36-28f1-4bf8-aa6f-96f79249b4bc" style="Column header" x="202" y="2" width="161" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[current location]]></text>
+				<text><![CDATA[Current location]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="414" y="3" width="138" height="15"/>
+				<reportElement uuid="2bd24c32-4992-4087-9f7a-326cb0445e52" style="Column header" stretchType="RelativeToTallestObject" x="367" y="2" width="176" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[description]]></text>
+				<text><![CDATA[Description]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="555" y="3" width="122" height="15"/>
+				<reportElement uuid="6a1a1a95-9170-4e2f-9d39-5fad0b499eea" style="Column header" stretchType="RelativeToTallestObject" x="549" y="2" width="121" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[site]]></text>
+				<text><![CDATA[Field collection place	]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" stretchType="RelativeToTallestObject" x="678" y="3" width="123" height="15"/>
+				<reportElement uuid="60d214ef-d17c-4ceb-86de-b9f7a0c5119e" style="Column header" stretchType="RelativeToTallestObject" x="676" y="2" width="76" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<text><![CDATA[culture]]></text>
+				<text><![CDATA[Cultural group]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="19" splitType="Stretch">
-			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="-5" width="800" height="1"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
-				</graphicElement>
-			</line>
-			<textField>
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="-20" width="138" height="15"/>
+		<band height="18" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="7cabe161-1233-454c-a786-a51931ff9aa8" style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="2" width="86" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectnumber}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="138" y="-20" width="138" height="15"/>
+				<reportElement uuid="3919b36e-e625-4915-9fcc-3ac98171d69c" style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="90" y="2" width="107" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{objectname}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" x="276" y="-20" width="135" height="15"/>
-				<textElement>
-					<font fontName="SansSerif" size="9"/>
-				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{currentlocation}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="414" y="-20" width="138" height="15"/>
+				<reportElement uuid="bb69ee7c-300c-4d95-b07e-e9be5f9ae410" style="Detail" stretchType="RelativeToTallestObject" x="202" y="2" width="161" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{description}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{currentlocation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="555" y="-20" width="122" height="15"/>
+				<reportElement uuid="7fd7e2f0-7df3-4c7a-9ef8-4cbb0e79485a" style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="548" y="2" width="122" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{site}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{site}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="680" y="-20" width="110" height="15"/>
+				<reportElement uuid="d1bfe218-b60c-4cd9-aae6-0ea2a9de1b60" style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="366" y="2" width="177" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$F{culture}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="cbb7bb13-38c5-4943-822b-851dc5c0e61e" style="Detail" stretchType="RelativeToTallestObject" mode="Transparent" x="676" y="2" width="76" height="16"/>
+				<textElement>
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{culturalgroup}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<columnFooter>
 		<band height="14" splitType="Stretch">
 			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="-9" width="800" height="1"/>
+				<reportElement uuid="07724d84-7837-4f5a-9e36-3868854ca40e" positionType="FixRelativeToBottom" x="0" y="7" width="752" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
@@ -230,28 +236,39 @@ order by objectnumber]]>
 		</band>
 	</columnFooter>
 	<pageFooter>
-		<band height="20" splitType="Stretch">
+		<band height="22" splitType="Stretch">
 			<textField>
-				<reportElement style="Column header" x="433" y="0" width="80" height="20"/>
+				<reportElement uuid="07372a6b-10f3-46f9-90af-00219d63d73b" style="Column header" x="316" y="3" width="80" height="18"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement style="Column header" x="513" y="0" width="40" height="20"/>
+				<reportElement uuid="d64e5229-e7ff-4bee-bbaa-36efd809998f" style="Column header" x="396" y="3" width="40" height="18"/>
 				<textElement>
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement style="Column header" x="0" y="0" width="197" height="20"/>
+				<reportElement uuid="3d1a9a39-7e7a-4ffb-b991-c5a468b58d92" style="Column header" x="0" y="3" width="197" height="18"/>
 				<textElement>
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement uuid="92d4e522-3d77-4464-85f0-face1a366667" x="629" y="2" width="120" height="20"/>
+				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="508adf6d-5e27-489d-b869-f859f4ca2b02" x="550" y="1" width="70" height="17"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[powered by]]></text>
+			</staticText>
 		</band>
 	</pageFooter>
 	<summary>
