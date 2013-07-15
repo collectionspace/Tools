@@ -81,7 +81,7 @@ def buildJSON(d, indent = 0, lookup = None):
     Given a dictionary D, an optional initial indent INDENT, and a lookup table LOOKUP,
     returns a string representation of the tree needed for jqTree without a root level.
     """
-    return stripRoot(makeJSON(d, indent, lookup)
+    return stripRoot(makeJSON(d, indent, lookup))
 
 def makeJSON(d, indent = 0, lookup = None):
     """
@@ -102,7 +102,7 @@ def makeJSON(d, indent = 0, lookup = None):
             res += space * (indent + 4) + 'children: [\n'
             for val in d[key]:
                 if isinstance(val, dict):
-                    res += printJSON(val, indent + 4, lookup)
+                    res += makeJSON(val, indent + 4, lookup)
                 else:
                     res += space * (indent + 4) + '{ label: "' +  str(lookup[val]) + '"},\n'
         if indent:

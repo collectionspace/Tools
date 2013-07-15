@@ -12,10 +12,9 @@ timeoutcommand = 'set statement_timeout to 300000'
 
 # ###############################
 
-def getparentinfo(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getparentinfo(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getparentsinfo = """
@@ -48,18 +47,17 @@ JOIN collectionobjects_pahma cop ON (c2.id=cop.id)
 LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (c2.id=fcp.id AND fcp.pos=0)
 LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (c2.id=cm.id AND cm.pos=0)
 WHERE cp2.iscomponent = 'no' AND c1.objectnumber = '%s'""" % museumNumber
-    
+
     objects.execute(getparentsinfo)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getchildinfo(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getchildinfo(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getchildinfo = """
@@ -76,18 +74,17 @@ JOIN collectionobjects_common c2 ON (h2.id = c2.id)
 JOIN hierarchy h3 ON (c2.id = h3.id)
 JOIN collectionobjects_pahma cp2 ON (c2.id = cp2.id)
 WHERE cp2.iscomponent = 'yes' AND cp1.iscomponent = 'no' AND c1.objectnumber = '%s'""" % museumNumber
-    
+
     objects.execute(getchildinfo)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getchildlocations(childcsid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getchildlocations(childcsid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getchildlocations = """
@@ -101,18 +98,17 @@ JOIN movements_common mc ON (h.id = mc.id)
 WHERE csid.name  = '%s'
 ORDER BY mc.locationdate DESC
 LIMIT 1""" % childcsid
-    
+
     objects.execute(getchildlocations)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getobjinfo(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getobjinfo(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getobjects = """
@@ -147,18 +143,17 @@ LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co
 LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
 FULL OUTER JOIN hierarchy csid ON (co.id=csid.id)
 WHERE co.objectnumber = '%s'""" % museumNumber
-    
+
     objects.execute(getobjects)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getaccinfo(objectcsid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getaccinfo(objectcsid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getaccobjects = """
@@ -171,18 +166,17 @@ JOIN acquisitions_common ac ON (h3.id=ac.id)
 JOIN acquisitions_common_owners ao ON (ac.id = ao.id AND ao.pos=0)
 JOIN hierarchy csid ON (csid.id=ac.id)
 WHERE rc.subjectcsid = '%s'""" % objectcsid
-    
+
     objects.execute(getaccobjects)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getparentaccinfo(parentcsid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getparentaccinfo(parentcsid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getparentaccinfo = """
@@ -195,18 +189,17 @@ JOIN acquisitions_common ac ON (h1.id=ac.id)
 JOIN acquisitions_common_owners ao ON (ac.id = ao.id AND ao.pos=0)
 JOIN hierarchy csid ON (csid.id=ac.id)
 WHERE rc.subjectcsid = '%s'""" % parentcsid
-    
+
     objects.execute(getparentaccinfo)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getaltnums(objectid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getaltnums(objectid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getaltnums = """
@@ -217,18 +210,17 @@ FROM hierarchy h1
 JOIN pahmaaltnumgroup an ON (h1.id=an.id AND h1.pos=0)
 WHERE h1.name='collectionobjects_pahma:pahmaAltNumGroupList'
 AND h1.parentid = '%s'""" % objectid
-    
+
     objects.execute(getaltnums)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getallaltnums(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getallaltnums(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getallaltnums = """
@@ -240,18 +232,17 @@ FROM collectionobjects_common co
 LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.name='collectionobjects_pahma:pahmaAltNumGroupList')
 JOIN pahmaaltnumgroup an ON (h1.id=an.id AND h1.pos=0)
 WHERE co.objectnumber = '%s'""" % museumNumber
-    
+
     objects.execute(getallaltnums)
     #for object in objects.fetchall():
-        #print object
+    #print object
     return objects.fetchall()
 
 # ###############################
 
-def getparentaltnums(parentid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getparentaltnums(parentid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getparentaltnums = """
@@ -263,18 +254,17 @@ FROM collectionobjects_common co
 LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.name='collectionobjects_pahma:pahmaAltNumGroupList')
 JOIN pahmaaltnumgroup an ON (h1.id=an.id AND h1.pos=0)
 WHERE co.id = '%s'""" % parentid
-    
+
     objects.execute(getparentaltnums)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getassoccultures(objectid,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getassoccultures(objectid, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getassoccultures = """
@@ -285,16 +275,15 @@ FULL OUTER JOIN assocpeoplegroup cg ON (h1.id=cg.id)
 WHERE h1.name='collectionobjects_common:assocPeopleGroupList'
 AND h1.parentid = '%s'
 ORDER BY h1.pos""" % objectid
-    
+
     objects.execute(getassoccultures)
     return objects.fetchall()
 
 # ###############################
 
-def getproddates(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getproddates(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getproddates = """
@@ -303,18 +292,17 @@ FROM collectionobjects_common co
 LEFT OUTER JOIN hierarchy h1 on (h1.parentid=co.id AND h1.name='collectionobjects_common:objectProductionDateGroupList' AND h1.pos=0)
 LEFT OUTER JOIN structureddategroup sd on (h1.id=sd.id)
 WHERE co.objectnumber = '%s'""" % museumNumber
-    
+
     objects.execute(getproddates)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchone()
 
 # ###############################
 
-def getmedia(museumNumber,config):
-
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
-    objects  = pahmadb.cursor()
+def getmedia(museumNumber, config):
+    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
     getmedia = """
@@ -327,8 +315,8 @@ JOIN media_common mc ON (h2.id = mc.id)
 JOIN media_pahma mp ON (mc.id = mp.id)
 WHERE co.objectnumber = '%s'
 ORDER BY mp.primarydisplay DESC""" % museumNumber
-    
+
     objects.execute(getmedia)
     #for object in objects.fetchone():
-        #print object
+    #print object
     return objects.fetchall()
