@@ -689,6 +689,12 @@ def doUpdateKeyinfo(form, config):
 
         #print updateItems
         msg = 'updated.'
+        if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
+            msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+        if updateItems['assocPeople'] == '' and form.get('cg.' + index):
+            msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+        if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
+            msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
         try:
             #pass
             updateKeyInfo(updateItems, config)
