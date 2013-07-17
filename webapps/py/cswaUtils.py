@@ -1184,14 +1184,14 @@ def doHierarchyView(form, config):
     res = concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
     print re.sub(r'\n    { label: "(.*?)"},', r'''\n    { label: "no parent >> \1"},''', res)
     print '];'
-    print '''$(function() {
+    print """$(function() {
     $('#tree').tree({
         data: data,
         autoOpen: true,
         useContextMenu: false,
         selectable: false
     });
-});</script>'''
+});</script>"""
     #print "\n</table><hr/>"
     print "\n<hr>"
 
@@ -1359,10 +1359,8 @@ def updateKeyInfo(updateItems, config):
         metadata = root.findall('.//' + relationType + extra + 'List')
         metadata = metadata[0] # there had better be only one!
         # check if value is already present. if so, skip
-        #print(etree.tostring(metadata, pretty_print=True))
         #print(etree.tostring(metadata))
         #print ">>> ",relationType,':',updateItems[relationType]
-        if alreadyExists(updateItems[relationType], metadata): continue
         if relationType in ['assocPeople', 'objectName']:
             #group = metadata.findall('.//'+relationType+'Group')
             if not alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
@@ -1376,6 +1374,7 @@ def updateKeyInfo(updateItems, config):
                     newElement.append(apgType)
                 metadata.insert(0, newElement)
         else:
+            if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)): continue
             newElement = etree.Element(relationType)
             newElement.text = updateItems[relationType]
             metadata.insert(0, newElement)
@@ -1639,6 +1638,8 @@ def getHandlers(form):
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8724)'Allison Lewis'"),
         ("Corri MacEwen",
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
+        ("Jon Oligmueller",
+         "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
         ("Martina Smith",
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
         ("Linda Waterfield",
