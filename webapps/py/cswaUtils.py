@@ -1656,7 +1656,7 @@ def getHandlers(form):
         #print handler
         handlerOption = """<option value="%s">%s</option>""" % (handler[1], handler[0])
         #print "xxxx",selected
-        if selected and str(selected) in handler[1]:
+        if selected and str(selected) == handler[1]:
             handlerOption = handlerOption.replace('option', 'option selected')
         handlers = handlers + handlerOption
 
@@ -1732,7 +1732,7 @@ def getPrinters(form):
 
     for printer in printerlist:
         printerOption = """<option value="%s">%s</option>""" % (printer[1], printer[0])
-        if selected and str(selected) in printer[1]:
+        if selected and str(selected) == printer[1]:
             printerOption = printerOption.replace('option', 'option selected')
         printers = printers + printerOption
 
@@ -1754,7 +1754,7 @@ def getFieldset(form):
 
     for field in fields:
         fieldsetOption = """<option value="%s">%s</option>""" % (field[1], field[0])
-        if selected and str(selected) in field[1]:
+        if selected and str(selected) == field[1]:
             fieldsetOption = fieldsetOption.replace('option', 'option selected')
         fieldset = fieldset + fieldsetOption
 
@@ -1763,7 +1763,7 @@ def getFieldset(form):
 
 
 def getHierarchies(form):
-    selected = form.get('hierarchy')
+    selected = form.get('authority')
 
     authoritylist = [ \
         ("Ethnographic Culture", "concept"),
@@ -1777,9 +1777,12 @@ def getHierarchies(form):
 <select class="cell" name="authority">
 <option value="None">Select an authority</option>'''
 
+    sys.stderr.write('selected %s\n' % selected)
     for authority in authoritylist:
         authorityOption = """<option value="%s">%s</option>""" % (authority[1], authority[0])
-        if selected and str(selected) in authoritylist[1]:
+        sys.stderr.write('check hierarchy %s %s\n' % (authority[1], authority[0]))
+        if selected == authority[1]:
+            sys.stderr.write('found hierarchy %s %s\n' % (authority[1], authority[0]))
             authorityOption = authorityOption.replace('option', 'option selected')
         authorities = authorities + authorityOption
 
@@ -2142,10 +2145,10 @@ def starthtml(form, config):
     elif updateType == 'upload':
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
         otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
+
     elif updateType == 'hierarchyviewer':
         hierarchies, selected = getHierarchies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Hierarchy" name="action">'''
-        authority = str(form.get('authority')) if form.get('authority') else ''
         otherfields = '''<tr><th><span class="cell">Authority:</span></th><th>''' + hierarchies + '''</th></tr>'''
 
     elif False:
