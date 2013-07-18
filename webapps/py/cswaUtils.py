@@ -1777,12 +1777,12 @@ def getHierarchies(form):
 <select class="cell" name="authority">
 <option value="None">Select an authority</option>'''
 
-    sys.stderr.write('selected %s\n' % selected)
+    #sys.stderr.write('selected %s\n' % selected)
     for authority in authoritylist:
         authorityOption = """<option value="%s">%s</option>""" % (authority[1], authority[0])
         sys.stderr.write('check hierarchy %s %s\n' % (authority[1], authority[0]))
         if selected == authority[1]:
-            sys.stderr.write('found hierarchy %s %s\n' % (authority[1], authority[0]))
+            #sys.stderr.write('found hierarchy %s %s\n' % (authority[1], authority[0]))
             authorityOption = authorityOption.replace('option', 'option selected')
         authorities = authorities + authorityOption
 
