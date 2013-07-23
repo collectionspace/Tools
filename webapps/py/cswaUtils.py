@@ -253,7 +253,7 @@ def doObjectSearch(form, config, displaytype):
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
-        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
@@ -552,7 +552,7 @@ def doEnumerateObjects(form, config):
     if totalobjects == 0:
         pass
     else:
-        print """<tr><td align="center" colspan="7"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         if updateType == 'keyinfo':
             msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (
@@ -688,7 +688,7 @@ def doUpdateKeyinfo(form, config):
                 refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index),
                                                                            config)
 
-    print infoHeaders(fieldset)
+    print getHeader('keyinfoResult')
 
     #for r in refNames2find:
     #    print '<tr><td>%s<td>%s<td>%s</tr>' % ('refname',refNames2find[r],r)
@@ -740,7 +740,7 @@ def doUpdateKeyinfo(form, config):
                 msg += '<span style="color:red;"> Donor term "%s" not found, field not updated.</span>' % form.get('pd.' + index)
         try:
             #pass
-            updateKeyInfo(updateItems, config)
+            updateKeyInfo(fieldset, updateItems, config)
             numUpdated += 1
         except:
             raise
@@ -782,6 +782,7 @@ def infoHeaders(fieldSet):
       <th>Alt. Num. Type</th>
       <th>Collector</th>
       <th>Donor</th>
+      <th>Accession</th>
       <th>P?</th>
     </tr>"""
     else:
@@ -1574,9 +1575,10 @@ def formatRow(result, form, config):
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link2 = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return formatInfoReviewRow(form, link, rr)
+        return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
@@ -1605,11 +1607,11 @@ def formatRow(result, form, config):
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[7], rr[8], rr[6])
 
 
-def formatInfoReviewRow(form, link, rr):
-    """[0 Location, 1 Locaion Key, 2 Timestamp, 3 Museum Number, 4 Name, 5 Count, 6 Collection Place, 7 Culture, 8 csid,
+def formatInfoReviewRow(form, link, rr, link2):
+    """[0 Location, 1 Location Key, 2 Timestamp, 3 Museum Number, 4 Name, 5 Count, 6 Collection Place, 7 Culture, 8 csid,
         9 Ethnographic File Code, 10 Place Ref Name, 11 Culture Ref Name, 12 Ethnographic File Code Ref Name, 13 Crate Ref Name,
         14 Computed Crate 15 Description, 16 Collector, 17 Donor, 18 Alt Num, 19 Alt Num Type, 20 Collector Ref Name,
-        21 Accession Number, 22 Donor Ref Name]"""
+        21 Accession Number, 22 Donor Ref Name, 23 Acquisition ID, 24 Acquisition CSID]"""
     fieldSet = form.get("fieldset")
     if fieldSet == 'namedesc':
         return """<tr>
@@ -1634,13 +1636,14 @@ def formatInfoReviewRow(form, link, rr):
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="13" name="an.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="ant.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="13" name="ant.%s" value="%s"></td>
 <td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="pd.%s" value="%s"></td>
+<td><span style="font-size:8">%s</span></td>
+<td><a target="cspace" href="%s">%s</a></td>
 <td><input type="checkbox"></td>
 </tr>""" % (
-            link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[18], rr[8], rr[19], rr[8], rr[16], rr[8],
-            rr[17])
+            link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[18], rr[8], rr[19], rr[8], rr[16],
+            rr[17], link2, rr[21])
     else:
         return """<tr>
 <td class="objno"><a target="cspace" href="%s">%s</a></td>
