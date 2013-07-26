@@ -17,12 +17,12 @@ def testDB(config):
         return "OK"
     except pgdb.DatabaseError, e:
         sys.stderr.write('testDB error: %s' % e)
-        return  '%s' % e
+        return '%s' % e
     except:
         sys.stderr.write("some other testDB error!")
         return "Some other failure"
 
-    
+
 def dbtransaction(command, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     cursor = dbconn.cursor()
@@ -323,7 +323,7 @@ def getplants(location1, location2, num2ret, config, updateType):
 
     return result
 
-    
+
 def getloclist(searchType, location1, location2, num2ret, config):
     # 'set' means 'next num2ret locations', otherwise prefix match
     if searchType == 'set':
@@ -359,6 +359,7 @@ limit """ + str(num2ret)
     #print object
     return objects.fetchall()
 
+
 def getobjlist(searchType, object1, object2, num2ret, config):
     query1 = """
     SELECT objectNumber,
@@ -371,7 +372,7 @@ INNER JOIN misc
         ON misc.id=h1.id and misc.lifecyclestate <> 'deleted'
 WHERE
      cc.objectNumber = '%s'"""
-    
+
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -379,10 +380,10 @@ WHERE
     if int(num2ret) < 1:    num2ret = 1
 
     objects.execute(query1 % object1)
-    (object1,sortkey1) = objects.fetchone()
+    (object1, sortkey1) = objects.fetchone()
     objects.execute(query1 % object2)
-    (object2,sortkey2) = objects.fetchone()
-    
+    (object2, sortkey2) = objects.fetchone()
+
     # 'set' means 'next num2ret objects', otherwise prefix match
     if searchType == 'set':
         whereclause = "WHERE sortableobjectnumber >= '" + sortkey1 + "'"
@@ -468,7 +469,7 @@ def getrefname(table, term, config):
     if term == None or term == '':
         return ''
 
-    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term.replace("'","''"))
+    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term.replace("'", "''"))
 
     try:
         objects.execute(query)
@@ -485,7 +486,7 @@ def findrefnames(table, termlist, config):
 
     result = []
     for t in termlist:
-        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t.replace("'","''"))
+        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t.replace("'", "''"))
 
         try:
             objects.execute(query)
@@ -496,6 +497,142 @@ def findrefnames(table, termlist, config):
             return "findrefnames error"
 
     return result
+
+def getobjinfo(museumNumber,config):
+
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+   SELECT co.objectnumber,
+    co.numberofobjects,
+    n.objectname,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1'),
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+    
+    objects.execute(getobjects)
+    #for ob in objects.fetchone():
+        #print ob
+    return objects.fetchone()
+
+def gethierarchy(query, config):
+    dbconn  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if query != 'places':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM concepts_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child""".format(query)
+    else:
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM places_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
+WHERE misc.lifecyclestate <> 'deleted'
+ORDER BY ParentPlace, Place
+
+"""
+        
+    objects.execute(gethierarchy)
+    return objects.fetchall()
+
+def getobjinfo(museumNumber, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+   SELECT co.objectnumber,
+    co.numberofobjects,
+    n.objectname,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1'),
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+
+    objects.execute(getobjects)
+    #for ob in objects.fetchone():
+    #print ob
+    return objects.fetchone()
+
+
+def gethierarchy(query, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if query != 'places':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM concepts_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child""".format(query)
+    else:
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
+        child.shortidentifier AS ChildKey, 
+        parent.shortidentifier AS ParentKey
+FROM places_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
+WHERE misc.lifecyclestate <> 'deleted'
+ORDER BY ParentPlace, Place
+
+"""
+
+    objects.execute(gethierarchy)
+    return objects.fetchall()
 
 
 def findparents(refname, config):
@@ -529,15 +666,16 @@ LEFT OUTER JOIN concepts_common cc2 ON (cc2.id = h2.id)
 INNER JOIN ethnculture_hierarchyquery AS ech ON h.name = ech.broaderculturecsid)
 SELECT ethnCulture, refname, level
 FROM ethnculture_hierarchyquery
-order by level""" % refname.replace("'","''")
-    
+order by level""" % refname.replace("'", "''")
+
     try:
         objects.execute(query)
         return objects.fetchall()
     except:
         #raise
         return [["findparents error"]]
-        
+
+
 if __name__ == "__main__":
 
     from cswaUtils import getConfig
