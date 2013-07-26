@@ -152,7 +152,7 @@ where h1.name=$P{csid}]]>
 				<textFieldExpression><![CDATA[$F{determination}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="eb4b71f2-b9ac-4a3b-92b0-41c4a718a208" stretchType="RelativeToBandHeight" x="323" y="43" width="100" height="15"/>
+				<reportElement uuid="eb4b71f2-b9ac-4a3b-92b0-41c4a718a208" stretchType="RelativeToBandHeight" x="323" y="43" width="129" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
@@ -213,8 +213,8 @@ where h1.name=$P{csid}]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accessiondate}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement uuid="ddc3003b-4af4-44b9-8ed5-1c5061d5fcc8" x="423" y="43" width="100" height="15"/>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="ddc3003b-4af4-44b9-8ed5-1c5061d5fcc8" x="452" y="43" width="71" height="15"/>
 				<textElement textAlignment="Right">
 					<font size="10"/>
 				</textElement>
