@@ -276,7 +276,7 @@ def doSingleObjectSearch(form, config, displaytype=''):
         except:
             raise
             handleTimeout('search', form)
-            obj = [-1, -1, '(null)', '(null)', '(null)']
+            #obj = [-1, -1, '(null)', '(null)', '(null)']
         print """
     <table width="100%"><tr>
     <th>Object</th>
@@ -284,12 +284,9 @@ def doSingleObjectSearch(form, config, displaytype=''):
     <th>Object Name</th>
     <th>Culture</th>
     <th>Collection Place</th>
+    <th>Ethnographic File Code</th>
     </tr>"""
-        print '''<tr align="center"><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>'''.format(obj[0],
-                                                                                                                obj[1],
-                                                                                                                obj[2],
-                                                                                                                obj[4],
-                                                                                                                obj[3])
+        print '''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % tuple(obj)
 
         print """<tr><td align="center" colspan="6"><hr><td></tr>"""
         print """<tr><td align="center" colspan="6">"""
@@ -979,22 +976,21 @@ def doBarCodes(form, config):
     else:
         print getHeader(updateType)
 
+    totalobjects = 0
     #If the museum number field has input, print by object
     if form.get('ob.objectnumber') != '':
         try:
-            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+            # we need 3 elements at the beginning which writeCommanderFile will ignore
+            obj = ['','',''] + cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
             totalobjects = 1
+            rowcount = 1
         except:
             raise
             handleTimeout(updateType, form)
-            obj = [-1, -1, '(null)', '(null)', '(null)']
+            #obj = [-1, -1, '(null)', '(null)', '(null)']
         if action == 'Create Labels for Objects':
-            labelFilename = writeCommanderFile('', form.get("printer"), 'objectLabels', 'objects', obj, config)
-            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[0], 1, labelFilename)
-            print """<tr><td align="center" colspan="4"><hr><td></tr>"""
-            print """<tr><td align="center" colspan="4">"""
-            if totalobjects == 0:
-                print '<span class="save">No objects found in this range.</span>'
+            labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [ obj, ], config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[3], 1, labelFilename)
 
     else:
         try:
@@ -1011,7 +1007,6 @@ def doBarCodes(form, config):
         rowcount = len(rows)
 
         objectsHandled = []
-        totalobjects = 0
         rows.reverse()
         if action == "Create Labels for Locations Only":
             labelFilename = writeCommanderFile('locations', form.get("printer"), 'locationLabels', 'locations', rows,
@@ -1029,17 +1024,19 @@ def doBarCodes(form, config):
                     else:
                         objectsHandled.append(o[3] + o[4])
                 totalobjects += len(objects)
+                # hack: move the ethnographic file code to the right spot for this app... :-(
+                objects = [ o[0:8] + [o[9]] for o in objects ]
                 labelFilename = writeCommanderFile(r[0], form.get("printer"), 'objectLabels', 'objects', objects,
                                                    config)
                 print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
                     r[0], len(objects), labelFilename)
 
-        print """<tr><td align="center" colspan="4"><hr><td></tr>"""
-        print """<tr><td align="center" colspan="4">"""
-        if totalobjects != 0:
-            print "<b>%s objects</b> found in %s locations." % (totalobjects, rowcount)
-        else:
-            print '<span class="save">No objects found in this range.</span>'
+    print """<tr><td align="center" colspan="4"><hr/><td></tr>"""
+    print """<tr><td align="center" colspan="4">"""
+    if totalobjects != 0:
+        print "<b>%s object(s)</b> found in %s locations." % (totalobjects, rowcount)
+    else:
+        print '<span class="save">No objects found in this range.</span>'
 
     print "\n</td></tr></table><hr/>"
 
@@ -1219,7 +1216,7 @@ def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, confi
                 'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(
                     ','))
             for d in data:
-                csvlogfh.writerow(d[3:8])
+                csvlogfh.writerow(d[3:9])
                 audlogfh.writerow(d)
         barcodeFh.close()
         alogFh.close()
@@ -1780,7 +1777,7 @@ def getHierarchies(form):
     #sys.stderr.write('selected %s\n' % selected)
     for authority in authoritylist:
         authorityOption = """<option value="%s">%s</option>""" % (authority[1], authority[0])
-        sys.stderr.write('check hierarchy %s %s\n' % (authority[1], authority[0]))
+        #sys.stderr.write('check hierarchy %s %s\n' % (authority[1], authority[0]))
         if selected == authority[1]:
             #sys.stderr.write('found hierarchy %s %s\n' % (authority[1], authority[0]))
             authorityOption = authorityOption.replace('option', 'option selected')
@@ -2349,8 +2346,14 @@ if __name__ == "__main__":
     # in that config file!
     import cswaDB
 
-    form = cgi.FieldStorage()
+
+
+    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber' : '1-504', 'action':'Create Labels for Objects'}
+
     config = getConfig(form)
+
+    print doBarCodes(form, config)
+    sys.exit()
 
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
