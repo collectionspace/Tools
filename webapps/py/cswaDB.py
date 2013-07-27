@@ -212,7 +212,7 @@ co1.recordstatus dataQuality,
 case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\\)''(.*)''$', '\\1')
      when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
 end as locality,
-htig.parentid as objectcsid,
+h1.name as objectcsid,
 con.rare,
 cob.deadflag,
 regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth
