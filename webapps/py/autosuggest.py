@@ -64,7 +64,11 @@ def dbtransaction(form):
             WHERE termdisplayname like '%s%%' order by locationkey limit 30;"""
         elif srchindex == 'object':
             # objectnumber is special: not an authority, no need for joins
-            template = "select distinct(objectnumber) FROM collectionobjects_common WHERE objectnumber like '%s%%' ORDER BY objectnumber LIMIT 30;"
+            template = """SELECT cc.objectnumber
+            FROM collectionobjects_common cc
+            JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
+            WHERE cc.objectnumber like '%s%%'
+            ORDER BY cp.sortableobjectnumber LIMIT 30;"""
         elif srchindex == 'group':
             template = makeTemplate('grouptermgroup', 'termdisplayname', "like '%s%%'")
         elif srchindex == 'place':
