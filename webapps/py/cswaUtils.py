@@ -43,6 +43,7 @@ import getPlaces
 import getTaxname
 import getAuthorityTree
 import cswaConceptutils as concept
+import cswaCollectionUtils
 
 ## {{{ http://code.activestate.com/recipes/81547/ (r1)
 def cgiFieldStorageToDict(fieldStorage):
@@ -1873,6 +1874,178 @@ def selectWebapp():
 
     return line
 
+def printCollectionStats(form, config):
+    writeInfo2log('start', form, config, 0.0)
+    logo = config.get('info', 'logo')
+    schemacolor1 = config.get('info', 'schemacolor1')
+    serverlabel = config.get('info', 'serverlabel')
+    serverlabelcolor = config.get('info', 'serverlabelcolor')
+    apptitle = config.get('info', 'apptitle')
+    updateType = config.get('info', 'updatetype')
+
+    divsize = '''<div id="sidiv" style="position:relative; width:1300px; height:750px; color:black; ">'''
+
+    print '''Content-type: text/html; charset=utf-8
+
+    
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>''' + apptitle + ' : ' + serverlabel + '''</title>
+<style type="text/css">
+body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
+table { width: 100%; }
+td { cell-padding: 3px; }
+.stattitle { font-weight: normal; text-align:right; }
+.statvalue { font-weight: bold; text-align:left; }
+.statvaluecenter { font-weight: bold; text-align:center; }
+th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
+h1 { font-size:32px; float:left; padding:10px; margin:0px; border-bottom: none; }
+h2 { font-size:12px; float:left; color:white; background:black; }
+p { padding:10px 10px 10px 10px; }
+
+button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
+
+.statsection { font-size:21px; font-weight:bold; border-bottom: thin dotted #aaaaaa; color: ''' + schemacolor1 + '''; }
+.statheader { font-weight: bold; text-align:center; font-size:medium; }
+.stattitle { font-weight: bold; text-align:right; font-size:small; }
+.statvalue { font-weight: normal; text-align:left; font-size:x-small; }
+.statbignumber { font-weight: bold; text-align:center; font-size:medium; }
+.statnumber { font-weight: bold; text-align:right; font-size:x-small; }
+.statpct { font-weight: normal; text-align:left; font-size:x-small; }
+.objtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
+.objsubtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; font-style: italic; color: #999999; }
+.notentered { font-style: italic; color: #999999; }
+.askjohn { font-style: italic; color: #009999; }
+
+.addtoquery { font-style: italic; color: #aa0000; }
+.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
+.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
+img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
+.locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
+.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:110px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
+.ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
+.ui-tabs .ui-tabs-nav li { height:40px; font-size:16px; }
+.ui-tabs .ui-tabs-nav li a { position:relative; top:0px }
+#tabs { padding: 0px; background: none; border-width: 0px; } 
+#tabs .ui-tabs-nav { padding-left: 0px; background: transparent; border-width: 0px 0px 1px 0px;
+  -moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px; text-align: center; height: 2.35em; }
+#tabs .ui-tabs-panel { background: #ffffff repeat-x scroll 50% top; border-width: 1px 1px 1px 1px; }
+#tabs .ui-tabs-nav li { display: inline-block; float: none; top: 0px; margin: 0em; }
+.rdo { text-align: center; }
+.save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
+.shortinput { font-weight: bold; width:150px; }
+.subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
+.veryshortinput { width:60px; }
+.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
+
+
+</style>
+<style type="text/css">
+  /*<![CDATA[*/
+    @import "../css/jquery-ui-1.8.22.custom.css";
+  /*]]>*/
+  </style>
+<script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
+<script type="text/javascript" src="../js/provision.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<style>
+.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
+</style>
+<script type="text/javascript">
+function formSubmit(location)
+{
+    console.log(location);
+    document.getElementById('lo.location1').value = location
+    document.getElementById('lo.location2').value = location
+    //document.getElementById('num2ret').value = 1
+    //document.getElementById('actionbutton').value = "Next"
+    document.forms['sysinv'].submit();
+}
+</script>
+</head>
+<body>
+<form id="sysinv" enctype="multipart/form-data" method="post">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tbody><tr><td width="3%">&nbsp;</td><td align="center">''' + divsize + '''
+    <table width="100%">
+    <tbody>
+      <tr>
+	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
+        <td><span style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</td>
+	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
+      </tr>
+      <tr><td colspan="3"></td></tr>
+      <tr>
+	<td colspan="3">
+	<table>
+	  <tr><td><table>
+	</table>
+        </td><td style="width:3%"/>
+	<td style="width:120px;text-align:center;"></td>
+      </tr>
+      </table></td></tr>
+      <tr><td colspan="3"><div id="status"><hr/></div></td></tr>
+    </tbody>
+    </table>'''
+
+    dbsource = 'pahma.cspace.berkeley.edu'
+
+    print '''<div id="tabs">
+ <ul>
+   <li><a href="#tabs-1"><span>At A Glance</span></a></li>
+   <li><a href="#tabs-2"><span>By Object Types</span></a></li>
+   <li><a href="#tabs-3"><span>By Catalog or Department</span></a></li>
+   <li><a href="#tabs-4"><span>By Accession Status</span></a></li>
+   <li><a href="#tabs-5"><span>By Collection Manager</span></a></li>
+   <li><a href="#tabs-6"><span>By Ethnographic Use Code</span></a></li>
+ </ul>
+'''
+    cswaCollectionUtils.makeglancetab(dbsource, config)
+
+    print '''<div id="tabs-2">'''
+    statgroup = 'objByObjType'
+    sectiontitle = 'By object type'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-3">'''
+    statgroup = 'objByLegCat'
+    sectiontitle = 'By legacy catalog'
+    charttype = 'barchartvertical'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-4">'''
+    statgroup = 'objByAccStatus'
+    sectiontitle = 'By accession status'
+    charttype = 'barchartvertical'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-5">'''
+    statgroup = 'objByCollMan'
+    sectiontitle = 'By collection manager'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-6">'''
+    statgroup = 'objByFileCode'
+    sectiontitle = 'By ethnographic use code'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>
+</div>'''
+
 
 def getStyle(schemacolor1):
     return '''
@@ -2227,6 +2400,22 @@ def endhtml(form, config, elapsedtime):
         focusSnippet = '''$('input:text:first').focus().val("");'''
     else:
         focusSnippet = '''$('input:text:first').focus();'''
+    if config.get('info', 'updatetype') == 'collectionstats':
+        addenda = '''$("#gototab2").click(function() {
+    $("#tabs").tabs("select","#tabs-2");
+});
+$("#gototab3").click(function() {
+    $("#tabs").tabs("select","#tabs-3");
+});
+$("#gototab4").click(function() {
+    $("#tabs").tabs("select","#tabs-4");
+});
+$("#gototab5").click(function() {
+    $("#tabs").tabs("select","#tabs-5");
+});
+$("#gototab6").click(function() {
+    $("#tabs").tabs("select","#tabs-6");
+});'''
     return '''
   <table width="100%">
     <tbody>
@@ -2290,6 +2479,8 @@ $('[name]').map(function() {
     }
 });
 });
+
+''' + addenda + '''
 </script>
 </body></html>
 '''
