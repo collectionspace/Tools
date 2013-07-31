@@ -245,12 +245,15 @@ def doObjectSearch(form, config, displaytype):
         print '<span style="color:red;">No objects in this range! Sorry!</span>'
     else:
         totalobjects = 0
-        print getHeader(updateType)
+        if updateType == 'objinfo':
+            print infoHeaders(form.get('fieldset'))
+        else:
+            print getHeader(updateType)
         for r in rows:
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
-        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
@@ -390,7 +393,7 @@ def getHeader(updateType):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'keyinfo' or updateType == 'packinglist' or updateType == 'objinfo':
+    elif updateType == 'packinglist':
         return """
     <table><tr>
       <th>Museum #</th>
@@ -507,7 +510,10 @@ def doEnumerateObjects(form, config):
         print '<h2>No locations in this range!</h2>'
         return
 
-    print getHeader(updateType)
+    if updateType == 'keyinfo' or updateType == 'objinfo':
+        print infoHeaders(form.get('fieldset'))
+    else:
+        print getHeader(updateType)
     totalobjects = 0
     totallocations = 0
     for l in locationList:
@@ -543,7 +549,7 @@ def doEnumerateObjects(form, config):
     if totalobjects == 0:
         pass
     else:
-        print """<tr><td align="center" colspan="7"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         if updateType == 'keyinfo':
             msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (
@@ -645,6 +651,7 @@ def doCheckMove(form, config):
 def doUpdateKeyinfo(form, config):
     #print form
     CSIDs = []
+    fieldset = form.get('fieldset')
     for i in form:
         if 'csid.' in i:
             CSIDs.append(form.get(i))
@@ -653,14 +660,30 @@ def doUpdateKeyinfo(form, config):
     for row, csid in enumerate(CSIDs):
 
         index = csid # for now, the index is the csid
-        if not refNames2find.has_key(form.get('cp.' + index)):
-            refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
-        if not refNames2find.has_key(form.get('cg.' + index)):
-            refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index),
-                                                                       config)
-        if not refNames2find.has_key(form.get('fc.' + index)):
-            refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index),
-                                                                       config)
+        if fieldset == 'namedesc':
+            if not refnames2find.has_key(form.get('bd.' + index)):
+                refnames2find[form.get('bd.' + index)] = cswaDB.getrefname('collectionobjects_common_briefdescriptions',
+                                                                       form.get('bd.' + index), config)
+        elif fieldset == 'registration':
+            if not refNames2find.has_key(form.get('an.' + index)):
+                refNames2find[form.get('an.' + index)] = cswaDB.getrefname('pahmaaltnumgroup', form.get('an.' + index), config)
+            if not refNames2find.has_key(form.get('ant.' + index)):
+                refNames2find[form.get('ant.' + index)] = cswaDB.getrefname('pahmaaltnumgroup_type', form.get('ant.' + index), config)
+            if not refNames2find.has_key(form.get('pc.' + index)):
+                refNames2find[form.get('pc.' + index)] = cswaDB.getrefname('collectionobjects_common_fieldcollectors',
+                                                                           form.get('pc.' + index), config)
+            if not refNames2find.has_key(form.get('pd.' + index)):
+                refNames2find[form.get('pd.' + index)] = cswaDB.getrefname('acquisitions_common_owners',
+                                                                           form.get('pd.' + index), config)
+        else:
+            if not refNames2find.has_key(form.get('cp.' + index)):
+                refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
+            if not refNames2find.has_key(form.get('cg.' + index)):
+                refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index),
+                                                                           config)
+            if not refNames2find.has_key(form.get('fc.' + index)):
+                refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index),
+                                                                           config)
 
     print getHeader('keyinfoResult')
 
@@ -673,28 +696,48 @@ def doUpdateKeyinfo(form, config):
 
         index = csid # for now, the index is the csid
         updateItems = {}
-        updateItems['objectCsid'] = form.get('csid.' + index)
-        updateItems['objectName'] = form.get('onm.' + index)
-        updateItems['objectNumber'] = form.get('oox.' + index)
-        updateItems['objectCount'] = form.get('ocn.' + index)
-        updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
-        updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
-        updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
+        if fieldset == 'namedesc':
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['basicDescription'] = form.get('bd.' + index)
+        elif fieldset == 'registration':
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['altnumber'] = form.get('an.' + index)
+            updateItems['altnumbertype'] = form.get('ant.' + index)
+            updateItems['collector'] = form.get('pc.' + index)
+            updateItems['donor'] = form.get('pd.' + index)
+        else:
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['objectCount'] = form.get('ocn.' + index)
+            updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
+            updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
+            updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
 
         for i in ('handlerRefName',):
             updateItems[i] = form.get(i)
 
         #print updateItems
         msg = 'updated.'
-        if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-            msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
-        if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-            msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
-        if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
-            msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+        if fieldset == 'keyinfo':
+            if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
+                msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+            if updateItems['assocPeople'] == '' and form.get('cg.' + index):
+                msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+            if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
+                msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+        elif fieldset == 'registration':
+            if updateItems['collector'] == '' and form.get('pc.' + index):
+                msg += '<span style="color:red;"> Field Collector term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
+            if updateItems['donor'] == '' and form.get('pd.' + index):
+                msg += '<span style="color:red;"> Donor term "%s" not found, field not updated.</span>' % form.get('pd.' + index)
         try:
             #pass
-            updateKeyInfo(updateItems, config)
+            updateKeyInfo(fieldset, updateItems, config)
             numUpdated += 1
         except:
             raise
@@ -706,6 +749,41 @@ def doUpdateKeyinfo(form, config):
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'object had key information updated</h4>'
 
+def infoHeaders(fieldSet):
+    if fieldSet == 'keyinfo':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th>Field Collection Place</th>
+      <th>Cultural Group</th>
+      <th>Ethnographic File Code</th>
+      <th>P?</th>
+    </tr>"""
+    elif fieldSet == 'namedesc':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th></th>
+      <th style="text-align:center">Basic Description</th>
+      <th>P?</th>
+    </tr>"""
+    elif fieldSet == 'registration':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Alt. Num.</th>
+      <th>Alt. Num. Type</th>
+      <th>Collector</th>
+      <th>Donor</th>
+      <th>Accession</th>
+      <th>P?</th>
+    </tr>"""
+    else:
+        return "<table><tr>DEBUG</tr>"
 
 def doNothing(form, config):
     print '<span style="color:red;">Nothing to do yet! ;-)</span>'
@@ -1331,7 +1409,7 @@ def alreadyExists(txt, element):
     return False
 
 
-def updateKeyInfo(updateItems, config):
+def updateKeyInfo(fieldset, updateItems, config):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
     username = config.get('connect', 'username')
@@ -1340,11 +1418,19 @@ def updateKeyInfo(updateItems, config):
     uri = 'collectionobjects'
     getItems = updateItems['objectCsid']
 
+    #Fields vary with fieldsets
+    if fieldset == 'keyinfo':
+        fields = ('pahmaFieldCollectionPlace', 'assocPeople', 'objectName', 'pahmaEthnographicFileCode')
+    elif fieldset == 'namedesc':
+        fields = ('basicDescription', 'objectname')
+    elif fieldset == 'registration':
+        fields = ('objectName', 'altnumber', 'altnumbertype', 'collector', 'donor')
+
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
     root = etree.fromstring(content)
     # add the user's changes to the XML
-    for relationType in ('pahmaFieldCollectionPlace', 'assocPeople', 'objectName', 'pahmaEthnographicFileCode'):
+    for relationType in fields:
         # skip if no refName was provided to update
         if updateItems[relationType] == '':
             continue
@@ -1485,27 +1571,10 @@ def formatRow(result, form, config):
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link2 = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr>
-<td class="objno"><a target="cspace" href="%s">%s</a></td>
-<td class="objname">
-<input class="objname" type="text" name="onm.%s" value="%s">
-</td>
-<td class="veryshortinput">
-<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
-</td>
-<td>
-<input type="hidden" name="oox.%s" value="%s">
-<input type="hidden" name="csid.%s" value="%s">
-<input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
-<td><input type="checkbox"></td>
-</tr>""" % (
-            link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[3], rr[8], rr[8], rr[8], rr[6], rr[8], rr[7], rr[8],
-            rr[9])
-
+        return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
@@ -1533,6 +1602,63 @@ def formatRow(result, form, config):
 <td><input type="checkbox"></td>
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[7], rr[8], rr[6])
 
+
+def formatInfoReviewRow(form, link, rr, link2):
+    """[0 Location, 1 Location Key, 2 Timestamp, 3 Museum Number, 4 Name, 5 Count, 6 Collection Place, 7 Culture, 8 csid,
+        9 Ethnographic File Code, 10 Place Ref Name, 11 Culture Ref Name, 12 Ethnographic File Code Ref Name, 13 Crate Ref Name,
+        14 Computed Crate 15 Description, 16 Collector, 17 Donor, 18 Alt Num, 19 Alt Num Type, 20 Collector Ref Name,
+        21 Accession Number, 22 Donor Ref Name, 23 Acquisition ID, 24 Acquisition CSID]"""
+    fieldSet = form.get("fieldset")
+    if fieldSet == 'namedesc':
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td width="0"></td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<textarea cols="78" rows="1" name="bd.%s">%s</textarea></td>
+<td><input type="checkbox"></td>
+</tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[15])
+    elif fieldSet == 'registration':
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<input class="xspan" type="text" size="13" name="an.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="13" name="ant.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
+<td><span style="font-size:8">%s</span></td>
+<td><a target="cspace" href="%s">%s</a></td>
+<td><input type="checkbox"></td>
+</tr>""" % (
+            link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[18], rr[8], rr[19], rr[8], rr[16],
+            rr[17], link2, rr[21])
+    else:
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td class="veryshortinput">
+<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
+<td><input type="checkbox"></td>
+</tr>""" % (
+            link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[3], rr[8], rr[8], rr[8], rr[6], rr[8], rr[7], rr[8],
+            rr[9])
 
 def formatError(cspaceObject):
     return '<tr><th colspan="2" class="leftjust">%s</th><td></td><td>None found.</td></tr>\n' % (cspaceObject)
@@ -1742,8 +1868,8 @@ def getFieldset(form):
 
     fields = [ \
         ("Key Info", "keyinfo"),
-        #    ("Basic Info", "basicinfo"),
-        #    ("Registration", "registration")
+            ("Name & Desc.", "namedesc"),
+            ("Registration", "registration")
     ]
 
     fieldset = '''
@@ -1956,8 +2082,11 @@ def starthtml(form, config):
     '''
 
     if updateType == 'keyinfo':
+        fieldset, selected = getFieldset(form)
+        otherfields = otherfields[:-5]
         otherfields += '''
-	  <tr><th/><th/><th/><th/></tr>'''
+        <th><span class="cell">set:</span></th><th>''' + fieldset + '''</th>
+	<tr></tr>'''
 
     elif updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
@@ -1972,7 +2101,7 @@ def starthtml(form, config):
         <th><th><span class="cell">set:</span></th><th>''' + fieldset + '''</th></tr>
         '''
         otherfields += '''
-        <tr><th/><th/><th/><th/></tr>'''
+        <tr></tr>'''
 
     elif updateType == 'objdetails':
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
