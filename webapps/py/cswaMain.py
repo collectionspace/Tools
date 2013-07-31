@@ -37,6 +37,8 @@ if str(form.get('lo.location2')) == '':
 if updateType == 'packinglist' and action == 'Download as CSV':  
     downloadCsv(form,config)
     sys.exit(0)
+elif updateType == 'collectionstats':
+    printCollectionStats(form, config)
 else:    
     print starthtml(form,config)
 
