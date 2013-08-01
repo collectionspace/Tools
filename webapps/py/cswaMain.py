@@ -40,8 +40,8 @@ if updateType == 'packinglist' and action == 'Download as CSV':
 else:    
     print starthtml(form,config)
 
-#print form
 elapsedtime = time.time()
+sys.stdout.flush()
 
 if checkServer == 'check server':
     print serverCheck(form,config)
@@ -78,6 +78,7 @@ else:
         elif updateType == 'movecrate':    doCheckMove(form,config)
         elif updateType == 'barcodeprint':
             if form.get('ob.objectnumber'):
+                #form['action'] = 'Create Label for this Object'
                 doSingleObjectSearch(form, config)
             else:
                 doLocationSearch(form, config, 'nolist')

@@ -575,7 +575,7 @@ def doCheckMove(form, config):
 
     toRefname = cswaDB.getrefname('locations_common', toLocation, config)
 
-    sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'toRefName', toRefname))
+    #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'toRefName', toRefname))
 
     # DEBUG
     #print '<table cellpadding="8px" border="1">'
@@ -607,7 +607,9 @@ def doCheckMove(form, config):
     totalobjects = 0
     totallocations = 0
 
+    #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'objects', len(objects)))
     for r in objects:
+        #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, crate, r[15]))
         if r[15] != crate: # skip if this is not the crate we want
             continue
         locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
@@ -989,6 +991,7 @@ def doBarCodes(form, config):
             handleTimeout(updateType, form)
             #obj = [-1, -1, '(null)', '(null)', '(null)']
         if action == 'Create Labels for Objects':
+            sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'barcode object', obj[3]))
             labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [ obj, ], config)
             print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[3], 1, labelFilename)
 
@@ -2154,6 +2157,8 @@ def starthtml(form, config):
           <th><input id="num2ret" class="cell" type="text" size="4" name="num2ret" value="''' + num2ret + '''" class="xspan"></th></tr>
           <tr><th/><th/><th/><th/></tr>'''
 
+    username = ''
+
     return '''Content-type: text/html; charset=utf-8
 
     
@@ -2193,13 +2198,26 @@ function formSubmit(location)
     <table width="100%">
     <tbody>
       <tr>
-	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
-        <td><span style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</td>
+	<td class="cell" style="width: 500px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
+    <td style="width: 120px; text-align: right; padding-right: 10px;">
+    <span class="tiny">server</span>
+    <br/>
+    <span class="tiny">user</span>
+    <br/>
+    <span class="tiny">&nbsp;</span>
+    </td>
+    <td style="width: 100px; text-align: left; padding-right: 10px;"><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span>
+    <br/>
+    <span class="ncell">''' + username + '''</span>
+    <br/>
+    <span class="tiny">&nbsp;</span>
+    </td>
+    <td><div style="width:80px; ";" id="appstatus"><img height="60px" src="../images/timer-animated.gif"></div></td>
 	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
       </tr>
-      <tr><td colspan="3"><hr/></td></tr>
-      <tr><th colspan="3">
-        <table>
+      <tr><td colspan="5"><hr/></td></tr>
+      <tr><th colspan="5">
+    <table>
         <tr>
         <th>
         <table>
@@ -2210,7 +2228,7 @@ function formSubmit(location)
         </tr>
         </table>
       </th></tr>
-      <tr><td colspan="3"><div id="status"><hr/></div></td></tr>
+      <tr><td colspan="5"><div id="status"><hr/></div></td></tr>
     </tbody>
     </table>
 '''
@@ -2250,7 +2268,7 @@ $(function () {
            var selected = this.checked;
            var mySet    = $(this).attr("name");
            mySet = mySet.replace('select-','');
-           console.log(mySet);
+           // console.log(mySet);
            // Iterate each checkbox
            $("[name^=" + mySet + "]").each(function () { this.checked = selected; });
        });
@@ -2262,7 +2280,7 @@ $(document).ready(function () {
 
 $(function() {
   $('[id^="sortTable"]').map(function() {
-        console.log(this);
+        // console.log(this);
         $(this).tablesorter({debug: true})
      });
   });
@@ -2270,7 +2288,7 @@ $(function() {
 $('[name]').map(function() {
     var elementID = $(this).attr('name');
     if (elementID.indexOf('.') == 2) {
-        console.log(elementID);
+        // console.log(elementID);
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -2289,6 +2307,10 @@ $('[name]').map(function() {
         });
     }
 });
+
+d = document.getElementById("appstatus");
+d.innerHTML = '&nbsp;';
+
 });
 </script>
 </body></html>
