@@ -43,6 +43,7 @@ import getPlaces
 import getTaxname
 import getAuthorityTree
 import cswaConceptutils as concept
+import cswaCollectionUtils as cswaCollectionUtils
 
 ## {{{ http://code.activestate.com/recipes/81547/ (r1)
 def cgiFieldStorageToDict(fieldStorage):
@@ -245,12 +246,15 @@ def doObjectSearch(form, config, displaytype):
         print '<span style="color:red;">No objects in this range! Sorry!</span>'
     else:
         totalobjects = 0
-        print getHeader(updateType)
+        if updateType == 'objinfo':
+            print infoHeaders(form.get('fieldset'))
+        else:
+            print getHeader(updateType)
         for r in rows:
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
-        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
@@ -390,7 +394,7 @@ def getHeader(updateType):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'keyinfo' or updateType == 'packinglist' or updateType == 'objinfo':
+    elif updateType == 'packinglist':
         return """
     <table><tr>
       <th>Museum #</th>
@@ -507,7 +511,10 @@ def doEnumerateObjects(form, config):
         print '<h2>No locations in this range!</h2>'
         return
 
-    print getHeader(updateType)
+    if updateType == 'keyinfo' or updateType == 'objinfo':
+        print infoHeaders(form.get('fieldset'))
+    else:
+        print getHeader(updateType)
     totalobjects = 0
     totallocations = 0
     for l in locationList:
@@ -543,7 +550,7 @@ def doEnumerateObjects(form, config):
     if totalobjects == 0:
         pass
     else:
-        print """<tr><td align="center" colspan="7"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
         print """<tr><td align="center" colspan="3">"""
         if updateType == 'keyinfo':
             msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (
@@ -647,6 +654,7 @@ def doCheckMove(form, config):
 def doUpdateKeyinfo(form, config):
     #print form
     CSIDs = []
+    fieldset = form.get('fieldset')
     for i in form:
         if 'csid.' in i:
             CSIDs.append(form.get(i))
@@ -655,14 +663,30 @@ def doUpdateKeyinfo(form, config):
     for row, csid in enumerate(CSIDs):
 
         index = csid # for now, the index is the csid
-        if not refNames2find.has_key(form.get('cp.' + index)):
-            refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
-        if not refNames2find.has_key(form.get('cg.' + index)):
-            refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index),
-                                                                       config)
-        if not refNames2find.has_key(form.get('fc.' + index)):
-            refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index),
-                                                                       config)
+        if fieldset == 'namedesc':
+            if not refnames2find.has_key(form.get('bd.' + index)):
+                refnames2find[form.get('bd.' + index)] = cswaDB.getrefname('collectionobjects_common_briefdescriptions',
+                                                                       form.get('bd.' + index), config)
+        elif fieldset == 'registration':
+            if not refNames2find.has_key(form.get('an.' + index)):
+                refNames2find[form.get('an.' + index)] = cswaDB.getrefname('pahmaaltnumgroup', form.get('an.' + index), config)
+            if not refNames2find.has_key(form.get('ant.' + index)):
+                refNames2find[form.get('ant.' + index)] = cswaDB.getrefname('pahmaaltnumgroup_type', form.get('ant.' + index), config)
+            if not refNames2find.has_key(form.get('pc.' + index)):
+                refNames2find[form.get('pc.' + index)] = cswaDB.getrefname('collectionobjects_common_fieldcollectors',
+                                                                           form.get('pc.' + index), config)
+            if not refNames2find.has_key(form.get('pd.' + index)):
+                refNames2find[form.get('pd.' + index)] = cswaDB.getrefname('acquisitions_common_owners',
+                                                                           form.get('pd.' + index), config)
+        else:
+            if not refNames2find.has_key(form.get('cp.' + index)):
+                refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
+            if not refNames2find.has_key(form.get('cg.' + index)):
+                refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index),
+                                                                           config)
+            if not refNames2find.has_key(form.get('fc.' + index)):
+                refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index),
+                                                                           config)
 
     print getHeader('keyinfoResult')
 
@@ -675,28 +699,48 @@ def doUpdateKeyinfo(form, config):
 
         index = csid # for now, the index is the csid
         updateItems = {}
-        updateItems['objectCsid'] = form.get('csid.' + index)
-        updateItems['objectName'] = form.get('onm.' + index)
-        updateItems['objectNumber'] = form.get('oox.' + index)
-        updateItems['objectCount'] = form.get('ocn.' + index)
-        updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
-        updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
-        updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
+        if fieldset == 'namedesc':
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['basicDescription'] = form.get('bd.' + index)
+        elif fieldset == 'registration':
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['altnumber'] = form.get('an.' + index)
+            updateItems['altnumbertype'] = form.get('ant.' + index)
+            updateItems['collector'] = form.get('pc.' + index)
+            updateItems['donor'] = form.get('pd.' + index)
+        else:
+            updateItems['objectCsid'] = form.get('csid.' + index)
+            updateItems['objectName'] = form.get('onm.' + index)
+            updateItems['objectNumber'] = form.get('oox.' + index)
+            updateItems['objectCount'] = form.get('ocn.' + index)
+            updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
+            updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
+            updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
 
         for i in ('handlerRefName',):
             updateItems[i] = form.get(i)
 
         #print updateItems
         msg = 'updated.'
-        if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-            msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
-        if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-            msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
-        if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
-            msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+        if fieldset == 'keyinfo':
+            if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
+                msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+            if updateItems['assocPeople'] == '' and form.get('cg.' + index):
+                msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+            if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
+                msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+        elif fieldset == 'registration':
+            if updateItems['collector'] == '' and form.get('pc.' + index):
+                msg += '<span style="color:red;"> Field Collector term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
+            if updateItems['donor'] == '' and form.get('pd.' + index):
+                msg += '<span style="color:red;"> Donor term "%s" not found, field not updated.</span>' % form.get('pd.' + index)
         try:
             #pass
-            updateKeyInfo(updateItems, config)
+            updateKeyInfo(fieldset, updateItems, config)
             numUpdated += 1
         except:
             raise
@@ -708,6 +752,41 @@ def doUpdateKeyinfo(form, config):
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'object had key information updated</h4>'
 
+def infoHeaders(fieldSet):
+    if fieldSet == 'keyinfo':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th>Field Collection Place</th>
+      <th>Cultural Group</th>
+      <th>Ethnographic File Code</th>
+      <th>P?</th>
+    </tr>"""
+    elif fieldSet == 'namedesc':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th></th>
+      <th style="text-align:center">Basic Description</th>
+      <th>P?</th>
+    </tr>"""
+    elif fieldSet == 'registration':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Alt. Num.</th>
+      <th>Alt. Num. Type</th>
+      <th>Collector</th>
+      <th>Donor</th>
+      <th>Accession</th>
+      <th>P?</th>
+    </tr>"""
+    else:
+        return "<table><tr>DEBUG</tr>"
 
 def doNothing(form, config):
     print '<span style="color:red;">Nothing to do yet! ;-)</span>'
@@ -991,7 +1070,6 @@ def doBarCodes(form, config):
             handleTimeout(updateType, form)
             #obj = [-1, -1, '(null)', '(null)', '(null)']
         if action == 'Create Labels for Objects':
-            sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'barcode object', obj[3]))
             labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [ obj, ], config)
             print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[3], 1, labelFilename)
 
@@ -1334,7 +1412,7 @@ def alreadyExists(txt, element):
     return False
 
 
-def updateKeyInfo(updateItems, config):
+def updateKeyInfo(fieldset, updateItems, config):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
     username = config.get('connect', 'username')
@@ -1343,11 +1421,19 @@ def updateKeyInfo(updateItems, config):
     uri = 'collectionobjects'
     getItems = updateItems['objectCsid']
 
+    #Fields vary with fieldsets
+    if fieldset == 'keyinfo':
+        fields = ('pahmaFieldCollectionPlace', 'assocPeople', 'objectName', 'pahmaEthnographicFileCode')
+    elif fieldset == 'namedesc':
+        fields = ('basicDescription', 'objectname')
+    elif fieldset == 'registration':
+        fields = ('objectName', 'altnumber', 'altnumbertype', 'collector', 'donor')
+
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
     root = etree.fromstring(content)
     # add the user's changes to the XML
-    for relationType in ('pahmaFieldCollectionPlace', 'assocPeople', 'objectName', 'pahmaEthnographicFileCode'):
+    for relationType in fields:
         # skip if no refName was provided to update
         if updateItems[relationType] == '':
             continue
@@ -1488,27 +1574,10 @@ def formatRow(result, form, config):
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link2 = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr>
-<td class="objno"><a target="cspace" href="%s">%s</a></td>
-<td class="objname">
-<input class="objname" type="text" name="onm.%s" value="%s">
-</td>
-<td class="veryshortinput">
-<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
-</td>
-<td>
-<input type="hidden" name="oox.%s" value="%s">
-<input type="hidden" name="csid.%s" value="%s">
-<input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
-<td><input type="checkbox"></td>
-</tr>""" % (
-            link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[3], rr[8], rr[8], rr[8], rr[6], rr[8], rr[7], rr[8],
-            rr[9])
-
+        return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
         link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
@@ -1536,6 +1605,63 @@ def formatRow(result, form, config):
 <td><input type="checkbox"></td>
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[7], rr[8], rr[6])
 
+
+def formatInfoReviewRow(form, link, rr, link2):
+    """[0 Location, 1 Location Key, 2 Timestamp, 3 Museum Number, 4 Name, 5 Count, 6 Collection Place, 7 Culture, 8 csid,
+        9 Ethnographic File Code, 10 Place Ref Name, 11 Culture Ref Name, 12 Ethnographic File Code Ref Name, 13 Crate Ref Name,
+        14 Computed Crate 15 Description, 16 Collector, 17 Donor, 18 Alt Num, 19 Alt Num Type, 20 Collector Ref Name,
+        21 Accession Number, 22 Donor Ref Name, 23 Acquisition ID, 24 Acquisition CSID]"""
+    fieldSet = form.get("fieldset")
+    if fieldSet == 'namedesc':
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td width="0"></td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<textarea cols="78" rows="1" name="bd.%s">%s</textarea></td>
+<td><input type="checkbox"></td>
+</tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[15])
+    elif fieldSet == 'registration':
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<input class="xspan" type="text" size="13" name="an.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="13" name="ant.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
+<td><span style="font-size:8">%s</span></td>
+<td><a target="cspace" href="%s">%s</a></td>
+<td><input type="checkbox"></td>
+</tr>""" % (
+            link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[18], rr[8], rr[19], rr[8], rr[16],
+            rr[17], link2, rr[21])
+    else:
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td class="veryshortinput">
+<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
+<td><input type="checkbox"></td>
+</tr>""" % (
+            link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[3], rr[8], rr[8], rr[8], rr[6], rr[8], rr[7], rr[8],
+            rr[9])
 
 def formatError(cspaceObject):
     return '<tr><th colspan="2" class="leftjust">%s</th><td></td><td>None found.</td></tr>\n' % (cspaceObject)
@@ -1745,8 +1871,8 @@ def getFieldset(form):
 
     fields = [ \
         ("Key Info", "keyinfo"),
-        #    ("Basic Info", "basicinfo"),
-        #    ("Registration", "registration")
+            ("Name & Desc.", "namedesc"),
+            ("Registration", "registration")
     ]
 
     fieldset = '''
@@ -1816,7 +1942,7 @@ def selectWebapp():
 
     webapps = {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
-                  'barcodeprint', 'hierarchyViewer'],
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats'],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
@@ -1875,6 +2001,178 @@ def selectWebapp():
 </html>'''
 
     return line
+
+def printCollectionStats(form, config):
+    writeInfo2log('start', form, config, 0.0)
+    logo = config.get('info', 'logo')
+    schemacolor1 = config.get('info', 'schemacolor1')
+    serverlabel = config.get('info', 'serverlabel')
+    serverlabelcolor = config.get('info', 'serverlabelcolor')
+    apptitle = config.get('info', 'apptitle')
+    updateType = config.get('info', 'updatetype')
+
+    divsize = '''<div id="sidiv" style="position:relative; width:1300px; height:750px; color:black; ">'''
+
+    print '''Content-type: text/html; charset=utf-8
+
+    
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>''' + apptitle + ' : ' + serverlabel + '''</title>
+<style type="text/css">
+body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
+table { width: 100%; }
+td { cell-padding: 3px; }
+.stattitle { font-weight: normal; text-align:right; }
+.statvalue { font-weight: bold; text-align:left; }
+.statvaluecenter { font-weight: bold; text-align:center; }
+th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
+h1 { font-size:32px; float:left; padding:10px; margin:0px; border-bottom: none; }
+h2 { font-size:12px; float:left; color:white; background:black; }
+p { padding:10px 10px 10px 10px; }
+
+button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
+
+.statsection { font-size:21px; font-weight:bold; border-bottom: thin dotted #aaaaaa; color: ''' + schemacolor1 + '''; }
+.statheader { font-weight: bold; text-align:center; font-size:medium; }
+.stattitle { font-weight: bold; text-align:right; font-size:small; }
+.statvalue { font-weight: normal; text-align:left; font-size:x-small; }
+.statbignumber { font-weight: bold; text-align:center; font-size:medium; }
+.statnumber { font-weight: bold; text-align:right; font-size:x-small; }
+.statpct { font-weight: normal; text-align:left; font-size:x-small; }
+.objtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
+.objsubtitle { font-size:28px; float:left; padding:2px; margin:0px; border-bottom: thin dotted #aaaaaa; font-style: italic; color: #999999; }
+.notentered { font-style: italic; color: #999999; }
+.askjohn { font-style: italic; color: #009999; }
+
+.addtoquery { font-style: italic; color: #aa0000; }
+.cell { line-height: 1.0; text-indent: 2px; color: #666666; font-size: 16px;}
+.enumerate { background-color: green; font-size:20px; color: #FFFFFF; font-weight:bold; vertical-align: middle; text-align: center; }
+img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
+.locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
+.ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:110px; }
+.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
+.ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
+.ui-tabs .ui-tabs-nav li { height:40px; font-size:16px; }
+.ui-tabs .ui-tabs-nav li a { position:relative; top:0px }
+#tabs { padding: 0px; background: none; border-width: 0px; } 
+#tabs .ui-tabs-nav { padding-left: 0px; background: transparent; border-width: 0px 0px 1px 0px;
+  -moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px; text-align: center; height: 2.35em; }
+#tabs .ui-tabs-panel { background: #ffffff repeat-x scroll 50% top; border-width: 1px 1px 1px 1px; }
+#tabs .ui-tabs-nav li { display: inline-block; float: none; top: 0px; margin: 0em; }
+.rdo { text-align: center; }
+.save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
+.shortinput { font-weight: bold; width:150px; }
+.subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
+.veryshortinput { width:60px; }
+.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
+
+
+</style>
+<style type="text/css">
+  /*<![CDATA[*/
+    @import "../css/jquery-ui-1.8.22.custom.css";
+  /*]]>*/
+  </style>
+<script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
+<script type="text/javascript" src="../js/provision.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<style>
+.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
+</style>
+<script type="text/javascript">
+function formSubmit(location)
+{
+    console.log(location);
+    document.getElementById('lo.location1').value = location
+    document.getElementById('lo.location2').value = location
+    //document.getElementById('num2ret').value = 1
+    //document.getElementById('actionbutton').value = "Next"
+    document.forms['sysinv'].submit();
+}
+</script>
+</head>
+<body>
+<form id="sysinv" enctype="multipart/form-data" method="post">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tbody><tr><td width="3%">&nbsp;</td><td align="center">''' + divsize + '''
+    <table width="100%">
+    <tbody>
+      <tr>
+	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
+        <td><span style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</td>
+	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
+      </tr>
+      <tr><td colspan="3"></td></tr>
+      <tr>
+	<td colspan="3">
+	<table>
+	  <tr><td><table>
+	</table>
+        </td><td style="width:3%"/>
+	<td style="width:120px;text-align:center;"></td>
+      </tr>
+      </table></td></tr>
+      <tr><td colspan="3"><div id="status"><hr/></div></td></tr>
+    </tbody>
+    </table>'''
+
+    dbsource = 'pahma.cspace.berkeley.edu'
+
+    print '''<div id="tabs">
+ <ul>
+   <li><a href="#tabs-1"><span>At A Glance</span></a></li>
+   <li><a href="#tabs-2"><span>By Object Types</span></a></li>
+   <li><a href="#tabs-3"><span>By Catalog or Department</span></a></li>
+   <li><a href="#tabs-4"><span>By Accession Status</span></a></li>
+   <li><a href="#tabs-5"><span>By Collection Manager</span></a></li>
+   <li><a href="#tabs-6"><span>By Ethnographic Use Code</span></a></li>
+ </ul>
+'''
+    cswaCollectionUtils.makeglancetab(dbsource, config)
+
+    print '''<div id="tabs-2">'''
+    statgroup = 'objByObjType'
+    sectiontitle = 'By object type'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-3">'''
+    statgroup = 'objByLegCat'
+    sectiontitle = 'By legacy catalog'
+    charttype = 'barchartvertical'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-4">'''
+    statgroup = 'objByAccStatus'
+    sectiontitle = 'By accession status'
+    charttype = 'barchartvertical'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-5">'''
+    statgroup = 'objByCollMan'
+    sectiontitle = 'By collection manager'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>'''
+
+    print '''<div id="tabs-6">'''
+    statgroup = 'objByFileCode'
+    sectiontitle = 'By ethnographic use code'
+    charttype = 'piechart'
+    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
+    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
+    print '''</div>
+</div>'''
 
 
 def getStyle(schemacolor1):
@@ -1959,8 +2257,11 @@ def starthtml(form, config):
     '''
 
     if updateType == 'keyinfo':
+        fieldset, selected = getFieldset(form)
+        otherfields = otherfields[:-5]
         otherfields += '''
-	  <tr><th/><th/><th/><th/></tr>'''
+        <th><span class="cell">set:</span></th><th>''' + fieldset + '''</th>
+	<tr></tr>'''
 
     elif updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
@@ -1975,7 +2276,7 @@ def starthtml(form, config):
         <th><th><span class="cell">set:</span></th><th>''' + fieldset + '''</th></tr>
         '''
         otherfields += '''
-        <tr><th/><th/><th/><th/></tr>'''
+        <tr></tr>'''
 
     elif updateType == 'objdetails':
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
@@ -2240,11 +2541,28 @@ def endhtml(form, config, elapsedtime):
     count = form.get('count')
     connect_string = config.get('connect', 'connect_string')
     focusSnippet = ""
+    addenda = ""
     # for object details, clear out the input field on focus, for everything else, just focus
     if config.get('info', 'updatetype') == 'objdetails':
         focusSnippet = '''$('input:text:first').focus().val("");'''
     else:
         focusSnippet = '''$('input:text:first').focus();'''
+    if config.get('info', 'updatetype') == 'collectionstats':
+        addenda = '''$("#gototab2").click(function() {
+    $("#tabs").tabs("select","#tabs-2");
+});
+$("#gototab3").click(function() {
+    $("#tabs").tabs("select","#tabs-3");
+});
+$("#gototab4").click(function() {
+    $("#tabs").tabs("select","#tabs-4");
+});
+$("#gototab5").click(function() {
+    $("#tabs").tabs("select","#tabs-5");
+});
+$("#gototab6").click(function() {
+    $("#tabs").tabs("select","#tabs-6");
+});'''
     return '''
   <table width="100%">
     <tbody>
@@ -2312,6 +2630,8 @@ d = document.getElementById("appstatus");
 d.innerHTML = '&nbsp;';
 
 });
+
+''' + addenda + '''
 </script>
 </body></html>
 '''
