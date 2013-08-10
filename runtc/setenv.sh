@@ -18,7 +18,6 @@ then
   export DB_PASSWORD_NUXEO=
   export PATH=$JAVA_HOME/bin:/bin:/usr/bin:$CATALINA_HOME/bin
   LOG=$CATALINA_HOME/logs/catalina.out
-  PATH=/bin:/usr/bin:$CATALINA_HOME/bin
   TCPID=""
 else
   export CATALINA_HOME=""
