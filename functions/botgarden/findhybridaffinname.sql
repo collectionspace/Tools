@@ -110,6 +110,12 @@ IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
 /*
+select pg_get_functiondef(oid)
+from pg_proc
+where proname = 'findhybridaffinhtml';
+
+-- drop function findhybridaffinhtml (tigid varchar);
+
 -- hybridflag is false and affinitytaxon is null
 select id, regexp_replace(taxon, '^.*\)''(.*)''$', '\1'),
 	findhybridaffinname(id), findhybridaffinhtml(id)
