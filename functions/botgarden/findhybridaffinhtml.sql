@@ -1,4 +1,4 @@
--- function to return html formatted hybrid name
+-- function to return formatted hybrid name
 
 create or replace function findhybridaffinhtml (tigid varchar)
 returns varchar
