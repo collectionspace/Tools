@@ -158,7 +158,25 @@ end as ethnographicfilecode,
 pfc.item fcpRefName,
 apg.assocpeople cgRefName,
 pef.item efcRefName,
-ca.computedcrate
+ca.computedcrate,
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate,
+case when (bd.item is not null and bd.item <> '') then
+bd.item end as briefdescription,
+case when (pc.item is not null and pc.item <> '') then
+substring(pc.item, position(')''' IN pc.item)+2, LENGTH(pc.item)-position(')''' IN pc.item)-2)
+end as fieldcollector,
+case when (donor.item is not null and donor.item <> '') then
+substring(donor.item, position(')''' IN donor.item)+2, LENGTH(donor.item)-position(')''' IN donor.item)-2)
+end as donor,
+case when (an.pahmaaltnum is not null and an.pahmaaltnum <> '') then
+an.pahmaaltnum end as altnum,
+case when (an.pahmaaltnumtype is not null and an.pahmaaltnumtype <> '') then
+an.pahmaaltnumtype end as altnumtype,
+pc.item pcRefName,
+ac.acquisitionreferencenumber accNum,
+donor.item pdRefName,
+ac.id accID,
+h9.name accCSID
 
 FROM loctermgroup l
 
@@ -178,11 +196,10 @@ left outer join objectnamegroup ong on (ong.id=h4.id)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
-left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and pfc.pos=0)
-left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and pef.pos=0)
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and (pfc.pos=0 or pfc.pos is null))
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and (pef.pos=0 or pef.pos is null))
 
-left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
-'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
+left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype = 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
 left outer join assocpeoplegroup apg on (apg.id=h5.id)
  
 left outer join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
@@ -192,19 +209,17 @@ FULL OUTER JOIN hierarchy h6 ON (h6.id = cc.id)
 FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name)
 FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
 FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
-FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND donor.pos=0)
+FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos=0 or donor.pos is null))
+FULL OUTER JOIN hierarchy h9 ON (ac.id=h9.id)
 
 FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid)
 FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND h8.pos = 0)
- 
+
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
 WHERE 
    l.termdisplayName = '""" + str(location) + """'
-   
-AND (pfc.pos=0 or pfc.pos is null)
-AND (h5.pos=0 or h5.pos is null)
-AND (pef.pos=0 or pef.pos is null)
+
    
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
 LIMIT 30000
@@ -443,8 +458,10 @@ case when (an.pahmaaltnumtype is not null and an.pahmaaltnumtype <> '') then
 an.pahmaaltnumtype end as altnumtype,
 pc.item pcRefName,
 ac.acquisitionreferencenumber accNum,
-donor.item pdRefName
- 
+donor.item pdRefName,
+ac.id accID,
+h9.name accCSID
+
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
 
@@ -469,6 +486,7 @@ FULL OUTER JOIN hierarchy h6 ON (h6.id = cc.id)
 FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name)
 FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
 FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
+FULL OUTER JOIN hierarchy h9 ON (ac.id=h9.id)
 FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND donor.pos=0)
 
 FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid)
@@ -509,19 +527,24 @@ def getrefname(table, term, config):
     if term == None or term == '':
         return ''
 
-    if table in ('collectionobjects_common_fieldcollectors', 'collectionobjects_common_briefdescriptions', 'acquisitions_common_owners'):
+    if table in ('collectionobjects_common_fieldcollectors', 'collectionobjects_common_briefdescriptions',
+                 'acquisitions_common_owners'):
         column = 'item'
     else:
         column = 'refname'
 
     if table == 'collectionobjects_common_briefdescriptions':
-        query = "SELECT item FROM collectionobjects_common_briefdescriptions WHERE item ILIKE '%s' LIMIT 1" % (term.replace("'", "''"))
+        query = "SELECT item FROM collectionobjects_common_briefdescriptions WHERE item ILIKE '%s' LIMIT 1" % (
+        term.replace("'", "''"))
     elif table == 'pahmaaltnumgroup':
-        query = "SELECT pahmaaltnum FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (term.replace("'", "''"))
+        query = "SELECT pahmaaltnum FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
+        term.replace("'", "''"))
     elif table == 'pahmaaltnumgroup_type':
-        query = "SELECT pahmaaltnumtype FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (term.replace("'", "''"))
+        query = "SELECT pahmaaltnumtype FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
+        term.replace("'", "''"))
     else:
-        query  = "select %s from %s where %s ILIKE '%%''%s''%%' LIMIT 1" % (column, table, column, term.replace("'","''"))
+        query = "select %s from %s where %s ILIKE '%%''%s''%%' LIMIT 1" % (
+        column, table, column, term.replace("'", "''"))
 
     try:
         objects.execute(query)
@@ -552,7 +575,6 @@ def findrefnames(table, termlist, config):
 
 
 def getobjinfo(museumNumber, config):
-
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -666,6 +688,38 @@ ORDER BY ParentPlace, Place
     return objects.fetchall()
 
 
+def getCSID(argType, arg, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if argType == 'objectnumber':
+        query = """SELECT h.name from collectionobjects_common cc
+JOIN hierarchy h on h.id=cc.id
+WHERE objectnumber = '%s'""" % arg
+    elif argType == 'crateName':
+        query = """SELECT h.name FROM collectionobjects_anthropology ca
+JOIN hierarchy h on h.id=ca.id
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+
+    objects.execute(query)
+    return objects.fetchone()
+
+
+def getCSIDs(argType, arg, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if argType == 'crateName':
+        query = """SELECT h.name FROM collectionobjects_anthropology ca
+JOIN hierarchy h on h.id=ca.id
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+
+    objects.execute(query)
+    return objects.fetchall()
+
+
 def findparents(refname, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
@@ -715,6 +769,13 @@ if __name__ == "__main__":
 
     config = getConfig(form)
     print getobjinfo('1-504', config)
+
+    print '\nkeyinfo\n'
+    # Kroeber, 20A, X  1,  1
+    # Kroeber, 20AMez, 128 A
+    for i, loc in enumerate(getlocations('Kroeber, 20A, X  1,  3', '', 1, config, 'keyinfo')):
+        print 'location', i + 1, loc[0:12]
+
     sys.exit()
 
     form = {'webapp': 'ucbgLocationReport'}

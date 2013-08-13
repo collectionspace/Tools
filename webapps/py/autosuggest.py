@@ -49,6 +49,8 @@ def dbtransaction(form):
         srchindex = 'concept'
     elif srchindex in ['px']:
         srchindex = 'longplace2'
+    elif srchindex in ['pc']:
+        srchindex = 'person'
     else:
         srchindex = 'concept'
 
@@ -81,8 +83,13 @@ def dbtransaction(form):
             template = makeTemplate('concepttermgroup', 'termname', "ilike '%%%s%%'")
         elif srchindex == 'longplace2':
             template = makeTemplate('placetermgroup', 'termdisplayname', "like '%s%%'")
+        elif srchindex == 'person':
+            template = makeTemplate('persontermgroup', 'termdisplayname', "like '%s%%'")
         elif srchindex == 'taxon':
             template = makeTemplate('taxontermgroup', 'termdisplayname', "like '%s%%'")
+        else:
+            pass
+            # error!
 
         #sys.stderr.write('template %s' % template)
 
