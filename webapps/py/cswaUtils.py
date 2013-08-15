@@ -1416,7 +1416,8 @@ def updateKeyInfo(fieldset, updateItems, config):
     elif fieldset == 'namedesc':
         fields = ('briefDescription', 'objectName')
     elif fieldset == 'registration':
-        fields = ('objectName', 'pahmaAltNum', 'pahmaAltNumType', 'fieldCollector')
+        # nb:  'pahmaAltNumType' is handle with  'pahmaAltNum'
+        fields = ('objectName', 'pahmaAltNum', 'fieldCollector')
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -1428,9 +1429,9 @@ def updateKeyInfo(fieldset, updateItems, config):
         extra = ''
         if updateItems[relationType] == '':
             continue
-        if relationType == 'assocPeople':
+        if relationType == 'assocPeople' or relationType == 'pahmaAltNum':
             extra = 'Group'
-        elif relationType in ['briefDescription']:
+        elif relationType in ['briefDescription', 'fieldCollector']:
             list = 's'
         else:
             pass
@@ -2691,16 +2692,26 @@ if __name__ == "__main__":
 
     # this will load the config file and attempt to update some records in server identified
     # in that config file!
-    import cswaDB
 
 
-
-    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber' : '1-504', 'action':'Create Labels for Objects'}
+    form = {'webapp': 'keyinfoDev', 'action':'Update Object Information',
+            'fieldset': 'namedesc',
+            #'fieldset': 'registration',
+            'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+            'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+            'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+            'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
+            'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+            'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+            'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
+    }
 
     config = getConfig(form)
+    doUpdateKeyinfo(form, config)
 
-    print doBarCodes(form, config)
     sys.exit()
+
+    import cswaDB
 
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
@@ -2725,6 +2736,8 @@ if __name__ == "__main__":
     #updateLocations(f2,config)
     #print "updateLocations succeeded..."
     #sys.exit(0)
+
+
 
     uri = 'movements'
 
@@ -2804,3 +2817,10 @@ if __name__ == "__main__":
 
     #print lmiPayload(f)
     #print relationsPayload(f)
+
+    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber' : '1-504', 'action':'Create Labels for Objects'}
+
+    config = getConfig(form)
+
+    print doBarCodes(form, config)
+    sys.exit()
