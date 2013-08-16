@@ -206,14 +206,18 @@ left outer join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id an
 left outer join collectionobjects_common_fieldcollectors pc on (pc.id=cc.id and pc.pos=0)
 
 FULL OUTER JOIN hierarchy h6 ON (h6.id = cc.id)
-FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name)
+FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name AND rc6.objectdocumenttype = 'Acquisition')
+
 FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
 FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
-FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos=0 or donor.pos is null))
+FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
+FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
+FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
+
 FULL OUTER JOIN hierarchy h9 ON (ac.id=h9.id)
 
-FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid)
-FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND h8.pos = 0)
+FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
+FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
@@ -482,15 +486,15 @@ left outer join assocpeoplegroup apg on (apg.id=h5.id)
 left outer join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
 left outer join collectionobjects_common_fieldcollectors pc on (pc.id=cc.id and pc.pos=0)
 
-FULL OUTER JOIN hierarchy h6 ON (h6.id = cc.id)
-FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name)
+FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h1.name AND rc6.objectdocumenttype = 'Acquisition')
 FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
 FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
-FULL OUTER JOIN hierarchy h9 ON (ac.id=h9.id)
-FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND donor.pos=0)
+FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
+FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
+FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
 
-FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid)
-FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND h8.pos = 0)
+FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
+FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
  
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
