@@ -63,7 +63,7 @@ def dbtransaction(form):
             INNER JOIN hierarchy h_tg ON h_tg.id=tg.id
             INNER JOIN hierarchy h_loc ON h_loc.id=h_tg.parentid
             INNER JOIN misc ON misc.id=h_loc.id and misc.lifecyclestate <> 'deleted'
-            WHERE termdisplayname like '%s%%' order by locationkey limit 30;"""
+            WHERE termdisplayname ilike '%s%%' order by locationkey limit 30;"""
         elif srchindex == 'object':
             # objectnumber is special: not an authority, no need for joins
             template = """SELECT cc.objectnumber
@@ -76,7 +76,7 @@ def dbtransaction(form):
         elif srchindex == 'place':
             template = makeTemplate('placetermgroup', 'termname', "ilike '%%%s%%' and termtype='descriptor'")
         elif srchindex == 'longplace':
-            template = makeTemplate('placetermgroup', 'termdisplayname', "like '%s%%' and termtype='descriptor'")
+            template = makeTemplate('placetermgroup', 'termdisplayname', "ilike '%s%%' and termtype='descriptor'")
         elif srchindex == 'concept':
             template = makeTemplate('concepttermgroup', 'termname', "ilike '%%%s%%' and termtype='descriptor'")
         elif srchindex == 'concept2':
