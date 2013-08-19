@@ -214,8 +214,6 @@ FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
 FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
 FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
 
-FULL OUTER JOIN hierarchy h9 ON (ac.id=h9.id)
-
 FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
 FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
 
@@ -315,7 +313,7 @@ def getlocations(location1, location2, num2ret, config, updateType):
                 result.append(row)
         except:
             raise
-            sys.stderr.write("other getobjects error: %s" % len(rows))
+            #sys.stderr.write("other getobjects error: %s" % len(rows))
 
     return result
 
@@ -340,8 +338,8 @@ def getplants(location1, location2, num2ret, config, updateType):
         if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1, elapsedtime))
     except pgdb.DatabaseError, e:
         raise
-        sys.stderr.write('getplants select error: %s' % e)
-        return result
+        #sys.stderr.write('getplants select error: %s' % e)
+        #return result
     except:
         sys.stderr.write("some other getplants database error!")
         return result
@@ -539,16 +537,16 @@ def getrefname(table, term, config):
 
     if table == 'collectionobjects_common_briefdescriptions':
         query = "SELECT item FROM collectionobjects_common_briefdescriptions WHERE item ILIKE '%s' LIMIT 1" % (
-        term.replace("'", "''"))
+            term.replace("'", "''"))
     elif table == 'pahmaaltnumgroup':
         query = "SELECT pahmaaltnum FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
-        term.replace("'", "''"))
+            term.replace("'", "''"))
     elif table == 'pahmaaltnumgroup_type':
         query = "SELECT pahmaaltnumtype FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
-        term.replace("'", "''"))
+            term.replace("'", "''"))
     else:
         query = "select %s from %s where %s ILIKE '%%''%s''%%' LIMIT 1" % (
-        column, table, column, term.replace("'", "''"))
+            column, table, column, term.replace("'", "''"))
 
     try:
         objects.execute(query)
@@ -616,8 +614,8 @@ def gethierarchy(query, config):
 SELECT DISTINCT
         regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
         regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
-        child.shortidentifier AS ChildKey, 
-        parent.shortidentifier AS ParentKey
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
 FROM concepts_common child
 JOIN misc ON (misc.id = child.id)
 FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
@@ -632,51 +630,8 @@ ORDER BY Parent, Child""".format(query)
 SELECT DISTINCT
         regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
         regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
-        child.shortidentifier AS ChildKey, 
-        parent.shortidentifier AS ParentKey
-FROM places_common child
-JOIN misc ON (misc.id = child.id)
-FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
-FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
-FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
-FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
-WHERE misc.lifecyclestate <> 'deleted'
-ORDER BY ParentPlace, Place
-
-"""
-
-    objects.execute(gethierarchy)
-    return objects.fetchall()
-
-
-def gethierarchy(query, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
-    objects = dbconn.cursor()
-    objects.execute(timeoutcommand)
-
-    if query != 'places':
-        gethierarchy = """
-SELECT DISTINCT
-        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
-        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
-        child.shortidentifier AS ChildKey, 
-        parent.shortidentifier AS ParentKey
-FROM concepts_common child
-JOIN misc ON (misc.id = child.id)
-FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
-FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
-FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
-FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
-WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
-AND misc.lifecyclestate <> 'deleted'
-ORDER BY Parent, Child""".format(query)
-    else:
-        gethierarchy = """
-SELECT DISTINCT
-        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
-        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
-        child.shortidentifier AS ChildKey, 
-        parent.shortidentifier AS ParentKey
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
 FROM places_common child
 JOIN misc ON (misc.id = child.id)
 FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
