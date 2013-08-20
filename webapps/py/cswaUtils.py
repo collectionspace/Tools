@@ -719,14 +719,21 @@ def doUpdateKeyinfo(form, config):
         msg = 'updated.'
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-                msg += '<span style="color:red;"> Field Collection Place term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+                msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
             if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-                msg += '<span style="color:red;"> Cultural Group term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+                msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
             if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
-                msg += '<span style="color:red;"> Ethnographic File Code term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+                msg += '<span style="color:red;"> Ethnographic File Code: term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
+            try:
+                int(updateItems['objectCount'])
+                int(updateItems['objectCount'][0])
+            except ValueError:
+                msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
+                del updateItems['objectCount']
+                #updateItems['objectCount'] = mythicalquerymethodtoreturncount(do)
         elif fieldset == 'registration':
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
-                msg += '<span style="color:red;"> Field Collector term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
+                msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
         try:
             #pass
             updateKeyInfo(fieldset, updateItems, config)
@@ -740,6 +747,7 @@ def doUpdateKeyinfo(form, config):
 
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'object had key information updated</h4>'
+
 
 def infoHeaders(fieldSet):
     if fieldSet == 'keyinfo':
@@ -776,6 +784,7 @@ def infoHeaders(fieldSet):
     </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
+
 
 def doNothing(form, config):
     print '<span style="color:red;">Nothing to do yet! ;-)</span>'
@@ -1051,7 +1060,7 @@ def doBarCodes(form, config):
     if form.get('ob.objectnumber') != '':
         try:
             # we need 3 elements at the beginning which writeCommanderFile will ignore
-            obj = ['','',''] + cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+            obj = ['', '', ''] + cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
             totalobjects = 1
             rowcount = 1
         except:
@@ -1059,7 +1068,7 @@ def doBarCodes(form, config):
             handleTimeout(updateType, form)
             #obj = [-1, -1, '(null)', '(null)', '(null)']
         if action == 'Create Labels for Objects':
-            labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [ obj, ], config)
+            labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [obj, ], config)
             print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[3], 1, labelFilename)
 
     else:
@@ -1095,7 +1104,7 @@ def doBarCodes(form, config):
                         objectsHandled.append(o[3] + o[4])
                 totalobjects += len(objects)
                 # hack: move the ethnographic file code to the right spot for this app... :-(
-                objects = [ o[0:8] + [o[9]] for o in objects ]
+                objects = [o[0:8] + [o[9]] for o in objects]
                 labelFilename = writeCommanderFile(r[0], form.get("printer"), 'objectLabels', 'objects', objects,
                                                    config)
                 print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
@@ -1470,7 +1479,7 @@ def updateKeyInfo(fieldset, updateItems, config):
             './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
         collectionobjects_common.insert(0, objectCount)
         objectCount.text = updateItems['objectCount']
-    #print(etree.tostring(root, pretty_print=True))
+        #print(etree.tostring(root, pretty_print=True))
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
     payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root)
@@ -1622,7 +1631,8 @@ def formatInfoReviewRow(form, link, rr, link2):
 <input type="hidden" name="csid.%s" value="%s">
 <textarea cols="78" rows="1" name="bdx.%s">%s</textarea></td>
 <td><input type="checkbox"></td>
-</tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[15])
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
+            rr[8], cgi.escape(rr[15], True))
     elif fieldSet == 'registration':
         return """<tr>
 <td class="objno"><a target="cspace" href="%s">%s</a></td>
@@ -1638,9 +1648,9 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td><span style="font-size:8">%s</span></td>
 <td><a target="cspace" href="%s">%s</a></td>
 <td><input type="checkbox"></td>
-</tr>""" % (
-            link, rr[3], rr[8], rr[4], rr[8], rr[3], rr[8], rr[8], rr[8], rr[18], rr[8], rr[19], rr[8], rr[16],
-            rr[17], link2, rr[21])
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
+            rr[8], cgi.escape(rr[18], True), rr[8], cgi.escape(rr[19], True), rr[8], cgi.escape(rr[16], True),
+            cgi.escape(rr[17], True), link2, cgi.escape(rr[21], True))
     elif fieldSet == 'keyinfo':
         return """<tr>
 <td class="objno"><a target="cspace" href="%s">%s</a></td>
@@ -1657,9 +1667,10 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
 <td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
 <td><input type="checkbox"></td>
-</tr>""" % (
-            link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[3], rr[8], rr[8], rr[8], rr[6], rr[8], rr[7], rr[8],
-            rr[9])
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
+            rr[8],
+            rr[8], rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[7], True), rr[8], cgi.escape(rr[9], True))
+
 
 def formatError(cspaceObject):
     return '<tr><th colspan="2" class="leftjust">%s</th><td></td><td>None found.</td></tr>\n' % (cspaceObject)
@@ -1725,8 +1736,8 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
             sys.stderr.write("Error in POSTing!\n")
             sys.stderr.write(url)
             #sys.stderr.write(payload)
-        #print url
-    #print payload
+            #print url
+        #print payload
     #raise
     data = f.read()
     info = f.info()
@@ -1869,8 +1880,8 @@ def getFieldset(form):
 
     fields = [ \
         ("Key Info", "keyinfo"),
-            ("Name & Desc.", "namedesc"),
-            ("Registration", "registration")
+        ("Name & Desc.", "namedesc"),
+        ("Registration", "registration")
     ]
 
     fieldset = '''
@@ -1999,6 +2010,7 @@ def selectWebapp():
 </html>'''
 
     return line
+
 
 def printCollectionStats(form, config):
     writeInfo2log('start', form, config, 0.0)
@@ -2694,7 +2706,7 @@ if __name__ == "__main__":
     # in that config file!
 
 
-    form = {'webapp': 'keyinfoDev', 'action':'Update Object Information',
+    form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
             'fieldset': 'namedesc',
             #'fieldset': 'registration',
             'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
@@ -2818,7 +2830,7 @@ if __name__ == "__main__":
     #print lmiPayload(f)
     #print relationsPayload(f)
 
-    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber' : '1-504', 'action':'Create Labels for Objects'}
+    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber': '1-504', 'action': 'Create Labels for Objects'}
 
     config = getConfig(form)
 
