@@ -111,7 +111,7 @@ def doObjectDetails(form, config):
         print '<tr><td class="rightlabel"><b>Current location:</b></td><td><span align="left">%s : %s</span></td></tr>' % (
         childlocations[0], childlocations[3])
     else:
-        print '<tr><td class="rightlabel"><b>Current location:</b></td><td><span align="left">' + currlocresult + '</span></td></tr>'
+        print '<tr><td class="rightlabel"><b>Current location:</b></td><td><span align="left">%s</span></td></tr>' % currlocresult
 
     print formatField('Object count', objresult[3], objresult[3], '%s piece(s)', 'no count entered')
     print formatField('Object type', objresult[1], parentinfo[3], '%s', 'PARENT: none entered')

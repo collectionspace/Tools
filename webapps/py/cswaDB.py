@@ -5,8 +5,10 @@ import sys
 import cgi
 import pgdb
 
-timeoutcommand = 'set statement_timeout to 300000'
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
+timeoutcommand = "set statement_timeout to 300000; SET NAMES 'utf8';"
 
 def testDB(config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
@@ -275,6 +277,7 @@ join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
 left outer join taxon_naturalhistory tn on (tc.id=tn.id) order by determination""" % ('', '')
 
+# mc.reasonformove = 'Dead'.
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
 def getlocations(location1, location2, num2ret, config, updateType):

@@ -9,8 +9,10 @@ import pgdb
 
 form = cgi.FieldStorage()
 
-timeoutcommand = 'set statement_timeout to 500'
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
+timeoutcommand = "set statement_timeout to 500; SET NAMES 'utf8';"
 
 def makeTemplate(table, term, expression):
     return """select distinct(%s)
