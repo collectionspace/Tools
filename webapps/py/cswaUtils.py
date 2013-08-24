@@ -1124,12 +1124,16 @@ def doAdvancedSearch(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
     groupby = form.get('groupby')
-    rare = []
-    if form.get('rare'): rare = ['true']
-    dead = []
-    if form.get('dead'): dead = ['true']
 
     if not validateParameters(form, config): return
+
+    # yes, I know, it does look a bit odd...
+    rare = []
+    if form.get('rare'):    rare.append('true')
+    if form.get('notrare'): rare.append('false')
+    dead = []
+    if form.get('dead'):    dead.append('true')
+    if form.get('alive'):   dead.append('false')
 
     beds = [form.get(i) for i in form if 'locations.' in i]
     taxa = [form.get(i) for i in form if 'taxon.' in i]
@@ -1478,8 +1482,8 @@ def updateKeyInfo(fieldset, updateItems, config):
         collectionobjects_common = root.find(
             './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
         collectionobjects_common.insert(0, objectCount)
-        objectCount.text = updateItems['objectCount']
-        #print(etree.tostring(root, pretty_print=True))
+    objectCount.text = updateItems['objectCount']
+    #print(etree.tostring(root, pretty_print=True))
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
     payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root)
@@ -1685,7 +1689,7 @@ def getxml(uri, realm, hostname, username, password, getItems):
     urllib2.install_opener(opener)
     if getItems == None: getItems = ''
     url = "%s/cspace-services/%s/%s" % (server, uri, getItems)
-    elapsedtime = 0
+    elapsedtime = 0.0
 
     try:
         elapsedtime = time.time()
@@ -1765,8 +1769,6 @@ def getHandlers(form):
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
         ("Rowan Gard",
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'"),
-        ("Ryan Gross",
-         "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8737)'Ryan Gross'"),
         ("Natasha Johnson",
          "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
         ("Allison Lewis",
