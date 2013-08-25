@@ -1,0 +1,36 @@
+<div class="result-title"><b>#field('objectname_s')</b></div>
+##do we have a physical store for this product
+#set($store = $doc.getFieldValue('store'))
+#if($store)<div class="map"><img src="http://maps.google.com/maps/api/staticmap?&zoom=12&size=150x80&maptype=roadmap&markers=$doc.getFieldValue('store')&sensor=false" /><div><small><a target="_map" href="http://maps.google.com/?q=$store&amp;source=embed">Larger Map</a></small></div></div>#end
+##<div>Id: #field('id')</div>
+<div>Museum Number: #field('objectnumber_s')</div>
+<div>Description: #field('description_txt')</div>
+<div>Cultural Group: #field('culture_s')</div>
+<div>Provenance: #field('provenance_ss')</div>
+<div>Medium: #field('medium_s')</div>
+##<div>Blob CSID: #field('blobs_ss')</div>
+<div>
+#foreach($t in $doc.getFieldValue('blobs_ss'))
+<a href="http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/$t/derivatives/OriginalJpeg/content">
+<image src="http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/$t/derivatives/Thumbnail/content"></a>
+#end
+</div>
+<div class="mlt">
+  #set($mlt = $mltResults.get($docId))
+  #set($mltOn = $params.getBool('mlt'))
+  #if($mltOn == true)<div class="field-name">Similar Items</div>#end
+  #if ($mltOn && $mlt && $mlt.size() > 0)
+  <ul>
+    #foreach($mltHit in $mlt)
+      #set($mltId = $mltHit.getFieldValue('id'))
+      <li><div><a href="#url_for_home?q=id:$mltId">$mltId</a></div><div><span class="field-name">Name:</span> $mltHit.getFieldValue('name')</div>
+        <div><span class="field-name">Price:</span> $!number.currency($mltHit.getFieldValue('price')) <span class="field-name">In Stock:</span> $mltHit.getFieldValue('inStock')</div>
+
+      </li>
+    #end
+  </ul>
+  #elseif($mltOn && $mlt.size() == 0)
+    <div>No Similar Items Found</div>
+  #end
+</div>
+#parse('debug.vm')
