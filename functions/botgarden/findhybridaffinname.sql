@@ -1,3 +1,5 @@
+-- function to get hybrid name
+
 create or replace function findhybridaffinname (tigid varchar)
 returns varchar
 as
@@ -90,11 +92,16 @@ elseif is_hybrid is true then
 		end if;
 	end if;
 
-	if return_name = ' × ' then return null;
-		else return return_name;
+	if return_name = ' × ' then
+		return null;
+	else
+		return return_name;
 	end if;
 
 end if;
+
+return null;
+
 end;
 
 $$
@@ -103,6 +110,12 @@ IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
 /*
+select pg_get_functiondef(oid)
+from pg_proc
+where proname = 'findhybridaffinhtml';
+
+-- drop function findhybridaffinhtml (tigid varchar);
+
 -- hybridflag is false and affinitytaxon is null
 select id, regexp_replace(taxon, '^.*\)''(.*)''$', '\1'),
 	findhybridaffinname(id), findhybridaffinhtml(id)
