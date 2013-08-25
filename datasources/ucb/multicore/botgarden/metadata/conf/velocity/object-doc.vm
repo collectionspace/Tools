@@ -1,0 +1,28 @@
+<div style="float:right;">
+#foreach($t in $doc.getFieldValue('blob_ss'))
+<a target="image" href="http://ucjeps.cspace.berkeley.edu:8180/cspace-services/blobs/$t/derivatives/OriginalJpeg/content">
+<image height="200px" src="http://ucjeps.cspace.berkeley.edu:8180/cspace-services/blobs/$t/derivatives/Thumbnail/content"></a>
+#end
+</div>
+<div>
+<div class="result-title"><b>#field('accessionnumber_s')</b></div>
+##do we have a physical location for this specimen
+#set($location = $doc.getFieldValue('location'))
+#if($location)<div class="map"><img src="http://maps.google.com/maps/api/staticmap?&zoom=12&size=150x80&maptype=roadmap&markers=$doc.getFieldValue('location')&sensor=false" /><div><small><a target="_map" href="http://maps.google.com/?q=$location&amp;source=embed">Larger Map</a></small></div></div>#end
+##<div>Id: #field('id')</div>
+##<div>Blob CSID: #field('blob_ss')</div>
+<div><h2>#field('determination_s')</h2></div>
+<div>#field('collcountry_s') /  #field('collstate_s') /  #field('collcounty_s')</div>
+<div>Collector: #field('collector_s')</div><div>Locality:
+<ul>
+#foreach($t in $doc.getFieldValue('locality_ss'))
+<li>$t</li>
+#end
+</ul>
+</div>
+#set($objectdate = $date.format('MM/dd/yyyy',$doc.getFieldValue('earlycollectiondate_dt')))
+#if($doc.getFieldValue('earlycollectiondate_dt'))<div>Collection date: $objectdate</div>#end
+#if($doc.getFieldValue('habitat_s'))<div>Habitat: #field('habitat_s')</div>#end
+#if($doc.getFieldValue('elevation_s'))<div>Elevation: #field('elevation_s') #field('elevationunit_s')</div>#end
+#parse('debug.vm')
+</div>

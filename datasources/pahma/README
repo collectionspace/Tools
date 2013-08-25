@@ -1,0 +1,25 @@
+To run the query and extract the 26 columns used by Delphi, do the following in this directory:
+
+nohup time psql -A -U reporter -d "host=pahma.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f delphiV2.sql -o delphiV2.csv
+
+Caveats:
+
+- Most of the fields extracted are empty (i.e. no CSpace data is extracted from them).  
+However, many of these are empty in the original extract as well.
+
+- There are many different notes and remarks fields in the format. I'm not sure which,
+of these to try to map to CSpace data.
+
+- Fields which still need to be extracted (in progress): Dimensions
+
+- Note that the ComponentNumber and ComponentName fields *could* be filled in using the
+ObjectNumber and ObjectName fields -- in CSpace the distinction is formally expressed using
+the Object hierarchy, and that distinction is not being capture in the output file. 
+Perhaps it should?
+
+- The mappings should be checked. For example, there are Delphi columns for Provenance, SiteName, 
+and SiteNumber, but CSpace's Field Collection Place was mapped only to the first of these. 
+CSpace's Ethnographic File Code was mapped to Purpose. Etc.
+
+
+(jbl 3/28/2013)
