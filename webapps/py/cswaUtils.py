@@ -1477,12 +1477,13 @@ def updateKeyInfo(fieldset, updateItems, config):
             metadata.insert(0, newElement)
             #print(etree.tostring(metadata, pretty_print=True))
     objectCount = root.find('.//numberOfObjects')
-    if objectCount is None and updateItems['objectCount'] is not None:
-        objectCount = etree.Element('numberOfObjects')
-        collectionobjects_common = root.find(
-            './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
-        collectionobjects_common.insert(0, objectCount)
-    objectCount.text = updateItems['objectCount']
+    if 'objectCount' in updateItems:
+        if objectCount is None:
+            objectCount = etree.Element('numberOfObjects')
+            collectionobjects_common = root.find(
+                './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
+            collectionobjects_common.insert(0, objectCount)
+        objectCount.text = updateItems['objectCount']
     #print(etree.tostring(root, pretty_print=True))
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
