@@ -719,9 +719,15 @@ def doUpdateKeyinfo(form, config):
         msg = 'updated.'
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-                msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace')[0]:
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
             if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-                msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+                if form.get('cg.' + index) == cswaDB.getCSIDDetail(config, index, 'assocpeoplegroup')[0]:
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
             if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
                 msg += '<span style="color:red;"> Ethnographic File Code: term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
             try:
@@ -730,7 +736,6 @@ def doUpdateKeyinfo(form, config):
             except ValueError:
                 msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
                 del updateItems['objectCount']
-                #updateItems['objectCount'] = mythicalquerymethodtoreturncount(do)
         elif fieldset == 'registration':
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
@@ -1547,7 +1552,7 @@ def updateKeyInfo(fieldset, updateItems, config):
     elif fieldset == 'namedesc':
         fields = ('briefDescription', 'objectName')
     elif fieldset == 'registration':
-        # nb:  'pahmaAltNumType' is handle with  'pahmaAltNum'
+        # nb:  'pahmaAltNumType' is handled with  'pahmaAltNum'
         fields = ('objectName', 'pahmaAltNum', 'fieldCollector')
 
     # get the XML for this object
