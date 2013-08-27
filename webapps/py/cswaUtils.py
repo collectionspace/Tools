@@ -1639,6 +1639,7 @@ def formatInfoReviewRow(form, link, rr, link2):
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
             rr[8], cgi.escape(rr[15], True))
     elif fieldSet == 'registration':
+        altnumtypes, selected = getAltNumTypes(form, rr[8], rr[19])
         return """<tr>
 <td class="objno"><a target="cspace" href="%s">%s</a></td>
 <td class="objname">
@@ -1648,13 +1649,13 @@ def formatInfoReviewRow(form, link, rr, link2):
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="13" name="anm.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="13" name="ant.%s" value="%s"></td>
+<td>%s</td>
 <td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
 <td><span style="font-size:8">%s</span></td>
 <td><a target="cspace" href="%s">%s</a></td>
 <td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
-            rr[8], cgi.escape(rr[18], True), rr[8], cgi.escape(rr[19], True), rr[8], cgi.escape(rr[16], True),
+            rr[8], cgi.escape(rr[18], True), altnumtypes, rr[8], cgi.escape(rr[16], True),
             cgi.escape(rr[17], True), link2, cgi.escape(rr[21], True))
     elif fieldSet == 'keyinfo':
         return """<tr>
@@ -1927,6 +1928,50 @@ def getHierarchies(form):
     authorities + '\n </select>'
     return authorities, selected
 
+
+def getAltNumTypes(form, csid, ant):
+    selected = form.get('altnumtype')
+
+    altnumtypelist = [ \
+        ("(none selected)","(none selected)"),
+        ("additional number","additional number"),
+        ("attr. PAHMA number","attributed PAHMA number"),
+        ("burial number","burial number"),
+        ("moac subojid","moac subobjid"),
+        ("recataloged to","museum number (recataloged to)"),
+        ("previous number","previous number"),
+        ("prev. num. Bender","previous number (Albert Bender's number)"),
+        ("prev. num. Bascom","previous number (Bascom's number)"),
+        ("prev. num. collector","previous number (collector's original number)"),
+        ("prev. num. Design","previous number (Design Dept.)"),
+        ("prev. num. MVC","previous number (MVC number, Mossman-Vitale collection)"),
+        ("prev. num. UCAS","previous number (UCAS: University of California Archaeological Survey)"),
+        ("song number","song number"),
+        ("tag","tag"),
+        ("temporary number","temporary number"),
+        ("assoc. catalog number","associated catalog number"),
+        ("field number","field number"),
+        ("original number","original number"),
+        ("recataloged from","previous museum number (recataloged from)"),
+        ("prev. num. Blake","previous number (Anson Blake's number)"),
+        ("prev. num. donor","previous number (donor's original number)"),
+        ("prev. num. Paleo","previous number (UC Paleontology number)"),
+        ("tb number","tb (temporary basket) number")
+    ]
+
+    altnumtypes = \
+          '''<select class="cell" name="ant.''' + csid + '''">
+              <option value="None">Select an alternate number type</option>'''
+
+    for altnumtype in altnumtypelist:
+        if altnumtype[1] == ant:
+            altnumtypeOption = """<option value="%s" selected>%s</option>""" % (altnumtype[1], altnumtype[0])
+        else:
+            altnumtypeOption = """<option value="%s">%s</option>""" % (altnumtype[1], altnumtype[0])
+        altnumtypes = altnumtypes + altnumtypeOption
+
+    altnumtypes += '\n      </select>'
+    return altnumtypes, selected
 
 def selectWebapp():
     files = os.listdir(".")
