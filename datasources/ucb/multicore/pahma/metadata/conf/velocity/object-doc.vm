@@ -15,7 +15,7 @@
 <div>Museum Number: #field('objectnumber_s')</div>
 <div>Description: #field('description_txt')</div>
 <div>Cultural Group: #field('culture_s')</div>
-<div>Provenance: #field('provenance_ss')</div>
+<div>Provenance:  #field('provenance_s')</div>
 <div>Medium: #field('medium_s')</div>
 ##<div>Blob CSID: #field('blobs_ss')</div>
 <div class="mlt">
@@ -26,9 +26,8 @@
   <ul>
     #foreach($mltHit in $mlt)
       #set($mltId = $mltHit.getFieldValue('id'))
-      <li><div><a href="#url_for_home?q=id:$mltId">$mltId</a></div><div><span class="field-name">Name:</span> $mltHit.getFieldValue('name')</div>
-        <div><span class="field-name">Price:</span> $!number.currency($mltHit.getFieldValue('price')) <span class="field-name">In Stock:</span> $mltHit.getFieldValue('inStock')</div>
-
+      <li><div><a href="#url_for_home?q=id:$mltId">$mltId</a></div><div><span class="field-name">Name:</span> $mltHit.getFieldValue('objectname_txt')</div>
+        <div><span class="field-name"><span class="field-name">name:</span> $mltHit.getFieldValue('description_txt')</div>
       </li>
     #end
   </ul>

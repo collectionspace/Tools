@@ -902,7 +902,7 @@
        <str name="defType">edismax</str>
        <str name="qf">
 	 objectnumber_s^0.5 objectname_s^3.0 title_txt^0.5 medium_s^0.5 dimensions_s^0.5 markings_s^0.5 
-	 curatorialremarks_txt^0.5 description_txt^2.0 provenance_ss^0.5 notes_txt^0.5 sitename_s^0.5 
+	 curatorialremarks_txt^0.5 description_txt^2.0 provenance_s^0.5 notes_txt^0.5 sitename_s^0.5 
 	 sitenumber_s^0.5 culture_s^1.0
        </str>
        <str name="df">text</str>
@@ -913,7 +913,7 @@
 
        <str name="mlt.qf">
 	 objectnumber_s^0.5 objectname_s^3.0 title_txt^0.5 medium_s^0.5 dimensions_s^0.5 markings_s^0.5 
-	 curatorialremarks_txt^0.5 description_txt^2.0 provenance_ss^0.5 notes_txt^0.5 sitename_s^0.5 
+	 curatorialremarks_txt^0.5 description_txt^2.0 provenance_s^0.5 notes_txt^0.5 sitename_s^0.5 
 	 sitenumber_s^0.5 culture_s^1.0
        </str>
        <str name="mlt.fl">
@@ -925,15 +925,15 @@
        <!-- Faceting defaults -->
        <str name="facet">on</str>
        <str name="facet.field">objectname_s</str>
-       <str name="facet.field">provenance_ss</str>
        <str name="facet.field">medium_s</str>
        <str name="facet.field">culture_s</str>
+       <str name="facet.field">provenance_s</str>
        <str name="facet.query">mask</str>
        <str name="facet.mincount">1</str>
 
        <!-- Highlighting defaults -->
        <str name="hl">on</str>
-       <str name="hl.fl">objectnumber_s objectname_s title_txt description_txt provenance_ss culture_s</str>
+       <str name="hl.fl">objectnumber_s objectname_s title_txt description_txt provenance_s culture_s</str>
        <str name="hl.encoder">html</str>
        <str name="hl.simple.pre">&lt;b&gt;</str>
        <str name="hl.simple.post">&lt;/b&gt;</str>
