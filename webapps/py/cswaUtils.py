@@ -2740,7 +2740,8 @@ def endhtml(form, config, elapsedtime):
     else:
         focusSnippet = '''$('input:text:first').focus();'''
     if config.get('info', 'updatetype') == 'collectionstats':
-        addenda = '''$("#gototab2").click(function() {
+        addenda = '''});
+$("#gototab2").click(function() {
     $("#tabs").tabs("select","#tabs-2");
 });
 $("#gototab3").click(function() {
@@ -2754,6 +2755,13 @@ $("#gototab5").click(function() {
 });
 $("#gototab6").click(function() {
     $("#tabs").tabs("select","#tabs-6");
+});'''
+    else:
+        addenda = '''
+
+d = document.getElementById("appstatus");
+d.innerHTML = '&nbsp;';
+
 });'''
     return '''
   <table width="100%">
@@ -2816,11 +2824,6 @@ $('[name]').map(function() {
             minLength: 2,
         });
     }
-});
-
-d = document.getElementById("appstatus");
-d.innerHTML = '&nbsp;';
-
 });
 
 ''' + addenda + '''
