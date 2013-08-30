@@ -194,6 +194,8 @@ def prepOthers(retrievedstats, statmetric, chartTitle, imgW, imgH, legend, chart
    icount = -1
    for retrievedstat in retrievedstats:
       icount += 1
+      if retrievedstats[icount][0] == "None" and "Ethnographic File Code" in chartTitle:
+         continue
       stat += "['" + str(makeTersePrettyLabel(retrievedstats[icount][0])) + "', " + str(retrievedstats[icount][1]) + "],\n"
    divs = ''
    otherFields = '''var options = {'width':''' + str(imgW) + ''',
@@ -272,7 +274,43 @@ def maketableofcounts (dbsource, sectiontitle, statgroup, config):
    print """<table border="0"><tr>
    <th class="statheader">""" + sectiontitle + """</th><th class="statheader" colspan="2">Museum Nos.</th><th class="statheader" colspan="2">Object Counts</th>
    <th class="statheader" colspan="2">Piece Counts</th></tr>"""
-   
+
+   if sectiontitle == "By ethnographic use code":
+      
+      totalmusno, totalobjno, totalpieceno, icount = 0, 0, 0, -1
+      for tableresult in tableresults:
+         icount += 1
+         if tableresults[icount][0] == "None":
+            continue
+         totalmusno += tableresults[icount][1]
+         totalobjno += tableresults[icount][5]
+         totalpieceno += tableresults[icount][9]
+
+      print (totalmusno, totalobjno, totalpieceno)
+      
+      icount = -1
+      for tableresult in tableresults:
+         icount += 1
+         if tableresults[icount][0] == "None":
+            continue
+         labelverbatim = tableresults[icount][0]
+         label = makeprettylabel(labelverbatim)
+         totalMusNoCount = tableresults[icount][1]
+         percentOfMuseumNos = round((totalMusNoCount/(totalmusno * 0.01)),3)
+         trueObjectCount = tableresults[icount][5]
+         percentOfTrueObjects = round((trueObjectCount/(totalobjno * 0.01)),3)
+         truePieceCount = tableresults[icount][9]
+         percentOfTruePieces = round((truePieceCount/(totalpieceno * 0.01)),3)
+         dateOfCounts = tableresults[icount][11]
+            
+         print """<tr><td  width="250px" class="stattitle">""" + str(label) + """</td>
+           <td width="75px" class="statnumber">""" + str(locale.format("%d", int(totalMusNoCount), grouping=True)) + """</td><td width="75px" class="statpct"> (""" + str(percentOfMuseumNos) + """ %)</td>
+           <td width="75px" class="statnumber">""" + str(locale.format("%d", int(trueObjectCount), grouping=True)) + """</td><td width="75px" class="statpct"> (""" + str(percentOfTrueObjects) + """ %)</td>
+           <td width="75px" class="statnumber">""" + str(locale.format("%d", int(truePieceCount), grouping=True)) + """</td><td width="75px" class="statpct"> (""" + str(percentOfTruePieces) + """ %)</td></tr>"""
+
+      print "</table>"
+      print "<hr/>"
+      return  
 
    icount = -1
    for tableresult in tableresults:
@@ -409,6 +447,52 @@ def makeTersePrettyLabel(label):
    elif str(label) == 'NAGPRA-associated Funerary Objects':                               label = 'NAGPRA AFOs'
    elif str(label) == 'Faunal Remains':                                                   label = 'Faunal remains'
    elif str(label) == 'Human Remains':                                                    label = 'Human remains'
+   elif str(label) == '1.0 Use not specified (Utensils, Implements, and Conveyances)':                                                            label = '1.0 Utensils, implements, etc.'
+   elif str(label) == '1.1 Hunting and Fishing':                                                                                                  label = '1.1 Hunting and fishing'
+   elif str(label) == '1.2 Gathering':                                                                                                            label = '1.2 Gathering'
+   elif str(label) == '1.3 Agriculture and Animal Husbandry':                                                                                     label = '1.3 Agriculture, animal husbandry'
+   elif str(label) == '1.4 Transportation':                                                                                                       label = '1.4 Transportation'
+   elif str(label) == '1.5 Household':                                                                                                            label = '1.5 Household'
+   elif str(label) == '1.6 Manufacturing, Constructing, Craft, and Professional Pursuits':                                                        label = '1.6 Manufacturing, craft, etc.'
+   elif str(label) == '1.7 Fighting, Warfare, and Social Control':                                                                                label = '1.7 Fighting, warfare, social control'
+   elif str(label) == '1.8 Toilet Articles':                                                                                                      label = '1.8 Toilet articles'
+   elif str(label) == '1.9 Multiple Utility':                                                                                                     label = '1.9 Multiple utility'
+   elif str(label) == '2.0 Use not specified (Secular Dress and Accoutrements, and Adornment)':                                                   label = '2.0 Secular dress, adornment'
+   elif str(label) == '2.1 Daily Garb':                                                                                                           label = '2.1 Daily garb'
+   elif str(label) == '2.2 Personal Adornments and Accoutrements':                                                                                label = '2.2 Personal adornments, etc.'
+   elif str(label) == '2.3 Special Ornaments, Garb, and Finery Worn to Battle by Warrior (excluding status insignia)':                            label = '2.3 Special ornaments for battle'
+   elif str(label) == '2.4 Fine Clothes and Accoutrements not used exclusively for status or religious purposes':                                 label = '2.4 Fine clothes, non-religious'
+   elif str(label) == '3.1 Status Objects and Insignia of Office':                                                                                label = '3.1 Status objects, insignia of office'
+   elif str(label) == '4.0 Use not specified (Structures and Furnishings)':                                                                       label = '4.0 Structures and furnishings'
+   elif str(label) == '4.1 Dwellings and Furnishings':                                                                                            label = '4.1 Dwellings and furnishings'
+   elif str(label) == '4.2 Public Buildings and Furnishings':                                                                                     label = '4.2 Public buildings, furnishings'
+   elif str(label) == '4.3 Storehouses, Granaries, and the Like':                                                                                 label = '4.3 Storehouses, granaries, etc.'
+   elif str(label) == '5.0 Use not specified (Ritual, Pageantry, and Recreation)':                                                                label = '5.0 Ritual, pageantry, and recreation'
+   elif str(label) == '5.1 Religion and Divination: Objects and garb associated with practices reflecting submission, devotion, obedience, and service to supernatural agencies':    
+                                                                                                                                                  label = '5.1 Religion & divination'
+   elif str(label) == '5.2 Magic: Objects Associated with Practices reflecting confidence in the ability to manipulate supernatural agencies':    label = '5.2 Magic, assoc. objects'
+   elif str(label) == '5.3 Objects relating to the Secular and Quasi-religious Rites, Pageants, and Drama':                                       label = '5.3 For quasi-religious rites, etc.'
+   elif str(label) == '5.4 Secular and Religious Musical Instruments':                                                                            label = '5.4 Musical instruments'
+   elif str(label) == '5.5 Stimulants, Narcotics, and Accessories':                                                                               label = '5.5 Stimulants, narcotics'
+   elif str(label) == '5.6 Sports, Games, Amusements; Gambling and Pet Accessories':                                                              label = '5.6 Sports, games, gambling, pets'
+   elif str(label) == """5.7 Gifts, Novelties, Models, "Fakes," and Reproductions (excluding currency) and Commemorative Medals""":               label = '5.7 Gifts, models, reproductions'
+   elif str(label) == '6.0 Use not specified (Child Care and Enculturation)':                                                                     label = '6.0 Child care and enculturation'
+   elif str(label) == '6.1 Cradles and Swaddling':                                                                                                label = '6.1 Cradles and swaddling'
+   elif str(label) == "6.2 Toys, Children's Utensils, Objects used in the Education of Children":                                                 label = "6.2 Children's toys, utensils, etc."
+   elif str(label) == '7.0 Use not specified (Communication, Records, Currency, and Measures)':                                                   label = '7.0 Communication, currency, measures'
+   elif str(label) == '7.1 Writing and Records (including religious texts)':                                                                      label = '7.1 Writing and records'
+   elif str(label) == '7.2 Sound Communication':                                                                                                  label = '7.2 Sound communication'
+   elif str(label) == '7.3 Weights, Measures, and Computing Devices':                                                                             label = '7.3 Weights, measures, etc.'
+   elif str(label) == '7.4 Non-issued Media of Exchange, Symbolic Valuables, and Associated Containers':                                          label = '7.4 Media of exchange, symb. value'
+   elif str(label) == '7.5 Issued Currency and Associated Containers':                                                                            label = '7.5 Issued currency, containers'
+   elif str(label) == '8.0 Use not specified (Raw Materials)':                                                                                    label = '8.0 Raw materials'
+   elif str(label) == '8.1 Foods':                                                                                                                label = '8.1 Foods'
+   elif str(label) == '8.2 Medicine and Hygiene':                                                                                                 label = '8.2 Medicine and Hygiene'
+   elif str(label) == '8.3 For Manufacturing':                                                                                                    label = '8.3 For Manufacturing'
+   elif str(label) == '8.4 Fuels':                                                                                                                label = '8.4 Fuels'
+   elif str(label) == '8.5 Multiple Utility':                                                                                                     label = '8.5 Multiple Utility'
+   elif str(label) == 'None':                                                                                                                     label = 'None'
+
 
    return label
 
