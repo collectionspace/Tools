@@ -723,9 +723,15 @@ def doUpdateKeyinfo(form, config):
         msg = 'updated.'
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-                msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace')[0]:
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
             if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-                msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
+                if form.get('cg.' + index) == cswaDB.getCSIDDetail(config, index, 'assocpeoplegroup')[0]:
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
             if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
                 msg += '<span style="color:red;"> Ethnographic File Code: term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
             try:
@@ -734,7 +740,6 @@ def doUpdateKeyinfo(form, config):
             except ValueError:
                 msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
                 del updateItems['objectCount']
-                #updateItems['objectCount'] = mythicalquerymethodtoreturncount(do)
         elif fieldset == 'registration':
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
@@ -1346,7 +1351,7 @@ def writeInfo2log(request, form, config, elapsedtime):
         updateType, action, request, elapsedtime, serverlabel, location1, location2))
 
 
-def uploadFile(actualform, config):
+def uploadFile(actualform, form, config):
     barcodedir = config.get('files', 'barcodedir')
     barcodeprefix = config.get('files', 'barcodeprefix')
     #print form
@@ -1358,15 +1363,133 @@ def uploadFile(actualform, config):
     if fileitem.filename:
 
         # strip leading path from file name to avoid directory traversal attacks
+        #fn = os.path.basename(fileitem.filename)
+        #open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
+        #os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
+        #processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
         fn = os.path.basename(fileitem.filename)
-        open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
-        os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
+        open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
+        os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
+        processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
         message = fn + ' was uploaded successfully'
     else:
         message = 'No file was uploaded'
 
     print "<h3>%s</h3>" % message
 
+def processTricoderFile(barcodefile, form, config):
+    handler, timestamp, objno, loc, crate = "", "", "", "", ""
+    try:
+        print getHeader('inventoryResult')
+
+        numUpdated = 0
+        
+        f = open(barcodefile, 'rb')
+        lines = f.readlines()
+        for line in lines:
+            if line[0] != '"':
+                continue
+            data = []
+            tempData = line.split('","')
+            for datum in tempData:
+                data.append(datum.rstrip())
+            data[0] = data[0][1:]
+            data[len(data)-1] = data[len(data)-1][:-1]
+            #print data
+            doUploadUpdateLocs(data, line, form, config)
+    except IOError:
+        raise
+    except Exception, e:
+        raise
+        print "<span style='color:red'>%s</span>" % e
+    print "\n</table>"
+        
+
+def doUploadUpdateLocs(data, line, form, config):
+
+    #get table from config
+    #*** Ape prohibited list code to get table ***
+    id2ref = {'A1732177': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7827)'Michael T. Black'",
+              'A1676856': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8700)'Raksmey Mam'",
+              'A0951620': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'",
+              'A1811681': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'",
+              'A2346921': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'",
+              'A2055958': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'",
+              'A2507976': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8731)'Tya Ates'",
+              'A2346563': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'",
+              'A1728294': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'",
+              'A1881977': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8724)'Allison Lewis'",
+              'A2472847': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'",
+              'A1687900': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7500)'Elizabeth Minor'",
+              'A2472958': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(AlexanderJackson1345659630608)'Alexander Jackson'",
+              'A2503701': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(GavinLee1349386412719)'Gavin Lee'",
+              'A2504029': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RonMartin1349386396342)'Ron Martin' ",
+              'A1148429': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8020)'Paolo Pellegatti'",
+              'A0904690': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'",
+              'A2525169': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(GrainneHebeler1354748670308)'Grainne Hebeler'",
+              '20271721': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KatieFleming1353023599564)'KatieFleming'",
+              'A2266779': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KatieFleming1353023599564)'KatieFleming'",
+              'A2204739': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(PaigeWalker1351201763000)'PaigeWalker'",
+              'A0701434': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'",
+              'A2532024': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'LindaWaterfield'",
+              'A2581770': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'JonOligmueller'"}
+    
+    from datetime import datetime
+    updateItems = {'crate': '', 'objectNumber': ''}
+    if data[0] == "C":
+        #Ex: "C","A1234567","07/22/2013 15:54","8-4216","Asian Archaeology Storage Box 0013","Kroeber, 20A, AA  1,  5"
+        updateItems['handlerRefName'] = id2ref[data[1]]
+        updateItems['locationDate'] = datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['objectNumber'] = data[3]
+        updateItems['crate'] = data[4]
+        updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[5], config)
+        updateItems['objectCsid'] = cswaDB.getCSID("objectnumber", data[3], config)[0]
+        updateItems['reason'] = form.get('reason')
+    elif data[0] == "M":
+        #Ex: "M","A1234567","8-4216","Kroeber, 20A, AA  1,  1","07/22/2013 15:54"
+        updateItems['handlerRefName'] = id2ref[data[1]]
+        updateItems['objectNumber'] = data[2]
+        updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[3], config)
+        updateItems['objectCsid'] = cswaDB.getCSID("objectnumber", data[2], config)[0]
+        updateItems['locationDate'] = datetime.strptime(data[4], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['reason'] = form.get('reason')
+    elif data[0] == "R":
+        #Ex: "R","A1234567","07/11/2013 17:29","Asian Archaeology Storage Box 0007","Kroeber, 20A, AA  1,  1"
+        updateItems['handlerRefName'] = id2ref[data[1]]
+        updateItems['locationDate'] = datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['crate'] = data[3]
+        #updateItems['locationRefname'], updateItems['objectCsid'] = cswaDB.getCSID('locations_common', data[4], config)
+        updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[4], config)
+        updateItems['objectCsid'] = cswaDB.getCSIDs('crateName', data[3], config)
+        updateItems['reason'] = form.get('reason')
+    else:
+        raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nMove codes are M, C, or R!</span>" % line)
+
+    updateItems[
+        'subjectCsid'] = '' # cells[3] is actually the csid of the movement record for the current location; the updated value gets inserted later
+    updateItems['inventoryNote'] = ''
+    updateItems['computedSummary'] = updateItems['locationDate'][0:10] + ' (%s)' % form.get('reason')
+
+    #print updateItems
+    numUpdated = 0
+    try:
+        if not isinstance(updateItems['objectCsid'], basestring):
+            objectCsid = updateItems['objectCsid']
+            for csid in objectCsid:
+                updateItems['objectCsid'] = csid[0]
+                updateLocations(updateItems, config)
+                numUpdated += 1
+        else:
+            updateLocations(updateItems, config)
+        numUpdated += 1
+        msg = 'Update successful'
+    except:
+        raise
+        raise Exception('<span style="color:red;">Problem updating line %s </span>' % line)
+        msg = 'Problem updating line %s' % line
+    print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+        updateItems['objectNumber'], updateItems['inventoryNote'], msg)
+    writeLog(updateItems, config)
 
 def viewLog(form, config):
     num2ret = int(form.get('num2ret')) if str(form.get('num2ret')).isdigit() else 100
@@ -1429,7 +1552,7 @@ def updateKeyInfo(fieldset, updateItems, config):
     elif fieldset == 'namedesc':
         fields = ('briefDescription', 'objectName')
     elif fieldset == 'registration':
-        # nb:  'pahmaAltNumType' is handle with  'pahmaAltNum'
+        # nb:  'pahmaAltNumType' is handled with  'pahmaAltNum'
         fields = ('objectName', 'pahmaAltNum', 'fieldCollector')
 
     # get the XML for this object
@@ -1469,7 +1592,12 @@ def updateKeyInfo(fieldset, updateItems, config):
                 metadata.insert(0, newElement)
         elif relationType in ['briefDescription', 'fieldCollector']:
             firstEntry = metadata.findall('.//' + relationType)
-            firstEntry[0].text = updateItems[relationType]
+            if firstEntry == []:
+                newElement = etree.Element(relationType)
+                newElement.text = updateItems[relationType]
+                metadata.insert(0, newElement)
+            else:
+                firstEntry[0].text = updateItems[relationType]
         else:
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)): continue
             newElement = etree.Element(relationType)
@@ -1640,6 +1768,7 @@ def formatInfoReviewRow(form, link, rr, link2):
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
             rr[8], cgi.escape(rr[15], True))
     elif fieldSet == 'registration':
+        altnumtypes, selected = getAltNumTypes(form, rr[8], rr[19])
         return """<tr>
 <td class="objno"><a target="cspace" href="%s">%s</a></td>
 <td class="objname">
@@ -1649,13 +1778,13 @@ def formatInfoReviewRow(form, link, rr, link2):
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="13" name="anm.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="13" name="ant.%s" value="%s"></td>
+<td>%s</td>
 <td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
 <td><span style="font-size:8">%s</span></td>
 <td><a target="cspace" href="%s">%s</a></td>
 <td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
-            rr[8], cgi.escape(rr[18], True), rr[8], cgi.escape(rr[19], True), rr[8], cgi.escape(rr[16], True),
+            rr[8], cgi.escape(rr[18], True), altnumtypes, rr[8], cgi.escape(rr[16], True),
             cgi.escape(rr[17], True), link2, cgi.escape(rr[21], True))
     elif fieldSet == 'keyinfo':
         return """<tr>
@@ -1928,6 +2057,50 @@ def getHierarchies(form):
     authorities + '\n </select>'
     return authorities, selected
 
+
+def getAltNumTypes(form, csid, ant):
+    selected = form.get('altnumtype')
+
+    altnumtypelist = [ \
+        ("(none selected)","(none selected)"),
+        ("additional number","additional number"),
+        ("attr. PAHMA number","attributed PAHMA number"),
+        ("burial number","burial number"),
+        ("moac subojid","moac subobjid"),
+        ("recataloged to","museum number (recataloged to)"),
+        ("previous number","previous number"),
+        ("prev. num. Bender","previous number (Albert Bender's number)"),
+        ("prev. num. Bascom","previous number (Bascom's number)"),
+        ("prev. num. collector","previous number (collector's original number)"),
+        ("prev. num. Design","previous number (Design Dept.)"),
+        ("prev. num. MVC","previous number (MVC number, Mossman-Vitale collection)"),
+        ("prev. num. UCAS","previous number (UCAS: University of California Archaeological Survey)"),
+        ("song number","song number"),
+        ("tag","tag"),
+        ("temporary number","temporary number"),
+        ("assoc. catalog number","associated catalog number"),
+        ("field number","field number"),
+        ("original number","original number"),
+        ("recataloged from","previous museum number (recataloged from)"),
+        ("prev. num. Blake","previous number (Anson Blake's number)"),
+        ("prev. num. donor","previous number (donor's original number)"),
+        ("prev. num. Paleo","previous number (UC Paleontology number)"),
+        ("tb number","tb (temporary basket) number")
+    ]
+
+    altnumtypes = \
+          '''<select class="cell" name="ant.''' + csid + '''">
+              <option value="None">Select an alternate number type</option>'''
+
+    for altnumtype in altnumtypelist:
+        if altnumtype[1] == ant:
+            altnumtypeOption = """<option value="%s" selected>%s</option>""" % (altnumtype[1], altnumtype[0])
+        else:
+            altnumtypeOption = """<option value="%s">%s</option>""" % (altnumtype[1], altnumtype[0])
+        altnumtypes = altnumtypes + altnumtypeOption
+
+    altnumtypes += '\n      </select>'
+    return altnumtypes, selected
 
 def selectWebapp():
     files = os.listdir(".")
@@ -2448,9 +2621,12 @@ def starthtml(form, config):
                                                                          'checked value="groupbyculture"')
 
     elif updateType == 'upload':
+        reasons, selected = getReasons(form)
+        
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
-        otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>'''
-
+        otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>
+<th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>'''
+        
     elif updateType == 'hierarchyviewer':
         hierarchies, selected = getHierarchies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Hierarchy" name="action">'''
@@ -2552,7 +2728,8 @@ def endhtml(form, config, elapsedtime):
     else:
         focusSnippet = '''$('input:text:first').focus();'''
     if config.get('info', 'updatetype') == 'collectionstats':
-        addenda = '''$("#gototab2").click(function() {
+        addenda = '''});
+$("#gototab2").click(function() {
     $("#tabs").tabs("select","#tabs-2");
 });
 $("#gototab3").click(function() {
@@ -2566,6 +2743,13 @@ $("#gototab5").click(function() {
 });
 $("#gototab6").click(function() {
     $("#tabs").tabs("select","#tabs-6");
+});'''
+    else:
+        addenda = '''
+
+d = document.getElementById("appstatus");
+d.innerHTML = '&nbsp;';
+
 });'''
     return '''
   <table width="100%">
@@ -2628,11 +2812,6 @@ $('[name]').map(function() {
             minLength: 2,
         });
     }
-});
-
-d = document.getElementById("appstatus");
-d.innerHTML = '&nbsp;';
-
 });
 
 ''' + addenda + '''
