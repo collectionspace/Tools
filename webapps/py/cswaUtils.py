@@ -1363,14 +1363,14 @@ def uploadFile(actualform, form, config):
     if fileitem.filename:
 
         # strip leading path from file name to avoid directory traversal attacks
-        #fn = os.path.basename(fileitem.filename)
-        #open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
-        #os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        #processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
         fn = os.path.basename(fileitem.filename)
-        open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
-        os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
-        processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
+        open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
+        os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
+        processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+        #fn = os.path.basename(fileitem.filename)
+        #open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
+        #os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
+        #processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
         message = fn + ' was uploaded successfully'
     else:
         message = 'No file was uploaded'
