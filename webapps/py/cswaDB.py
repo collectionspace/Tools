@@ -107,7 +107,10 @@ findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
 end as family,
-h1.name as objectcsid
+h1.name as objectcsid,
+con.rare,
+cob.deadflag
+
 from collectionobjects_common co1
 left outer join hierarchy h1 on co1.id=h1.id
 left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
@@ -117,6 +120,7 @@ left outer join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)'
 inner join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')
 
 join collectionobjects_botgarden cob on (co1.id=cob.id)
+join collectionobjects_naturalhistory con on (co1.id = con.id)
 
 left outer join hierarchy htig 
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
