@@ -722,6 +722,47 @@ order by level""" % refname.replace("'", "''")
         #raise
         return [["findparents error"]]
 
+def getCSIDDetail(config, csid, detail):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    
+    if detail == 'fieldcollectionplace':
+        query = """SELECT substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+AS fieldcollectionplace
+
+FROM collectionobjects_pahma_pahmafieldcollectionplacelist pfc
+LEFT OUTER JOIN HIERARCHY h1 on (pfc.id=h1.id and pfc.pos = 0)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'assocpeoplegroup':
+        query = """SELECT substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+as culturalgroup
+
+FROM collectionobjects_common cc
+
+left outer join hierarchy h1 on (cc.id=h1.id)
+left outer join hierarchy h2 on (cc.id=h2.parentid and h2.primarytype =
+'assocPeopleGroup' and (h2.pos=0 or h2.pos is null))
+left outer join assocpeoplegroup apg on (apg.id=h2.id)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'objcount':
+        query = """SELECT cc.numberofobjects
+
+FROM collectionobjects_common cc
+
+left outer join hierarchy h1 on (cc.id=h1.id)
+
+WHERE h1.name = '%s'""" % csid
+    else:
+        return ''
+    try:
+        objects.execute(query)
+        return objects.fetchone()
+    except:
+        return ''
+
 
 if __name__ == "__main__":
 

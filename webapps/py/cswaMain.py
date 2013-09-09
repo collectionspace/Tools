@@ -70,7 +70,7 @@ try:
             # elif updateType == 'holdings':     doBedList(form,config)
             # elif updateType == 'locreport':    doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
-            elif updateType == 'upload':       uploadFile(actualform,config)
+            elif updateType == 'upload':       uploadFile(actualform,form,config)
             elif action == "Recent Activity":
                 viewLog(form,config)
     ##    # special case: if only one location in range, jump to enumerate
