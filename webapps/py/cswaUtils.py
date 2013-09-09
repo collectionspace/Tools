@@ -428,9 +428,11 @@ def getHeader(updateType):
         return """
     <table class="tablesorter" id="sortTable%s"><thead>
     <tr>
-      <th>Accession</th>
-      <th>Family</th>
-      <th>Taxonomic Name</th>
+      <th data-sort="float">Accession</th>
+      <th data-sort="string">Family</th>
+      <th data-sort="string">Taxonomic Name</th>
+      <th data-sort="string">Rare</th>
+      <th data-sort="string">Dead</th>
     </tr></thead><tbody>"""
     elif updateType == 'bedlistxxx' or updateType == 'advsearchxxx':
         return """
@@ -443,12 +445,14 @@ def getHeader(updateType):
     elif updateType == 'bedlistnone':
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
-      <th>Accession</th>
-      <th>Family</th>
-      <th>Taxonomic Name</th>
+      <th data-sort="float">Accession</th>
+      <th data-sort="string">Family</th>
+      <th data-sort="string">Taxonomic Name</th>
+      <th data-sort="string">Rare</th>
+      <th data-sort="string">Dead</th>
       <th>Garden Location</th>
     </tr></thead><tbody>"""
-    elif updateType == 'locreport' or updateType == 'holdings' or updateType == 'advsearch':
+    elif updateType in ['locreport','holdings','advsearch']:
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
       <th data-sort="float">Accession</th>
@@ -1001,10 +1005,7 @@ def doAuthorityScan(form, config):
     accessions = []
     for t in objects:
         if t[column] in tList:
-            if updateType == 'locreport' and checkMembership(t[7], rare) and checkMembership(t[8], dead):
-                print formatRow({'rowtype': updateType, 'data': t}, form, config)
-                totalobjects += 1
-            elif updateType == 'holdings':
+            if updateType in ['locreport','holdings'] and checkMembership(t[7], rare) and checkMembership(t[8], dead):
                 print formatRow({'rowtype': updateType, 'data': t}, form, config)
                 totalobjects += 1
 
@@ -1148,7 +1149,7 @@ def doAdvancedSearch(form, config):
         objects = cswaDB.getplants('', '', 1, config, 'getalltaxa')
     except:
         raise
-        handleTimeout('getalltaxa', form)
+        handleTimeout('getalltaxa: advancedsearch', form)
         objects = []
 
     print getHeader(updateType)
@@ -1156,8 +1157,7 @@ def doAdvancedSearch(form, config):
     accessions = []
     for t in objects:
         if checkMembership(t[1], taxa) and checkMembership(t[3], beds) and checkMembership(t[5],
-                                                                                           places) and checkMembership(
-                t[7], rare) and checkMembership(t[8], dead):
+            places) and checkMembership(t[7], rare) and checkMembership(t[8], dead):
             print formatRow({'rowtype': updateType, 'data': t}, form, config)
 
     print """</table><table>"""
@@ -1225,8 +1225,8 @@ def doBedList(form, config):
         for r in objects:
             #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
             #if checkObject(places,r):
-            #if checkMembership(t[7],rare) and checkMembership(t[8],dead):
-            if True:
+            if checkMembership(r[8],rare) and checkMembership(r[9],dead):
+            #if True:
                 totalobjects += 1
                 print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
@@ -1449,7 +1449,7 @@ def updateKeyInfo(fieldset, updateItems, config):
         else:
             pass
             #print ">>> ",'.//'+relationType+extra+'List'
-        sys.stderr.write('tag: ' + relationType + extra + list)
+        #sys.stderr.write('tag: ' + relationType + extra + list)
         metadata = root.findall('.//' + relationType + extra + list)
         metadata = metadata[0] # there had better be only one!
         # check if value is already present. if so, skip
@@ -1548,16 +1548,17 @@ def formatRow(result, form, config):
         #return '''<tr><td class="xspan"><input type="checkbox" name="%s.%s" value="%s" checked> <a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % ((boxType,) + (rr[0],) * 4)
     elif result['rowtype'] == 'bedlist':
         groupby = str(form.get("groupby"))
+        rare = 'Yes' if rr[8] == 'true' else 'No'
+        dead = 'Yes' if rr[9] == 'true' else 'No'
         link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
         if groupby == 'none':
             location = '<td>%s</td>' % rr[0]
         else:
             location = ''
-            # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
-        #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid 
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td>%s</tr>''' % (
-            link, rr[4], rr[6], rr[5], location)
-    elif result['rowtype'] == 'locreport' or result['rowtype'] == 'holdings' or result['rowtype'] == 'advsearch':
+            # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid | 8 rare | 9 dead
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>''' % (
+            link, rr[4], rr[6], rr[5], rare, dead,location)
+    elif result['rowtype'] in ['locreport','holdings','advsearch']:
         rare = 'Yes' if rr[7] == 'true' else 'No'
         dead = 'Yes' if rr[8] == 'true' else 'No'
         link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6]
@@ -2251,14 +2252,31 @@ def starthtml(form, config):
 
     # temporary, until the other groupings and sortings work...
     groupbyelement = '''
-          <th><span class="cell">group by:</span></th>
-          <th>
-          <span class="cell">none </span><input type="radio" name="groupby" value="none">
-          <span class="cell">location </span><input type="radio" name="groupby" value="location">
-          </th>'''
+          <th><span class="cell">group by: </span></th>
+          <th><span class="cell">none </span><input type="radio" name="groupby" value="none">
+          <span class="cell">location </span><input type="radio" name="groupby" value="location"></th>
+          '''
 
     groupby = str(form.get("groupby")) if form.get("groupby") else 'location'
     groupbyelement = groupbyelement.replace(('value="%s"' % groupby), ('checked value="%s"' % groupby))
+
+    deadoralive = '''
+      <th><span class="cell">filters: </span></th>
+      <th><span class="cell">rare </span>
+	  <input id="rare" class="cell" type="checkbox" name="rare" value="rare" class="xspan">
+          <span class="cell">not rare </span>
+	  <input id="notrare" class="cell" type="checkbox" name="notrare" value="notrare" class="xspan">
+          ||
+	  <span class="cell">alive </span>
+	  <input id="alive" class="cell" type="checkbox" name="alive" value="alive" class="xspan">
+	  <span class="cell">dead </span>
+	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
+
+    for v in ['rare', 'notrare', 'dead', 'alive']:
+        if form.get(v):
+            deadoralive = deadoralive.replace('value="%s"' % v, 'checked value="%s"' % v)
+        else:
+            deadoralive = deadoralive.replace('checked value="%s"' % v, 'value="%s"' % v)
 
     location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
     location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
@@ -2348,30 +2366,12 @@ def starthtml(form, config):
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
         otherfields = '''
 	  <tr>
-          <th><span class="cell">bed:</span></th>
+          <th><span rowspan="2" class="cell">bed:</span></th>
 	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
-          ''' + groupbyelement + '''
-          </tr>
-    '''
+          <th><table><tr>''' + groupbyelement + '''</tr><tr>''' + deadoralive + '''</tr></table></th>
+          </tr>'''
+
     elif updateType == 'locreport':
-
-        deadoralive = '''
-         <th><span class="cell">rare </span>
-	  <input id="rare" class="cell" type="checkbox" name="rare" value="rare" class="xspan">
-          <span class="cell">not rare </span>
-	  <input id="notrare" class="cell" type="checkbox" name="notrare" value="notrare" class="xspan">
-          ||
-	  <span class="cell">alive </span>
-	  <input id="alive" class="cell" type="checkbox" name="alive" value="alive" class="xspan">
-	  <span class="cell">dead </span>
-	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
-
-        for v in ['rare', 'notrare', 'dead', 'alive']:
-            if form.get(v):
-                deadoralive = deadoralive.replace('value="%s"' % v, 'checked value="%s"' % v)
-            else:
-                deadoralive = deadoralive.replace('checked value="%s"' % v, 'value="%s"' % v)
-
         taxName = str(form.get('ta.taxon')) if form.get('ta.taxon') else ''
         otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
@@ -2382,8 +2382,8 @@ def starthtml(form, config):
         place = str(form.get('px.place')) if form.get('px.place') else ''
         otherfields = '''
 	  <tr><th><span class="cell">collection place:</span></th>
-	  <th><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></th></tr>
-    '''
+	  <th><input id="px.place" class="cell" type="text" size="40" name="px.place" value="''' + place + '''" class="xspan"></th>
+          ''' + deadoralive + '''</tr> '''
 
     elif updateType == 'advsearch':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
@@ -2391,25 +2391,6 @@ def starthtml(form, config):
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
         place = str(form.get('px.place')) if form.get('px.place') else ''
         concept = str(form.get('cx.concept')) if form.get('cx.concept') else ''
-
-        deadoralive = '''
-         <th><span class="cell">filters:</span></th><th><span class="cell">rare </span>
-	  <input id="rare" class="cell" type="checkbox" name="rare" value="rare" class="xspan">
-	  <span class="cell">dead </span>
-	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
-
-        #alive = str(form.get('alive')) if form.get('alive') else ''
-        #  <span class="cell">alive </span>
-        #  <input id="alive" class="cell" type="checkbox" name=""alive" value="''' + alive + '''" class="xspan"></th>
-
-        #  <th><span class="cell">sort by:</span></th>
-        #  <th>
-        #  <span class="cell">name </span><input type="radio" name="sortby" value="name">
-        #  <span class="cell">family </span><input type="radio" name="sortby" value="family">
-        #  <span class="cell">location </span><input type="radio" name="sortby" value="location" checked>
-        #  </th>
-        if form.get('rare'): deadoralive = deadoralive.replace('value="rare"', 'checked value="rare"')
-        if form.get('dead'): deadoralive = deadoralive.replace('value="dead"', 'checked value="dead"')
 
         otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
@@ -2439,6 +2420,7 @@ def starthtml(form, config):
 	  <th><input id="co.concept" class="cell" type="text" size="40" name="co.concept" value="''' + concept + '''" class="xspan"></th></tr>
 	  <tr><th><span class="cell">collection place:</span></th>
 	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
+
     elif updateType == 'barcodeprint':
         printers, selected = getPrinters(form)
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
@@ -2446,6 +2428,7 @@ def starthtml(form, config):
 <tr><th><span class="cell">museum number:</span></th>
 <th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>
 <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
+
     elif updateType == 'inventory':
         handlers, selected = getHandlers(form)
         reasons, selected = getReasons(form)
