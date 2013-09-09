@@ -1572,7 +1572,7 @@ def updateKeyInfo(fieldset, updateItems, config):
         else:
             pass
             #print ">>> ",'.//'+relationType+extra+'List'
-        sys.stderr.write('tag: ' + relationType + extra + list)
+        #sys.stderr.write('tag: ' + relationType + extra + list)
         metadata = root.findall('.//' + relationType + extra + list)
         metadata = metadata[0] # there had better be only one!
         # check if value is already present. if so, skip
@@ -1592,7 +1592,12 @@ def updateKeyInfo(fieldset, updateItems, config):
                 metadata.insert(0, newElement)
         elif relationType in ['briefDescription', 'fieldCollector']:
             firstEntry = metadata.findall('.//' + relationType)
-            firstEntry[0].text = updateItems[relationType]
+            if firstEntry == []:
+                newElement = etree.Element(relationType)
+                newElement.text = updateItems[relationType]
+                metadata.insert(0, newElement)
+            else:
+                firstEntry[0].text = updateItems[relationType]
         else:
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)): continue
             newElement = etree.Element(relationType)
