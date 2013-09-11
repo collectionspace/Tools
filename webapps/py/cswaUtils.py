@@ -962,13 +962,7 @@ def doAuthorityScan(form, config):
     updateType = config.get('info', 'updatetype')
     if not validateParameters(form, config): return
 
-    # yes, I know, it does look a bit odd...
-    rare = []
-    if form.get('rare'):    rare.append('true')
-    if form.get('notrare'): rare.append('false')
-    dead = []
-    if form.get('dead'):    dead.append('true')
-    if form.get('alive'):   dead.append('false')
+    dead,rare,qualifier = setFilters(form)
 
     if updateType == 'locreport':
         Taxon = form.get("ta.taxon")
@@ -989,7 +983,7 @@ def doAuthorityScan(form, config):
         column = 5
 
     try:
-        objects = cswaDB.getplants('', '', 1, config, 'getalltaxa')
+        objects = cswaDB.getplants('', '', 1, config, 'getalltaxa', qualifier)
     except:
         raise
         handleTimeout('getalltaxa', form)
@@ -1125,6 +1119,23 @@ def doBarCodes(form, config):
 
     print "\n</td></tr></table><hr/>"
 
+def setFilters(form):
+    # yes, I know, it does look a bit odd...
+    rare = []
+    if form.get('rare'):    rare.append('true')
+    if form.get('notrare'): rare.append('false')
+    dead = []
+    qualifier = []
+    if form.get('dead'):
+        dead.append('true')
+        qualifier.append('dead')
+    if form.get('alive'):
+        dead.append('false')
+        qualifier.append('alive')
+
+    qualifier = ' or '.join(qualifier)
+
+    return dead,rare,qualifier
 
 def doAdvancedSearch(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
@@ -1133,13 +1144,7 @@ def doAdvancedSearch(form, config):
 
     if not validateParameters(form, config): return
 
-    # yes, I know, it does look a bit odd...
-    rare = []
-    if form.get('rare'):    rare.append('true')
-    if form.get('notrare'): rare.append('false')
-    dead = []
-    if form.get('dead'):    dead.append('true')
-    if form.get('alive'):   dead.append('false')
+    dead,rare,qualifier = setFilters(form)
 
     beds = [form.get(i) for i in form if 'locations.' in i]
     taxa = [form.get(i) for i in form if 'taxon.' in i]
@@ -1151,7 +1156,7 @@ def doAdvancedSearch(form, config):
     #place: column = 5
 
     try:
-        objects = cswaDB.getplants('', '', 1, config, 'getalltaxa')
+        objects = cswaDB.getplants('', '', 1, config, 'getalltaxa', qualifier)
     except:
         raise
         handleTimeout('getalltaxa: advancedsearch', form)
@@ -1186,13 +1191,7 @@ def doBedList(form, config):
 
     if not validateParameters(form, config): return
 
-    # yes, I know, it does look a bit odd...
-    rare = []
-    if form.get('rare'):    rare.append('true')
-    if form.get('notrare'): rare.append('false')
-    dead = []
-    if form.get('dead'):    dead.append('true')
-    if form.get('alive'):   dead.append('false')
+    dead,rare,qualifier = setFilters(form)
 
     if updateType == 'bedlist':
         rows = [form.get(i) for i in form if 'locations.' in i]
@@ -2951,7 +2950,7 @@ if __name__ == "__main__":
 
     sys.exit()
 
-    print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport')
+    print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport', 'dead')
     sys.exit()
 
     starthtml(form, config)
