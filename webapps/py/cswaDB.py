@@ -31,7 +31,7 @@ def dbtransaction(command, config):
     cursor.execute(command)
 
 
-def setquery(type, location):
+def setquery(type, location, qualifier):
     if type == 'inventory':
         return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
@@ -107,7 +107,10 @@ findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
 end as family,
-h1.name as objectcsid
+h1.name as objectcsid,
+con.rare,
+cob.deadflag
+
 from collectionobjects_common co1
 left outer join hierarchy h1 on co1.id=h1.id
 left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
@@ -117,6 +120,7 @@ left outer join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)'
 inner join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')
 
 join collectionobjects_botgarden cob on (co1.id=cob.id)
+join collectionobjects_naturalhistory con on (co1.id = con.id)
 
 left outer join hierarchy htig 
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
@@ -230,7 +234,7 @@ LIMIT 30000
 """
 
     elif type == 'getalltaxa':
-        return """
+        queryTemplate = """
 select co1.objectnumber,
 findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
@@ -246,18 +250,19 @@ end as locality,
 h1.name as objectcsid,
 con.rare,
 cob.deadflag,
-regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth
+regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth,
+mc.reasonformove
 
 from collectionobjects_common co1
 
 join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
-join movements_common mc on (mc.id=h2.id)
-join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
+join movements_common mc on (mc.id=h2.id %s)
+%s
 
-join collectionobjects_naturalhistory con on (co1.id = con.id %s)
-join collectionobjects_botgarden cob on (co1.id=cob.id %s)
+join collectionobjects_naturalhistory con on (co1.id = con.id)
+join collectionobjects_botgarden cob on (co1.id=cob.id)
 
 left outer join hierarchy htig
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
@@ -275,7 +280,31 @@ join collectionspace_core core on (core.id=co1.id and core.tenantid=35)
 join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id) order by determination""" % ('', '')
+left outer join taxon_naturalhistory tn on (tc.id=tn.id) """
+        # the form of the query for finding Deads and Alives is a bit different, so we
+        # need to build the query string based on what we are trying to make a list of...deads or alives.
+        sys.stderr.write('qualifier %s' % qualifier)
+        if qualifier == 'alive':
+            queryPart1 = ""
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            return queryTemplate % (queryPart1, queryPart2)
+        elif qualifier == 'dead':
+            queryPart1 = " and mc.reasonformove = 'Dead'"
+            queryPart2 = " "
+            return queryTemplate % (queryPart1, queryPart2)
+        elif qualifier == 'dead or alive':
+            queryPart1 = ""
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            part1 = queryTemplate % (queryPart1, queryPart2)
+            queryPart1 = " and mc.reasonformove = 'Dead'"
+            queryPart2 = " "
+            part2 = queryTemplate % (queryPart1, queryPart2)
+            return part1 + ' UNION ' + part2
+        else:
+            raise
+            # houston, we got a problem...query not qualified
+
+
 
 # mc.reasonformove = 'Dead'.
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
@@ -290,7 +319,7 @@ def getlocations(location1, location2, num2ret, config, updateType):
     result = []
 
     for loc in getloclist('set', location1, '', num2ret, config):
-        getobjects = setquery(updateType, loc[0])
+        getobjects = setquery(updateType, loc[0], '')
 
         try:
             elapsedtime = time.time()
@@ -321,7 +350,7 @@ def getlocations(location1, location2, num2ret, config, updateType):
     return result
 
 
-def getplants(location1, location2, num2ret, config, updateType):
+def getplants(location1, location2, num2ret, config, updateType, qualifier):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -331,7 +360,7 @@ def getplants(location1, location2, num2ret, config, updateType):
     result = []
 
     #for loc in getloclist('set',location1,'',num2ret,config):
-    getobjects = setquery(updateType, location1)
+    getobjects = setquery(updateType, location1, qualifier)
     #print getobjects
     try:
         elapsedtime = time.time()
@@ -722,10 +751,57 @@ order by level""" % refname.replace("'", "''")
         #raise
         return [["findparents error"]]
 
+def getCSIDDetail(config, csid, detail):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    
+    if detail == 'fieldcollectionplace':
+        query = """SELECT substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+AS fieldcollectionplace
+
+FROM collectionobjects_pahma_pahmafieldcollectionplacelist pfc
+LEFT OUTER JOIN HIERARCHY h1 on (pfc.id=h1.id and pfc.pos = 0)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'assocpeoplegroup':
+        query = """SELECT substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+as culturalgroup
+
+FROM collectionobjects_common cc
+
+left outer join hierarchy h1 on (cc.id=h1.id)
+left outer join hierarchy h2 on (cc.id=h2.parentid and h2.primarytype =
+'assocPeopleGroup' and (h2.pos=0 or h2.pos is null))
+left outer join assocpeoplegroup apg on (apg.id=h2.id)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'objcount':
+        query = """SELECT cc.numberofobjects
+
+FROM collectionobjects_common cc
+
+left outer join hierarchy h1 on (cc.id=h1.id)
+
+WHERE h1.name = '%s'""" % csid
+    else:
+        return ''
+    try:
+        objects.execute(query)
+        return objects.fetchone()
+    except:
+        return ''
+
 
 if __name__ == "__main__":
 
     from cswaUtils import getConfig
+
+    form = {'webapp': 'ucbgLocationReportV321'}
+    config = getConfig(form)
+    allplants = getplants('Pteridophyta', '', 1, config, 'getalltaxa', 'alive')
+    print 'array:',len(allplants)
+    sys.exit()
 
     form = {'webapp': 'barcodeprintDev'}
 
@@ -740,10 +816,6 @@ if __name__ == "__main__":
 
     sys.exit()
 
-    form = {'webapp': 'ucbgLocationReport'}
-    config = getConfig(form)
-    print getplants('Velleia rosea', '', 1, config, 'locreport')
-    sys.exit()
 
     config = getConfig('sysinvProd.cfg')
     print '\nrefnames\n'
