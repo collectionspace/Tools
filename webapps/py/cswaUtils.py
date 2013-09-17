@@ -1280,6 +1280,22 @@ def doHierarchyView(form, config):
     print "\n<hr>"
 
 
+def doListGovHoldings(form, config):
+    query = form.get('agency')
+    longFlag = form.get('long')
+    objects = cswaDB.getObjByOwner(config, query)
+    print "<table>"
+    print '''<tbody align="center" width=75 style="font-weight:bold">
+        <tr><td>Site</td><td>Owner</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
+    for objList in objects:
+        print "<tr>"
+        for obj in objList:
+            if not obj:
+                obj = ''
+            print '<td align="center" width=75>' + obj + "</td>"
+        print '</tr><tr><td colspan="4"><hr></td></tr>'
+    print "</table>"
+
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
     auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
@@ -1377,34 +1393,6 @@ def uploadFile(actualform, form, config):
     print "<h3>%s</h3>" % message
 
 def processTricoderFile(barcodefile, form, config):
-    handler, timestamp, objno, loc, crate = "", "", "", "", ""
-    try:
-        print getHeader('inventoryResult')
-
-        numUpdated = 0
-        
-        f = open(barcodefile, 'rb')
-        lines = f.readlines()
-        for line in lines:
-            if line[0] != '"':
-                continue
-            data = []
-            tempData = line.split('","')
-            for datum in tempData:
-                data.append(datum.rstrip())
-            data[0] = data[0][1:]
-            data[len(data)-1] = data[len(data)-1][:-1]
-            #print data
-            doUploadUpdateLocs(data, line, form, config)
-    except IOError:
-        raise
-    except Exception, e:
-        raise
-        print "<span style='color:red'>%s</span>" % e
-    print "\n</table>"
-        
-
-def doUploadUpdateLocs(data, line, form, config):
 
     #get table from config
     #*** Ape prohibited list code to get table ***
@@ -1433,6 +1421,84 @@ def doUploadUpdateLocs(data, line, form, config):
               'A2532024': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'LindaWaterfield'",
               'A2581770': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'JonOligmueller'"}
     
+    try:
+        print getHeader('inventoryResult')
+
+        numUpdated = 0
+        
+        barcodebuffer = {}
+        flag = 0
+        with open(barcodefile, 'rb') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line[0] != '"':
+                    continue
+                data = []
+                tempData = line.split('","')
+                for datum in tempData:
+                    data.append(datum.rstrip())
+                data[0] = data[0][1:]
+                data[len(data)-1] = data[len(data)-1][:-1]
+                #print data
+                barcodebuffer[line] = data
+            for line in barcodebuffer:
+                flag = 1
+                try:
+                    checkData(barcodebuffer[line], line, id2ref, config)
+                except Exception, e:
+                    print "<span style='color:red'>%s</span>" % e
+                    flag = 0
+                if flag == 0:
+                    barcodebuffer[line] = []
+            for line in barcodebuffer:
+                if barcodebuffer[line] == []:
+                    continue
+                doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+    except (IOError, AttributeError, LookupError):
+        raise
+    except Exception, e:
+        print "<span style='color:red'>%s</span>" % e
+    print "\n</table>"
+
+def checkData(data, line, id2ref, config):
+    from datetime import datetime
+    if data[0] not in ["C", "M", "R"]:
+        raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nMove codes are M, C, or R!</span>" % line)
+    if data[1] not in id2ref:
+        raise Exception("<span style='color:red'>Error encountered in line '%s':\nHandler ID not recognized!</span>" % line)
+    if data[0] == "C":
+        try:
+            datetime.strptime(data[2], '%m/%d/%Y %H:%M')
+        except ValueError:
+            raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
+        if not cswaDB.checkData(config, data[3], "objno"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
+        if not cswaDB.checkData(config, data[4], "crate"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
+        if not cswaDB.checkData(config, data[5], "location"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
+    elif data[0] == "M":
+        if not cswaDB.checkData(config, data[2], "objno"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
+        if not cswaDB.checkData(config, data[3], "location"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
+        try:
+            datetime.strptime(data[4], '%m/%d/%Y %H:%M')
+        except ValueError:
+            raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
+    else: #Guaranteed to be "R"
+        try:
+            datetime.strptime(data[2], '%m/%d/%Y %H:%M')
+        except ValueError:
+            raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
+        if not cswaDB.checkData(config, data[3], "crate"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
+        if not cswaDB.checkData(config, data[4], "location"):
+            raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
+    
+
+
+def doUploadUpdateLocs(data, line, id2ref, form, config):    
     from datetime import datetime
     updateItems = {'crate': '', 'objectNumber': ''}
     if data[0] == "C":
@@ -2101,6 +2167,40 @@ def getAltNumTypes(form, csid, ant):
     altnumtypes += '\n      </select>'
     return altnumtypes, selected
 
+def getAgencies(form):
+    selected = form.get('agency')
+
+    agencylist = [ \
+        ("Bureau of Indian Affairs", "Bureau of Indian Affairs"),
+        ("Bureau of Land Management", "Bureau of Land Management"),
+        ("Bureau of Reclamation", "Bureau of Reclamation"),
+        ("California Department of Transportation", "California Department of Transportation"),
+        ("California State Parks", "California State Division of State Parks and "),
+        ("East Bay Municipal Utility District", "East Bay Municipal Utility District"),
+        ("National Park Service", "National Park Service"),
+        ("United States Air Force", "United States Air Force"),
+        ("United States Army", "United States Army"),
+        ("United States Coast Guard", "United States Coast Guard"),
+        ("United States Fish and Wildlife Service", "United States Fish and Wildlife Service"),
+        ("United States Forest Service", "United States Forest Service"),
+        ("United States Marine Corps", "United States Marine Corps"),
+        ("United States Navy", "United States Navy"),
+        ("U.S. Army Corps of Engineers", "U.S. Army Corps of Engineers"),
+    ]
+
+    agencies = '''
+<select class="cell" name="agency">
+<option value="None">Select an agency</option>'''
+
+    for agency in agencylist:
+        agencyOption = """<option value="%s">%s</option>""" % (agency[1], agency[0])
+        if selected == agency[1]:
+            agencyOption = agencyOption.replace('option', 'option selected')
+        agencies = agencies + agencyOption
+
+    agencies + '\n </select>'
+    return agencies, selected
+
 def selectWebapp():
     files = os.listdir(".")
 
@@ -2127,7 +2227,7 @@ def selectWebapp():
 
     webapps = {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats'],
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
@@ -2630,6 +2730,12 @@ def starthtml(form, config):
         hierarchies, selected = getHierarchies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Hierarchy" name="action">'''
         otherfields = '''<tr><th><span class="cell">Authority:</span></th><th>''' + hierarchies + '''</th></tr>'''
+
+    elif updateType == 'governmentholdings':
+        agencies, selected = getAgencies(form)
+        button = '''<input id="actionbutton" class="save" type="submit" value="View Holdings" name="action">'''
+        otherfields = '''<tr><th><span class="cell">Agency:</span></th><th>''' + agencies + '''</th>'''
+        otherfields += '''<th><input id="longbox" type="checkbox" name="long" value="long">Include Object Detail</th></tr>'''
 
     elif False:
         otherfields += '''
