@@ -1334,6 +1334,7 @@ def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, confi
 
 def writeLog(updateItems, config):
     auditFile = config.get('files', 'auditfile')
+    updateType = config.get('updatetype')
     myPid = str(os.getpid())
     # writing of individual log files is now disabled. audit file contains the same data.
     #logFile = config.get('files','logfileprefix') + '.' + datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") + myPid + '.csv'
@@ -1343,7 +1344,7 @@ def writeLog(updateItems, config):
         #csvlogfh = csv.writer(codecs.open(logFile,'a','utf-8'), delimiter="\t")
         #csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
         csvlogfh = csv.writer(codecs.open(auditFile, 'a', 'utf-8'), delimiter="\t")
-        csvlogfh.writerow([updateItems['locationDate'], updateItems['objectNumber'], updateItems['objectStatus'],
+        csvlogfh.writerow([updateType, updateItems['locationDate'], updateItems['objectNumber'], updateItems['objectStatus'],
                            updateItems['subjectCsid'], updateItems['objectCsid'], updateItems['handlerRefName']])
     except:
         print 'log failed!'
