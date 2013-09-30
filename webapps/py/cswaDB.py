@@ -607,6 +607,20 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def finddoctypes(table, doctype, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    doctypes = dbconn.cursor()
+    doctypes.execute(timeoutcommand)
+
+    query = "select %s,count(*) as n from %s group by %s;" % (doctype,table,doctype)
+
+    try:
+        doctypes.execute(query)
+        return doctypes.fetchall()
+    except:
+        raise
+        return "finddoctypes error"
+
 
 def getobjinfo(museumNumber, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
@@ -791,6 +805,82 @@ WHERE h1.name = '%s'""" % csid
         return objects.fetchone()
     except:
         return ''
+
+def checkData(config, data, datatype):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if datatype == "objno":
+        query = """SELECT
+EXISTS(SELECT cc.objectnumber AS objno
+FROM collectionobjects_common cc
+JOIN misc ON (cc.id=misc.id)
+WHERE misc.lifecyclestate <> 'deleted'
+AND cc.objectnumber='%s')""" % data
+    if datatype in ["crate", "location"]:
+        query = """SELECT
+EXISTS(SELECT lc.refname
+FROM locations_common lc
+JOIN misc ON (lc.id=misc.id)
+WHERE misc.lifecyclestate <> 'deleted'
+AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(""" + datatype + """):%""" + data + """%')"""
+    objects.execute(query)
+    return objects.fetchone()
+
+def getObjByOwner(config, owner):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site", REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner", pog.ownershipnote AS "ownership note", pc.placenote AS "place note"
+FROM collectionobjects_pahma_pahmafieldcollectionplacelist fcp 
+JOIN places_common pc ON (pc.refname = fcp.item)
+JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
+JOIN placeownergroup pog ON (pog.id = h1.id)
+WHERE REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') ILIKE '%%""" + owner + """%%'
+OR (pog.owner IS NULL AND pog.ownershipnote ILIKE '%%""" + owner + """%%')
+ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
+    objects.execute(query)
+    return objects.fetchall()
+
+def getObjDetailsByOwner(config, owner):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT DISTINCT cc.objectnumber AS "Museum No.",
+    cp.sortableobjectnumber AS "sort number",
+    cc.numberofobjects AS "pieces",
+    ong.objectname AS "object name",
+    fcd.datedisplaydate AS "collection date",
+    STRING_AGG(DISTINCT(ac.acquisitionreferencenumber), ', ') AS "Acc. No.",
+    REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
+    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.ownershipnote AS "ownership note", pc.placenote AS "place note"
+FROM collectionobjects_common cc
+JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
+JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (fcp.id = cc.id)
+JOIN misc ms ON (ms.id = cc.id AND ms.lifecyclestate <> 'deleted')
+JOIN places_common pc ON (pc.refname = fcp.item)
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
+JOIN placeownergroup pog ON (pog.id = h1.id)
+FULL OUTER JOIN hierarchy h2 ON (h2.parentid = cc.id AND h2.name = 'collectionobjects_common:objectNameList' AND h2.pos = 0)
+FULL OUTER JOIN objectnamegroup ong ON (ong.id = h2.id)
+FULL OUTER JOIN hierarchy h3 ON (h3.id = cc.id)
+FULL OUTER JOIN relations_common rc ON (rc.subjectcsid = h3.name AND rc.objectdocumenttype = 'Acquisition')
+FULL OUTER JOIN hierarchy h4 ON (h4.name = rc.objectcsid)
+FULL OUTER JOIN acquisitions_common ac ON (ac.id = h4.id)
+FULL OUTER JOIN hierarchy h5 ON (h5.parentid = cc.id AND h5.pos = 0 AND h5.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+FULL OUTER JOIN structureddategroup fcd ON (fcd.id = h5.id)
+WHERE REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') ILIKE '%""" + owner + """%'
+OR (pog.owner IS NULL AND pog.ownershipnote ILIKE '%""" + owner + """%')
+GROUP BY cc.objectnumber, cp.sortableobjectnumber, cc.numberofobjects, ong.objectname, fcd.datedisplaydate, fcp.item, pog.owner, pog.ownershipnote, pc.placenote
+ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1'), pog.ownershipnote, cp.sortableobjectnumber"""
+
+    objects.execute(query)
+    return objects.fetchall()
 
 
 if __name__ == "__main__":

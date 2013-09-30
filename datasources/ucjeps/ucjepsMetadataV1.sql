@@ -1,5 +1,6 @@
 select
-    co.id as CSID,
+--  co.id as CSID,
+    h1.name as CSID,
     co.objectnumber as AccessionNumber,
     case when (tig.taxon is not null and tig.taxon <> '')
                 then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
@@ -38,7 +39,6 @@ select
     end as LateCollectionDate,
     lg.fieldlocverbatim as Locality,
     lg.fieldloccounty as CollCounty,
--- adding state and country
     lg.fieldlocstate as CollState,
     lg.fieldloccountry as CollCountry,
     lg.velevation as Elevation,
@@ -54,9 +54,12 @@ select
     lg.geodeticdatum as Datum,
     lg.localitysource as CoordinateSource,
     lg.coorduncertainty as CoordinateUncertainty,
-    lg.coorduncertaintyunit as CoordinateUncertaintyUnit
+    lg.coorduncertaintyunit as CoordinateUncertaintyUnit,
+    cc.updatedat as UpdatedAt
 from collectionobjects_common co
 inner join misc on co.id = misc.id
+inner join hierarchy h1 on co.id = h1.id
+inner join collectionspace_core cc on co.id=cc.id
 left outer join collectionobjects_common_fieldCollectors fc
         on (co.id = fc.id
         and fc.pos = 0)
@@ -78,5 +81,6 @@ left outer join taxon_ucjeps tu on (tu.id = tc.id)
 left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 -- and lg.fieldlocstate = 'CA'
+-- and h1.name = 'e09500ee-519f-4976-95d0'
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
 order by co.objectnumber

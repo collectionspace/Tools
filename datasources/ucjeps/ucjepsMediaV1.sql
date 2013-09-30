@@ -1,5 +1,5 @@
 SELECT 
-cc.id objectcsid,
+h2.name objectcsid,
 cc.objectnumber,
 mc.id mediacsid,
 mc.description,
