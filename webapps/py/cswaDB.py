@@ -828,7 +828,7 @@ AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:na
     objects.execute(query)
     return objects.fetchone()
 
-def getObjByOwner(config, owner):
+def getSitesByOwner(config, owner):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
