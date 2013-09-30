@@ -71,6 +71,7 @@ try:
             # elif updateType == 'locreport':    doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
             elif updateType == 'upload':       uploadFile(actualform,form,config)
+            elif updateType == 'editrel':      doRelationsEdit(form,config)
             elif action == "Recent Activity":
                 viewLog(form,config)
     ##    # special case: if only one location in range, jump to enumerate
@@ -99,6 +100,8 @@ try:
             elif updateType == 'objinfo':      doObjectSearch(form,config,'list')
             elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
             elif updateType == 'objdetails':   doObjectDetails(form,config)
+            elif updateType == 'objdetails':   doObjectDetails(form,config)
+            elif updateType == 'editrel':      doRelationsSearch(form,config)
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)

@@ -1,4 +1,4 @@
-#!/usr/bin/env /usr/bin/python
+
 
 import os
 import sys
@@ -14,6 +14,7 @@ import httplib, urllib2
 import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
+from cswaHelpers import *
 
 MAXLOCATIONS = 1000
 
@@ -45,123 +46,6 @@ import getAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
 
-## {{{ http://code.activestate.com/recipes/81547/ (r1)
-def cgiFieldStorageToDict(fieldStorage):
-    """Get a plain dictionary, rather than the '.value' system used by the cgi module."""
-    params = {}
-    for key in fieldStorage.keys():
-        params[key] = fieldStorage[key].value
-    return params
-
-
-def getConfig(form):
-    try:
-        fileName = form.get('webapp') + '.cfg'
-        config = ConfigParser.RawConfigParser()
-        config.read(fileName)
-        # test to see if it seems like it is really a config file
-        updateType = config.get('info', 'updatetype')
-        return config
-    except:
-        return False
-
-
-def getProhibitedLocations(appconfig):
-    #fileName = appconfig.get('files','prohibitedLocations.csv')
-    fileName = 'prohibitedLocations.csv'
-    locList = []
-    try:
-        with open(fileName, 'rb') as csvfile:
-            csvreader = csv.reader(csvfile, delimiter="\t")
-            for row in csvreader:
-                locList.append(row[0])
-    except:
-        print 'FAIL'
-        raise
-
-    return locList
-
-
-def serverCheck(form, config):
-    result = "<tr><td>start server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
-
-    elapsedtime = time.time()
-    # do an sql search...
-    result += "<tr><td>SQL check</td><td>" + cswaDB.testDB(config) + "</td></tr>"
-    elapsedtime = time.time() - elapsedtime
-    result += "<tr><td>SQL time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
-
-    # if we are configured for barcodes, try that...
-    try:
-        config.get('files', 'cmdrfileprefix') + config.get('files', 'cmdrauditfile')
-        try:
-            elapsedtime = time.time()
-            result += "<tr><td>barcode audit file</td><td>" + config.get('files', 'cmdrauditfile') + "</td></tr>"
-            result += "<tr><td>trying...</td><td> to write empty test files to commanderWatch directory</td></tr>"
-            result += "<tr><td>location labels</td><td>" + writeCommanderFile('test', 'kroeberBCP', 'locationLabels',
-                                                                              'locations', [], config) + "</td></tr>"
-            result += "<tr><td>object labels</td><td>" + writeCommanderFile('test', 'kroeberBCP', 'objectLabels',
-                                                                            'objects', [], config) + "</td></tr>"
-            elapsedtime = time.time() - elapsedtime
-            result += "<tr><td>barcode check time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
-        except:
-            result += "<tr><td>barcode funtionality check</td><td>FAILED.</td></tr>"
-    except:
-        result += "<tr><td>barcode funtionality check</td><td>skipped, not configured.</td></tr>"
-
-    elapsedtime = time.time()
-    # rest check...
-    elapsedtime = time.time() - elapsedtime
-    result += "<tr><td>REST check</td><td>Not ready yet.</td></tr>"
-    #result += "<tr><td>REST check</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
-
-    result += "<tr><td>end server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
-    result += '''<tr><td colspan="2"><hr/></td></tr>'''
-
-    return '''<table width="100%"><tbody><tr><td><h3>Server Status Check</h3></td></tr>''' + result + '''</tbody></table>'''
-
-
-def handleTimeout(source, form):
-    print '<h3><span style="color:red;">Time limit exceeded! The problem has been logged and will be examined. Feel free to try again though!</span></h3>'
-    sys.stderr.write('TIMEOUT::' + source + '::location::' + str(form.get("lo.location1")) + '::')
-
-
-def validateParameters(form, config):
-    valid = True
-
-    if form.get('handlerRefName') == 'None':
-        print '<h3>Please select a handler before searching</h3>'
-        valid = False
-
-    #if not str(form.get('num2ret')).isdigit():
-    #    print '<h3><i>number to retrieve</i> must be a number, please!</h3>'
-    #    valid = False
-
-    if form.get('reason') == 'None':
-        print '<h3>Please select a reason before searching</h3>'
-        valid = False
-
-    if config.get('info', 'updatetype') == 'barcodeprint':
-        if form.get('printer') == 'None':
-            print '<h3>Please select a printer before trying to print labels</h3>'
-            valid = False
-
-    prohibitedLocations = getProhibitedLocations(config)
-    if form.get("lo.location1"):
-        loc = form.get("lo.location1")
-        if loc in prohibitedLocations:
-            print '<h3>Location "%s" is unavailable to this webapp. Please contact registration staff for details.</h3>' % form.get(
-                "lo.location1")
-            valid = False
-
-    if form.get("lo.location2"):
-        loc = form.get("lo.location2")
-        if loc in prohibitedLocations:
-            print '<h3>Location "%s" is unavailable to this webapp. Please contact registration staff for details.</h3>' % form.get(
-                "lo.location2")
-            valid = False
-
-    return valid
 
 
 def search(form, config):
@@ -567,13 +451,6 @@ def doEnumerateObjects(form, config):
     print "\n</table><hr/>"
 
 
-def verifyLocation(loc, form, config):
-    location = cswaDB.getloclist('set', loc, '', 1, config)
-    if loc == location[0][0]:
-        return loc
-    else:
-        return ''
-
 
 def doCheckMove(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
@@ -794,11 +671,6 @@ def infoHeaders(fieldSet):
     else:
         return "<table><tr>DEBUG</tr>"
 
-
-def doNothing(form, config):
-    print '<span style="color:red;">Nothing to do yet! ;-)</span>'
-
-
 def doUpdateLocations(form, config):
     updateValues = [form.get(i) for i in form if 'r.' in i]
 
@@ -855,16 +727,6 @@ def doUpdateLocations(form, config):
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'object locations updated</h4>'
 
-
-def checkObject(places, objectInfo):
-    if places == []:
-        return True
-    elif objectInfo[6] is None:
-        return False
-    elif objectInfo[6] in places:
-        return True
-    else:
-        return False
 
 
 def doPackingList(form, config):
@@ -1015,6 +877,40 @@ def doAuthorityScan(form, config):
     print """<tr><td align="center">Report completed. %s objects displayed</td></tr>""" % (totalobjects)
     print "\n</table><hr/>"
 
+
+def doRelationsSearch(form, config):
+    updateactionlabel = config.get('info', 'updateactionlabel')
+    updateType = config.get('info', 'updatetype')
+    #if not validateParameters(form, config): return
+
+    try:
+        relations = cswaDB.getRelations(form,config)
+    except:
+        raise
+        handleTimeout('getrelations', form)
+        objects = []
+
+    rowcount = len(relations)
+
+    if rowcount == 0:
+        print '<h2>No relations!</h2>'
+        return
+
+    print getHeader(updateType)
+    totalobjects = 0
+    for t in objects:
+        print formatRow({'rowtype': updateType, 'data': t}, form, config)
+        totalobjects += 1
+
+    print """</table><table>"""
+    print """<tr><td align="center">&nbsp;</tr>"""
+    print """<tr><td align="center"><hr></tr>"""
+    print """<tr><td align="center">Report completed. %s relations displayed</td></tr>""" % (totalobjects)
+    print "\n</table><hr/>"
+
+
+def doRelationsEdit(form, config):
+    pass
 
 def downloadCsv(form, config):
     try:
@@ -1176,14 +1072,6 @@ def doAdvancedSearch(form, config):
     print """<tr><td align="center">Report completed. %s objects displayed</td></tr>""" % (len(accessions))
     print "\n</table><hr/>"
 
-
-def checkMembership(item, qlist):
-    if item in qlist or qlist == []:
-        return True
-    else:
-        return False
-
-
 def doBedList(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
@@ -1279,6 +1167,7 @@ def doHierarchyView(form, config):
     #print "\n</table><hr/>"
     print "\n<hr>"
 
+
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
     auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
@@ -1330,6 +1219,7 @@ def writeLog(updateItems, config):
         csvlogfh.writerow([updateType, updateItems['locationDate'], updateItems['objectNumber'], updateItems['objectStatus'],
                            updateItems['subjectCsid'], updateItems['objectCsid'], updateItems['handlerRefName']])
     except:
+        raise
         print 'log failed!'
         pass
 
@@ -1348,7 +1238,7 @@ def writeInfo2log(request, form, config, elapsedtime):
         updateType = checkServer
     sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (
         updateType, action, request, elapsedtime, serverlabel, location1, location2))
-
+    
 
 def uploadFile(actualform, form, config):
     barcodedir = config.get('files', 'barcodedir')
@@ -1567,14 +1457,6 @@ def viewLog(form, config):
     print '</table>'
 
 
-def OldalreadyExists(txt, elements):
-    for e in elements:
-        if txt == str(e.text):
-            #print "    found,skipping: ",txt
-            return True
-    return False
-
-
 def alreadyExists(txt, element):
     if element == []: return False
     # only examine first (preferred) element
@@ -1735,6 +1617,11 @@ def formatRow(result, form, config):
             # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid | 8 rare | 9 dead
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>''' % (
             link, rr[4], rr[6], rr[5], rare, dead,location)
+    elif ['rowtype'] == 'editrel':
+        link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6]
+        #  0 relations csid (2 x [csid, refname, displayname])
+        return '''<tr>''' + (2 * '''<td>%s</td>''') + '''</tr>''' % (rr[3], rr[6])
+
     elif result['rowtype'] in ['locreport','holdings','advsearch']:
         rare = 'Yes' if rr[7] == 'true' else 'No'
         dead = 'Yes' if rr[8] == 'true' else 'No'
@@ -1934,6 +1821,24 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
     elapsedtime = time.time() - elapsedtime
     return (url, data, csid, elapsedtime)
 
+def getDoctypes(form,config):
+    dtypes = cswaDB.finddoctypes('relations_common', 'subjectdocumenttype', config)
+    selected = form.get('documenttype')
+
+    doctypes = '''
+          <select class="cell" name="documenttype">
+              <option value="None">Select a doctype</option>'''
+
+    for d in dtypes:
+        #print handler
+        doctypeOption = """<option value="%s">%s</option>""" % (d[0], d[0])
+        #print "xxxx",selected
+        if selected and str(selected) == d[0]:
+            doctypeOption = doctypeOption.replace('option', 'option selected')
+        doctypes = doctypes + doctypeOption
+
+    doctypes = doctypes + '\n      </select>'
+    return doctypes, selected
 
 def getHandlers(form):
     selected = form.get('handlerRefName')
@@ -2524,6 +2429,7 @@ def starthtml(form, config):
         otherfields += '''
         <tr></tr>'''
 
+
     elif updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
@@ -2583,6 +2489,23 @@ def starthtml(form, config):
         otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
+
+    elif updateType == 'editrel':
+        location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
+        location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
+        doctypes, selected = getDoctypes(form,config)
+
+        otherfields = '''
+	    <tr>
+	    <th><span class="cell">doctype:</span></th><th>''' + doctypes + '''</th>
+	    <th><span class="cell">existing location:</span></th>
+	    <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+        <th><span class="cell">new location:</span></th>
+        <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th>
+        </tr>
+    '''
+        otherfields += '''
+        <tr></tr>'''
 
     elif updateType == 'bedlist':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''

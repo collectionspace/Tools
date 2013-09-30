@@ -607,6 +607,20 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def finddoctypes(table, doctype, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    doctypes = dbconn.cursor()
+    doctypes.execute(timeoutcommand)
+
+    query = "select %s,count(*) as n from %s group by %s;" % (doctype,table,doctype)
+
+    try:
+        doctypes.execute(query)
+        return doctypes.fetchall()
+    except:
+        raise
+        return "finddoctypes error"
+
 
 def getobjinfo(museumNumber, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
