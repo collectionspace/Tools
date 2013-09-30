@@ -1279,6 +1279,25 @@ def doHierarchyView(form, config):
     #print "\n</table><hr/>"
     print "\n<hr>"
 
+
+def doListGovHoldings(form, config):
+    query = form.get('agency')
+    if query == "None":
+        print '<h3>Please Select An Agency</h><hr>'
+        return
+    sites = cswaDB.getSitesByOwner(config, query)
+    print "<table>"
+    print '''<tbody align="center" width=75 style="font-weight:bold">
+        <tr><td>Site</td><td>Owner</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
+    for siteList in sites:
+        print "<tr>"
+        for site in siteList:
+            if not site:
+                site = ''
+            print '<td align="center" width=75>' + site + "</td>"
+        print '</tr><tr><td colspan="4"><hr></td></tr>'
+    print "</table>"
+
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
     auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
@@ -2154,6 +2173,40 @@ def getAltNumTypes(form, csid, ant):
     altnumtypes += '\n      </select>'
     return altnumtypes, selected
 
+def getAgencies(form):
+    selected = form.get('agency')
+
+    agencylist = [ \
+        ("Bureau of Indian Affairs", "Bureau of Indian Affairs"),
+        ("Bureau of Land Management", "Bureau of Land Management"),
+        ("Bureau of Reclamation", "Bureau of Reclamation"),
+        ("California Department of Transportation", "California Department of Transportation"),
+        ("California State Parks", "California State Division of State Parks and "),
+        ("East Bay Municipal Utility District", "East Bay Municipal Utility District"),
+        ("National Park Service", "National Park Service"),
+        ("United States Air Force", "United States Air Force"),
+        ("United States Army", "United States Army"),
+        ("United States Coast Guard", "United States Coast Guard"),
+        ("United States Fish and Wildlife Service", "United States Fish and Wildlife Service"),
+        ("United States Forest Service", "United States Forest Service"),
+        ("United States Marine Corps", "United States Marine Corps"),
+        ("United States Navy", "United States Navy"),
+        ("U.S. Army Corps of Engineers", "U.S. Army Corps of Engineers"),
+    ]
+
+    agencies = '''
+<select class="cell" name="agency">
+<option value="None">Select an agency</option>'''
+
+    for agency in agencylist:
+        agencyOption = """<option value="%s">%s</option>""" % (agency[1], agency[0])
+        if selected == agency[1]:
+            agencyOption = agencyOption.replace('option', 'option selected')
+        agencies = agencies + agencyOption
+
+    agencies + '\n </select>'
+    return agencies, selected
+
 def selectWebapp():
     files = os.listdir(".")
 
@@ -2180,7 +2233,7 @@ def selectWebapp():
 
     webapps = {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats'],
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
@@ -2683,6 +2736,11 @@ def starthtml(form, config):
         hierarchies, selected = getHierarchies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Hierarchy" name="action">'''
         otherfields = '''<tr><th><span class="cell">Authority:</span></th><th>''' + hierarchies + '''</th></tr>'''
+
+    elif updateType == 'governmentholdings':
+        agencies, selected = getAgencies(form)
+        button = '''<input id="actionbutton" class="save" type="submit" value="View Holdings" name="action">'''
+        otherfields = '''<tr><th><span class="cell">Agency:</span></th><th>''' + agencies + '''</th>'''
 
     elif False:
         otherfields += '''
