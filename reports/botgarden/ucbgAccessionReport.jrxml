@@ -11,13 +11,13 @@
 		<defaultValueExpression><![CDATA[35]]></defaultValueExpression>
 	</parameter>
 	<parameter name="csid" class="java.lang.String">
-		<defaultValueExpression><![CDATA["6383350e-3c6a-4817-8b22-a86183b339b9"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["46ef60a7-6bd2-486d-81da-18958e15a9ff"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select co1.objectnumber,
 date(con.accessiondate + interval '8 hours') accessiondate,
 findhybridaffinname(tig.id) Determination,
-cob.deadflag,
+case when cob.deadflag = 'true' then 'DEAD' end as deadflag,
 case when (fc.item is not null and fc.item <> '')
      then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
 end as Collector,
@@ -163,7 +163,7 @@ where h1.name=$P{csid}]]>
 				<textElement>
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{deadflag}.equals(true)? "\"dead\"" : null]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{deadflag}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="d82afdbc-c091-4d09-a320-bc56b9d4309d" x="81" y="83" width="442" height="15" isPrintWhenDetailOverflows="true"/>
