@@ -1327,9 +1327,12 @@ def writeLog(updateItems, config):
         #csvlogfh = csv.writer(codecs.open(logFile,'a','utf-8'), delimiter="\t")
         #csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
         csvlogfh = csv.writer(codecs.open(auditFile, 'a', 'utf-8'), delimiter="\t")
-        csvlogfh.writerow([updateType, updateItems['locationDate'], updateItems['objectNumber'], updateItems['objectStatus'],
-                           updateItems['subjectCsid'], updateItems['objectCsid'], updateItems['handlerRefName']])
+        logrec = [ updateType ]
+        for item in updateItems.keys():
+            logrec.append(updateItems[item])
+        csvlogfh.writerow(logrec)
     except:
+        raise
         print 'log failed!'
         pass
 
