@@ -147,17 +147,15 @@ find $APP_LAYER_CONFIG_DIR -name local-settings.xml -delete
 unset a i
 while IFS= read -r -u3 -d $'\0' tenantpath; do
     tenantname=${tenantpath##*/} # Get last directory in relative path as tenant name
-    echo "Copying settings.xml file to local-$tenantname-settings.xml ..."
-    cp -p $tenantpath/settings.xml $tenantpath/local-$tenantname-settings.xml
     echo "Removing obsolete local-settings.xml files for $tenantname tenant ..."
     rm $tenantpath/local-settings.xml
-    echo "Resetting hostnames to 'localhost' in local-$tenantname-settings.xml ..."
+    echo "Resetting hostnames to 'localhost' in settings.xml ..."
     $SED_CMD 's#<baseurl>http://[^:]*:8180</baseurl>#<baseurl>http://localhost:8180</baseurl>#' \
-        $tenantpath/local-$tenantname-settings.xml;
+        $tenantpath/settings.xml;
     $SED_CMD 's#<url>http://[^:]*:8180/cspace-services</url>#<url>http://localhost:8180/cspace-services</url>#' \
-        $tenantpath/local-$tenantname-settings.xml;
+        $tenantpath/settings.xml;
     $SED_CMD 's#<ims-url>http://[^:]*:8180/#<ims-url>http://localhost:8180/#' \
-        $tenantpath/local-$tenantname-settings.xml;
+        $tenantpath/settings.xml;
 done 3< <(find $APP_LAYER_CONFIG_DIR/tenants -mindepth 1 -maxdepth 1 -type d -print0)
 cd ..
 
