@@ -755,7 +755,7 @@ def doUpdateKeyinfo(form, config):
         # print 'place %s' % updateItems['pahmaFieldCollectionPlace']
 
     print "\n</table>"
-    print '<h4>', numUpdated, 'of', row + 1, 'object had key information updated</h4>'
+    print '<h4>', numUpdated, 'of', row + 1, 'objects had key information updated</h4>'
 
 
 def infoHeaders(fieldSet):
@@ -1209,7 +1209,7 @@ def doBedList(form, config):
     for headerid, l in enumerate(rows):
 
         try:
-            objects = cswaDB.getplants(l, '', 1, config, updateType)
+            objects = cswaDB.getplants(l, '', 1, config, updateType, qualifier)
         except:
             raise
             handleTimeout('getplants', form)
@@ -1287,16 +1287,28 @@ def doListGovHoldings(form, config):
         return
     sites = cswaDB.getSitesByOwner(config, query)
     print "<table>"
-    print '''<tbody align="center" width=75 style="font-weight:bold">
-        <tr><td>Site</td><td>Owner</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
+    print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
+    #print '''
+    #    <tr><th>Site</th><th>Ownership Note</th></tr>'''
+    print '''
+        <tr><th>Site</th><th>Ownership Note</th><th>Place Note</th></tr>'''
     for siteList in sites:
-        print "<tr>"
+        #print '<tr><td><b>%s</b></td>' % siteList[0]
+        #if siteList[2]:
+        #    print '<td>%s</td>' % siteList[2]
+        #else:
+        #    print '<td/>'
+        #print '<tr/>'
+        #if siteList[3]:
+        #    print '<tr><td colspan="2"><span class="cell">Place Note:</span> <i>%s</i></td></tr>' % siteList[3]
+        siteList = [siteList[i] for i in [0,2,3]]
         for site in siteList:
             if not site:
                 site = ''
-            print '<td align="center" width=75>' + site + "</td>"
+            print '<td style="min-width: 240px;">' + site + "</td>"
         print '</tr><tr><td colspan="4"><hr></td></tr>'
     print "</table>"
+    print '<h4>', len(sites), ' sites listed.</h4>'
 
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
     auditFile = config.get('files', 'cmdrauditfile')
@@ -2233,7 +2245,7 @@ def selectWebapp():
 
     webapps = {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', 'governmentholdings'],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
@@ -2258,7 +2270,7 @@ def selectWebapp():
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
 
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.x Production</th><th>v3.2.x Dev "Test"</th></tr>\n' % museum
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.x Production</th><th>v3.x Dev "Test"</th></tr>\n' % museum
         for webapp in webapps[museum]:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
             line += '<tr><th>%s</th><th>%s</th>' % (apptitle, webapp)

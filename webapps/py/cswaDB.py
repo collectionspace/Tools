@@ -833,7 +833,10 @@ def getSitesByOwner(config, owner):
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
-    query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site", REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner", pog.ownershipnote AS "ownership note", pc.placenote AS "place note"
+    query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
+    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.ownershipnote AS "ownership note",
+    case when pc.placenote is Null then '' else pc.placenote end AS "place note"
 FROM collectionobjects_pahma_pahmafieldcollectionplacelist fcp 
 JOIN places_common pc ON (pc.refname = fcp.item)
 JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
