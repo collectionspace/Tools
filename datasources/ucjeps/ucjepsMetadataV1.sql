@@ -82,5 +82,5 @@ left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 -- and lg.fieldlocstate = 'CA'
 -- and h1.name = 'e09500ee-519f-4976-95d0'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS', 'GOD')
 order by co.objectnumber
