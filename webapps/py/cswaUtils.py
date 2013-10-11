@@ -494,6 +494,14 @@ def getHeader(updateType):
       <th>Locations listed</th>
       <th>Barcode Filename</th>
     </tr>"""
+    elif updateType == 'upload':
+        return """
+    <table width="100%" border="1">
+    <tr>
+      <th>Museum #</th>
+      <th>Note</th>
+      <th>Update status</th>
+    </tr>"""
 
 
 def doEnumerateObjects(form, config):
@@ -1399,7 +1407,8 @@ def uploadFile(actualform, form, config):
         fn = os.path.basename(fileitem.filename)
         open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
         os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+        numUpdated = processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
+        message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
         #fn = os.path.basename(fileitem.filename)
         #open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
         #os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
@@ -1440,7 +1449,7 @@ def processTricoderFile(barcodefile, form, config):
               'A2581770': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'JonOligmueller'"}
     
     try:
-        print getHeader('inventoryResult')
+        print getHeader('upload')
 
         numUpdated = 0
         
@@ -1460,23 +1469,22 @@ def processTricoderFile(barcodefile, form, config):
                 #print data
                 barcodebuffer[line] = data
             for line in barcodebuffer:
-                flag = 1
                 try:
                     checkData(barcodebuffer[line], line, id2ref, config)
                 except Exception, e:
-                    print "<span style='color:red'>%s</span>" % e
-                    flag = 0
-                if flag == 0:
-                    barcodebuffer[line] = []
+                    print "<span style='color:red'>%s</span><br>" % e
+                    flag = 1
             for line in barcodebuffer:
-                if barcodebuffer[line] == []:
-                    continue
-                doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+                if flag == 1:
+                    break
+                numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
     except (IOError, AttributeError, LookupError):
         raise
     except Exception, e:
-        print "<span style='color:red'>%s</span>" % e
+        raise
+        print "<span style='color:red'>%s</span><br>" % e
     print "\n</table>"
+    return numUpdated
 
 def checkData(data, line, id2ref, config):
     from datetime import datetime
@@ -1489,16 +1497,16 @@ def checkData(data, line, id2ref, config):
             datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "objno"):
+        if not cswaDB.checkData(config, data[3], "objno")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
-        if not cswaDB.checkData(config, data[4], "crate"):
+        if not cswaDB.checkData(config, data[4], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[5], "location"):
+        if not cswaDB.checkData(config, data[3], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     elif data[0] == "M":
-        if not cswaDB.checkData(config, data[2], "objno"):
+        if not cswaDB.checkData(config, data[2], "objno")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "location"):
+        if not cswaDB.checkData(config, data[3], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
         try:
             datetime.strptime(data[4], '%m/%d/%Y %H:%M')
@@ -1509,9 +1517,9 @@ def checkData(data, line, id2ref, config):
             datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "crate"):
+        if not cswaDB.checkData(config, data[3], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[4], "location"):
+        if not cswaDB.checkData(config, data[4], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     
 
@@ -1559,20 +1567,27 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
         if not isinstance(updateItems['objectCsid'], basestring):
             objectCsid = updateItems['objectCsid']
             for csid in objectCsid:
+                updateItems['objectNumber'] = cswaDB.getCSIDDetail(config, csid[0], 'objNumber')[0]
                 updateItems['objectCsid'] = csid[0]
                 updateLocations(updateItems, config)
                 numUpdated += 1
+                msg = 'Update successful'
+                print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+                    updateItems['objectNumber'], updateItems['crate'], msg)
         else:
             updateLocations(updateItems, config)
-        numUpdated += 1
-        msg = 'Update successful'
+            numUpdated += 1
+            msg = 'Update successful'
+            print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+                updateItems['objectNumber'], updateItems['inventoryNote'], msg)
     except:
         raise
         raise Exception('<span style="color:red;">Problem updating line %s </span>' % line)
         msg = 'Problem updating line %s' % line
-    print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
-        updateItems['objectNumber'], updateItems['inventoryNote'], msg)
+        print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+            updateItems['objectNumber'], updateItems['inventoryNote'], msg)
     writeLog(updateItems, config)
+    return numUpdated
 
 def viewLog(form, config):
     num2ret = int(form.get('num2ret')) if str(form.get('num2ret')).isdigit() else 100
