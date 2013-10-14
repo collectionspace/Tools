@@ -1406,10 +1406,13 @@ def uploadFile(actualform, form, config):
 
         # strip leading path from file name to avoid directory traversal attacks
         fn = os.path.basename(fileitem.filename)
-        open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
-        os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
-        message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
+        success = processTricoderFile(fileitem, form, config)
+        if success:
+            open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
+            os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
+        #numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+        message = fn + ' was uploaded successfully!'
+        #message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
     else:
         message = 'No file was uploaded'
 
@@ -1451,8 +1454,8 @@ def processTricoderFile(barcodefile, form, config):
         
         barcodebuffer = {}
         flag = 0
-        with open(barcodefile, 'rb') as f:
-            lines = f.readlines()
+        while True:
+            lines = barcodefile.file.readlines()
             for line in lines:
                 if line[0] != '"':
                     continue
@@ -1472,15 +1475,18 @@ def processTricoderFile(barcodefile, form, config):
                     flag = 1
             for line in barcodebuffer:
                 if flag == 1:
-                    break
-                numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+                    #break
+                    return False
+                #numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+            break
     except (IOError, AttributeError, LookupError):
         raise
     except Exception, e:
         raise
         print "<span style='color:red'>%s</span><br>" % e
     print "\n</table>"
-    return numUpdated
+    #return numUpdated
+    return True
 
 def checkData(data, line, id2ref, config):
     from datetime import datetime
@@ -1497,7 +1503,7 @@ def checkData(data, line, id2ref, config):
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
         if not cswaDB.checkData(config, data[4], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "location")[0]:
+        if not cswaDB.checkData(config, data[5], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     elif data[0] == "M":
         if not cswaDB.checkData(config, data[2], "objno")[0]:

@@ -830,7 +830,7 @@ EXISTS(SELECT lc.refname
 FROM locations_common lc
 JOIN misc ON (lc.id=misc.id)
 WHERE misc.lifecyclestate <> 'deleted'
-AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(""" + datatype + """):%""" + data + """%')"""
+AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(""" + datatype + """):%""" + data + """''')"""
     objects.execute(query)
     return objects.fetchone()
 
