@@ -706,6 +706,10 @@ WHERE objectnumber = '%s'""" % arg
         query = """SELECT h.name FROM collectionobjects_anthropology ca
 JOIN hierarchy h on h.id=ca.id
 WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+    elif argType == 'placeName':
+        query = """SELECT h.name from places_common pc
+JOIN hierarchy h on h.id=pc.id
+WHERE pc.refname ILIKE '%""" + arg + "%%'"
 
     objects.execute(query)
     return objects.fetchone()
@@ -792,11 +796,13 @@ left outer join assocpeoplegroup apg on (apg.id=h2.id)
 WHERE h1.name = '%s'""" % csid
     elif detail == 'objcount':
         query = """SELECT cc.numberofobjects
-
 FROM collectionobjects_common cc
-
 left outer join hierarchy h1 on (cc.id=h1.id)
-
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'objNumber':
+        query = """SELECT cc.objectnumber
+FROM collectionobjects_common cc
+left outer join hierarchy h1 on (cc.id=h1.id)
 WHERE h1.name = '%s'""" % csid
     else:
         return ''
@@ -836,17 +842,28 @@ def getSitesByOwner(config, owner):
     query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
     REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
     pog.ownershipnote AS "ownership note",
-    case when pc.placenote is Null then '' else pc.placenote end AS "place note"
+    pc.placenote AS "place note"
 FROM collectionobjects_pahma_pahmafieldcollectionplacelist fcp 
 JOIN places_common pc ON (pc.refname = fcp.item)
 JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
 JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
 JOIN placeownergroup pog ON (pog.id = h1.id)
-WHERE REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') ILIKE '%%""" + owner + """%%'
-OR (pog.owner IS NULL AND pog.ownershipnote ILIKE '%%""" + owner + """%%')
+WHERE pog.owner LIKE '%%""" + owner + """%%'
 ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
     objects.execute(query)
     return objects.fetchall()
+
+def getDisplayName(config, refname):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1')
+FROM placeownergroup pog
+WHERE pog.owner LIKE '""" + refname + "%'"
+    
+    objects.execute(query)
+    return objects.fetchone()
 
 def getObjDetailsByOwner(config, owner):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
