@@ -494,6 +494,14 @@ def getHeader(updateType):
       <th>Locations listed</th>
       <th>Barcode Filename</th>
     </tr>"""
+    elif updateType == 'upload':
+        return """
+    <table width="100%" border="1">
+    <tr>
+      <th>Museum #</th>
+      <th>Note</th>
+      <th>Update status</th>
+    </tr>"""
 
 
 def doEnumerateObjects(form, config):
@@ -755,7 +763,7 @@ def doUpdateKeyinfo(form, config):
         # print 'place %s' % updateItems['pahmaFieldCollectionPlace']
 
     print "\n</table>"
-    print '<h4>', numUpdated, 'of', row + 1, 'object had key information updated</h4>'
+    print '<h4>', numUpdated, 'of', row + 1, 'objects had key information updated</h4>'
 
 
 def infoHeaders(fieldSet):
@@ -1209,7 +1217,7 @@ def doBedList(form, config):
     for headerid, l in enumerate(rows):
 
         try:
-            objects = cswaDB.getplants(l, '', 1, config, updateType)
+            objects = cswaDB.getplants(l, '', 1, config, updateType, qualifier)
         except:
             raise
             handleTimeout('getplants', form)
@@ -1281,22 +1289,35 @@ def doHierarchyView(form, config):
 
 
 def doListGovHoldings(form, config):
-    query = form.get('agency')
+    query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+    hostname = config.get('connect', 'hostname')
+    link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/place.html?csid='
     if query == "None":
         print '<h3>Please Select An Agency</h><hr>'
         return
-    sites = cswaDB.getSitesByOwner(config, query)
+    sites = cswaDB.getSitesByOwner(config, form.get('agency'))
     print "<table>"
+    print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
     print '''<tbody align="center" width=75 style="font-weight:bold">
-        <tr><td>Site</td><td>Owner</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
+        <tr><td>Site</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
     for siteList in sites:
         print "<tr>"
+        #A little hacky...
+        i = 0
         for site in siteList:
             if not site:
                 site = ''
-            print '<td align="center" width=75>' + site + "</td>"
-        print '</tr><tr><td colspan="4"><hr></td></tr>'
+            if i == 0:
+                print '<td align="left" width=75><a href="' + link + str(cswaDB.getCSID('placeName',site, config)[0]) + '&vocab=place">' + site + '</td>'
+                #print '<td align="center" width=75>' + site + "</td>"
+            elif i == 1:
+                pass
+            else:
+                print '<td align="left" width=75>' + site + "</td>"
+            i += 1
+        print '</tr><tr><td colspan="3"><hr></td></tr>'
     print "</table>"
+    print '<h4>', len(sites), ' sites listed.</h4>'
 
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
     auditFile = config.get('files', 'cmdrauditfile')
@@ -1387,12 +1408,8 @@ def uploadFile(actualform, form, config):
         fn = os.path.basename(fileitem.filename)
         open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
         os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
-        #fn = os.path.basename(fileitem.filename)
-        #open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
-        #os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
-        #processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
-        message = fn + ' was uploaded successfully'
+        numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+        message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
     else:
         message = 'No file was uploaded'
 
@@ -1428,7 +1445,7 @@ def processTricoderFile(barcodefile, form, config):
               'A2581770': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'JonOligmueller'"}
     
     try:
-        print getHeader('inventoryResult')
+        print getHeader('upload')
 
         numUpdated = 0
         
@@ -1448,23 +1465,22 @@ def processTricoderFile(barcodefile, form, config):
                 #print data
                 barcodebuffer[line] = data
             for line in barcodebuffer:
-                flag = 1
                 try:
                     checkData(barcodebuffer[line], line, id2ref, config)
                 except Exception, e:
-                    print "<span style='color:red'>%s</span>" % e
-                    flag = 0
-                if flag == 0:
-                    barcodebuffer[line] = []
+                    print "<span style='color:red'>%s</span><br>" % e
+                    flag = 1
             for line in barcodebuffer:
-                if barcodebuffer[line] == []:
-                    continue
-                doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+                if flag == 1:
+                    break
+                numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
     except (IOError, AttributeError, LookupError):
         raise
     except Exception, e:
-        print "<span style='color:red'>%s</span>" % e
+        raise
+        print "<span style='color:red'>%s</span><br>" % e
     print "\n</table>"
+    return numUpdated
 
 def checkData(data, line, id2ref, config):
     from datetime import datetime
@@ -1477,16 +1493,16 @@ def checkData(data, line, id2ref, config):
             datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "objno"):
+        if not cswaDB.checkData(config, data[3], "objno")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
-        if not cswaDB.checkData(config, data[4], "crate"):
+        if not cswaDB.checkData(config, data[4], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[5], "location"):
+        if not cswaDB.checkData(config, data[3], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     elif data[0] == "M":
-        if not cswaDB.checkData(config, data[2], "objno"):
+        if not cswaDB.checkData(config, data[2], "objno")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "location"):
+        if not cswaDB.checkData(config, data[3], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
         try:
             datetime.strptime(data[4], '%m/%d/%Y %H:%M')
@@ -1497,9 +1513,9 @@ def checkData(data, line, id2ref, config):
             datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "crate"):
+        if not cswaDB.checkData(config, data[3], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[4], "location"):
+        if not cswaDB.checkData(config, data[4], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     
 
@@ -1547,20 +1563,27 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
         if not isinstance(updateItems['objectCsid'], basestring):
             objectCsid = updateItems['objectCsid']
             for csid in objectCsid:
+                updateItems['objectNumber'] = cswaDB.getCSIDDetail(config, csid[0], 'objNumber')[0]
                 updateItems['objectCsid'] = csid[0]
                 updateLocations(updateItems, config)
                 numUpdated += 1
+                msg = 'Update successful'
+                print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+                    updateItems['objectNumber'], updateItems['crate'], msg)
         else:
             updateLocations(updateItems, config)
-        numUpdated += 1
-        msg = 'Update successful'
+            numUpdated += 1
+            msg = 'Update successful'
+            print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+                updateItems['objectNumber'], updateItems['inventoryNote'], msg)
     except:
         raise
         raise Exception('<span style="color:red;">Problem updating line %s </span>' % line)
         msg = 'Problem updating line %s' % line
-    print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
-        updateItems['objectNumber'], updateItems['inventoryNote'], msg)
+        print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+            updateItems['objectNumber'], updateItems['inventoryNote'], msg)
     writeLog(updateItems, config)
+    return numUpdated
 
 def viewLog(form, config):
     num2ret = int(form.get('num2ret')) if str(form.get('num2ret')).isdigit() else 100
@@ -2177,21 +2200,21 @@ def getAgencies(form):
     selected = form.get('agency')
 
     agencylist = [ \
-        ("Bureau of Indian Affairs", "Bureau of Indian Affairs"),
-        ("Bureau of Land Management", "Bureau of Land Management"),
-        ("Bureau of Reclamation", "Bureau of Reclamation"),
-        ("California Department of Transportation", "California Department of Transportation"),
-        ("California State Parks", "California State Division of State Parks and "),
-        ("East Bay Municipal Utility District", "East Bay Municipal Utility District"),
-        ("National Park Service", "National Park Service"),
-        ("United States Air Force", "United States Air Force"),
-        ("United States Army", "United States Army"),
-        ("United States Coast Guard", "United States Coast Guard"),
-        ("United States Fish and Wildlife Service", "United States Fish and Wildlife Service"),
-        ("United States Forest Service", "United States Forest Service"),
-        ("United States Marine Corps", "United States Marine Corps"),
-        ("United States Navy", "United States Navy"),
-        ("U.S. Army Corps of Engineers", "U.S. Army Corps of Engineers"),
+        ("Bureau of Indian Affairs", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(8452)"),
+        ("Bureau of Land Management", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3784)"),
+        ("Bureau of Reclamation", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(6392)"),
+        ("California Department of Transportation", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9068)"),
+        ("California State Parks", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(8594)"),
+        ("East Bay Municipal Utility District", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(EastBayMunicipalUtilityDistrict1370388801890)"),
+        ("National Park Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(1533)"),
+        ("United States Air Force", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesAirForce1369177133041)"),
+        ("United States Army", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3021)"),
+        ("United States Coast Guard", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesCoastGuard1342641628699)"),
+        ("United States Fish and Wildlife Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesFishandWildlifeService1342132748290)"),
+        ("United States Forest Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3120)"),
+        ("United States Marine Corps", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesMarineCorps1365524918536)"),
+        ("United States Navy", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9079)"),
+        ("U.S. Army Corps of Engineers", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9133)"),
     ]
 
     agencies = '''

@@ -27,7 +27,7 @@ updateType  = config.get('info','updatetype')
 action      = form.get('action')
 checkServer = form.get('check')
 
-# if action has not been set, this is the first time through, and we need to see defaults. (only 1 right now!)
+# if action has not been set, this is the first time through, and we need to set defaults. (only 1 right now!)
 if not action:
     form['alive'] = 'checked'
     
@@ -67,10 +67,9 @@ try:
             elif updateType == 'objinfo':      doUpdateKeyinfo(form,config)
             elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
             elif updateType == 'bedlist':      doBedList(form,config)
-            # elif updateType == 'holdings':     doBedList(form,config)
-            # elif updateType == 'locreport':    doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
             elif updateType == 'upload':       uploadFile(actualform,form,config)
+            elif updateType == 'governmentholdings': doListGovHoldings(form, config)
             elif updateType == 'editrel':      doRelationsEdit(form,config)
             elif action == "Recent Activity":
                 viewLog(form,config)
@@ -115,7 +114,7 @@ try:
 except:
     sys.stderr.write("error! %s" % traceback.format_exc())
     print '''<h3><span style="color:red;">Sorry! An error occurred; it has been logged and will be investigated.<br/>
-        However, to expedite matters, please contact John Lowe jblowe@berkeley.edu or Michael Black mtblack@berkeley.edu.
+        However, to expedite matters, please contact John Lowe jblowe@berkeley.edu.
         Please record the time and what you were doing when this unfortunate event happened.
         '</span></h3>'''
 
