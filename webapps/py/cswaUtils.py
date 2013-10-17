@@ -1289,32 +1289,33 @@ def doHierarchyView(form, config):
 
 
 def doListGovHoldings(form, config):
-    query = form.get('agency')
+    query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+    hostname = config.get('connect', 'hostname')
+    link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/place.html?csid='
     if query == "None":
         print '<h3>Please Select An Agency</h><hr>'
         return
-    sites = cswaDB.getSitesByOwner(config, query)
+    sites = cswaDB.getSitesByOwner(config, form.get('agency'))
     print "<table>"
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
-    #print '''
-    #    <tr><th>Site</th><th>Ownership Note</th></tr>'''
-    print '''
-        <tr><th>Site</th><th>Ownership Note</th><th>Place Note</th></tr>'''
+    print '''<tbody align="center" width=75 style="font-weight:bold">
+        <tr><td>Site</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
     for siteList in sites:
-        #print '<tr><td><b>%s</b></td>' % siteList[0]
-        #if siteList[2]:
-        #    print '<td>%s</td>' % siteList[2]
-        #else:
-        #    print '<td/>'
-        #print '<tr/>'
-        #if siteList[3]:
-        #    print '<tr><td colspan="2"><span class="cell">Place Note:</span> <i>%s</i></td></tr>' % siteList[3]
-        siteList = [siteList[i] for i in [0,2,3]]
+        print "<tr>"
+        #A little hacky...
+        i = 0
         for site in siteList:
             if not site:
                 site = ''
-            print '<td style="min-width: 240px;">' + site + "</td>"
-        print '</tr><tr><td colspan="4"><hr></td></tr>'
+            if i == 0:
+                print '<td align="left" width=75><a href="' + link + str(cswaDB.getCSID('placeName',site, config)[0]) + '&vocab=place">' + site + '</td>'
+                #print '<td align="center" width=75>' + site + "</td>"
+            elif i == 1:
+                pass
+            else:
+                print '<td align="left" width=75>' + site + "</td>"
+            i += 1
+        print '</tr><tr><td colspan="3"><hr></td></tr>'
     print "</table>"
     print '<h4>', len(sites), ' sites listed.</h4>'
 
@@ -1405,15 +1406,13 @@ def uploadFile(actualform, form, config):
 
         # strip leading path from file name to avoid directory traversal attacks
         fn = os.path.basename(fileitem.filename)
-        open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
-        os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        numUpdated = processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
-        message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
-        #fn = os.path.basename(fileitem.filename)
-        #open('C:/wamp/www/Barcodes/barcode.DAT', 'wb').write(fileitem.file.read())
-        #os.chmod('C:/wamp/www/Barcodes/barcode.DAT', 0666)
-        #processTricoderFile('C:/wamp/www/Barcodes/barcode.DAT', form, config)
-        message = fn + ' was uploaded successfully'
+        success = processTricoderFile(fileitem, form, config)
+        if success:
+            open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
+            os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
+        #numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+        message = fn + ' was uploaded successfully!'
+        #message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
     else:
         message = 'No file was uploaded'
 
@@ -1455,8 +1454,8 @@ def processTricoderFile(barcodefile, form, config):
         
         barcodebuffer = {}
         flag = 0
-        with open(barcodefile, 'rb') as f:
-            lines = f.readlines()
+        while True:
+            lines = barcodefile.file.readlines()
             for line in lines:
                 if line[0] != '"':
                     continue
@@ -1476,15 +1475,18 @@ def processTricoderFile(barcodefile, form, config):
                     flag = 1
             for line in barcodebuffer:
                 if flag == 1:
-                    break
-                numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+                    #break
+                    return False
+                #numUpdated += doUploadUpdateLocs(barcodebuffer[line], line, id2ref, form, config)
+            break
     except (IOError, AttributeError, LookupError):
         raise
     except Exception, e:
         raise
         print "<span style='color:red'>%s</span><br>" % e
     print "\n</table>"
-    return numUpdated
+    #return numUpdated
+    return True
 
 def checkData(data, line, id2ref, config):
     from datetime import datetime
@@ -1501,7 +1503,7 @@ def checkData(data, line, id2ref, config):
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nObject Number not found!</span>" % line)
         if not cswaDB.checkData(config, data[4], "crate")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
-        if not cswaDB.checkData(config, data[3], "location")[0]:
+        if not cswaDB.checkData(config, data[5], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
     elif data[0] == "M":
         if not cswaDB.checkData(config, data[2], "objno")[0]:
@@ -2204,21 +2206,21 @@ def getAgencies(form):
     selected = form.get('agency')
 
     agencylist = [ \
-        ("Bureau of Indian Affairs", "Bureau of Indian Affairs"),
-        ("Bureau of Land Management", "Bureau of Land Management"),
-        ("Bureau of Reclamation", "Bureau of Reclamation"),
-        ("California Department of Transportation", "California Department of Transportation"),
-        ("California State Parks", "California State Division of State Parks and "),
-        ("East Bay Municipal Utility District", "East Bay Municipal Utility District"),
-        ("National Park Service", "National Park Service"),
-        ("United States Air Force", "United States Air Force"),
-        ("United States Army", "United States Army"),
-        ("United States Coast Guard", "United States Coast Guard"),
-        ("United States Fish and Wildlife Service", "United States Fish and Wildlife Service"),
-        ("United States Forest Service", "United States Forest Service"),
-        ("United States Marine Corps", "United States Marine Corps"),
-        ("United States Navy", "United States Navy"),
-        ("U.S. Army Corps of Engineers", "U.S. Army Corps of Engineers"),
+        ("Bureau of Indian Affairs", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(8452)"),
+        ("Bureau of Land Management", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3784)"),
+        ("Bureau of Reclamation", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(6392)"),
+        ("California Department of Transportation", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9068)"),
+        ("California State Parks", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(8594)"),
+        ("East Bay Municipal Utility District", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(EastBayMunicipalUtilityDistrict1370388801890)"),
+        ("National Park Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(1533)"),
+        ("United States Air Force", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesAirForce1369177133041)"),
+        ("United States Army", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3021)"),
+        ("United States Coast Guard", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesCoastGuard1342641628699)"),
+        ("United States Fish and Wildlife Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesFishandWildlifeService1342132748290)"),
+        ("United States Forest Service", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(3120)"),
+        ("United States Marine Corps", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(UnitedStatesMarineCorps1365524918536)"),
+        ("United States Navy", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9079)"),
+        ("U.S. Army Corps of Engineers", "urn:cspace:pahma.cspace.berkeley.edu:orgauthorities:name(organization):item:name(9133)"),
     ]
 
     agencies = '''
@@ -2260,7 +2262,7 @@ def selectWebapp():
 
     webapps = {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', 'governmentholdings'],
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
@@ -2285,7 +2287,7 @@ def selectWebapp():
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
 
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.x Production</th><th>v3.x Dev "Test"</th></tr>\n' % museum
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.x Production</th><th>v3.2.x Dev "Test"</th></tr>\n' % museum
         for webapp in webapps[museum]:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
             line += '<tr><th>%s</th><th>%s</th>' % (apptitle, webapp)
