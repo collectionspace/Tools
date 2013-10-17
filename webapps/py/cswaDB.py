@@ -628,7 +628,7 @@ def getobjinfo(museumNumber, config):
     objects.execute(timeoutcommand)
 
     getobjects = """
-   SELECT co.objectnumber,
+    SELECT co.objectnumber,
     n.objectname,
     co.numberofobjects,
     regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1') AS fieldcollectionplace,
@@ -642,6 +642,7 @@ LEFT OUTER JOIN collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pe
 LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
 LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
 LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+JOIN misc ON misc.id = co.id AND misc.lifecyclestate <> 'deleted'
 WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
 
     objects.execute(getobjects)
