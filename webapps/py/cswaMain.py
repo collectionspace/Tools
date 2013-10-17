@@ -85,7 +85,7 @@ try:
             if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
             elif updateType == 'movecrate':    doCheckMove(form,config)
             elif updateType == 'barcodeprint':
-                if form.get('ob.objectnumber'):
+                if form.get('ob.objno1'):
                     #form['action'] = 'Create Label for this Object'
                     doSingleObjectSearch(form, config)
                 else:
@@ -99,11 +99,12 @@ try:
             elif updateType == 'objinfo':      doObjectSearch(form,config,'list')
             elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
             elif updateType == 'objdetails':   doObjectDetails(form,config)
-            elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)
+        elif action == "View Holdings":
+            doListGovHoldings(form,config)
 
         elif action in ['<<','>>']:
             print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"

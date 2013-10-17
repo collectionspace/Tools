@@ -276,11 +276,12 @@ def doSingleObjectSearch(form, config, displaytype=''):
 
     if updateType == 'barcodeprint':
         try:
-            obj = cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
+            if form.get('ob.objno2'):
+                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
+            else:
+                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)            
         except:
             raise
-            handleTimeout('search', form)
-            #obj = [-1, -1, '(null)', '(null)', '(null)']
         print """
     <table width="100%"><tr>
     <th>Object</th>
@@ -290,9 +291,11 @@ def doSingleObjectSearch(form, config, displaytype=''):
     <th>Collection Place</th>
     <th>Ethnographic File Code</th>
     </tr>"""
-        print '''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % tuple(obj)
+        for o in objs:
+            print '''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (o[3], o[5], o[4], o[7], o[6], o[9])
 
-        print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+        print """<tr><td align="center" colspan="6"><hr></td></tr>"""
+        print """<tr><td align="center" colspan="6"><b>%s objects</b></td></tr>""" % len(objs)
         print """<tr><td align="center" colspan="6">"""
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td></tr>'''
 
@@ -312,7 +315,25 @@ def listSearchResults(authority, config, displaytype, form, rows):
     elif displaytype == 'select':
         print """<div style="float:left; width: 300px;">%s %s in this range</th>""" % (rowcount, label)
     else:
-        print """
+        if updateType == 'barcodeprint':
+            rows.reverse()
+            count = 0
+            objectsHandled = []
+            for r in rows:
+                objects = cswaDB.getlocations(r[0], '', 1, config, updateType)
+                for o in objects:
+                    if o[3] + o[4] in objectsHandled:
+                        objects.remove(o)
+                    else:
+                        objectsHandled.append(o[3] + o[4])
+                count += len(objects)
+            print """
+    <table width="100%%">
+    <tr>
+      <th>%s %s and %s objects in this range</th>
+    </tr>""" % (rowcount, label, count)
+        else:
+            print """
     <table width="100%%">
     <tr>
       <th>%s %s in this range</th>
@@ -1065,20 +1086,18 @@ def doBarCodes(form, config):
 
     totalobjects = 0
     #If the museum number field has input, print by object
-    if form.get('ob.objectnumber') != '':
+    if form.get('ob.objno1') != '':
         try:
-            # we need 3 elements at the beginning which writeCommanderFile will ignore
-            obj = ['', '', ''] + cswaDB.getobjinfo(form.get('ob.objectnumber'), config)
-            totalobjects = 1
-            rowcount = 1
+            if form.get('ob.objno2'):
+                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
+            else:
+                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)
         except:
             raise
-            handleTimeout(updateType, form)
-            #obj = [-1, -1, '(null)', '(null)', '(null)']
-        if action == 'Create Labels for Objects':
-            labelFilename = writeCommanderFile(obj[3], form.get("printer"), 'objectLabels', 'objects', [obj, ], config)
-            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (obj[3], 1, labelFilename)
-
+        if action == 'Create Labels':
+            totalobjects += len(objs)
+            o = [o[0:8] + [o[9]] for o in objs]
+            labelFilename = writeCommanderFile('', form.get("printer"), 'objectLabels', 'objects', o, config)
     else:
         try:
             #If no end location, assume single location
@@ -1121,7 +1140,10 @@ def doBarCodes(form, config):
     print """<tr><td align="center" colspan="4"><hr/><td></tr>"""
     print """<tr><td align="center" colspan="4">"""
     if totalobjects != 0:
-        print "<b>%s object(s)</b> found in %s locations." % (totalobjects, rowcount)
+        if form.get('ob.objno1'):
+            print "<b>%s object barcode(s) printed." % totalobjects
+        else:
+            print "<b>%s object(s)</b> found in %s locations." % (totalobjects, rowcount)
     else:
         print '<span class="save">No objects found in this range.</span>'
 
@@ -2724,10 +2746,13 @@ def starthtml(form, config):
 
     elif updateType == 'barcodeprint':
         printers, selected = getPrinters(form)
-        objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
+        objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
+        objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         otherfields += '''
-<tr><th><span class="cell">museum number:</span></th>
-<th><input id="ob.objectnumber" class="cell" type="text" size="40" name="ob.objectnumber" value="''' + objectnumber + '''" class="xspan"></th></tr>
+<tr><th><span class="cell">first museum number:</span></th>
+<th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
+<th><span class="cell">last museum number:</span></th>
+<th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
 <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
 
     elif updateType == 'inventory':
