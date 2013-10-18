@@ -86,8 +86,7 @@ try:
             elif updateType == 'movecrate':    doCheckMove(form,config)
             elif updateType == 'barcodeprint':
                 if form.get('ob.objno1'):
-                    #form['action'] = 'Create Label for this Object'
-                    doSingleObjectSearch(form, config)
+                    doOjectRangeSearch(form, config)
                 else:
                     doLocationSearch(form, config, 'nolist')
             elif updateType == 'bedlist':      doComplexSearch(form,config,'select')

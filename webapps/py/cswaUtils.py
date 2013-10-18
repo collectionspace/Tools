@@ -268,21 +268,20 @@ def doObjectSearch(form, config, displaytype):
             #if len(rows) != 0: getTableFooter(config,displaytype)
 
 
-def doSingleObjectSearch(form, config, displaytype=''):
+def doOjectRangeSearch(form, config, displaytype=''):
     if not validateParameters(form, config): return
 
     updateType = config.get('info', 'updatetype')
     updateactionlabel = config.get('info', 'updateactionlabel')
 
-    if updateType == 'barcodeprint':
-        try:
-            if form.get('ob.objno2'):
-                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
-            else:
-                objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)            
-        except:
-            raise
-        print """
+    try:
+        if form.get('ob.objno2'):
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
+        else:
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)            
+    except:
+        raise
+    print """
     <table width="100%"><tr>
     <th>Object</th>
     <th>Count</th>
@@ -291,13 +290,13 @@ def doSingleObjectSearch(form, config, displaytype=''):
     <th>Collection Place</th>
     <th>Ethnographic File Code</th>
     </tr>"""
-        for o in objs:
-            print '''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (o[3], o[5], o[4], o[7], o[6], o[9])
+    for o in objs:
+        print '''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (o[3], o[5], o[4], o[7], o[6], o[9])
 
-        print """<tr><td align="center" colspan="6"><hr></td></tr>"""
-        print """<tr><td align="center" colspan="6"><b>%s objects</b></td></tr>""" % len(objs)
-        print """<tr><td align="center" colspan="6">"""
-        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td></tr>'''
+    print """<tr><td align="center" colspan="6"><hr></td></tr>"""
+    print """<tr><td align="center" colspan="6"><b>%s objects</b></td></tr>""" % len(objs)
+    print """<tr><td align="center" colspan="6">"""
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td></tr>'''
 
 
 def listSearchResults(authority, config, displaytype, form, rows):
@@ -1395,7 +1394,7 @@ def writeLog(updateItems, config):
         csvlogfh.writerow(logrec)
     except:
         raise
-        print 'log failed!'
+        print 'writing to log %s failed!' % auditFile
         pass
 
 
@@ -1411,8 +1410,7 @@ def writeInfo2log(request, form, config, elapsedtime):
     # override updateType if we are just checking the server
     if checkServer == 'check server':
         updateType = checkServer
-    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (
-        updateType, action, request, elapsedtime, serverlabel, location1, location2))
+    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel, location1, location2))
 
 
 def uploadFile(actualform, form, config):
@@ -1432,11 +1430,13 @@ def uploadFile(actualform, form, config):
         if success:
             open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
             os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
-        #numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
-        message = fn + ' was uploaded successfully!'
-        #message = fn + ' was uploaded successfully! %s object(s) updated.' % numUpdated
+            # for now, processing of Tricoder files by this webapp is disabled. john and julian 17 oct 2013
+            #numUpdated = processTricoderFile(barcodedir + '/' + barcodeprefix + '.' + fn, form, config)
+            message = '%s.%s was uploaded successfully to directory %s!' % (barcodeprefix,fn, barcodedir)
+        else:
+             message = 'Sorry, your file was rejected for errors.'
     else:
-        message = 'No file was uploaded'
+        message = 'No file was chosen to be uploaded. Please choose a file!'
 
     print "<h3>%s</h3>" % message
 
@@ -1470,7 +1470,7 @@ def processTricoderFile(barcodefile, form, config):
               'A2581770': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'JonOligmueller'"}
     
     try:
-        print getHeader('upload')
+        #print getHeader('upload')
 
         numUpdated = 0
         
@@ -1506,7 +1506,7 @@ def processTricoderFile(barcodefile, form, config):
     except Exception, e:
         raise
         print "<span style='color:red'>%s</span><br>" % e
-    print "\n</table>"
+    #print "\n</table>"
     #return numUpdated
     return True
 
@@ -2759,7 +2759,9 @@ def starthtml(form, config):
 <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
-<tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th></tr>'''
+<tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th>
+<th colspan="4"><i>NB: object number range supercedes location range, if entered.</i></th>
+</tr>'''
 
     elif updateType == 'inventory':
         handlers, selected = getHandlers(form)
