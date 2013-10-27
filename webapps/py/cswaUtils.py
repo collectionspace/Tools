@@ -554,6 +554,7 @@ def doEnumerateObjects(form, config):
         try:
             objects = cswaDB.getlocations(l[0], '', 1, config, updateType)
         except:
+            raise
             handleTimeout(updateType + ' getting objects', form)
             return
 
@@ -633,8 +634,10 @@ def doCheckMove(form, config):
         return
 
     try:
+        # NB: the movecrate webapp uses the inventory query...naturally!
         objects = cswaDB.getlocations(form.get("lo.location1"), '', 1, config, 'inventory')
     except:
+        raise
         handleTimeout(updateType + ' getting objects', form)
         return
 
@@ -646,11 +649,11 @@ def doCheckMove(form, config):
     totalobjects = 0
     totallocations = 0
 
-    #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'objects', len(objects)))
+    #sys.stderr.write('%-13s:: %s :: %-18s:: %s\n' % (updateType, crate, 'objects', len(objects)))
     for r in objects:
-        #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, crate, r[15]))
         if r[15] != crate: # skip if this is not the crate we want
             continue
+        #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[15],  r[0]))
         locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
         if locations.has_key(locationheader):
             pass
@@ -877,8 +880,7 @@ def doUpdateLocations(form, config):
         except:
             msg = '<span style="color:red;">problem updating</span>'
         print ('<tr>' + (4 * '<td class="ncell">%s</td>') + '</tr>\n') % (
-            updateItems['objectNumber'], updateItems['objectStatus'], updateItems['inventoryNote'], msg)
-        writeLog(updateItems, config)
+            updateItems['objectNumber'], updateItems['objectStatus'], updateItems['inventoryNote'], msg)\
 
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'object locations updated</h4>'
@@ -931,6 +933,7 @@ def doPackingList(form, config):
         try:
             objects = cswaDB.getlocations(l[0], '', 1, config, 'packinglist')
         except:
+            raise
             handleTimeout(updateType + ' getting objects', form)
             return
 
@@ -1093,10 +1096,12 @@ def doBarCodes(form, config):
                 objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)
         except:
             raise
-        if action == 'Create Labels':
+        if action == 'Create Labels for Objects':
             totalobjects += len(objs)
             o = [o[0:8] + [o[9]] for o in objs]
-            labelFilename = writeCommanderFile('', form.get("printer"), 'objectLabels', 'objects', o, config)
+            labelFilename = writeCommanderFile('objectrange', form.get("printer"), 'objectLabels', 'objects', o, config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
+                'objectrange', len(o), labelFilename)
     else:
         try:
             #If no end location, assume single location
@@ -1329,7 +1334,7 @@ def doListGovHoldings(form, config):
             if not site:
                 site = ''
             if i == 0:
-                print '<td align="left" width=75><a href="' + link + str(cswaDB.getCSID('placeName',site, config)[0]) + '&vocab=place">' + site + '</td>'
+                print '<td align="left" width=75><a target="fcplace" href="' + link + str(cswaDB.getCSID('placeName',site, config)[0]) + '&vocab=place">' + site + '</td>'
                 #print '<td align="center" width=75>' + site + "</td>"
             elif i == 1:
                 pass
@@ -1360,8 +1365,7 @@ def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, confi
                 audlogfh.writerow(d)
         elif dataType == 'objectLabels':
             csvlogfh.writerow(
-                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(
-                    ','))
+                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
             for d in data:
                 csvlogfh.writerow(d[3:9])
                 audlogfh.writerow(d)
@@ -1376,7 +1380,7 @@ def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, confi
     return newName
 
 
-def writeLog(updateItems, config):
+def writeLog(updateItems, uri, httpAction, username, config):
     auditFile = config.get('files', 'auditfile')
     updateType = config.get('info', 'updatetype')
     myPid = str(os.getpid())
@@ -1388,9 +1392,9 @@ def writeLog(updateItems, config):
         #csvlogfh = csv.writer(codecs.open(logFile,'a','utf-8'), delimiter="\t")
         #csvlogfh.writerow([updateItems['locationDate'],updateItems['objectNumber'],updateItems['objectStatus'],updateItems['subjectCsid'],updateItems['objectCsid'],updateItems['handlerRefName']])
         csvlogfh = csv.writer(codecs.open(auditFile, 'a', 'utf-8'), delimiter="\t")
-        logrec = [ updateType ]
+        logrec = [ httpAction, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), updateType, uri, username ]
         for item in updateItems.keys():
-            logrec.append(updateItems[item])
+            logrec.append("%s=%s" % (item,updateItems[item]))
         csvlogfh.writerow(logrec)
     except:
         raise
@@ -1411,7 +1415,8 @@ def writeInfo2log(request, form, config, elapsedtime):
     if checkServer == 'check server':
         updateType = checkServer
     sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel, location1, location2))
-
+    updateItems = {'app': apptitle, 'server': serverlabel, 'elapsedtime': '%8.2f' % elapsedtime, 'action': action}
+    writeLog(updateItems, '', request, '', config)
 
 def uploadFile(actualform, form, config):
     barcodedir = config.get('files', 'barcodedir')
@@ -1511,14 +1516,13 @@ def processTricoderFile(barcodefile, form, config):
     return True
 
 def checkData(data, line, id2ref, config):
-    from datetime import datetime
     if data[0] not in ["C", "M", "R"]:
         raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nMove codes are M, C, or R!</span>" % line)
     if data[1] not in id2ref:
         raise Exception("<span style='color:red'>Error encountered in line '%s':\nHandler ID not recognized!</span>" % line)
     if data[0] == "C":
         try:
-            datetime.strptime(data[2], '%m/%d/%Y %H:%M')
+            datetime.datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
         if not cswaDB.checkData(config, data[3], "objno")[0]:
@@ -1533,12 +1537,12 @@ def checkData(data, line, id2ref, config):
         if not cswaDB.checkData(config, data[3], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
         try:
-            datetime.strptime(data[4], '%m/%d/%Y %H:%M')
+            datetime.datetime.strptime(data[4], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
     else: #Guaranteed to be "R"
         try:
-            datetime.strptime(data[2], '%m/%d/%Y %H:%M')
+            datetime.datetime.strptime(data[2], '%m/%d/%Y %H:%M')
         except ValueError:
             raise Exception("<span style='color:red'>Error encountered in malformed line '%s':\nDate formatting incorrect!</span>" % line)
         if not cswaDB.checkData(config, data[3], "crate")[0]:
@@ -1548,13 +1552,12 @@ def checkData(data, line, id2ref, config):
     
 
 
-def doUploadUpdateLocs(data, line, id2ref, form, config):    
-    from datetime import datetime
+def doUploadUpdateLocs(data, line, id2ref, form, config):  
     updateItems = {'crate': '', 'objectNumber': ''}
     if data[0] == "C":
         #Ex: "C","A1234567","07/22/2013 15:54","8-4216","Asian Archaeology Storage Box 0013","Kroeber, 20A, AA  1,  5"
         updateItems['handlerRefName'] = id2ref[data[1]]
-        updateItems['locationDate'] = datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['locationDate'] = datetime.datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
         updateItems['objectNumber'] = data[3]
         updateItems['crate'] = data[4]
         updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[5], config)
@@ -1566,12 +1569,12 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
         updateItems['objectNumber'] = data[2]
         updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[3], config)
         updateItems['objectCsid'] = cswaDB.getCSID("objectnumber", data[2], config)[0]
-        updateItems['locationDate'] = datetime.strptime(data[4], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['locationDate'] = datetime.datetime.strptime(data[4], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
         updateItems['reason'] = form.get('reason')
     elif data[0] == "R":
         #Ex: "R","A1234567","07/11/2013 17:29","Asian Archaeology Storage Box 0007","Kroeber, 20A, AA  1,  1"
         updateItems['handlerRefName'] = id2ref[data[1]]
-        updateItems['locationDate'] = datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
+        updateItems['locationDate'] = datetime.datetime.strptime(data[2], '%m/%d/%Y %H:%M').strftime("%Y-%m-%dT%H:%M:%SZ")
         updateItems['crate'] = data[3]
         #updateItems['locationRefname'], updateItems['objectCsid'] = cswaDB.getCSID('locations_common', data[4], config)
         updateItems['locationRefname'] = cswaDB.getrefname('locations_common', data[4], config)
@@ -1610,7 +1613,6 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
         msg = 'Problem updating line %s' % line
         print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
             updateItems['objectNumber'], updateItems['inventoryNote'], msg)
-    writeLog(updateItems, config)
     return numUpdated
 
 def viewLog(form, config):
@@ -1741,6 +1743,7 @@ def updateKeyInfo(fieldset, updateItems, config):
     # update collectionobject..
     #print "<br>pretending to post update to %s to REST API..." % updateItems['objectCsid']
     (url, data, csid, elapsedtime) = postxml('PUT', uri, realm, hostname, username, password, payload)
+    writeLog(updateItems, uri, 'PUT', username, config)
 
     #print "<h3>Done w update!</h3>"
 
@@ -1775,6 +1778,8 @@ def updateLocations(updateItems, config):
     updateItems['objectDocumentType'] = 'Movement'
     payload = relationsPayload(updateItems)
     (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+
+    writeLog(updateItems, uri, 'POST', username, config)    
 
     #print "<h3>Done w update!</h3>"
 

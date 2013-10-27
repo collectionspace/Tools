@@ -71,6 +71,7 @@ def dbtransaction(form):
             template = """SELECT cc.objectnumber
             FROM collectionobjects_common cc
             JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
+            JOIN misc ON misc.id = cc.id AND misc.lifecyclestate <> 'deleted'
             WHERE cc.objectnumber like '%s%%'
             ORDER BY cp.sortableobjectnumber LIMIT 30;"""
         elif srchindex == 'group':
