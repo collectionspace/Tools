@@ -8,7 +8,7 @@ import pgdb
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-timeoutcommand = "set statement_timeout to 300000; SET NAMES 'utf8';"
+timeoutcommand = "set statement_timeout to 270000; SET NAMES 'utf8';"
 
 def testDB(config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
@@ -52,8 +52,8 @@ m.id moveid,
 rc.subjectdocumenttype,
 rc.objectdocumenttype,
 cp.sortableobjectnumber sortableobjectnumber,
-ma.crate crateRefname,
-regexp_replace(ma.crate, '^.*\\)''(.*)''$', '\\1') crate
+ca.computedcrate crateRefname,
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
 
 FROM loctermgroup l
 
@@ -63,7 +63,6 @@ join movements_common m on m.currentlocation = lc.refname
 
 join hierarchy h2 on m.id = h2.id
 join relations_common rc on rc.subjectcsid = h2.name
-join movements_anthropology ma on ma.id = h2.id
 
 join hierarchy h3 on rc.objectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
