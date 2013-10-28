@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4de45c02-325c-4de9-9b9f-ce349eef1453">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="84"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="csid" class="java.lang.String">
 		<defaultValueExpression><![CDATA["0cca1640-6014-4b3e-8453"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT  gc.title AS "GroupTitle",
+		<![CDATA[SELECT  lic.loaninnumber loanInNumber,
+        case when (lg.lender is not null and lg.lender <> '') then
+         regexp_replace(lg.lender, '^.*\)''(.*)''$', '\1')
+         else ''
+        end AS lender,
         h1.name AS "csid",
         co.objectnumber AS "Museum No.",
         cp.sortableobjectnumber AS "sort",
@@ -18,8 +22,8 @@
         case when ca.computedcrate is null then regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
 	  else regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
 	end as "Currentlocation"
-FROM groups_common gc
-JOIN hierarchy h1 ON (gc.id=h1.id)
+FROM loansin_common lic
+JOIN hierarchy h1 ON (lic.id=h1.id)
 JOIN relations_common rc1 ON (h1.name=rc1.subjectcsid)
 JOIN hierarchy h2 ON (rc1.objectcsid=h2.name)
 JOIN collectionobjects_common co ON (h2.id=co.id)
@@ -31,13 +35,17 @@ LEFT OUTER JOIN objectnamegroup ong ON (ong.id=h3.id)
 
 LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id and bd.pos=0)
 
+left outer join hierarchy hlgl on (lic.id=hlgl.parentid and hlgl.pos=0 and hlgl.name='loansin_common:lenderGroupList')
+left outer join lendergroup lg on (lg.id=hlgl.id)
+
 LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
 
 WHERE rc1.subjectcsid = $P{csid}
 
 ORDER BY sort]]>
 	</queryString>
-	<field name="GroupTitle" class="java.lang.String"/>
+	<field name="loaninnumber" class="java.lang.String"/>
+	<field name="lender" class="java.lang.String"/>
 	<field name="csid" class="java.lang.String"/>
 	<field name="Museum No." class="java.lang.String"/>
 	<field name="sort" class="java.lang.String"/>
@@ -53,24 +61,31 @@ ORDER BY sort]]>
 	</background>
 	<title>
 		<band height="92" splitType="Stretch">
-			<textField>
-				<reportElement uuid="dc487301-2223-408a-bbfe-3b5bf575c064" x="0" y="62" width="752" height="24"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="dc487301-2223-408a-bbfe-3b5bf575c064" x="2" y="68" width="269" height="24"/>
 				<textElement textAlignment="Center">
-					<font size="18"/>
+					<font size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{GroupTitle}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{loaninnumber}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="315cb7c5-69e8-4a2e-be10-42a3cdaa6fbe" x="0" y="0" width="373" height="30"/>
 				<textElement>
 					<font size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Objects with Sites and Locations]]></text>
+				<text><![CDATA[In Loan Objects]]></text>
 			</staticText>
 			<image>
 				<reportElement uuid="8a524ecd-083c-4aa6-81e0-42de58a13cb3" x="481" y="2" width="270" height="51"/>
 				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="f4f4984e-b763-432d-b9c8-a36b08a8c9c7" x="273" y="68" width="299" height="24"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lender}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -114,38 +129,38 @@ ORDER BY sort]]>
 	</columnHeader>
 	<detail>
 		<band height="28" splitType="Stretch">
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="93e2869d-a019-4151-b235-7cd1332f8468" stretchType="RelativeToBandHeight" x="0" y="6" width="86" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Museum No.}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="3282969a-e7aa-4d6f-924d-e413691e0ab4" stretchType="RelativeToBandHeight" x="88" y="6" width="111" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="37941031-7b61-4f3e-b63e-10538bfe27db" stretchType="RelativeToBandHeight" x="565" y="6" width="187" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Currentlocation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="8846d652-92b8-4eb7-8c92-6864f18b90e1" stretchType="RelativeToBandHeight" x="209" y="6" width="156" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Description}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="96da5af3-7c77-4553-8150-3f89afe9b205" stretchType="RelativeToBandHeight" x="373" y="6" width="182" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Site}]]></textFieldExpression>
 			</textField>

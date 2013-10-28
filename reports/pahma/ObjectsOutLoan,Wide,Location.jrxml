@@ -7,7 +7,11 @@
 		<defaultValueExpression><![CDATA["0cca1640-6014-4b3e-8453"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT  gc.title AS "GroupTitle",
+		<![CDATA[SELECT  loc.loanoutnumber loanOutNumber,
+        case when (loc.borrower is not null and loc.borrower <> '') then
+        regexp_replace(loc.borrower, '^.*\)''(.*)''$', '\1')
+        else ''
+        end AS borrower,
         h1.name AS "csid",
         co.objectnumber AS "Museum No.",
         cp.sortableobjectnumber AS "sort",
@@ -18,8 +22,8 @@
         case when ca.computedcrate is null then regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')
 	  else regexp_replace(co.computedcurrentlocation, '^.*\)''(.*)''$', '\1')||' '||regexp_replace(ca.computedcrate, '^.*\)''(.*)''$', '\1')
 	end as "Currentlocation"
-FROM groups_common gc
-JOIN hierarchy h1 ON (gc.id=h1.id)
+FROM loansout_common loc
+JOIN hierarchy h1 ON (loc.id=h1.id)
 JOIN relations_common rc1 ON (h1.name=rc1.subjectcsid)
 JOIN hierarchy h2 ON (rc1.objectcsid=h2.name)
 JOIN collectionobjects_common co ON (h2.id=co.id)
@@ -37,7 +41,8 @@ WHERE rc1.subjectcsid = $P{csid}
 
 ORDER BY sort]]>
 	</queryString>
-	<field name="GroupTitle" class="java.lang.String"/>
+	<field name="loanoutnumber" class="java.lang.String"/>
+	<field name="borrower" class="java.lang.String"/>
 	<field name="csid" class="java.lang.String"/>
 	<field name="Museum No." class="java.lang.String"/>
 	<field name="sort" class="java.lang.String"/>
@@ -53,24 +58,31 @@ ORDER BY sort]]>
 	</background>
 	<title>
 		<band height="92" splitType="Stretch">
-			<textField>
-				<reportElement uuid="dc487301-2223-408a-bbfe-3b5bf575c064" x="0" y="62" width="752" height="24"/>
-				<textElement textAlignment="Center">
-					<font size="18"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{GroupTitle}]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement uuid="315cb7c5-69e8-4a2e-be10-42a3cdaa6fbe" x="0" y="0" width="373" height="30"/>
 				<textElement>
 					<font size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Objects with Sites and Locations]]></text>
+				<text><![CDATA[Out Loan Objects]]></text>
 			</staticText>
 			<image>
 				<reportElement uuid="8a524ecd-083c-4aa6-81e0-42de58a13cb3" x="481" y="2" width="270" height="51"/>
 				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c67bc2bf-0792-4680-93d2-71fe01a8f1c7" stretchType="RelativeToTallestObject" x="2" y="62" width="269" height="24"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{loanoutnumber}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="2ad7ef7e-a384-448d-9c5f-a6c359198fa0" stretchType="RelativeToTallestObject" x="273" y="62" width="479" height="24"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{borrower}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -114,38 +126,38 @@ ORDER BY sort]]>
 	</columnHeader>
 	<detail>
 		<band height="28" splitType="Stretch">
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="93e2869d-a019-4151-b235-7cd1332f8468" stretchType="RelativeToBandHeight" x="0" y="6" width="86" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Museum No.}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="3282969a-e7aa-4d6f-924d-e413691e0ab4" stretchType="RelativeToBandHeight" x="88" y="6" width="111" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="37941031-7b61-4f3e-b63e-10538bfe27db" stretchType="RelativeToBandHeight" x="565" y="6" width="187" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Currentlocation}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="8846d652-92b8-4eb7-8c92-6864f18b90e1" stretchType="RelativeToBandHeight" x="209" y="6" width="156" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Description}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="96da5af3-7c77-4553-8150-3f89afe9b205" stretchType="RelativeToBandHeight" x="373" y="6" width="182" height="18" isPrintWhenDetailOverflows="true"/>
 				<textElement>
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Site}]]></textFieldExpression>
 			</textField>
