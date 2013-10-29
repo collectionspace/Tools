@@ -1433,6 +1433,7 @@ def uploadFile(actualform, form, config):
         fn = os.path.basename(fileitem.filename)
         success = processTricoderFile(fileitem, form, config)
         if success:
+            fileitem.file.seek(0,0)
             open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
             os.chmod(barcodedir + '/' + barcodeprefix + '.' + fn, 0666)
             # for now, processing of Tricoder files by this webapp is disabled. john and julian 17 oct 2013
@@ -1482,6 +1483,7 @@ def processTricoderFile(barcodefile, form, config):
         barcodebuffer = {}
         flag = 0
         while True:
+            barcodefile.file.seek(0,0)
             lines = barcodefile.file.readlines()
             for line in lines:
                 if line[0] != '"':
