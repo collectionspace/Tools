@@ -1433,7 +1433,7 @@ def uploadFile(actualform, form, config):
         fn = os.path.basename(fileitem.filename)
         # don't validate uploaded file (faster!)
         #success = processTricoderFile(fileitem, form, config)
-        sucess = True
+        success = True
         if success:
             fileitem.file.seek(0,0)
             open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
