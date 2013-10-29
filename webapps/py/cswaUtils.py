@@ -1431,7 +1431,9 @@ def uploadFile(actualform, form, config):
 
         # strip leading path from file name to avoid directory traversal attacks
         fn = os.path.basename(fileitem.filename)
-        success = processTricoderFile(fileitem, form, config)
+        # don't validate uploaded file (faster!)
+        #success = processTricoderFile(fileitem, form, config)
+        sucess = True
         if success:
             fileitem.file.seek(0,0)
             open(barcodedir + '/' + barcodeprefix + '.' + fn, 'wb').write(fileitem.file.read())
