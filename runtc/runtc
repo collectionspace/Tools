@@ -1,0 +1,12 @@
+#!/bin/bash
+
+CATALINA_BIN=$(dirname $(/usr/bin/readlink -f "$0"))
+
+OWNER=tomcat
+
+if [ "`/usr/bin/whoami`" = "$OWNER" ]
+then
+    $CATALINA_BIN/.sudo/runtc "$@"
+else
+    sudo -u $OWNER $CATALINA_BIN/.sudo/runtc "$@"
+fi
