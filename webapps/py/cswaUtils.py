@@ -2021,7 +2021,7 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
 def getHandlers(form):
     selected = form.get('handlerRefName')
     handlerlist = [ \
-        ("Lisa Beyer","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LisaBeyer1372717980469)'Lisa Beyer'")
+        ("Lisa Beyer","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LisaBeyer1372717980469)'Lisa Beyer'"),
         ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
         ("Thusa Chu", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7654)'Thusa Chu'"),
         ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
