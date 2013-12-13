@@ -75,7 +75,7 @@ The steps are basically as follows:
 11. it is also prudent to update your own fork at this point, if you have one.
 12. double check that commit "took" on GitHub. e.g. https://github.com/cspace-deployment/Tools/commit/....
 13. update Dev and Prod servers with the new .jxrml (removing the old .jasper file)
-14. if this report will display in a Django web app, also put the jrxml file in the /jrxml directory on dev.cspace that is accessible to Django (see PAHMA-823 for details of why you have to do this.)
+14. if this report will display in a Django web app, also put the jrxml file in the /usr/local/share/django/jrxml directory on dev.cspace that is accessible to Django (see PAHMA-823 for details of why you have to do this.)
 15. test to see the reports work on Prod and Dev. In the case of Prod reports, some of them can be (and should be) tested via the ireports webapp, e.g., https://dev.cspace.berkeley.edu/botgarden_project/ireports/
 16. resolve JIRA(s)
 17. notify customer of fix
@@ -113,6 +113,64 @@ prints the CSID and report names of the reports installed on the target system.
 
 Note: You can also get a list of reports by making a call directly to the report service API, e.g., 
   http://botgarden.cspace.berkeley.edu:8180/cspace-services/reports/
+
+
+MANUAL RECIPE FOR UPDATING AN iREPORT
+
+This recipe reinforces the instructions above. The steps are done by hand, at the command line, rather than by script.
+
+EXAMPLE: Revising the UCJEPS Collector Label (Word) report for Groups on the ucjeps-dev server.
+ENVIRONMENT: ucjeps-dev is running CollectionSpace 3.3, iReport version __, postgres v. __ on a Red Hat 6(?) Linux VM.
+
+WHAT TO LOOK FOR / WHERE TO LOOK
+• In the CollectionSpace web UI, reports appear in the right sidebar of the cataloging or procedure record for which the report was written. On the ucjeps-dev instance, the Collector Label (Word) report is available on the Group record. 
+• On the server, the .jrxml and .jasper files the define the report can be found in the /usr/local/share/tomcat/cspace/reports/ directory.
+    - ucjepsCollectorLabel_group.jrxml
+    - ucjepsCollectorLabel_group.jasper
+• In the nuxeo database, reports are stored in reports_common 
+    From the nuxeo prompt, run: nuxeo=> select * from reports_common;
+
+TASK SUMMARY
+To replace an existing report with a new version, you must delete the existing report from the database and from the file system, then upload a new .jrxml file and install (compile/initialize) the new report.
+
+STEPS
+1. Determine the CSID of the report that you want to replace.
+     • https://ucjeps.cspace.berkeley.edu/cspace-services/reports/ (login with ucjeps-dev credentials).
+     • Find report by name and copy its CSID
+
+2. Delete the existing report via a call to cspace-services.
+     • curl -i -u admin@ucjeps.cspace.berkeley.edu -X DELETE https://ucjeps-dev.cspace.berkeley.edu/cspace-services/reports/{CSID}   (provide user password when asked)
+     • Report should disappear from the database.
+
+3. Delete the .jrxml and .jasper files for that report from the server.
+     • cd /usr/local/share/tomcat/cspace/reports
+     • sudo rm {filename} -- once for each file, or use * at end of partial file name, being sure that the wildcard doesn't match any unintended files. (Use sudo rm ucjepsCollectorLabel_group.j* for removing both the .jrmxl and .jasper files, without touching the files for the _concat version of the report.)
+
+4. Securely copy the new .jrxml file to server.
+     • from the local machine:
+       scp /Users/rjaffe/Desktop/ucjepsCollectorLabel_group.jrxml ucjeps-dev.cspace.berkeley.edu:/usr/local/share/tomcat/cspace/reports/ucjepsCollectorLabel_group.jrxml
+     •  In this case, the file I want to copy sits on my desktop.
+
+5. Change ownership of .jrxml file:
+     • sudo chown tomcat:tomcat ucjepsCollectorLabel_group.jrxml 
+
+6. Change mod of .jrxml file (although this seemed to happen automatically if I chown after initializing and running the report):
+     • sudo chmod u-x ucjepsCollectorLabel_group.jrxml
+     • sudo chmod g-x ucjepsCollectorLabel_group.jrxml
+     • sudo chmod o-x ucjepsCollectorLabel_group.jrxml
+
+7. "Initialize" or "register" this report, i.e. send a request to cspace-services with an .xml payload that provides the name and context for the report and instantiates the report so that CSpace assigns it a CSID.
+
+     • curl -i -u admin@ucjeps.cspace.berkeley.edu -X POST -H "Content-Type: application/xml" https://ucjeps-dev.cspace.berkeley.edu/cspace-services/reports -T /Users/rjaffe/Desktop/ucjepsCollectorLabel_group.xml  
+(Note that .xml file is sent from my desktop.)
+     • Report should appear in the database.
+
+8. Clear browser cache and run the report from the CSpace UI. 
+     • Report should be created and either appear in the browser or be downloaded per browser settings to your local machine.
+     • The compiled .jasper file is created automatically.
+
+
+
 
 
 
