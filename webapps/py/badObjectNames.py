@@ -193,7 +193,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest2.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
