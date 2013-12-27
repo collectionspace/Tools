@@ -8,6 +8,7 @@ time psql -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne '$x = $_ ;s/[^\|]//g; if (length eq 31) { print $x;} '     d3.csv | perl -pe 's/\"/\\"/g;' > d4.csv
 time perl -ne '$x = $_ ;s/[^\|]//g; unless (length eq 31) { print $x;} ' d3.csv | perl -pe 's/\"/\\"/g;' > errors.csv &
+time perl -pe 's/\\"/\"\"/g;s/^/\"/;s/$/\"/;s/\|/\"\|\"/g;' d4.csv | cut -f1-27 -d"|" > d4a.csv
 mv d4.csv metadata.csv
 time psql -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f delphiMediaV1.sql -o m1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv
