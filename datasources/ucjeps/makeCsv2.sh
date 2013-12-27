@@ -19,6 +19,8 @@ tail -n +2 d6.csv | perl fixdate.pl > d7.csv
 cat metadataHeaderV2.csv d7.csv > 4solr.$HOST.metadata.csv
 rm d6.csv d7.csv
 wc -l *.csv
-#
+# clear out the existing data
+curl "http://localhost:8983/solr/ucjeps-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
+curl "http://localhost:8983/solr/ucjeps-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl 'http://localhost:8983/solr/ucjeps-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.blobs_ss.split=true&f.blobs_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 date
