@@ -53,7 +53,24 @@ select
     lg.geodeticdatum as Datum,
     lg.localitysource as CoordinateSource,
     lg.coorduncertainty as CoordinateUncertainty,
-    lg.coorduncertaintyunit as CoordinateUncertaintyUnit
+    lg.coorduncertaintyunit as CoordinateUncertaintyUnit,
+    
+case when (tn.family is not null and tn.family <> '')
+     then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
+end as family,
+case when (mc.currentlocation is not null and mc.currentlocation <> '')
+     then regexp_replace(mc.currentlocation, '^.*\)''(.*)''$', '\1')
+end as gardenlocation,
+co.recordstatus dataQuality,
+case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\)''(.*)''$', '\1')
+     when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
+end as locality,
+h1.name as objectcsid,
+con.rare,
+cob.deadflag,
+regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth,
+mc.reasonformove
+
 from collectionobjects_common co
 inner join misc on co.id = misc.id
 left outer join collectionobjects_common_fieldCollectors fc
@@ -73,7 +90,22 @@ left outer join hierarchy hlg
         and hlg.pos = 0
         and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
-where misc.lifecyclestate <> 'deleted'
--- and lg.fieldlocstate = 'CA'
--- and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
-order by co.objectnumber
+
+join hierarchy h1 on co.id=h1.id
+join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
+join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+join movements_common mc on (mc.id=h2.id)
+join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
+
+join collectionobjects_naturalhistory con on (co.id = con.id)
+join collectionobjects_botgarden cob on (co.id=cob.id)
+
+left outer join hierarchy htig2
+     on (co.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
+
+join collectionspace_core core on (core.id=co.id and core.tenantid=35)
+join misc misc2 on (misc2.id = co.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
+
+left outer join taxon_common tc on (tig.taxon=tc.refname)
+left outer join taxon_naturalhistory tn on (tc.id=tn.id) 
