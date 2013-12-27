@@ -1,6 +1,6 @@
 SELECT
 
-h4.name  ObjectID,
+h1.name  ObjectID,
 '' ObjectType,
 '' CatRais,
 '' Bibliography,
@@ -55,6 +55,9 @@ regexp_replace(cc.computedcurrentlocation, '^.*\)''(.*)''$', '\1') Currentlocati
 ag.annotationnote annotationnote
 
 FROM collectionobjects_common cc
+
+inner join misc on (cc.id = misc.id and misc.lifecyclestate <> 'deleted')
+inner join hierarchy h1 on cc.id = h1.id
 
 left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name =
 'collectionobjects_common:objectNameList' and (h4.pos=0 or h4.pos is null))
