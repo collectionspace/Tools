@@ -25,8 +25,8 @@ rm d6.csv d4a.csv
 mv media.csv 4solr.$HOST.media.csv
 wc -l *.csv
 # clear out the existing data
-curl http://localhost:8983/solr/pahma-metadata/update --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
-curl http://localhost:8983/solr//pahma-metadataupdate --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 # load the data into solr using the csv datahandler
 time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%7C&f.provenance_txt.split=true&f.provenance_txt.separator=,&f.blobs_ss.split=true&f.blobs_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 date
