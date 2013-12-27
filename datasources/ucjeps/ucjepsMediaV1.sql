@@ -1,7 +1,7 @@
 SELECT 
 h2.name objectcsid,
 cc.objectnumber,
-mc.id mediacsid,
+h1.name mediacsid,
 mc.description,
 mc.filename,
 mc.creator creatorRefname,

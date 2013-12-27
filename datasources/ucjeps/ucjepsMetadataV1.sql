@@ -1,5 +1,4 @@
 select
---  co.id as CSID,
     h1.name as CSID,
     co.objectnumber as AccessionNumber,
     case when (tig.taxon is not null and tig.taxon <> '')
