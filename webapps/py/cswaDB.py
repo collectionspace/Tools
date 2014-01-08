@@ -5,8 +5,10 @@ import sys
 import cgi
 import pgdb
 
-timeoutcommand = 'set statement_timeout to 300000'
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
+timeoutcommand = "set statement_timeout to 270000; SET NAMES 'utf8';"
 
 def testDB(config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
@@ -17,19 +19,19 @@ def testDB(config):
         return "OK"
     except pgdb.DatabaseError, e:
         sys.stderr.write('testDB error: %s' % e)
-        return  '%s' % e
+        return '%s' % e
     except:
         sys.stderr.write("some other testDB error!")
         return "Some other failure"
 
-    
+
 def dbtransaction(command, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     cursor = dbconn.cursor()
     cursor.execute(command)
 
 
-def setquery(type, location):
+def setquery(type, location, qualifier):
     if type == 'inventory':
         return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
@@ -50,8 +52,8 @@ m.id moveid,
 rc.subjectdocumenttype,
 rc.objectdocumenttype,
 cp.sortableobjectnumber sortableobjectnumber,
-ma.crate crateRefname,
-regexp_replace(ma.crate, '^.*\\)''(.*)''$', '\\1') crate
+ca.computedcrate crateRefname,
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
 
 FROM loctermgroup l
 
@@ -61,7 +63,6 @@ join movements_common m on m.currentlocation = lc.refname
 
 join hierarchy h2 on m.id = h2.id
 join relations_common rc on rc.subjectcsid = h2.name
-join movements_anthropology ma on ma.id = h2.id
 
 join hierarchy h3 on rc.objectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
@@ -105,7 +106,10 @@ findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
 end as family,
-h1.name as objectcsid
+h1.name as objectcsid,
+con.rare,
+cob.deadflag
+
 from collectionobjects_common co1
 left outer join hierarchy h1 on co1.id=h1.id
 left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
@@ -115,6 +119,7 @@ left outer join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)'
 inner join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')
 
 join collectionobjects_botgarden cob on (co1.id=cob.id)
+join collectionobjects_naturalhistory con on (co1.id = con.id)
 
 left outer join hierarchy htig 
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
@@ -128,7 +133,7 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id)
 
 left outer join locations_common lc on (mc.currentlocation=lc.refname)
 
-where deadflag='false' and regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
+where regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
    
 ORDER BY %s,to_number(objectnumber,'9999.9999')
 LIMIT 6000""" % (searchkey, location, sortkey)
@@ -146,19 +151,37 @@ cc.objectnumber objectnumber,
 (case when ong.objectName is NULL then '' else ong.objectName end) objectName,
 cc.numberofobjects objectCount,
 case when (pfc.item is not null and pfc.item <> '') then
- substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
 end AS fieldcollectionplace,
 case when (apg.assocpeople is not null and apg.assocpeople <> '') then
- substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
 end as culturalgroup,
 rc.objectcsid  objectCsid,
 case when (pef.item is not null and pef.item <> '') then
- substring(pef.item, position(')''' IN pef.item)+2, LENGTH(pef.item)-position(')''' IN pef.item)-2)
+substring(pef.item, position(')''' IN pef.item)+2, LENGTH(pef.item)-position(')''' IN pef.item)-2)
 end as ethnographicfilecode,
 pfc.item fcpRefName,
 apg.assocpeople cgRefName,
 pef.item efcRefName,
-ca.computedcrate
+ca.computedcrate,
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate,
+case when (bd.item is not null and bd.item <> '') then
+bd.item end as briefdescription,
+case when (pc.item is not null and pc.item <> '') then
+substring(pc.item, position(')''' IN pc.item)+2, LENGTH(pc.item)-position(')''' IN pc.item)-2)
+end as fieldcollector,
+case when (donor.item is not null and donor.item <> '') then
+substring(donor.item, position(')''' IN donor.item)+2, LENGTH(donor.item)-position(')''' IN donor.item)-2)
+end as donor,
+case when (an.pahmaaltnum is not null and an.pahmaaltnum <> '') then
+an.pahmaaltnum end as altnum,
+case when (an.pahmaaltnumtype is not null and an.pahmaaltnumtype <> '') then
+an.pahmaaltnumtype end as altnumtype,
+pc.item pcRefName,
+ac.acquisitionreferencenumber accNum,
+donor.item pdRefName,
+ac.id accID,
+h9.name accCSID
 
 FROM loctermgroup l
 
@@ -178,28 +201,39 @@ left outer join objectnamegroup ong on (ong.id=h4.id)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
-left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and pfc.pos=0)
-left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and pef.pos=0)
+left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=cc.id and (pfc.pos=0 or pfc.pos is null))
+left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=cc.id and (pef.pos=0 or pef.pos is null))
 
-left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
-'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
+left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype = 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
 left outer join assocpeoplegroup apg on (apg.id=h5.id)
+ 
+left outer join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
+left outer join collectionobjects_common_fieldcollectors pc on (pc.id=cc.id and pc.pos=0)
+
+FULL OUTER JOIN hierarchy h6 ON (h6.id = cc.id)
+FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h6.name AND rc6.objectdocumenttype = 'Acquisition')
+
+FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
+FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
+FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
+FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
+FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
+
+FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
+FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
 WHERE 
    l.termdisplayName = '""" + str(location) + """'
-   
-AND (pfc.pos=0 or pfc.pos is null)
-AND (h5.pos=0 or h5.pos is null)
-AND (pef.pos=0 or pef.pos is null)
+
    
 ORDER BY locationkey,sortableobjectnumber,h3.name desc
 LIMIT 30000
 """
 
     elif type == 'getalltaxa':
-        return """
+        queryTemplate = """
 select co1.objectnumber,
 findhybridaffinname(tig.id) as determination,
 case when (tn.family is not null and tn.family <> '')
@@ -214,32 +248,64 @@ case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_
 end as locality,
 h1.name as objectcsid,
 con.rare,
-cob.deadflag
+cob.deadflag,
+regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth,
+mc.reasonformove
 
 from collectionobjects_common co1
+
 join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+join movements_common mc on (mc.id=h2.id %s)
+%s
 
-join movements_common mc on (mc.id=h2.id)
-join collectionobjects_naturalhistory con on (co1.id = con.id %s)
-join collectionobjects_botgarden cob on (co1.id=cob.id %s)
+join collectionobjects_naturalhistory con on (co1.id = con.id)
+join collectionobjects_botgarden cob on (co1.id=cob.id)
 
 left outer join hierarchy htig
      on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
 left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
+
+left outer join hierarchy htig2
+     on (co1.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
 
 left outer join hierarchy hlg
      on (co1.id = hlg.parentid and hlg.pos = 0 and hlg.name='collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 
 join collectionspace_core core on (core.id=co1.id and core.tenantid=35)
-join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')   -- movement not deleted
 join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ('', '')
+left outer join taxon_naturalhistory tn on (tc.id=tn.id) """
+        # the form of the query for finding Deads and Alives is a bit different, so we
+        # need to build the query string based on what we are trying to make a list of...deads or alives.
+        sys.stderr.write('qualifier %s' % qualifier)
+        if qualifier == 'alive':
+            queryPart1 = ""
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            return queryTemplate % (queryPart1, queryPart2)
+        elif qualifier == 'dead':
+            queryPart1 = " and mc.reasonformove = 'Dead'"
+            queryPart2 = " "
+            return queryTemplate % (queryPart1, queryPart2)
+        elif qualifier == 'dead or alive':
+            queryPart1 = ""
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            part1 = queryTemplate % (queryPart1, queryPart2)
+            queryPart1 = " and mc.reasonformove = 'Dead'"
+            queryPart2 = " "
+            part2 = queryTemplate % (queryPart1, queryPart2)
+            return part1 + ' UNION ' + part2
+        else:
+            raise
+            # houston, we got a problem...query not qualified
 
+
+
+# mc.reasonformove = 'Dead'.
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
 def getlocations(location1, location2, num2ret, config, updateType):
@@ -252,7 +318,7 @@ def getlocations(location1, location2, num2ret, config, updateType):
     result = []
 
     for loc in getloclist('set', location1, '', num2ret, config):
-        getobjects = setquery(updateType, loc[0])
+        getobjects = setquery(updateType, loc[0], '')
 
         try:
             elapsedtime = time.time()
@@ -278,12 +344,12 @@ def getlocations(location1, location2, num2ret, config, updateType):
                 result.append(row)
         except:
             raise
-            sys.stderr.write("other getobjects error: %s" % len(rows))
+            #sys.stderr.write("other getobjects error: %s" % len(rows))
 
     return result
 
 
-def getplants(location1, location2, num2ret, config, updateType):
+def getplants(location1, location2, num2ret, config, updateType, qualifier):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -293,7 +359,7 @@ def getplants(location1, location2, num2ret, config, updateType):
     result = []
 
     #for loc in getloclist('set',location1,'',num2ret,config):
-    getobjects = setquery(updateType, location1)
+    getobjects = setquery(updateType, location1, qualifier)
     #print getobjects
     try:
         elapsedtime = time.time()
@@ -303,8 +369,8 @@ def getplants(location1, location2, num2ret, config, updateType):
         if debug: sys.stderr.write('all objects: %s :: %s\n' % (location1, elapsedtime))
     except pgdb.DatabaseError, e:
         raise
-        sys.stderr.write('getplants select error: %s' % e)
-        return result
+        #sys.stderr.write('getplants select error: %s' % e)
+        #return result
     except:
         sys.stderr.write("some other getplants database error!")
         return result
@@ -318,7 +384,7 @@ def getplants(location1, location2, num2ret, config, updateType):
 
     return result
 
-    
+
 def getloclist(searchType, location1, location2, num2ret, config):
     # 'set' means 'next num2ret locations', otherwise prefix match
     if searchType == 'set':
@@ -354,6 +420,7 @@ limit """ + str(num2ret)
     #print object
     return objects.fetchall()
 
+
 def getobjlist(searchType, object1, object2, num2ret, config):
     query1 = """
     SELECT objectNumber,
@@ -366,7 +433,7 @@ INNER JOIN misc
         ON misc.id=h1.id and misc.lifecyclestate <> 'deleted'
 WHERE
      cc.objectNumber = '%s'"""
-    
+
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -374,10 +441,10 @@ WHERE
     if int(num2ret) < 1:    num2ret = 1
 
     objects.execute(query1 % object1)
-    (object1,sortkey1) = objects.fetchone()
+    (object1, sortkey1) = objects.fetchone()
     objects.execute(query1 % object2)
-    (object2,sortkey2) = objects.fetchone()
-    
+    (object2, sortkey2) = objects.fetchone()
+
     # 'set' means 'next num2ret objects', otherwise prefix match
     if searchType == 'set':
         whereclause = "WHERE sortableobjectnumber >= '" + sortkey1 + "'"
@@ -409,7 +476,24 @@ pfc.item fcpRefName,
 apg.assocpeople cgRefName,
 pef.item efcRefName,
 ca.computedcrate crateRefname,
-regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
+regexp_replace(ca.computedcrate, '^.*\\)''(.*)''$', '\\1') crate,
+case when (bd.item is not null and bd.item <> '') then
+bd.item end as briefdescription,
+case when (pc.item is not null and pc.item <> '') then
+substring(pc.item, position(')''' IN pc.item)+2, LENGTH(pc.item)-position(')''' IN pc.item)-2)
+end as fieldcollector,
+case when (donor.item is not null and donor.item <> '') then
+substring(donor.item, position(')''' IN donor.item)+2, LENGTH(donor.item)-position(')''' IN donor.item)-2)
+end as donor,
+case when (an.pahmaaltnum is not null and an.pahmaaltnum <> '') then
+an.pahmaaltnum end as altnum,
+case when (an.pahmaaltnumtype is not null and an.pahmaaltnumtype <> '') then
+an.pahmaaltnumtype end as altnumtype,
+pc.item pcRefName,
+ac.acquisitionreferencenumber accNum,
+donor.item pdRefName,
+ac.id accID,
+h9.name accCSID
 
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
@@ -427,7 +511,20 @@ left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pe
 left outer join hierarchy h5 on (cc.id=h5.parentid and h5.primarytype =
 'assocPeopleGroup' and (h5.pos=0 or h5.pos is null))
 left outer join assocpeoplegroup apg on (apg.id=h5.id)
+ 
+left outer join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
+left outer join collectionobjects_common_fieldcollectors pc on (pc.id=cc.id and pc.pos=0)
 
+FULL OUTER JOIN relations_common rc6 ON (rc6.subjectcsid = h1.name AND rc6.objectdocumenttype = 'Acquisition')
+FULL OUTER JOIN hierarchy h7 ON (h7.name = rc6.objectcsid)
+FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
+FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
+FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
+FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
+
+FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
+FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
+ 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
 """ + whereclause + """
@@ -463,7 +560,24 @@ def getrefname(table, term, config):
     if term == None or term == '':
         return ''
 
-    query = "select refname from %s where refname ILIKE '%%''%s''%%' LIMIT 1" % (table, term.replace("'","''"))
+    if table in ('collectionobjects_common_fieldcollectors', 'collectionobjects_common_briefdescriptions',
+                 'acquisitions_common_owners'):
+        column = 'item'
+    else:
+        column = 'refname'
+
+    if table == 'collectionobjects_common_briefdescriptions':
+        query = "SELECT item FROM collectionobjects_common_briefdescriptions WHERE item ILIKE '%s' LIMIT 1" % (
+            term.replace("'", "''"))
+    elif table == 'pahmaaltnumgroup':
+        query = "SELECT pahmaaltnum FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
+            term.replace("'", "''"))
+    elif table == 'pahmaaltnumgroup_type':
+        query = "SELECT pahmaaltnumtype FROM pahmaaltnumgroup WHERE pahmaaltnum ILIKE '%s' LIMIT 1" % (
+            term.replace("'", "''"))
+    else:
+        query = "select %s from %s where %s ILIKE '%%''%s''%%' LIMIT 1" % (
+            column, table, column, term.replace("'", "''"))
 
     try:
         objects.execute(query)
@@ -480,7 +594,7 @@ def findrefnames(table, termlist, config):
 
     result = []
     for t in termlist:
-        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t.replace("'","''"))
+        query = "select refname from %s where refname ILIKE '%%''%s''%%'" % (table, t.replace("'", "''"))
 
         try:
             objects.execute(query)
@@ -492,14 +606,326 @@ def findrefnames(table, termlist, config):
 
     return result
 
+def finddoctypes(table, doctype, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    doctypes = dbconn.cursor()
+    doctypes.execute(timeoutcommand)
+
+    query = "select %s,count(*) as n from %s group by %s;" % (doctype,table,doctype)
+
+    try:
+        doctypes.execute(query)
+        return doctypes.fetchall()
+    except:
+        raise
+        return "finddoctypes error"
+
+
+def getobjinfo(museumNumber, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    getobjects = """
+    SELECT co.objectnumber,
+    n.objectname,
+    co.numberofobjects,
+    regexp_replace(fcp.item, '^.*\\)''(.*)''$', '\\1') AS fieldcollectionplace,
+    regexp_replace(apg.assocpeople, '^.*\\)''(.*)''$', '\\1') AS culturalgroup,
+    regexp_replace(pef.item, '^.*\\)''(.*)''$', '\\1') AS  ethnographicfilecode
+FROM collectionobjects_common co
+LEFT OUTER JOIN hierarchy h1 ON (co.id = h1.parentid AND h1.primarytype='objectNameGroup' AND h1.pos=0)
+LEFT OUTER JOIN objectnamegroup n ON (n.id=h1.id)
+LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
+LEFT OUTER JOIN collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=co.id and pef.pos=0)
+LEFT OUTER JOIN collectionobjects_common_responsibledepartments cm ON (co.id=cm.id AND cm.pos=0)
+LEFT OUTER JOIN hierarchy h2 ON (co.id=h2.parentid AND h2.primarytype='assocPeopleGroup' AND h2.pos=0)
+LEFT OUTER JOIN assocpeoplegroup apg ON apg.id=h2.id
+JOIN misc ON misc.id = co.id AND misc.lifecyclestate <> 'deleted'
+WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
+
+    objects.execute(getobjects)
+    #for ob in objects.fetchone():
+    #print ob
+    return objects.fetchone()
+
+
+def gethierarchy(query, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if query != 'places':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
+FROM concepts_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child""".format(query)
+    else:
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Place, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS ParentPlace, 
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
+FROM places_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN places_common parent ON (parent.id = h2.id)
+WHERE misc.lifecyclestate <> 'deleted'
+ORDER BY ParentPlace, Place
+
+"""
+
+    objects.execute(gethierarchy)
+    return objects.fetchall()
+
+
+def getCSID(argType, arg, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if argType == 'objectnumber':
+        query = """SELECT h.name from collectionobjects_common cc
+JOIN hierarchy h on h.id=cc.id
+WHERE objectnumber = '%s'""" % arg
+    elif argType == 'crateName':
+        query = """SELECT h.name FROM collectionobjects_anthropology ca
+JOIN hierarchy h on h.id=ca.id
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+    elif argType == 'placeName':
+        query = """SELECT h.name from places_common pc
+JOIN hierarchy h on h.id=pc.id
+WHERE pc.refname ILIKE '%""" + arg + "%%'"
+
+    objects.execute(query)
+    return objects.fetchone()
+
+
+def getCSIDs(argType, arg, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if argType == 'crateName':
+        query = """SELECT h.name FROM collectionobjects_anthropology ca
+JOIN hierarchy h on h.id=ca.id
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+
+    objects.execute(query)
+    return objects.fetchall()
+
+
+def findparents(refname, config):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    query = """WITH RECURSIVE ethnculture_hierarchyquery as (
+SELECT regexp_replace(cc.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCulture,
+      cc.refname,
+      rc.objectcsid broaderculturecsid,
+      regexp_replace(cc2.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCultureBroader,
+      0 AS level
+FROM concepts_common cc
+JOIN hierarchy h ON (cc.id = h.id)
+LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+LEFT OUTER JOIN hierarchy h2 ON (rc.relationshiptype='hasBroader' AND rc.objectcsid = h2.name)
+LEFT OUTER JOIN concepts_common cc2 ON (cc2.id = h2.id)
+WHERE cc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name(concept)%%'
+and cc.refname = '%s'
+UNION ALL
+SELECT regexp_replace(cc.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCulture,
+      cc.refname,
+      rc.objectcsid broaderculturecsid,
+      regexp_replace(cc2.refname, '^.*\\)''(.*)''$', '\\1') AS ethnCultureBroader,
+      ech.level-1 AS level
+FROM concepts_common cc
+JOIN hierarchy h ON (cc.id = h.id)
+LEFT OUTER JOIN relations_common rc ON (h.name = rc.subjectcsid)
+LEFT OUTER JOIN hierarchy h2 ON (rc.relationshiptype='hasBroader' AND rc.objectcsid = h2.name)
+LEFT OUTER JOIN concepts_common cc2 ON (cc2.id = h2.id)
+INNER JOIN ethnculture_hierarchyquery AS ech ON h.name = ech.broaderculturecsid)
+SELECT ethnCulture, refname, level
+FROM ethnculture_hierarchyquery
+order by level""" % refname.replace("'", "''")
+
+    try:
+        objects.execute(query)
+        return objects.fetchall()
+    except:
+        #raise
+        return [["findparents error"]]
+
+def getCSIDDetail(config, csid, detail):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+    
+    if detail == 'fieldcollectionplace':
+        query = """SELECT substring(pfc.item, position(')''' IN pfc.item)+2, LENGTH(pfc.item)-position(')''' IN pfc.item)-2)
+AS fieldcollectionplace
+
+FROM collectionobjects_pahma_pahmafieldcollectionplacelist pfc
+LEFT OUTER JOIN HIERARCHY h1 on (pfc.id=h1.id and pfc.pos = 0)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'assocpeoplegroup':
+        query = """SELECT substring(apg.assocpeople, position(')''' IN apg.assocpeople)+2, LENGTH(apg.assocpeople)-position(')''' IN apg.assocpeople)-2)
+as culturalgroup
+
+FROM collectionobjects_common cc
+
+left outer join hierarchy h1 on (cc.id=h1.id)
+left outer join hierarchy h2 on (cc.id=h2.parentid and h2.primarytype =
+'assocPeopleGroup' and (h2.pos=0 or h2.pos is null))
+left outer join assocpeoplegroup apg on (apg.id=h2.id)
+
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'objcount':
+        query = """SELECT cc.numberofobjects
+FROM collectionobjects_common cc
+left outer join hierarchy h1 on (cc.id=h1.id)
+WHERE h1.name = '%s'""" % csid
+    elif detail == 'objNumber':
+        query = """SELECT cc.objectnumber
+FROM collectionobjects_common cc
+left outer join hierarchy h1 on (cc.id=h1.id)
+WHERE h1.name = '%s'""" % csid
+    else:
+        return ''
+    try:
+        objects.execute(query)
+        return objects.fetchone()
+    except:
+        return ''
+
+def checkData(config, data, datatype):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    if datatype == "objno":
+        query = """SELECT
+EXISTS(SELECT cc.objectnumber AS objno
+FROM collectionobjects_common cc
+JOIN misc ON (cc.id=misc.id)
+WHERE misc.lifecyclestate <> 'deleted'
+AND cc.objectnumber='%s')""" % data
+    if datatype in ["crate", "location"]:
+        query = """SELECT
+EXISTS(SELECT lc.refname
+FROM locations_common lc
+JOIN misc ON (lc.id=misc.id)
+WHERE misc.lifecyclestate <> 'deleted'
+AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(""" + datatype + """):%""" + data + """''')"""
+    objects.execute(query)
+    return objects.fetchone()
+
+def getSitesByOwner(config, owner):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
+    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.ownershipnote AS "ownership note",
+    pc.placenote AS "place note"
+FROM collectionobjects_pahma_pahmafieldcollectionplacelist fcp 
+JOIN places_common pc ON (pc.refname = fcp.item)
+JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
+JOIN placeownergroup pog ON (pog.id = h1.id)
+WHERE pog.owner LIKE '%%""" + owner + """%%'
+ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
+    objects.execute(query)
+    return objects.fetchall()
+
+def getDisplayName(config, refname):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1')
+FROM placeownergroup pog
+WHERE pog.owner LIKE '""" + refname + "%'"
+    
+    objects.execute(query)
+    return objects.fetchone()
+
+def getObjDetailsByOwner(config, owner):
+    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    objects = dbconn.cursor()
+    objects.execute(timeoutcommand)
+
+    query = """SELECT DISTINCT cc.objectnumber AS "Museum No.",
+    cp.sortableobjectnumber AS "sort number",
+    cc.numberofobjects AS "pieces",
+    ong.objectname AS "object name",
+    fcd.datedisplaydate AS "collection date",
+    STRING_AGG(DISTINCT(ac.acquisitionreferencenumber), ', ') AS "Acc. No.",
+    REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
+    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.ownershipnote AS "ownership note", pc.placenote AS "place note"
+FROM collectionobjects_common cc
+JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
+JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (fcp.id = cc.id)
+JOIN misc ms ON (ms.id = cc.id AND ms.lifecyclestate <> 'deleted')
+JOIN places_common pc ON (pc.refname = fcp.item)
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
+JOIN placeownergroup pog ON (pog.id = h1.id)
+FULL OUTER JOIN hierarchy h2 ON (h2.parentid = cc.id AND h2.name = 'collectionobjects_common:objectNameList' AND h2.pos = 0)
+FULL OUTER JOIN objectnamegroup ong ON (ong.id = h2.id)
+FULL OUTER JOIN hierarchy h3 ON (h3.id = cc.id)
+FULL OUTER JOIN relations_common rc ON (rc.subjectcsid = h3.name AND rc.objectdocumenttype = 'Acquisition')
+FULL OUTER JOIN hierarchy h4 ON (h4.name = rc.objectcsid)
+FULL OUTER JOIN acquisitions_common ac ON (ac.id = h4.id)
+FULL OUTER JOIN hierarchy h5 ON (h5.parentid = cc.id AND h5.pos = 0 AND h5.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+FULL OUTER JOIN structureddategroup fcd ON (fcd.id = h5.id)
+WHERE REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') ILIKE '%""" + owner + """%'
+OR (pog.owner IS NULL AND pog.ownershipnote ILIKE '%""" + owner + """%')
+GROUP BY cc.objectnumber, cp.sortableobjectnumber, cc.numberofobjects, ong.objectname, fcd.datedisplaydate, fcp.item, pog.owner, pog.ownershipnote, pc.placenote
+ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1'), pog.ownershipnote, cp.sortableobjectnumber"""
+
+    objects.execute(query)
+    return objects.fetchall()
+
 
 if __name__ == "__main__":
 
-    from cswaUtilsNV import getConfig
+    from cswaUtils import getConfig
 
-    config = getConfig('ucbgLocationReport.cfg')
-    print getplants('Velleia rosea', '', 1, config, 'locreport')
+    form = {'webapp': 'ucbgLocationReportV321'}
+    config = getConfig(form)
+    allplants = getplants('Pteridophyta', '', 1, config, 'getalltaxa', 'alive')
+    print 'array:',len(allplants)
     sys.exit()
+
+    form = {'webapp': 'barcodeprintDev'}
+
+    config = getConfig(form)
+    print getobjinfo('1-504', config)
+
+    print '\nkeyinfo\n'
+    # Kroeber, 20A, X  1,  1
+    # Kroeber, 20AMez, 128 A
+    for i, loc in enumerate(getlocations('Kroeber, 20A, X  1,  3', '', 1, config, 'keyinfo')):
+        print 'location', i + 1, loc[0:12]
+
+    sys.exit()
+
 
     config = getConfig('sysinvProd.cfg')
     print '\nrefnames\n'

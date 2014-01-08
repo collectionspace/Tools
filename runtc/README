@@ -1,0 +1,22 @@
+The startup script for Tomcat/CollectionSpace requires some per/instance 
+variables to be set to appropriate values.
+
+Check the setenv.sh file for CATALINA_HOME, JAVA_HOME, and database passwords.
+Those fields will need to be set to something useful.
+
+The main script (.sudo/runtc) is written to include stopping and starting an
+Apache server. If CollectionSpace is not being run behind an Apache frontend
+then set APACHE=NO in the .sudo/runtc file.
+
+
+The files (except "cspace") will need to have their ownership changed
+after being installed.
+
+chown tomcat:tomcat setenv.sh runtc .sudo/runtc
+chown root:tomcat .sudo
+
+The "cspace" file is a sysv init script that can be installed as a way of
+running CollectionSpace at boot-time. It should work on RHEL 5 or 6. The 
+location of CATALINA_HOME may need to be adjusted.
+
+

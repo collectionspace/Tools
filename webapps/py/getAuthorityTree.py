@@ -110,7 +110,7 @@ def getAuthority(authority, primarytype, term, connect_string):
 
     createAuthorityHierarchyTable(authority, primarytype, term)
 
-    for i in range(1,20):
+    for i in range(1, 20):
         res = updateAuthorityHierarchyTable(authority, primarytype, i)
         if res == 0:
             #print "performed %d loops" % (i+1)
@@ -127,8 +127,8 @@ def getAuthority(authority, primarytype, term, connect_string):
             notFound = False
             break
     if notFound:
-        res.append([term,0])
-        
+        res.append([term, 0])
+
     cursor.close()
 
     conn.commit()

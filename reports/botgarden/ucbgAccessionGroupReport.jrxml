@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="595" pageHeight="842" columnWidth="523" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36" uuid="54296056-8f3d-4aeb-9c68-2554fd1fc2b6">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="595" pageHeight="842" columnWidth="523" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36" uuid="66bea5cf-f33a-4c96-b75b-cc62a61ba2f7">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -11,7 +11,7 @@
 		<defaultValueExpression><![CDATA[35]]></defaultValueExpression>
 	</parameter>
 	<parameter name="csid" class="java.lang.String">
-		<defaultValueExpression><![CDATA["6bea6ffc-fa3c-475f-a12f"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["64d89988-dcde-467c-a91d"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select g.title groupTitle,
@@ -20,7 +20,7 @@ co1.id objectid,
 co1.objectnumber objectNumber,
 date(con.accessiondate + interval '8 hours') accessiondate, -- only used on Accession report
 findhybridaffinname(tig.id) Determination,
-cob.deadflag,
+case when cob.deadflag = 'true' then 'DEAD' end as deadflag,
 case when (fc.item is not null and fc.item <> '')
      then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
 end as Collector,
@@ -118,34 +118,34 @@ order by objectNumber]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="23" splitType="Stretch">
+		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="4aab6b6a-a585-4043-a701-16da49305123" x="96" y="0" width="330" height="20"/>
+				<reportElement uuid="b8096fe7-6f34-4d5b-ab4b-fbfbe61a5a81" x="-1" y="0" width="115" height="20"/>
+				<textElement>
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Accession Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="31769d39-6dee-483f-980e-e4002954e234" x="151" y="0" width="216" height="20"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<text><![CDATA[UC Botanical Garden at Berkeley]]></text>
 			</staticText>
 			<textField pattern="dd-MMM-yyyy">
-				<reportElement uuid="f04b8ebd-72a3-4f22-8b90-823c50539d31" style="Column header" x="426" y="0" width="97" height="20" forecolor="#000000"/>
+				<reportElement uuid="a22ffab7-1422-4871-ba71-8185034df7ab" style="Column header" x="378" y="0" width="145" height="20" forecolor="#000000"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement uuid="17713184-4f33-4898-887b-d0d33d1a1c3c" x="0" y="0" width="97" height="20"/>
-				<textElement>
-					<font size="10" isBold="false"/>
-				</textElement>
-				<text><![CDATA[Accession Report]]></text>
-			</staticText>
 		</band>
 	</title>
 	<pageHeader>
-		<band height="6" splitType="Stretch">
+		<band height="4" splitType="Stretch">
 			<line>
-				<reportElement uuid="a14615a8-0e67-4c0e-9874-78d725d00e7a" positionType="FixRelativeToBottom" x="0" y="2" width="520" height="1"/>
+				<reportElement uuid="9ce54e17-7ce5-4f16-8149-b791ccfae97f" positionType="FixRelativeToBottom" x="0" y="1" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
@@ -153,126 +153,113 @@ order by objectNumber]]>
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="153" splitType="Prevent">
+		<band height="152" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="20bc4909-72c5-4e17-9fa9-eb0bfd9f5432" style="Detail" x="2" y="43" width="75" height="12"/>
+				<reportElement uuid="bbe8f461-b0e6-421d-8394-062a29521a35" style="Detail" stretchType="RelativeToBandHeight" x="2" y="43" width="75" height="15"/>
 				<textElement>
 					<font fontName="SansSerif" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="846fe5f6-85e7-411a-a178-6a0c6b826ee1" x="81" y="43" width="231" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="c7ae9bc8-9117-4e17-a47a-9f1dc03421a9" stretchType="RelativeToBandHeight" x="81" y="43" width="231" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{determination}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="ee4720ad-8071-4e11-9235-189994b5c830" x="323" y="43" width="100" height="12"/>
+				<reportElement uuid="eb4b71f2-b9ac-4a3b-92b0-41c4a718a208" stretchType="RelativeToBandHeight" x="323" y="43" width="129" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{family}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="74b275e1-757b-4547-acb2-4e87893212b1" positionType="Float" x="2" y="84" width="53" height="12"/>
+				<reportElement uuid="98f2a172-126b-42f5-8887-1f41cb31a909" x="2" y="84" width="53" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{deadflag}.equals(true)? "\"dead\"" : null]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{deadflag}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="2d762474-49d0-42f0-b7cf-8c94d9431c50" positionType="Float" x="81" y="84" width="438" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d82afdbc-c091-4d09-a320-bc56b9d4309d" x="81" y="83" width="442" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{locality}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="1634f652-756f-4a65-8a47-50a63131cb79" x="2" y="2" width="72" height="12"/>
+				<reportElement uuid="c5a0843c-0dd2-45e3-a088-59d8904d0b3b" x="2" y="2" width="72" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<text><![CDATA[Source: ]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="cd25368d-8d3c-433d-88a3-60f0dd868683" x="81" y="2" width="333" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="e01ff01e-4d09-433c-9b46-01723a70dc54" stretchType="RelativeToBandHeight" x="80" y="2" width="333" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{source}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="40e17f1a-75e5-4b26-974f-30c9645ee8cd" x="81" y="22" width="332" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="4ffec893-00bf-4842-a9bf-a9c1bf51d883" stretchType="RelativeToBandHeight" x="81" y="22" width="332" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{requestedby}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="0d6e9cf1-ea32-4415-83aa-8fdce7980151" x="2" y="22" width="72" height="12"/>
+				<reportElement uuid="e8fac3dd-8450-4709-a04c-1a9e51b3f686" x="2" y="22" width="72" height="15"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<text><![CDATA[Requested by:]]></text>
 			</staticText>
 			<line>
-				<reportElement uuid="50a061ba-8073-4105-b174-8cb0f110d61c" positionType="FixRelativeToBottom" x="-1" y="150" width="520" height="1"/>
+				<reportElement uuid="b3300dc5-710a-467f-87b0-c09d334b3140" positionType="Float" x="-1" y="150" width="520" height="1"/>
 				<graphicElement>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
 			<textField pattern="dd-MMM-yyyy" isBlankWhenNull="true">
-				<reportElement uuid="c7b2ef99-4c2e-492a-bf9a-e0e1e0fe55dc" x="423" y="2" width="100" height="12"/>
+				<reportElement uuid="3c45ed3a-a668-42fe-a915-9bd8852c7b8f" x="423" y="2" width="100" height="15"/>
 				<textElement textAlignment="Right">
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accessiondate}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="099d05fd-66e5-4c82-aca6-8d512a6ebbcd" x="423" y="43" width="100" height="12"/>
+				<reportElement uuid="ddc3003b-4af4-44b9-8ed5-1c5061d5fcc8" x="452" y="43" width="71" height="15"/>
 				<textElement textAlignment="Right">
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{materialtype}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="d2de4c0e-165f-49c3-9a94-6186a045841a" positionType="Float" x="81" y="105" width="438" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="8b62d4f4-c0bf-4ec5-bea4-9610c70f9cf4" stretchType="RelativeToBandHeight" x="81" y="105" width="442" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accessionnotes}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="4dd84875-d9f8-4a44-ab6a-098ca4f765a1" positionType="Float" x="2" y="63" width="53" height="12"/>
-				<textElement/>
+				<reportElement uuid="0cfd4d29-b7e7-41c5-af73-1ae3c1a70e39" x="2" y="64" width="53" height="15" isRemoveLineWhenBlank="true"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{rarestatus}.equals("rare")? "\"rare\"" : null]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="aabf2b3e-7539-46c6-bb91-e076273442b7" positionType="Float" x="81" y="63" width="438" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="daab812a-daf5-426d-8ab9-4868f88279a4" x="81" y="64" width="442" height="15" isPrintWhenDetailOverflows="true"/>
 				<textElement/>
 				<textFieldExpression><![CDATA[$F{collectioninfo}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="20" splitType="Stretch">
-			<textField>
-				<reportElement uuid="4c65e960-9d04-4025-a312-397345b01cb8" style="Column header" x="403" y="0" width="80" height="20"/>
-				<textElement textAlignment="Right">
-					<font fontName="SansSerif" size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Report">
-				<reportElement uuid="64a23e6c-c51b-4154-80be-ef0d60bb4579" style="Column header" x="483" y="0" width="40" height="20"/>
-				<textElement>
-					<font fontName="SansSerif" size="10" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-		</band>
+		<band height="20" splitType="Stretch"/>
 	</pageFooter>
 	<summary>
 		<band splitType="Stretch"/>
