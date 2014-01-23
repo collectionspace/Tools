@@ -1993,19 +1993,16 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
         if hasattr(e, 'reason'):
             sys.stderr.write('We failed to reach a server.\n')
             sys.stderr.write('Reason: ' + str(e.reason) + '\n')
-        elif hasattr(e, 'code'):
+        if hasattr(e, 'code'):
             sys.stderr.write('The server couldn\'t fulfill the request.\n')
             sys.stderr.write('Error code: ' + str(e.code) + '\n')
-        elif True:
+        if True:
             #print 'Error in POSTing!'
-            print request
-            raise
             sys.stderr.write("Error in POSTing!\n")
             sys.stderr.write(url)
-            #sys.stderr.write(payload)
-            #print url
-        #print payload
-    #raise
+            sys.stderr.write(payload)
+            raise
+        
     data = f.read()
     info = f.info()
     # if a POST, the Location element contains the new CSID
@@ -2023,13 +2020,14 @@ def getHandlers(form):
     handlerlist = [ \
         ("Lisa Beyer","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LisaBeyer1372717980469)'Lisa Beyer'"),
         ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+        ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
         ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
         ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
         ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
         ("Rowan Gard", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'"),
+        ("Leilani Hunter","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LeilaniHunter1389986789001)'Leilani Hunter'"),
         ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
         ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
-        ("Allison Lewis", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8724)'Allison Lewis'"),
         ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
         ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
         ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
