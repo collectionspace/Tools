@@ -118,6 +118,11 @@ def latestcollectionstats(dbsource, statgroup, config):
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
+    implemented = ['totalCounts', 'objByObjType', 'objByLegCat', 'objByAccStatus', 'objByCollMan', 'objByFileCode', 'objByCntntType', 'objByImgObjType']
+
+    if not statgroup in implemented:
+        return "Not Implemented Yet!"
+
     latestisoruntime = """SELECT MAX(date_trunc('day',isoruntime))
         FROM utils.collectionstats
         WHERE statgroup = '%s'""" % (str(statgroup))
@@ -197,8 +202,8 @@ def lateststatsforstatgroupbycounttype(dbsource, statgroup, statmetric, config):
     ORDER BY statvalue DESC""" % (str(dbsource), str(statgroup), str(statmetric), str(latestruntime))
     
     objects.execute(latestCounts)
-    truePieceCount=objects.fetchall()
-    return truePieceCount
+    count=objects.fetchall()
+    return count
 
 #   ######################################################################################################
 
@@ -226,6 +231,28 @@ def getrefname(table,term,config):
     except:
         return ''
         raise
+
+#   ######################################################################################################
+
+def getStatSeries(statTarget, category, config):
+
+    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
+    objects  = pahmadb.cursor()
+    objects.execute(timeoutcommand)
+
+    statMetric = {'musNumbers': 'totalMusNoCount', 'objects': 'trueObjectCount', 'pieces': 'truePieceCount'}
+    try: 
+        query = """SELECT isoruntime, statvalue, statmetric, label FROM utils.collectionstats
+WHERE statgroup = '%s'
+AND stattarget = '%s'
+AND statmetric = '%s'
+ORDER BY label ASC, isoruntime DESC""" % (category, statTarget, statMetric[statTarget])
+
+        objects.execute(query)
+        return objects.fetchall()
+    except:
+        return 'Query failed (getStatSeries(%s, %s, config)' % (statTarget, category)
+
 
 
 def findrefnames(table,termlist,config):

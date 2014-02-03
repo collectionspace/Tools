@@ -39,7 +39,7 @@ if str(form.get('lo.location2')) == '':
 if str(form.get('ob.objno2')) == '':
     form['ob.objno2'] = form.get('ob.objno1')
 
-if updateType == 'packinglist' and action == 'Download as CSV':  
+if (updateType == 'packinglist' or updateType == 'governmentholdings') and action == 'Download as CSV':  
     downloadCsv(form,config)
     sys.exit(0)
 elif updateType == 'collectionstats':
