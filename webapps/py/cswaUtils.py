@@ -2505,7 +2505,7 @@ function formSubmit(location)
     </div>''' % (code, longform[code])
     print '</div>'
 
-    imgsrc = "/Webapps/Images/x.png"
+    imgsrc = "/Images/x.png"
     for code in statcodes:
         print '''<div class="dashboardpane" id="%spane">
     <div class="close" id="%sclose">
@@ -2764,7 +2764,7 @@ def starthtml(form, config):
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
 <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th>
-<th colspan="4"><i>NB: object number range supercedes location range, if entered.</i></th>
+<th colspan="4"><i>NB: object number range supersedes location range, if entered.</i></th>
 </tr>'''
 
     elif updateType == 'inventory':

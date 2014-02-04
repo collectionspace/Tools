@@ -282,30 +282,30 @@ def getTopStats(dbsource, config):
 
 def makeSelection(code):
    if code in ['cont', 'obj', 'cult', 'don','acc', 'coll', 'iot']: #Pie Charts
-      chartsrc = '/WebApps/Images/piechartplaceholder.svg'
+      chartsrc = '/Images/piechartplaceholder.svg'
       alt = ['View Pie Chart']
    elif code =='total': #Intoductory Text
-      chartsrc ='/WebApps/Images/introtext.svg'
+      chartsrc ='/Images/introtext.svg'
       alt = ['Introduction to the Collection']
    elif code in ['cat', 'efc']: #Bar Charts
-      chartsrc = '/WebApps/Images/barchartplaceholder.svg'
+      chartsrc = '/Images/barchartplaceholder.svg'
       alt = ['View Bar Chart']
    else:
-      chartsrc = '/WebApps/Images/piechartplaceholder.svg'
+      chartsrc = '/Images/piechartplaceholder.svg'
       alt = ['Not implemented yet!']
       
    if code in ['total', 'cont', 'obj', 'cult', 'cat', 'don','acc', 'efc', 'coll', 'iot']: #Everything, for now
-      timesrc = '/WebApps/Images/timeseriesplaceholder.svg'
+      timesrc = '/Images/timeseriesplaceholder.svg'
       alt.append('View Time Series')
    else:
-      timesrc = '/WebApps/Images/timeseriesplaceholder.svg'
+      timesrc = '/Images/timeseriesplaceholder.svg'
       alt.append('Not Implemented Yet!')
       
    if code in ['total', 'cont', 'obj', 'cult', 'cat', 'don','acc', 'efc', 'coll', 'iot']: #Everything, for now
-      tablesrc = '/WebApps/Images/tableplaceholder.svg'
+      tablesrc = '/Images/tableplaceholder.svg'
       alt.append('View Table')
    else:
-      tablesrc = '/WebApps/Images/tableplaceholder.svg'
+      tablesrc = '/Images/tableplaceholder.svg'
       alt.append('Not Implemented Yet!')
       
    print '''
