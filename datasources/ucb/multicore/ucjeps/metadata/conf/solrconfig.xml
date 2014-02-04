@@ -932,7 +932,7 @@
        <str name="facet.field">determination_s</str>
        <str name="facet.field">collector_ss</str>
        <str name="facet.field">habitat_s</str>
-       <str name="facet.field">locality_ss</str>
+       <str name="facet.field">locality_s</str>
        <str name="facet.mincount">1</str>
 
        <str name="facet.pivot">collcountry_s,collcounty_s</str>
@@ -946,7 +946,7 @@
 
        <!-- Highlighting defaults -->
        <str name="hl">on</str>
-       <str name="hl.fl">determination_s collector_s collectornumber_s locality_ss collcounty_s collstate_s collcountry_s elevation_s habitat_s</str>
+       <str name="hl.fl">determination_s collector_s collectornumber_s locality_s collcounty_s collstate_s collcountry_s elevation_s habitat_s</str>
        <str name="hl.encoder">html</str>
        <str name="hl.simple.pre">&lt;b&gt;</str>
        <str name="hl.simple.post">&lt;/b&gt;</str>

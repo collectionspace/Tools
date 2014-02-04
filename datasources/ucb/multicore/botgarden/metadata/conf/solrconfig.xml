@@ -902,40 +902,41 @@
        <str name="defType">edismax</str>
        <str name="qf">
 	 accessionnumber_s^0.5 determination_s^1.0 collectornumber_s^0.5
-	 locality_s^0.5 collcounty_s^1.0 collstate_s^1.0 collcountry_s1.0 elevation_s^0.5 habitat_s^1.0 collector_s^0.5
-	 locality_txt^0.5 collcounty_txt^1.0 collstate_txt^1.0 collcountry_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
+	 accessionnumber_txt^0.5 determination_txt^1.0 collectornumber_txt^0.5
+	 locality_s^0.5 rare_s^1.0 family_s^1.0 deadflag_s1.0 elevation_s^0.5 habitat_s^1.0 collector_s^0.5
+	 locality_txt^0.5 rare_txt^1.0 family_txt^1.0 deadflag_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
        </str>
        <str name="df">text</str>
        <str name="mm">100%</str>
        <str name="q.alt">*:*</str>
-       <str name="rows">20</str>
+       <str name="rows">30</str>
        <str name="fl">*,score</str>
 
        <str name="mlt.qf">
-	 accessionnumber_s^0.5 determination_s^1.0 collectornumber_s^0.5
-	 locality_s^0.5 collcounty_s^1.0 collstate_s^1.0 collcountry_s1.0 elevation_s^0.5 habitat_s^1.0 collector_s^0.5
-	 locality_txt^0.5 collcounty_txt^1.0 collstate_txt^1.0 collcountry_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
+	 accessionnumber_txt^0.5 determination_txt^1.0 collectornumber_txt^0.5
+	 locality_txt^0.5 rare_txt^1.0 family_txt^1.0 deadflag_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5
+	 locality_txt^0.5 rare_txt^1.0 family_txt^1.0 deadflag_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
        </str>
 
        <str name="mlt.fl">
-	 accessionnumber_s^0.5 determination_s^1.0 collectornumber_s^0.5
-	 locality_s^0.5 collcounty_s^1.0 collstate_s^1.0 collcountry_s1.0 elevation_s^0.5 habitat_s^1.0 collector_s^0.5
-	 locality_txt^0.5 collcounty_txt^1.0 collstate_txt^1.0 collcountry_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
+	 accessionnumber_txt^0.5 determination_txt^1.0 collectornumber_txt^0.5
+	 locality_txt^0.5 rare_txt^1.0 family_txt^1.0 deadflag_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5
+	 locality_txt^0.5 rare_txt^1.0 family_txt^1.0 deadflag_txt1.0 elevation_txt^0.5 habitat_txt^1.0 collector_txt^0.5 
        </str>
        <int name="mlt.count">3</int>
 
        <!-- Faceting defaults -->
        <str name="facet">on</str>
-       <str name="facet.field">collcountry_s</str>
-       <str name="facet.field">collstate_s</str>
-       <str name="facet.field">collcounty_s</str>
+       <str name="facet.field">rare_txt</str>
+       <str name="facet.field">deadflag_txt</str>
+       <str name="facet.field">family_s</str>
        <str name="facet.field">determination_s</str>
-       <str name="facet.field">collector_ss</str>
-       <str name="facet.field">habitat_s</str>
-       <str name="facet.field">locality_ss</str>
+       <str name="facet.field">gardenlocation_s</str>
+       <str name="facet.field">collector_s</str>
+       <str name="facet.field">habitat_txt</str>
        <str name="facet.mincount">1</str>
 
-       <str name="facet.pivot">collcountry_s,collcounty_s</str>
+       <str name="facet.pivot">deadflag_txt,rare_txt</str>
        <str name="facet.range.other">after</str>
        <str name="facet.range">earlycollectiondate_dt</str>
        <str name="f.earlycollectiondate_dt.facet.range.start">NOW/YEAR-100YEARS</str>
@@ -946,7 +947,7 @@
 
        <!-- Highlighting defaults -->
        <str name="hl">on</str>
-       <str name="hl.fl">determination_s collector_s collectornumber_s locality_ss collcounty_s collstate_s collcountry_s elevation_s habitat_s</str>
+       <str name="hl.fl">determination_txt gardenlocation_txt collector_txt collectornumber_txt locality_txt rare_txt family_txt deadflag_txt elevation_txt habitat_txt</str>
        <str name="hl.encoder">html</str>
        <str name="hl.simple.pre">&lt;b&gt;</str>
        <str name="hl.simple.post">&lt;/b&gt;</str>
