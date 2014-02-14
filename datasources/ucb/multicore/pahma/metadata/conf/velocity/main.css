@@ -43,7 +43,7 @@ a {
   float: left;
   margin: 5px;
   margin-top: 0px;
-  width: 185px;
+  width: 305px;
   padding: 5px;
   top: -20px;
   position: relative;  
@@ -146,7 +146,7 @@ a {
   padding-left: 33%;
   background: #eee;
   margin: 5px;
-  margin-left: 210px;
+  margin-left: 320px;
   padding-top: 5px;
   padding-bottom: 5px;
 }
@@ -155,7 +155,7 @@ a {
   border: 1px solid #999;
   padding: 5px;
   margin: 5px;
-  margin-left: 210px;
+  margin-left: 320px;
   margin-bottom: 15px;
 }
 
