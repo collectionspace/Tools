@@ -1,21 +1,21 @@
--- create in cinefiles_domain database
+-- create in cinefiles_domain database, cinefiles_denorm schema
 
-CREATE OR REPLACE FUNCTION concat_worktitles (filmid VARCHAR)
+CREATE OR REPLACE FUNCTION cinefiles_denorm.concat_worktitles (shortid VARCHAR)
 RETURNS VARCHAR
 AS
 $$
 
 DECLARE
     titlestring VARCHAR(1000);
-    originaltitle VARCHAR(500);
-    englishtitle VARCHAR(500);
-    originalcount INTEGER;
-    englishcount INTEGER;
+    preftitle VARCHAR(500);
+    engltitle VARCHAR(500);
+    prefcount INTEGER;
+    englcount INTEGER;
     errormsg VARCHAR(500);
 
 BEGIN
 
-select into originalcount count(*)
+select into prefcount count(*)
 from works_common wc
 inner join hierarchy hwc on (
     wc.id = hwc.parentid
@@ -24,7 +24,7 @@ inner join hierarchy hwc on (
 inner join worktermgroup wtg on (hwc.id = wtg.id)
 where wc.shortidentifier = $1;
 
-select into englishcount count(*)
+select into englcount count(*)
 from works_common wc
 inner join hierarchy hwc on (
     wc.id = hwc.parentid
@@ -35,16 +35,16 @@ inner join worktermgroup wtg on (
     and wtg.termlanguage like '%''English''%')
 where wc.shortidentifier = $1;
 
-IF originalcount = 0 THEN
+IF prefcount = 0 THEN
     return NULL;
 
-ELSEIF originalcount > 1 THEN
+ELSEIF prefcount > 1 THEN
     errormsg := 'There can be only one! But there are ' ||
-        originalcount::text || ' preferred titles!';
+        prefcount::text || ' preferred titles!';
     RAISE EXCEPTION '%', errormsg;
 
-ELSEIF originalcount = 1 THEN
-    select into originaltitle trim(wtg.termdisplayname)
+ELSEIF prefcount = 1 THEN
+    select into preftitle trim(wtg.termdisplayname)
     from works_common wc
     inner join hierarchy hwc on (
         wc.id = hwc.parentid
@@ -53,12 +53,12 @@ ELSEIF originalcount = 1 THEN
     inner join worktermgroup wtg on (hwc.id = wtg.id)
     where wc.shortidentifier = $1;
 
-    IF englishcount = 0 THEN
-        titlestring := originaltitle;
+    IF englcount = 0 THEN
+        titlestring := preftitle;
         RETURN titlestring;
 
-    ELSEIF englishcount = 1 THEN
-        select into englishtitle trim(wtg.termdisplayname)
+    ELSEIF englcount = 1 THEN
+        select into engltitle trim(wtg.termdisplayname)
         from works_common wc
         inner join hierarchy hwc on (
             wc.id = hwc.parentid
@@ -69,12 +69,12 @@ ELSEIF originalcount = 1 THEN
             and wtg.termlanguage like '%''English''%')
         where wc.shortidentifier = $1;
 
-        titlestring := originaltitle || ' (' || englishtitle || ')';
+        titlestring := preftitle || ' (' || engltitle || ')';
         RETURN titlestring;
 
-    ELSEIF englishcount > 1 THEN
+    ELSEIF englcount > 1 THEN
         errormsg := 'There can be only one! But there are ' ||
-            englishcount::text || ' non-preferred English titles!';
+            englcount::text || ' non-preferred English titles!';
         RAISE EXCEPTION '%', errormsg;
 
     ELSE
@@ -86,9 +86,9 @@ ELSE
     errormsg := 'Unable to get a count of preferred titles!';
     RAISE EXCEPTION '%', errormsg;
 END IF;
-   
+
 RETURN NULL;
-   
+
 END;
 
 $$
@@ -97,3 +97,4 @@ IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
 GRANT EXECUTE ON FUNCTION concat_worktitles (filmid VARCHAR) TO PUBLIC;
+
