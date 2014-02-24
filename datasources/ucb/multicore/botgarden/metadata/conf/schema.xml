@@ -247,20 +247,17 @@
 	 description_txt,provenance_ss,notes_txt,sitename_s,sitenumber_s,objnm_objname_s,objnm_remarks_s,culture_s
    -->
 
-   <copyField source="accessionnumber_s" dest="text"/>
-   <copyField source="determination_s" dest="text"/>
-   <copyField source="collectornumber_s" dest="text"/>
+   <copyField source="accessionnumber_txt" dest="text"/>
+   <copyField source="determination_txt" dest="text"/>
+   <copyField source="collectornumber_txt" dest="text"/>
 
    <copyField source="locality_ss" dest="text"/>
 
-   <copyField source="collector_s" dest="text"/>
-   <copyField source="collcounty_s" dest="text"/>
-   <copyField source="collstate_s" dest="text"/>
-   <copyField source="collcountry_s" dest="text"/>
-   <copyField source="habitat_s" dest="text"/>
+   <copyField source="collector_txt" dest="text"/>
+   <copyField source="habitat_txt" dest="text"/>
 
-   <copyField source="elevation_s" dest="text"/>
-   <copyField source="datum_s" dest="text"/>
+   <copyField source="elevation_txt" dest="text"/>
+   <copyField source="datum_txt" dest="text"/>
 
    <!-- Text fields from SolrCell to search by default in our catch-all field -->
    <copyField source="title" dest="text"/>
@@ -272,8 +269,13 @@
    <copyField source="resourcename" dest="text"/>
    <copyField source="url" dest="text"/>
 
-   <!-- Create a string version of author for faceting -->
+   <!-- Create a string versions for faceting -->
    <copyField source="author" dest="author_s"/>
+   <copyField source="accessionnumber_txt" dest="accessionnumber_s"/>
+   <copyField source="determination_txt" dest="determination_s"/>
+   <copyField source="gardenlocation_txt" dest="gardenlocation_s"/>
+   <copyField source="family_txt" dest="family_s"/>
+   <copyField source="collector_txt" dest="text"/>
 	
    <!-- Above, multiple source fields are copied to the [text] field. 
 	  Another way to map multiple source fields to the same 

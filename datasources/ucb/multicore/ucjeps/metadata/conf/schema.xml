@@ -262,7 +262,7 @@ id|accessionnumber_txt|determination_txt|majorgroup_txt|collector_txt|collectorn
    <copyField source="determination_txt" dest="determination_s"/>
    <copyField source="majorgroup_txt" dest="majorgroup_s"/>
    <copyField source="collectornumber_txt" dest="collectornumber_s"/>
-   <copyField source="locality_txt" dest="locality_ss"/>
+   <copyField source="locality_txt" dest="locality_s"/>
    <copyField source="collector_txt" dest="collector_s"/>
    <copyField source="collcounty_txt" dest="collcounty_s"/>
    <copyField source="collstate_txt" dest="collstate_s"/>
