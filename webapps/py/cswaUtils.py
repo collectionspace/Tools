@@ -2505,7 +2505,7 @@ function formSubmit(location)
     </div>''' % (code, longform[code])
     print '</div>'
 
-    imgsrc = "/Images/x.png"
+    imgsrc = "/images/x.png"
     for code in statcodes:
         print '''<div class="dashboardpane" id="%spane">
     <div class="close" id="%sclose">
