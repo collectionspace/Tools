@@ -685,6 +685,89 @@ def doCheckMove(form, config):
     print '<input type="hidden" name="toRefname" value="%s">' % toRefname
     print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
+def doBulkEdit(form, config):
+
+    if not validateParameters(form, config): return
+
+    updateType = config.get('info', 'updatetype')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        if form.get('ob.objno2'):
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 3000, config)
+        else:
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 3000, config)
+    except:
+        objs = []
+
+
+    CSIDs = []
+    fieldset = form.get('fieldset')
+    for row in objs:
+        CSIDs.append(row[8])
+
+    refNames2find = {}
+
+    index = 'user'
+    if fieldset == 'namedesc':
+        pass
+    elif fieldset == 'registration':
+        if not refNames2find.has_key(form.get('ant.' + index)):
+            refNames2find[form.get('ant.' + index)] = cswaDB.getrefname('pahmaaltnumgroup_type', form.get('ant.' + index), config)
+        if not refNames2find.has_key(form.get('pc.' + index)):
+            refNames2find[form.get('pc.' + index)] = cswaDB.getrefname('collectionobjects_common_fieldcollectors', form.get('pc.' + index), config)
+        if not refNames2find.has_key(form.get('pd.' + index)):
+            refNames2find[form.get('pd.' + index)] = cswaDB.getrefname('acquisitions_common_owners', form.get('pd.' + index), config)
+    elif fieldset == 'keyinfo':
+        if not refNames2find.has_key(form.get('cp.' + index)):
+            refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
+        if not refNames2find.has_key(form.get('cg.' + index)):
+            refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index), config)
+        if not refNames2find.has_key(form.get('fc.' + index)):
+            refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index), config)
+    else:
+        pass
+        #error! fieldset not set!
+
+    doTheUpdate(CSIDs, form, config, fieldset, refNames2find)
+
+
+
+def doBulkEditForm(form, config, displaytype):
+    #print form
+    if not validateParameters(form, config): return
+
+    updateType = config.get('info', 'updatetype')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        if form.get('ob.objno2'):
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 3000, config)
+        else:
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 3000, config)
+    except:
+        objs = []
+
+    totalobjects = len(objs)
+
+    print '''<table width="100%" cellpadding="8px"><tbody><tr class="smallheader">
+      <td width="250px">Field</td>
+      <td>Value to Set</td></tr>'''
+
+    print formatInfoReviewForm(form)
+
+    print '</table>'
+    print '<table>'
+
+    msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> in this range!" % totalobjects
+    print """<tr><td align="center" colspan="3"><hr></tr>"""
+    print """<tr><td align="center" colspan="2">"""
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="1">%s</td></tr>''' % msg
+
+
+    print '</table>'
+    print "<hr/>"
+
 
 def doUpdateKeyinfo(form, config):
     #print form
@@ -718,6 +801,13 @@ def doUpdateKeyinfo(form, config):
             pass
             #error! fieldset not set!
 
+    doTheUpdate(CSIDs, form, config, fieldset, refNames2find)
+
+
+def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
+
+    updateType = config.get('info', 'updatetype')
+
     print getHeader('keyinfoResult')
 
     #for r in refNames2find:
@@ -727,11 +817,14 @@ def doUpdateKeyinfo(form, config):
     numUpdated = 0
     for row, csid in enumerate(CSIDs):
 
-        index = csid # for now, the index is the csid
+        if updateType == 'bulkedit':
+            index = 'user'
+        else:
+            index = csid
         updateItems = {}
-        updateItems['objectCsid'] = form.get('csid.' + index)
+        updateItems['objectCsid'] = csid
         updateItems['objectName'] = form.get('onm.' + index)
-        updateItems['objectNumber'] = form.get('oox.' + index)
+        #updateItems['objectNumber'] = form.get('oox.' + index)
         if fieldset == 'namedesc':
             updateItems['briefDescription'] = form.get('bdx.' + index)
         elif fieldset == 'registration':
@@ -739,7 +832,8 @@ def doUpdateKeyinfo(form, config):
             updateItems['pahmaAltNumType'] = form.get('ant.' + index)
             updateItems['fieldCollector'] = refNames2find[form.get('pc.' + index)]
         elif fieldset == 'keyinfo':
-            updateItems['objectCount'] = form.get('ocn.' + index)
+            if form.get('ocn.' + index) != '':
+                updateItems['objectCount'] = form.get('ocn.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
             updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
@@ -765,12 +859,13 @@ def doUpdateKeyinfo(form, config):
                     msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
             if updateItems['pahmaEthnographicFileCode'] == '' and form.get('fc.' + index):
                 msg += '<span style="color:red;"> Ethnographic File Code: term "%s" not found, field not updated.</span>' % form.get('fc.' + index)
-            try:
-                int(updateItems['objectCount'])
-                int(updateItems['objectCount'][0])
-            except ValueError:
-                msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
-                del updateItems['objectCount']
+            if 'objectCount' in updateItems:
+                try:
+                    int(updateItems['objectCount'])
+                    int(updateItems['objectCount'][0])
+                except ValueError:
+                    msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
+                    del updateItems['objectCount']
         elif fieldset == 'registration':
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
@@ -781,8 +876,9 @@ def doUpdateKeyinfo(form, config):
         except:
             raise
             msg = '<span style="color:red;">problem updating</span>'
-        print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
-            updateItems['objectNumber'], updateItems['objectCsid'], msg)
+        #print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % (
+        #    updateItems['objectNumber'], updateItems['objectCsid'], msg)
+        print ('<tr>' + (3 * '<td class="ncell">%s</td>') + '</tr>\n') % ('',updateItems['objectCsid'], msg)
         # print 'place %s' % updateItems['pahmaFieldCollectionPlace']
 
     print "\n</table>"
@@ -1032,10 +1128,14 @@ def doAuthorityScan(form, config):
 
     print getHeader(updateType)
     totalobjects = 0
-    accessions = []
+    accessions = {}
     for t in objects:
         if t[column] in tList:
             if updateType in ['locreport','holdings'] and checkMembership(t[7], rare) and checkMembership(t[8], dead):
+                if t[8] == 'true' or t[8] is None:
+                    t[3] = "%s [%s]" % (t[13],t[12])
+                else:
+                    pass
                 print formatRow({'rowtype': updateType, 'data': t}, form, config)
                 totalobjects += 1
 
@@ -1249,6 +1349,7 @@ def doBedList(form, config):
             handleTimeout('getplants', form)
             objects = []
 
+        sys.stderr.write('%-13s:: %s\n' % (updateType, 'l=%s, q=%s, objects: %s' % (l,qualifier,len(objects))))
         if groupby == 'none':
             pass
         else:
@@ -1262,9 +1363,18 @@ def doBedList(form, config):
 
         for r in objects:
             #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
-            #if checkObject(places,r):
-            if checkMembership(r[8],rare) and checkMembership(r[9],dead):
-            #if True:
+            # skip if the accession is not really in this location...
+            #print "<tr><td>loc = %s<td>this = %s</tr>" % (l,r[0])
+            #if r[4] == '59.1168':
+            #    print "<tr><td>"
+            #    print r
+            #    print "</td></tr>"
+            if (checkMembership(r[8],rare) and checkMembership(r[9],dead)) or r[12] == 'Dead':
+                # nb: for bedlist, the gardenlocation (r[0]) is not displayed, so the next
+                # few lines do not alter the display.
+                if checkMembership(r[9],['dead']):
+                    r[0] = "%s [%s]" % (r[10],r[12])
+                r[0] = "%s = %s :: %s [%s]" % (r[9],r[0],r[10],r[12])
                 totalobjects += 1
                 print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
@@ -1938,6 +2048,27 @@ def formatInfoReviewRow(form, link, rr, link2):
             rr[8],
             rr[8], rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[7], True), rr[8], cgi.escape(rr[9], True))
 
+def formatInfoReviewForm(form):
+    fieldSet = form.get("fieldset")
+    if fieldSet == 'namedesc':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Brief Description</th><td><textarea cols="78" rows="7" name="bdx.user"></textarea></td>
+</tr>"""
+    elif fieldSet == 'registration':
+        altnumtypes, selected = getAltNumTypes(form, '','')
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Alternate Number</th><td><input class="xspan" type="text" size="60" name="anm.user"></td>
+</tr><tr><th>Alternate Number Types</th><td>%s</td>
+</tr><tr><th>Donor Name (person)</th><td><input class="xspan" type="text" size="60" name="pc.user"></td>
+</tr>""" % altnumtypes
+    elif fieldSet == 'keyinfo':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
+</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
+</tr><tr><th>Cultural Group</th><td><input class="xspan" type="text" size="60" name="cg.user"></td>
+</tr><tr><th>Ethnographic File Code</th><td><input class="xspan" type="text" size="60" name="fc.user"></td>
+</tr>"""
+
 
 def formatError(cspaceObject):
     return '<tr><th colspan="2" class="leftjust">%s</th><td></td><td>None found.</td></tr>\n' % (cspaceObject)
@@ -2280,7 +2411,7 @@ def selectWebapp():
                 badconfigfiles += '<tr><td>%s</td></tr>' % f
 
     webapps = {
-        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'moveobject', 'packinglist', 'movecrate', 'upload', \
+        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
                   'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
         'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
@@ -2540,6 +2671,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
 .shortinput { font-weight: bold; width:150px; }
 .subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
+.smallheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 12px; font-weight: bold; }
 .veryshortinput { width:60px; }
 .xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
 th[data-sort]{ cursor:pointer; }
@@ -2628,7 +2760,7 @@ def starthtml(form, config):
         otherfields += '''
         <tr></tr>'''
 
-    elif updateType == 'objinfo':
+    elif updateType == 'bulkedit':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         fieldset, selected = getFieldset(form)

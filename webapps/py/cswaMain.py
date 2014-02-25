@@ -66,6 +66,7 @@ try:
             elif updateType == 'moveobject':   doUpdateLocations(form,config)
             elif updateType == 'objinfo':      doUpdateKeyinfo(form,config)
             elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
+            elif updateType == 'bulkedit':     doBulkEdit(form,config)
             elif updateType == 'bedlist':      doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
             elif updateType == 'upload':       uploadFile(actualform,form,config)
@@ -90,6 +91,7 @@ try:
                 else:
                     doLocationSearch(form, config, 'nolist')
             elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
+            elif updateType == 'bulkedit':     doBulkEditForm(form,config,'nolist')
             elif updateType == 'holdings':     doAuthorityScan(form,config)
             elif updateType == 'locreport':    doAuthorityScan(form,config)
             elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
