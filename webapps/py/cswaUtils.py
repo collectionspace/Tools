@@ -2767,7 +2767,7 @@ def starthtml(form, config):
         otherfields += '''
         <tr></tr>'''
 
-    elif updateType == 'bulkedit':
+    elif updateType == 'bulkedit' or updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         fieldset, selected = getFieldset(form)
