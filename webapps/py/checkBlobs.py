@@ -38,39 +38,82 @@ def getSamples(img):
 
 def getColorModel(img):
     if img.mode == '1':
-        return "B/W"
+        return "dpi"
     elif img.mode == 'L':
-        return "Grayscale"
+        return "gray"
     elif img.mode == 'P':
-
-        return 'palette color'
+        return 'gray'
     if img.mode == 'RGB' or img.mode == 'YcbCr':
-        return 'Color'
+        return 'col'
     elif img.mode == 'RGBA' or img.mode == 'CMYK':
-        return 'Color'
+        return 'col'
     else:
         return img.mode
 
 
-def getFormat(img):
-    return img.format
+def checkFormat(img):
+    try:
+        if img.format == 'TIFF':
+            return True
+        else:
+            return False
+    except:
+        return False
 
 #if cell == "PCD":
 #	return "IMAG PAC"
 
-def getCompression(img):
+def checkCompression(img):
     try:
         cell = img.info['compression']
     except:
-        return None
+        return False
     if cell == 'tiff_lzw':
-        return 'LZW'
+        return True
     elif cell == 'group4':
-        return 'CCITT Group 4'
+        return True
+    elif cell == 'packbits':
+        return True
     elif cell == "IMAG PAC":
-        return "PCD"
+        return True
     else:
         print "Unknown compression format:", cell
+        return False
+
+def checkImage(tif, img):
+    # 12345.p2.300gray
+    # (0).p(1).(2)(3)
+    parsedName = re.search(r'(\d+)\.p(\d)\.(\d+)(\w+)\.tif', tif['name'])
+    if parsedName is None:
+        syntaxOK = False
+    else:
+        syntaxOK = True
+
+    try:
+        resolution = str(tif['dpi'][0])
+    except:
+        resolution = ''
+    return { 'isTiff': checkFormat(img),
+             'syntaxOK': syntaxOK,
+             'isNotZero': True,
+             #'isNotZero': checkSize(img),
+             'isCompressed': checkCompression(img),
+             'depthOK': True,
+             #'depthOK': checkSyntax(parsedName,1,getBits(img)),
+             'colorOK': checkSyntax(parsedName,4,getColorModel(img)),
+             'resolutionOK': checkSyntax(parsedName,3,resolution)
+    }
+
+
+def checkSyntax(parsedName, n, value):
+    if parsedName is None:
+        return False
+    else:
+        #print '%s :: %s' % (parsedName.group(n),value)
+        if parsedName.group(n) in value:
+            return True
+        else:
+            return False
 
 
 def getConfig(form):
@@ -106,18 +149,29 @@ def getBlobsFromDB(config, startdate, enddate):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
 
+    #SELECT b.id as blobid, c.id as contentid, b.name as filename,
+    #   c.data AS md5, cc.createdat, cc.updatedat
+
     query = """
     SELECT cc.id, cc.updatedat, b.name, c.data AS md5
-    FROM collectionspace_core cc
-      INNER JOIN blobs_common b
-        ON (cc.id = b.id)
+    FROM  blobs_common b
+      INNER JOIN  picture p
+         ON (b.repositoryid = p.id)
+      INNER JOIN hierarchy h2
+         ON (p.id = h2.parentid AND h2.primarytype = 'view')
+      INNER JOIN view v
+         ON (h2.id = v.id AND v.tag='original')
+      INNER JOIN hierarchy h1
+         ON (v.id = h1.parentid AND h1.primarytype = 'content')
       INNER JOIN content c
-        ON (c.name = 'Original_'||b.name)
+         ON (h1.id = c.id)
+      INNER JOIN collectionspace_core cc
+        ON (cc.id = b.id)
     WHERE cc.updatedat between '%s'  AND '%s'
     """ % (startdate, enddate)
 
     try:
-        objects.execute('set statement_timeout to 30000')
+        objects.execute('set statement_timeout to 600000')
         objects.execute(query)
         records = []
         for r in objects.fetchall():
@@ -141,9 +195,12 @@ def getBlobsFromDB(config, startdate, enddate):
 
 
 def get_tifftags(fn, ret):
-    #fp = open(fn, "rb")
-    im = Image.open(fn) # open from file object
-    #im.load() # make sure PIL has read the data
+
+    try:
+        im = Image.open(fn)
+    except:
+        ret['imageOK'] = False
+        return
 
     #im = Image.open(fn)
     ret['format'] = im.format
@@ -163,8 +220,15 @@ def get_tifftags(fn, ret):
     for tag, value in info.items():
         ret[tag] = value
 
-        #del im
-        #fp.close()
+    checks = checkImage(ret,im)
+    for k in checks.keys():
+        ret[k] = checks[k]
+    #print ret
+    ret['imageOK'] = True
+    for flag in 'resolutionOK isTiff isNotZero isCompressed depthOK colorOK syntaxOK'.split(' '):
+        if ret[flag] == False:
+            ret['imageOK'] = False
+
 
 
 def writeCsv(filename, items, writeheader):
@@ -214,7 +278,13 @@ def getBloblist(blobpath):
 
 if __name__ == "__main__":
 
+    if len(sys.argv) < 1:
+        sys.exit('Usage: %s [db|dir] ...' % sys.argv[0])
+
     if sys.argv[1] == 'db':
+        if len(sys.argv) < 6:
+            sys.exit('Usage: %s db config-file startdate enddate reportname' % sys.argv[0])
+
         try:
             #form = {'webapp': '/var/www/cgi-bin/' + sys.argv[2]}
             form = {'webapp': sys.argv[2]}
@@ -231,7 +301,9 @@ if __name__ == "__main__":
 
     elif sys.argv[1] == 'dir':
 
-        #print 'config',config
+        if len(sys.argv) < 4:
+            sys.exit('Usage: %s dir directory reportname' % sys.argv[0])
+
         blobpath = sys.argv[2]
         records, count = getBloblist(blobpath)
         print 'MEDIA: %s files found in directory %s' % (count, sys.argv[2])
@@ -241,7 +313,7 @@ if __name__ == "__main__":
         print 'datasource must either "db" or "dir"'
         sys.exit()
 
-    columns = 'name blobcsid size istiff updatedat format mode palette compression dpi fullpathtofile'.split(' ')
+    columns = 'name imageOK isTiff sizeOK syntaxOK isCompressed depthOK colorOK blobcsid size updatedat format mode palette compression dpi fullpathtofile'.split(' ')
     outputfh = csv.writer(open(outputFile, 'wb'), delimiter="\t")
     outputfh.writerow(columns)
 
@@ -252,10 +324,6 @@ if __name__ == "__main__":
         try:
             #print "checking file", i, tif['fullpathtofile']
             get_tifftags(tif['fullpathtofile'], tif)
-            if tif['format'] == 'TIFF':
-                tif['istiff'] = True
-            else:
-                tif['istiff'] = False
         except:
             print "failed on file", i, tif['fullpathtofile']
             raise
