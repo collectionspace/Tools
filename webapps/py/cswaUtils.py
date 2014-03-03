@@ -65,6 +65,10 @@ def getConfig(form):
     except:
         return False
 
+def getCreds(form):
+    username = form.get('csusername')
+    password = form.get('cspassword')
+    return username, password
 
 def getProhibitedLocations(appconfig):
     #fileName = appconfig.get('files','prohibitedLocations.csv')
@@ -871,7 +875,7 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
         try:
             #pass
-            updateKeyInfo(fieldset, updateItems, config)
+            updateKeyInfo(fieldset, updateItems, config, form)
             numUpdated += 1
         except:
             raise
@@ -971,7 +975,7 @@ def doUpdateLocations(form, config):
 
         #print updateItems
         try:
-            updateLocations(updateItems, config)
+            updateLocations(updateItems, config, form)
             numUpdated += 1
         except:
             msg = '<span style="color:red;">problem updating</span>'
@@ -1776,11 +1780,13 @@ def alreadyExists(txt, element):
     return False
 
 
-def updateKeyInfo(fieldset, updateItems, config):
+def updateKeyInfo(fieldset, updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
-    username = config.get('connect', 'username')
-    password = config.get('connect', 'password')
+    #username = config.get('connect', 'username')
+    #password = config.get('connect', 'password')
+    username, password = getCreds(form)
+    sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
 
     uri = 'collectionobjects'
     getItems = updateItems['objectCsid']
@@ -1863,11 +1869,12 @@ def updateKeyInfo(fieldset, updateItems, config):
     #print "<h3>Done w update!</h3>"
 
 
-def updateLocations(updateItems, config):
+def updateLocations(updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
-    username = config.get('connect', 'username')
-    password = config.get('connect', 'password')
+    #username = config.get('connect', 'username')
+    #password = config.get('connect', 'password')
+    username, password = getCreds(form)
 
     uri = 'movements'
 
@@ -2437,7 +2444,7 @@ def selectWebapp():
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
 
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>v3.2.x Production</th><th>v3.2.x Dev "Test"</th></tr>\n' % museum
+        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>Production</th><th>Dev "Test"</th></tr>\n' % museum
         for webapp in webapps[museum]:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
             line += '<tr><th>%s</th><th>%s</th>' % (apptitle, webapp)
@@ -2675,7 +2682,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .veryshortinput { width:60px; }
 .xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
 th[data-sort]{ cursor:pointer; }
-
+.littlebutton {color: #FFFFFF; background-color: gray; font-size: 11px; padding: 2px;}
 .imagecell { padding: 8px ; align: center; }
 .rightlabel { text-align: right ; vertical-align: top; padding: 2px 12px 2px 2px; width: 30%; }
 .objtitle { font-size:28px; float:left; padding:4px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
@@ -2693,19 +2700,38 @@ def starthtml(form, config):
     serverlabelcolor = config.get('info', 'serverlabelcolor')
     apptitle = config.get('info', 'apptitle')
     updateType = config.get('info', 'updatetype')
+    username = form.get('csusername')
+    password = form.get('cspassword')
+    if form.get('inputusername') is not None:
+        username = form.get('inputusername')
+        password = form.get('inputpassword')
+    if username is None:
+        username = ''
+        password = ''
+        updateType = 'login'
 
     #num2ret   = str(form.get('num2ret')) if str(form.get('num2ret')).isdigit() else '50'
 
     button = '''<input id="actionbutton" class="save" type="submit" value="Search" name="action">'''
 
-    groupbyelement = '''
-          <th><span class="cell">group by:</span></th>
-          <th>
-          <span class="cell">none </span><input type="radio" name="groupby" value="none">
-          <span class="cell">name </span><input type="radio" name="groupby" value="determination">
-          <span class="cell">family </span><input type="radio" name="groupby" value="family">
-          <span class="cell">location </span><input type="radio" name="groupby" value="gardenlocation">
-          </th>'''
+    appOptions = '''<select onchange="this.form.submit()">
+        ...
+        </select>'''
+
+    programName = os.path.basename(__file__).replace('Utils', 'Main') + '?webapp=' # yes, this is fragile!
+    appOptions = '''
+    <a target="%s" class="littlebutton" href="%s">%s</a>&nbsp;
+    <a target="%s" class="littlebutton" href="%s">%s</a></span>
+    ''' % ('switchapp',programName,'switch app','logout',programName,'logout')
+
+    #groupbyelement = '''
+    #      <th><span class="cell">group by:</span></th>
+    #      <th>
+    #      <span class="cell">none </span><input type="radio" name="groupby" value="none">
+    #      <span class="cell">name </span><input type="radio" name="groupby" value="determination">
+    #      <span class="cell">family </span><input type="radio" name="groupby" value="family">
+    #      <span class="cell">location </span><input type="radio" name="groupby" value="gardenlocation">
+    #      </th>'''
     #groupby   = str(form.get("groupby")) if form.get("groupby") else 'gardenlocation'
 
     # temporary, until the other groupings and sortings work...
@@ -2743,6 +2769,16 @@ def starthtml(form, config):
 	  <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
           <th><span class="cell">end location:</span></th>
           <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th></tr>
+    '''
+
+    if updateType == 'login':
+        button = '''<input id="actionbutton" class="save" type="submit" value="Login" name="action">'''
+        otherfields = '''
+	    <tr><th><span class="cell">username:</span></th>
+	    <th><input id="inputusername" class="cell" type="text" size="40" name="inputusername" class="xspan"></th></tr>
+        <tr><th><span class="cell">password:</span></th>
+        <th><input id="inputpassword" class="cell" type="password" size="40" name="inputpassword" class="xspan"></th>
+        </tr>
     '''
 
     if updateType == 'keyinfo':
@@ -2933,8 +2969,6 @@ def starthtml(form, config):
           <th><input id="num2ret" class="cell" type="text" size="4" name="num2ret" value="''' + num2ret + '''" class="xspan"></th></tr>
           <tr><th/><th/><th/><th/></tr>'''
 
-    username = ''
-
     return '''Content-type: text/html; charset=utf-8
 
     
@@ -2982,11 +3016,11 @@ function formSubmit(location)
     <br/>
     <span class="tiny">&nbsp;</span>
     </td>
-    <td style="width: 100px; text-align: left; padding-right: 10px;"><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span>
+    <td style="width: 150px; text-align: left; padding-right: 10px;"><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span>
     <br/>
     <span class="ncell">''' + username + '''</span>
     <br/>
-    <span class="tiny">&nbsp;</span>
+    <span class="tiny">''' + appOptions + '''</span>
     </td>
     <td><div style="width:80px; ";" id="appstatus"><img height="60px" src="../images/timer-animated.gif"></div></td>
 	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>
@@ -3007,6 +3041,8 @@ function formSubmit(location)
       <tr><td colspan="5"><div id="status"><hr/></div></td></tr>
     </tbody>
     </table>
+    <input type="hidden" name="csusername" value="''' + username + '''">
+    <input type="hidden" name="cspassword" value="''' + password + '''">
 '''
 
 
