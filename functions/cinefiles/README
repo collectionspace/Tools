@@ -1,0 +1,6 @@
+README
+3/3/2014
+
+Most of the functions in this directory support the creation of denormalized tables for the CineFiles web site.  All of the find*.sql create a concatenated string of potentially repeating information (e.g., document authors).  All but one create a pipe-delimited string of the format name1|name2|name3.  findfilmdirectorids.sql creates a string like |nameid1|nameid2|nameid3| (with pipes at the beginning and end since these numeric values could be subsets of other identifiers).  This is because searching from the CF web site will be done with "like %term%".  
+
+There are two functions doc_detail_summary.sql and film_detail_summary.sql that create the result sets that are used in the document citation and film citation.
