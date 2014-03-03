@@ -1,0 +1,11 @@
+README
+3/3/2014
+
+These tables are created as denormalized data sources for the CineFiles web site.
+
+Those that end in *string.sql are intermediate tables that have the concatenated strings of repeating information produced by corresponding Postgres functions.
+
+These are all tables, despite the "view" names.  These were named like their Sybase ancestors in order to minimize changes in Java.
+
+filmlist_view.sql and doclist_view.sql are the two primary sources, and filmdocs.sql is a many-to-many table that can be used to join them.  There are a few tables that are also used as primary data sources in the CineFiles web site (e.g., alldoctitles_view, allfilmtitles_view, docsubjects_view, filmgenres)
+
