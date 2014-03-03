@@ -1152,29 +1152,50 @@ def doAuthorityScan(form, config):
 
 
 def downloadCsv(form, config):
-    try:
-        rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), 500, config)
-    except:
-        raise
-        handleTimeout('downloadCSV', form)
-        rows = []
-
-    place = form.get("cp.place")
-    if place != None:
-        places = getPlaces.getPlaces(place)
+    updateType = config.get('info', 'updateType')
+    if updateType == 'governmentholdings':
+        try:
+            query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+            hostname = config.get('connect', 'hostname')
+            if query == "None":
+                print '<h3>Please Select An Agency</h><hr>'
+                return
+            sites = cswaDB.getSitesByOwner(config, form.get('agency'))
+        except:
+            raise
+        
+        rowcount = len(sites)
+        print 'Content-type: application/octet-stream; charset=utf-8'
+        print 'Content-Disposition: attachment; filename="Sites By %s.csv"' % query
+        print
+        writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+        for s in sites:
+                writer.writerow((s[0], s[1], s[2], s[3]))
+        
     else:
-        places = []
+        try:
+            rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), 500, config)
+        except:
+            raise
+            handleTimeout('downloadCSV', form)
+            rows = []
 
-    rowcount = len(rows)
-    print 'Content-type: application/octet-stream; charset=utf-8'
-    print 'Content-Disposition: attachment; filename="packinglist.xls"'
-    print
-    writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
-    for r in rows:
-        objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo')
-        for o in objects:
-            if checkObject(places, o):
-                writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
+        place = form.get("cp.place")
+        if place != None:
+            places = getPlaces.getPlaces(place)
+        else:
+            places = []
+
+        rowcount = len(rows)
+        print 'Content-type: application/octet-stream; charset=utf-8'
+        print 'Content-Disposition: attachment; filename="packinglist.xls"'
+        print
+        writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+        for r in rows:
+            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo')
+            for o in objects:
+                if checkObject(places, o):
+                    writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
     sys.stdout.flush()
     sys.stdout.close()
 
@@ -1440,21 +1461,14 @@ def doListGovHoldings(form, config):
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
     print '''<tbody align="center" width=75 style="font-weight:bold">
         <tr><td>Site</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
-    for siteList in sites:
+    for site in sites:
         print "<tr>"
-        #A little hacky...
-        i = 0
-        for site in siteList:
-            if not site:
-                site = ''
-            if i == 0:
-                print '<td align="left" width=75><a target="fcplace" href="' + link + str(cswaDB.getCSID('placeName',site, config)[0]) + '&vocab=place">' + site + '</td>'
-                #print '<td align="center" width=75>' + site + "</td>"
-            elif i == 1:
-                pass
-            else:
-                print '<td align="left" width=75>' + site + "</td>"
-            i += 1
+        for field in site:
+            if not field:
+                field = ''
+        print '<td align="left" width=75><a href="' + link + str(cswaDB.getCSID('placeName',site[0], config)[0]) + '&vocab=place">' + site[0] + '</td>'
+        print '<td align="left" width=75>' + (site[2] or '') + "</td>"
+        print '<td align="left" width=75>' + (site[3] or '') + "</td>"
         print '</tr><tr><td colspan="3"><hr></td></tr>'
     print "</table>"
     print '<h4>', len(sites), ' sites listed.</h4>'
@@ -2510,7 +2524,7 @@ p { padding:10px 10px 10px 10px; }
 
 button { font-size: 150%; width:85px; text-align: center; text-transform: uppercase;}
 
-.statsection { font-size:21px; font-weight:bold; border-bottom: thin dotted #aaaaaa; color: ''' + schemacolor1 + '''; }
+.statsection { font-size:21px; font-weight:bold; border-bottom: thin dotted #aaaaaa; color: #660000; }
 .statheader { font-weight: bold; text-align:center; font-size:medium; }
 .stattitle { font-weight: bold; text-align:right; font-size:small; }
 .statvalue { font-weight: normal; text-align:left; font-size:x-small; }
@@ -2528,26 +2542,31 @@ button { font-size: 150%; width:85px; text-align: center; text-transform: upperc
 img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
 .ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
-.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
-.objno { font-weight: bold; font-size: 16px; font-style: italic; width:110px; }
-.objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
-.ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
-.ui-tabs .ui-tabs-nav li { height:40px; font-size:16px; }
-.ui-tabs .ui-tabs-nav li a { position:relative; top:0px }
-#tabs { padding: 0px; background: none; border-width: 0px; } 
-#tabs .ui-tabs-nav { padding-left: 0px; background: transparent; border-width: 0px 0px 1px 0px;
-  -moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px; text-align: center; height: 2.35em; }
-#tabs .ui-tabs-panel { background: #ffffff repeat-x scroll 50% top; border-width: 1px 1px 1px 1px; }
-#tabs .ui-tabs-nav li { display: inline-block; float: none; top: 0px; margin: 0em; }
 .rdo { text-align: center; }
 .save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
-.shortinput { font-weight: bold; width:150px; }
-.subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
-.veryshortinput { width:60px; }
-.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
-
-
+.dashboardcell { width:265px; height:190px;
+-moz-border-radius:9px; border-radius:9px;
+border:2px solid black; position:relative;
+display:inline-block; margin:13px; padding:5px;
+text-align:left;}
+.dashboardpane { position:fixed; top:1px;
+left:1px; right:1px; bottom:1px;overflow:hidden;
+-moz-border-radius:9px; border-radius:9px;
+border:2px solid black; text-align:left;
+background:#CCC; display:none; padding:8px;
+background:rgba(0,0,0,0.2);}
+#overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#000;
+opacity:0.5; filter:alpha(opacity=50); display:none; overflow:hidden}
+.content {border-radius:7px; background:#fff;
+padding:20px; height:93%; overflow-y:auto;overflow-x:auto; position:relative;}
+.table{display:none; background:#fff; float:left; margin-left:305px;}
+.selection{height:150px; width:300px; float:left; background:#fff; position:fixed;}
+.charts{float:left; background:#fff; margin-left:305px;}
+.time{float:left; display:none; background:#fff; margin-left:305px;}
+.close{float:right; margin-top:-12.5px; margin-right:-5.5px; z-index:25; position:absolute; right:0px}
+.charts-menu-vertical { max-height: 300px; overflow-y: auto; z-index: 15;}
 </style>
+
 <style type="text/css">
   /*<![CDATA[*/
     @import "../css/jquery-ui-1.8.22.custom.css";
@@ -2599,58 +2618,46 @@ function formSubmit(location)
 
     dbsource = 'pahma.cspace.berkeley.edu'
 
-    print '''<div id="tabs">
- <ul>
-   <li><a href="#tabs-1"><span>At A Glance</span></a></li>
-   <li><a href="#tabs-2"><span>By Object Types</span></a></li>
-   <li><a href="#tabs-3"><span>By Catalog or Department</span></a></li>
-   <li><a href="#tabs-4"><span>By Accession Status</span></a></li>
-   <li><a href="#tabs-5"><span>By Collection Manager</span></a></li>
-   <li><a href="#tabs-6"><span>By Ethnographic Use Code</span></a></li>
- </ul>
-'''
-    cswaCollectionUtils.makeglancetab(dbsource, config)
+    print '''<div>
+    <span style="font-size:20px;"><b>%s</b> Total Museum Numbers &bull; <b>%s</b> Total Objects &bull; <b>%s</b> Total Pieces</span><br>
+    <span style="font-size:16px; font-style:italic">All counts accurate as of %s</span><br></div>
+''' % (cswaCollectionUtils.getTopStats(dbsource, config))
 
-    print '''<div id="tabs-2">'''
-    statgroup = 'objByObjType'
-    sectiontitle = 'By object type'
-    charttype = 'piechart'
-    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
-    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
-    print '''</div>'''
+    print '''<div id='overlay'></div>
+<div style="text-align:center;">'''
 
-    print '''<div id="tabs-3">'''
-    statgroup = 'objByLegCat'
-    sectiontitle = 'By legacy catalog'
-    charttype = 'barchartvertical'
-    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
-    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
-    print '''</div>'''
+    statcodes = ['total', 'cont', 'obj', 'cat', 'acc', 'efc', 'coll', 'iot']
+    longform = {'total': 'Total Counts', 'cont': 'Continent', 'obj': 'Object Type', 'cult': 'Culture', 'cat': 'Catalog',
+                'don': 'Donor','acc': 'Accession Status', 'efc': 'Ethnographic Use Code', 'coll': 'Collection Manager', 'iot': 'Objects Photographed'}
 
-    print '''<div id="tabs-4">'''
-    statgroup = 'objByAccStatus'
-    sectiontitle = 'By accession status'
-    charttype = 'barchartvertical'
-    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
-    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
-    print '''</div>'''
+    for code in statcodes:
+        if code == 'total':
+            print '''
+    <div class="dashboardcell" id="%s">
+        <span style="align:left">Total Counts</span>
+    </div>''' % code
+        else:
+            print '''
+    <div class="dashboardcell" id="%s">
+        <span style="align:left">By %s</span>
+    </div>''' % (code, longform[code])
+    print '</div>'
 
-    print '''<div id="tabs-5">'''
-    statgroup = 'objByCollMan'
-    sectiontitle = 'By collection manager'
-    charttype = 'piechart'
-    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
-    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
-    print '''</div>'''
-
-    print '''<div id="tabs-6">'''
-    statgroup = 'objByFileCode'
-    sectiontitle = 'By ethnographic use code'
-    charttype = 'piechart'
-    cswaCollectionUtils.makethreecharts(dbsource, charttype, statgroup, config)
-    cswaCollectionUtils.maketableofcounts(dbsource, sectiontitle, statgroup, config)
-    print '''</div>
+    imgsrc = "/images/x.png"
+    for code in statcodes:
+        print '''<div class="dashboardpane" id="%spane">
+    <div class="close" id="%sclose">
+        <img src="%s" alt="close">
+    </div>
+    <div class="content">''' % (code, code, imgsrc)
+        cswaCollectionUtils.makeSelection(code)
+        cswaCollectionUtils.makeChart(code, longform[code], dbsource, config)
+        cswaCollectionUtils.makeTable(code, longform[code], dbsource, config)
+        cswaCollectionUtils.makeTime(code, dbsource, config)
+        print '''
+    </div>
 </div>'''
+    print "</div>"
 
 
 def getStyle(schemacolor1):
@@ -2925,7 +2932,7 @@ def starthtml(form, config):
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
 <tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th>
-<th colspan="4"><i>NB: object number range supercedes location range, if entered.</i></th>
+<th colspan="4"><i>NB: object number range supersedes location range, if entered.</i></th>
 </tr>'''
 
     elif updateType == 'inventory':
@@ -2962,6 +2969,7 @@ def starthtml(form, config):
         agencies, selected = getAgencies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Holdings" name="action">'''
         otherfields = '''<tr><th><span class="cell">Agency:</span></th><th>''' + agencies + '''</th>'''
+        otherfields += """<td><input type="submit" class="save" value="%s" name="action"</td>""" % 'Download as CSV'
 
     elif False:
         otherfields += '''
@@ -3052,35 +3060,48 @@ def endhtml(form, config, elapsedtime):
     count = form.get('count')
     connect_string = config.get('connect', 'connect_string')
     focusSnippet = ""
-    addenda = ""
+    addenda = '''
+
+d = document.getElementById("appstatus");
+d.innerHTML = '&nbsp;';
+
+});'''
     # for object details, clear out the input field on focus, for everything else, just focus
     if config.get('info', 'updatetype') == 'objdetails':
         focusSnippet = '''$('input:text:first').focus().val("");'''
     else:
         focusSnippet = '''$('input:text:first').focus();'''
     if config.get('info', 'updatetype') == 'collectionstats':
-        addenda = '''});
-$("#gototab2").click(function() {
-    $("#tabs").tabs("select","#tabs-2");
-});
-$("#gototab3").click(function() {
-    $("#tabs").tabs("select","#tabs-3");
-});
-$("#gototab4").click(function() {
-    $("#tabs").tabs("select","#tabs-4");
-});
-$("#gototab5").click(function() {
-    $("#tabs").tabs("select","#tabs-5");
-});
-$("#gototab6").click(function() {
-    $("#tabs").tabs("select","#tabs-6");
-});'''
-    else:
-        addenda = '''
-
-d = document.getElementById("appstatus");
-d.innerHTML = '&nbsp;';
-
+        addenda = '''$(".dashboardcell").click(function() {
+		var paneid = $(this).attr('id') + 'pane';
+		$('#' + paneid).show();
+		$('#overlay').show();
+	});
+	$(".close").click(function() {
+		var closeid = $(this).attr('id').replace("close","pane");
+		$('#' + closeid).hide();
+		$('#overlay').hide();
+	});
+	$(".selimg").click(function() {
+		var showid = $(this).attr('id').replace("sel","");
+		if(showid.indexOf("chart") != -1) {
+			$('#' + showid.replace("chart", "table")).hide();
+			$('#' + showid.replace("chart", "time")).hide();
+			if (document.getElementById(showid).style.display == 'none'){
+				$('#' + showid).show(0)
+			} //else {
+				//$('#' + showid).hide();
+			//}
+		} else if(showid.indexOf("table") != -1) {
+			$('#' + showid.replace("table", "chart")).hide();
+			$('#' + showid.replace("table", "time")).hide();
+			$('#' + showid).show(0)		
+		} else if(showid.indexOf("time") != -1) {
+			$('#' + showid.replace("time", "chart")).hide();
+			$('#' + showid.replace("time", "table")).hide();
+			$('#' + showid).show(0)
+		}
+	});
 });'''
     return '''
   <table width="100%">
