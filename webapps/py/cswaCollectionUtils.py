@@ -282,38 +282,45 @@ def getTopStats(dbsource, config):
 
 def makeSelection(code):
    if code in ['cont', 'obj', 'cult', 'don','acc', 'coll', 'iot']: #Pie Charts
-      chartsrc = '/images/piechartplaceholder.svg'
+      chartsrc = '../images/piechart.png'
       alt = ['View Pie Chart']
    elif code =='total': #Intoductory Text
-      chartsrc ='/images/introtext.svg'
+      chartsrc ='../images/introduction.png'
       alt = ['Introduction to the Collection']
    elif code in ['cat', 'efc']: #Bar Charts
-      chartsrc = '/images/barchartplaceholder.svg'
+      chartsrc = '../images/barchart.png'
       alt = ['View Bar Chart']
    else:
-      chartsrc = '/images/piechartplaceholder.svg'
+      chartsrc = '../images/piechart.png'
       alt = ['Not implemented yet!']
       
    if code in ['total', 'cont', 'obj', 'cult', 'cat', 'don','acc', 'efc', 'coll', 'iot']: #Everything, for now
-      timesrc = '/images/timeseriesplaceholder.svg'
+      timesrc = '../images/timeseries.png'
       alt.append('View Time Series')
    else:
-      timesrc = '/images/timeseriesplaceholder.svg'
+      timesrc = '../images/timeserie.png'
       alt.append('Not Implemented Yet!')
       
-   if code in ['total', 'cont', 'obj', 'cult', 'cat', 'don','acc', 'efc', 'coll', 'iot']: #Everything, for now
-      tablesrc = '/images/tableplaceholder.svg'
+   if code in ['cont', 'obj', 'cult', 'cat', 'don','acc', 'efc', 'coll', 'iot']:
+      tablesrc = '../images/table.png'
       alt.append('View Table')
+   elif code == 'total':
+      tablesrc = '../images/howtouse.png'
+      alt.append('How To Use')
    else:
-      tablesrc = '/images/tableplaceholder.svg'
+      tablesrc = '../images/table.png'
       alt.append('Not Implemented Yet!')
+
+   closesrc = '../images/backtomain.png'
+   alt.append('Close')
       
    print '''
       <div class="selection">
          <img src="%s" alt="%s" id="%schartsel" class="selimg"><br>
          <img src="%s" alt="%s" id="%stimesel" class="selimg"><br>
-         <img src="%s" alt="%s" id="%stablesel" class="selimg">
-      </div>''' % (chartsrc, alt[0], code, timesrc, alt[1], code, tablesrc, alt[2], code)
+         <img src="%s" alt="%s" id="%stablesel" class="selimg"><br>
+         <img src="%s" alt="%s" id="%sclosesel" class="selimg">
+      </div>''' % (chartsrc, alt[0], code, timesrc, alt[1], code, tablesrc, alt[2], code, closesrc, alt[3], code)
 
 
 # #########################################################################
@@ -651,7 +658,7 @@ def makeTime(code, dbsource, config):
                    'iot': 'objByImgObjType'}
    defaultValue = {'cont': 'North American archaeology', 'obj': 'archaeology',
                    'cat': 'Cat. 1: California', 'acc': 'accessioned', 'efc': '2.2 Personal adornments, etc.',
-                   'coll': 'None (Registration)', 'iot': 'Total'}
+                   'coll': 'None (Registration)', 'iot': 'archaeology'}
    totFlag = 0
    if code == 'total':
       totFlag = 1
@@ -774,26 +781,15 @@ def prepTime(code, category, config):
             continue
          res += "\n    [new Date(%s, %s, %s), %s, '%s', '%s']," % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10], result[1],
                                                                    makeNiceStatMetrics(result[2]), makeTersePrettyLabel(result[3]))
-         if code in ['iot']:
-            if not '%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10]) in total:
-               total['%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10])] = [0, result[2]]
-            total['%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10])][0] += result[1]
-##         if code in ['cont']:
-##            total = {'North America': [], 'South America': [], 'Africa': [], 'Asia': [], 'Europe': [], 'Oceania': []}
-##            for key in total:
-##               if key in result[3]:
-##                  total[key].append("new Date(%s, %s, %s), %s, '%s', '%s'" % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10], result[1],
-##                                                                              makeNiceStatMetrics(result[2]), key))
-      if code in ['iot']:
-         for tot in total:
-            val = total[tot]
-            res += "\n    [new Date(%s), %s, '%s', 'Total']," % (tot, val[0], makeNiceStatMetrics(val[1]))
-##      if code in ['cont']:
-##         for key in total:
-##            print key
-##            for result in total[key]:
-##               print total[key]
-##               res += "\n    [%s]," % (result)
+#         if code in ['iot']:
+#            if not '%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10]) in total:
+#               total['%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10])] = [0, result[2]]
+#            total['%s, %s, %s' % (result[0][0:4], zeroMonth(result[0][5:7]), result[0][8:10])][0] += result[1]
+
+#      if code in ['iot']:
+#         for tot in total:
+#            val = total[tot]
+#            res += "\n    [new Date(%s), %s, '%s', 'Total']," % (tot, val[0], makeNiceStatMetrics(val[1]))
          
    res = res[:-1]
 

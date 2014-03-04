@@ -2609,7 +2609,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 -moz-border-radius:9px; border-radius:9px;
 border:2px solid black; position:relative;
 display:inline-block; margin:13px; padding:5px;
-text-align:left; cursor: pointer;}
+cursor: pointer;}
 .dashboardpane { position:fixed; top:1px;
 left:1px; right:1px; bottom:1px;overflow:hidden;
 -moz-border-radius:9px; border-radius:9px;
@@ -2621,7 +2621,7 @@ opacity:0.5; filter:alpha(opacity=50); display:none; overflow:hidden}
 .content {border-radius:7px; background:#fff;
 padding:20px; height:93%; overflow-y:auto;overflow-x:auto; position:relative;}
 .table{display:none; background:#fff; float:left; margin-left:305px;}
-.selection{height:150px; width:300px; float:left; background:#fff; position:fixed;}
+.selection{height:150px; width:300px; float:left; background:#fff; position:fixed; cursor:pointer;}
 .charts{float:left; background:#fff; margin-left:305px;}
 .time{float:left; display:none; background:#fff; margin-left:305px;}
 .close{float:right; margin-top:-12.5px; margin-right:-5.5px; z-index:25; position:absolute; right:0px}
@@ -2695,16 +2695,16 @@ function formSubmit(location)
         if code == 'total':
             print '''
     <div class="dashboardcell" id="%s">
-        <span style="align:left">Total Counts</span>
-    </div>''' % code
+        <img src="../images/%s.png" alt="%s" id="%simg">
+    </div>''' % (code, code, longform[code], code)
         else:
             print '''
     <div class="dashboardcell" id="%s">
-        <span style="align:left">By %s</span>
-    </div>''' % (code, longform[code])
+        <img src="../images/%s.png" alt="By %s" id="%simg">
+    </div>''' % (code, code, longform[code], code)
     print '</div>'
 
-    imgsrc = "/images/x.png"
+    imgsrc = "../images/x.png"
     for code in statcodes:
         print '''<div class="dashboardpane" id="%spane">
     <div class="close" id="%sclose">
@@ -3145,7 +3145,11 @@ d.innerHTML = '&nbsp;';
 	});
 	$(".selimg").click(function() {
 		var showid = $(this).attr('id').replace("sel","");
-		if(showid.indexOf("chart") != -1) {
+		if(showid.indexOf("close") != -1) {
+                    var closeid = showid.replace("close","pane");
+                    $('#' + closeid).hide();
+                    $('#overlay').hide();
+		} else if(showid.indexOf("chart") != -1) {
 			$('#' + showid.replace("chart", "table")).hide();
 			$('#' + showid.replace("chart", "time")).hide();
 			if (document.getElementById(showid).style.display == 'none'){
