@@ -862,7 +862,6 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
         elif fieldset == 'hsrinfo':
             if form.get('ocn.' + index) != '':
                 updateItems['objectCount'] = form.get('ocn.' + index)
-            updateItems['objectCount'] = form.get('ocn.' + index)
             updateItems['inventoryCount'] = form.get('ctn.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['briefDescription'] = form.get('bdx.' + index)
