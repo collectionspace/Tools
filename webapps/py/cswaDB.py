@@ -195,7 +195,8 @@ pc.item pcRefName,
 ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
-h9.name accCSID
+h9.name accCSID,
+cp.inventoryCount
 
 FROM loctermgroup l
 
@@ -509,7 +510,8 @@ pc.item pcRefName,
 ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
-h9.name accCSID
+h9.name accCSID,
+cp.inventoryCount
 
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
