@@ -83,7 +83,7 @@ def checkCompression(img):
 def checkImage(tif, img):
     # 12345.p2.300gray
     # (0).p(1).(2)(3)
-    parsedName = re.search(r'(\d+)\.p(\d)\.(\d+)(\w+)\.tif', tif['name'])
+    parsedName = re.search(r'(\d+)\.p(\d+)\.(\d+)(\w+)\.tif', tif['name'])
     if parsedName is None:
         syntaxOK = False
     else:
