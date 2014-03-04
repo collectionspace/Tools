@@ -813,6 +813,9 @@ def doUpdateKeyinfo(form, config):
                 refNames2find[form.get('cg.' + index)] = cswaDB.getrefname('concepts_common', form.get('cg.' + index), config)
             if not refNames2find.has_key(form.get('fc.' + index)):
                 refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index), config)
+        elif fieldset == 'hsrinfo':
+            if not refNames2find.has_key(form.get('fc.' + index)):
+                refNames2find[form.get('fc.' + index)] = cswaDB.getrefname('concepts_common', form.get('fc.' + index), config)
         else:
             pass
             #error! fieldset not set!
@@ -853,6 +856,12 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['assocPeople'] = refNames2find[form.get('cg.' + index)]
             updateItems['pahmaEthnographicFileCode'] = refNames2find[form.get('fc.' + index)]
+        elif fieldset == 'hsrinfo':
+            if form.get('ocn.' + index) != '':
+                updateItems['objectCount'] = form.get('ocn.' + index)
+                updateItems['objectCountNote'] = form.get('ctn.' + index)
+                updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
+                updateItems['briefDescription'] = form.get('bdx.' + index)
         else:
             pass
             #error!
@@ -885,6 +894,19 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
         elif fieldset == 'registration':
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
+        elif fieldset == 'hsrinfo':
+            if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace')[0]:
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+            if 'objectCount' in updateItems:
+                try:
+                    int(updateItems['objectCount'])
+                    int(updateItems['objectCount'][0])
+                except ValueError:
+                    msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
+                    del updateItems['objectCount']
         try:
             #pass
             updateKeyInfo(fieldset, updateItems, config, form)
@@ -932,6 +954,17 @@ def infoHeaders(fieldSet):
       <th>Field Collector</th>
       <th>Donor</th>
       <th>Accession</th>
+      <th>P?</th>
+    </tr>"""
+    elif fieldSet == 'hsrinfo':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th>Count Note</th>
+      <th>Field Collection Place</th>
+      <th style="text-align:center">Brief Description</th>
       <th>P?</th>
     </tr>"""
     else:
@@ -1823,6 +1856,8 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     elif fieldset == 'registration':
         # nb:  'pahmaAltNumType' is handled with  'pahmaAltNum'
         fields = ('objectName', 'pahmaAltNum', 'fieldCollector')
+    elif fieldset == 'hsrinfo':
+        fields = ('objectName', 'pahmaFieldCollectionPlace', 'briefDescription', 'countNote')
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -2076,6 +2111,52 @@ def formatInfoReviewRow(form, link, rr, link2):
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
             rr[8],
             rr[8], rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[7], True), rr[8], cgi.escape(rr[9], True))
+    elif fieldSet == 'hsrinfo':
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td class="veryshortinput">
+<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<input class="xspan" type="text" size="26" name="ctn.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
+<td><textarea cols="60" rows="1" name="bdx.%s">%s</textarea></td>
+<td><input type="checkbox"></td>
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
+            rr[8], rr[8], rr[8], cgi.escape(rr[25], True), rr[8], cgi.escape(rr[9], True), rr[8], cgi.escape(rr[15], True))
+
+def formatInfoReviewForm(form):
+    fieldSet = form.get("fieldset")
+    if fieldSet == 'namedesc':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Brief Description</th><td><textarea cols="78" rows="7" name="bdx.user"></textarea></td>
+</tr>"""
+    elif fieldSet == 'registration':
+        altnumtypes, selected = getAltNumTypes(form, '','')
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Alternate Number</th><td><input class="xspan" type="text" size="60" name="anm.user"></td>
+</tr><tr><th>Alternate Number Types</th><td>%s</td>
+</tr><tr><th>Donor Name (person)</th><td><input class="xspan" type="text" size="60" name="pc.user"></td>
+</tr>""" % altnumtypes
+    elif fieldSet == 'keyinfo':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
+</tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
+</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
+</tr><tr><th>Cultural Group</th><td><input class="xspan" type="text" size="60" name="cg.user"></td>
+</tr><tr><th>Ethnographic File Code</th><td><input class="xspan" type="text" size="60" name="fc.user"></td>
+</tr>"""
+    elif fieldSet == 'hsrinfo':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
+</tr><tr><th>Count Note</th><td><input class="xspan" type="text" size="30" name="ctn.user"></td>
+</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="50" name="cp.user"></td>
+</tr><tr><th>Brief Description</th><td><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
+</tr>"""
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
@@ -2294,7 +2375,8 @@ def getFieldset(form):
     fields = [ \
         ("Key Info", "keyinfo"),
         ("Name & Desc.", "namedesc"),
-        ("Registration", "registration")
+        ("Registration", "registration"),
+        ("HSR Info", "hsrinfo")
     ]
 
     fieldset = '''
@@ -2558,7 +2640,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 -moz-border-radius:9px; border-radius:9px;
 border:2px solid black; position:relative;
 display:inline-block; margin:13px; padding:5px;
-text-align:left;}
+text-align:left; cursor: pointer;}
 .dashboardpane { position:fixed; top:1px;
 left:1px; right:1px; bottom:1px;overflow:hidden;
 -moz-border-radius:9px; border-radius:9px;
