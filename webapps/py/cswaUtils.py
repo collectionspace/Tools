@@ -70,6 +70,18 @@ def getCreds(form):
     password = form.get('cspassword')
     return username, password
 
+def authenticateUser(username, password, form,config):
+    realm = config.get('connect', 'realm')
+    hostname = config.get('connect', 'hostname')
+    uri = "accounts/0/accountperms"
+    sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
+    try:
+        url, content, elapsedtime = getxml(uri, realm, hostname, username, password, '')
+        return True
+    except:
+        return False
+
+
 def getProhibitedLocations(appconfig):
     #fileName = appconfig.get('files','prohibitedLocations.csv')
     fileName = 'prohibitedLocations.csv'
@@ -1797,10 +1809,8 @@ def alreadyExists(txt, element):
 def updateKeyInfo(fieldset, updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
-    #username = config.get('connect', 'username')
-    #password = config.get('connect', 'password')
     username, password = getCreds(form)
-    sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
+    #sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
 
     uri = 'collectionobjects'
     getItems = updateItems['objectCsid']
@@ -1886,8 +1896,6 @@ def updateKeyInfo(fieldset, updateItems, config, form):
 def updateLocations(updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
-    #username = config.get('connect', 'username')
-    #password = config.get('connect', 'password')
     username, password = getCreds(form)
 
     uri = 'movements'
@@ -2104,6 +2112,7 @@ def getxml(uri, realm, hostname, username, password, getItems):
     urllib2.install_opener(opener)
     if getItems == None: getItems = ''
     url = "%s/cspace-services/%s/%s" % (server, uri, getItems)
+    #sys.stderr.write('url %s' % url )
     elapsedtime = 0.0
 
     try:
@@ -2112,12 +2121,12 @@ def getxml(uri, realm, hostname, username, password, getItems):
         data = f.read()
         elapsedtime = time.time() - elapsedtime
     except urllib2.HTTPError, e:
-        print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code
+        sys.stderr.write('The server couldn\'t fulfill the request.')
+        sys.stderr.write( 'Error code: %s' % e.code)
         raise
     except urllib2.URLError, e:
-        print 'We failed to reach a server.'
-        print 'Reason: ', e.reason
+        sys.stderr.write('We failed to reach a server.')
+        sys.stderr.write( 'Reason: %s' % e.reason)
         raise
     else:
         return (url, data, elapsedtime)
@@ -2542,6 +2551,7 @@ button { font-size: 150%; width:85px; text-align: center; text-transform: upperc
 img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .locations { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
 .ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.error {color:red;}
 .rdo { text-align: center; }
 .save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
 .dashboardcell { width:265px; height:190px;
@@ -2682,6 +2692,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
 .rdo { text-align: center; width:60px; }
+.error {color:red;}
 .save { background-color: BurlyWood; font-size:20px; color: #000000; font-weight:bold; vertical-align: middle; text-align: center; }
 .shortinput { font-weight: bold; width:150px; }
 .subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
@@ -2709,9 +2720,15 @@ def starthtml(form, config):
     updateType = config.get('info', 'updatetype')
     username = form.get('csusername')
     password = form.get('cspassword')
+    msg = ''
     if form.get('inputusername') is not None:
         username = form.get('inputusername')
         password = form.get('inputpassword')
+        if authenticateUser(username, password, form,config):
+            pass
+        else:
+            username = None
+            msg = 'not valid!'
     if username is None:
         username = ''
         password = ''
@@ -3026,7 +3043,7 @@ function formSubmit(location)
     </td>
     <td style="width: 150px; text-align: left; padding-right: 10px;"><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span>
     <br/>
-    <span class="ncell">''' + username + '''</span>
+    <span class="ncell">''' + username + '''</span><span class="error">''' + msg + '''</span>
     <br/>
     <span class="tiny">''' + appOptions + '''</span>
     </td>

@@ -115,7 +115,7 @@ try:
 
 except:
     sys.stderr.write("error! %s" % traceback.format_exc())
-    print '''<h3><span style="color:red;">Sorry! An error occurred; it has been logged and will be investigated.<br/>
+    print '''<h3><span class="error">Sorry! An error occurred; it has been logged and will be investigated.<br/>
         However, it may take some days before the log is reviewed, so please contact John Lowe jblowe@berkeley.edu directly
         if you have even the <i>slightest</i> concern about getting this issue resolved.
         Also, please record the time and what you were doing when this unfortunate event happened. Screenshots, are helpful, too.
