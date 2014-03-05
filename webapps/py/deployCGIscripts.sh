@@ -5,7 +5,7 @@
 #
 # copy files to approrpriate directories, keeping dir structure intact
 #
-git pull origin $2 -v
+git pull origin $1 -v
 cp cswa*.py           /var/www/cgi-bin/
 cp autosuggest.py     /var/www/cgi-bin/
 cp -r ../extras/*.js  /var/www/js/
