@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inventory" language="groovy" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="baa3a829-2cdf-4505-b140-15d9282910ca">
-	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="223"/>
 	<property name="ireport.y" value="0"/>
 	<style name="Title" fontName="SansSerif" fontSize="26" isBold="true" pdfFontName="Helvetica"/>
 	<style name="SubTitle" forecolor="#666666" fontName="SansSerif" fontSize="18"/>
@@ -98,14 +98,14 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 				<text><![CDATA[to:]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="31" y="28" width="115" height="23" uuid="8d4fb112-5a3c-4534-981b-3766c89c4700"/>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="31" y="24" width="115" height="27" uuid="8d4fb112-5a3c-4534-981b-3766c89c4700"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Start Location}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="171" y="28" width="129" height="23" uuid="b3a93249-4c39-4e71-958a-c461bfbccd4f"/>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="171" y="24" width="115" height="27" uuid="b3a93249-4c39-4e71-958a-c461bfbccd4f"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
@@ -139,35 +139,35 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 				<text><![CDATA[Museum #]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="86" y="2" width="91" height="15" uuid="795e218b-325f-4179-b305-9af70eb39f3e"/>
+				<reportElement style="Column header" x="86" y="1" width="91" height="15" uuid="795e218b-325f-4179-b305-9af70eb39f3e"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[Object name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="497" y="2" width="58" height="15" uuid="44fd4c83-9519-47a1-8065-910d94c5fa10"/>
+				<reportElement style="Column header" x="497" y="1" width="58" height="15" uuid="44fd4c83-9519-47a1-8065-910d94c5fa10"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[Located?]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="405" y="2" width="92" height="15" uuid="17a9f924-edc3-4b9f-b52c-14c8ed0358e1"/>
+				<reportElement style="Column header" x="405" y="1" width="92" height="15" uuid="17a9f924-edc3-4b9f-b52c-14c8ed0358e1"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[Count Note]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="361" y="2" width="32" height="15" uuid="532c8391-225b-4f3f-8061-cccdd53b4dfd"/>
+				<reportElement style="Column header" x="355" y="1" width="32" height="15" uuid="532c8391-225b-4f3f-8061-cccdd53b4dfd"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[Count]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="208" y="2" width="91" height="15" uuid="047b70cd-d320-44dc-bcc3-2c4fd8b9b0b6"/>
+				<reportElement style="Column header" x="208" y="1" width="91" height="15" uuid="047b70cd-d320-44dc-bcc3-2c4fd8b9b0b6"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
@@ -176,51 +176,51 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="19" splitType="Stretch">
+		<band height="20" splitType="Stretch">
 			<textField isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="2" y="1" width="84" height="16" backcolor="#FFFFFF" uuid="d3d389c9-257e-444d-82d0-c8f9ce206dd8"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="376" y="0" width="17" height="16" uuid="4db8037c-9da1-4b4c-8ede-fe183b7bde88"/>
-				<textElement>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="361" y="1" width="35" height="16" uuid="4db8037c-9da1-4b4c-8ede-fe183b7bde88"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectcount}]]></textFieldExpression>
 			</textField>
-			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="16" width="555" height="1" uuid="fb12ae68-60c0-424a-9bc8-7de085742cff"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
-				</graphicElement>
-			</line>
 			<rectangle>
-				<reportElement x="513" y="1" width="15" height="15" uuid="9b664b4c-1792-4418-a64b-1403885549b9"/>
+				<reportElement positionType="Float" x="513" y="1" width="15" height="15" uuid="9b664b4c-1792-4418-a64b-1403885549b9"/>
 			</rectangle>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="208" y="0" width="142" height="16" uuid="31ce47d9-5c7b-4bf8-b89d-d9d03b1d13a6"/>
-				<textElement>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="208" y="1" width="142" height="15" uuid="31ce47d9-5c7b-4bf8-b89d-d9d03b1d13a6"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{briefdescription}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="405" y="1" width="92" height="15" uuid="ae28346c-84b6-43ab-a454-d9a52991b916"/>
-				<textElement>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="406" y="1" width="92" height="15" uuid="ae28346c-84b6-43ab-a454-d9a52991b916"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{countnote}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="86" y="1" width="118" height="15" uuid="69888981-1b4b-458e-859a-ddc4bdde07a1"/>
-				<textElement>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="86" y="1" width="115" height="15" uuid="69888981-1b4b-458e-859a-ddc4bdde07a1"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectname}]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="2" y="17" width="555" height="1" uuid="fb12ae68-60c0-424a-9bc8-7de085742cff"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
 		</band>
 	</detail>
 	<pageFooter>
