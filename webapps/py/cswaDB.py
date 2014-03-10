@@ -673,7 +673,24 @@ def gethierarchy(query, config):
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
-    if query != 'places':
+    if query == 'taxonomy':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
+FROM taxon_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN taxon_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:taxonomyauthority:name(taxon):item:name%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child
+"""
+    elif query != 'places':
         gethierarchy = """
 SELECT DISTINCT
         regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 

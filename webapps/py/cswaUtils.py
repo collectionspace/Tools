@@ -2390,7 +2390,8 @@ def getHierarchies(form):
         ("Places", "places"),
         ("Archaeological Culture", "archculture"),
         ("Ethnographic File Codes", "ethusecode"),
-        ("Materials", "material_ca")
+        ("Materials", "material_ca"),
+        ("Taxonomy", "taxonomy")
     ]
 
     authorities = '''
@@ -2647,6 +2648,8 @@ padding:20px; height:93%; overflow-y:auto;overflow-x:auto; position:relative;}
 .time{float:left; display:none; background:#fff; margin-left:305px;}
 .close{float:right; margin-top:-12.5px; margin-right:-5.5px; z-index:25; position:absolute; right:0px}
 .charts-menu-vertical { max-height: 300px; overflow-y: auto; z-index: 15;}
+.useHead{ font-weight: bold; }
+.useBody{ display: inline-block; padding-left: 3em; }
 </style>
 
 <style type="text/css">
