@@ -8,14 +8,10 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import ConfigParser
 
-import time, datetime
+import time
 
 from os import listdir, environ
-from os.path import isfile, join
-
-
-def getWidthHeight(img):
-    return img.size
+from os.path import isfile, join, getsize
 
 
 def getBits(img):
@@ -60,8 +56,6 @@ def checkFormat(img):
     except:
         return False
 
-#if cell == "PCD":
-#	return "IMAG PAC"
 
 def checkCompression(img):
     try:
@@ -77,8 +71,9 @@ def checkCompression(img):
     elif cell == "IMAG PAC":
         return True
     else:
-        print "Unknown compression format:", cell
+        #print "Unknown compression format:", cell
         return False
+
 
 def checkImage(tif, img):
     # 12345.p2.300gray
@@ -93,15 +88,15 @@ def checkImage(tif, img):
         resolution = str(tif['dpi'][0])
     except:
         resolution = ''
-    return { 'isTiff': checkFormat(img),
-             'syntaxOK': syntaxOK,
-             'isNotZero': True,
-             #'isNotZero': checkSize(img),
-             'isCompressed': checkCompression(img),
-             'depthOK': True,
-             #'depthOK': checkSyntax(parsedName,1,getBits(img)),
-             'colorOK': checkSyntax(parsedName,4,getColorModel(img)),
-             'resolutionOK': checkSyntax(parsedName,3,resolution)
+    return {'isTiff': checkFormat(img),
+            'syntaxOK': syntaxOK,
+            'sizeOK': True if tif['filesize'] > 0 else False,
+            #'isNotZero': checkSize(img),
+            'isCompressed': checkCompression(img),
+            'depthOK': True,
+            #'depthOK': checkSyntax(parsedName,1,getBits(img)),
+            'colorOK': checkSyntax(parsedName, 4, getColorModel(img)),
+            'resolutionOK': checkSyntax(parsedName, 3, resolution)
     }
 
 
@@ -120,12 +115,13 @@ def getConfig(form):
     try:
         fileName = form.get('webapp') + '.cfg'
         config = ConfigParser.RawConfigParser()
-        config.read(fileName)
-        # test to see if it seems like it is really a config file
-        updateType = config.get('info', 'updatetype')
+        filesread = config.read(fileName)
+        if filesread == []:
+            raise
         return config
     except:
-        return False
+        print 'Problem reading config file.'
+        sys.exit()
 
 
 class CleanlinesFile(file):
@@ -153,7 +149,7 @@ def getBlobsFromDB(config, startdate, enddate):
     #   c.data AS md5, cc.createdat, cc.updatedat
 
     query = """
-    SELECT cc.id, cc.updatedat, b.name, c.data AS md5
+    SELECT cc.id, cc.updatedat, cc.updatedby, b.name, c.data AS md5
     FROM  blobs_common b
       INNER JOIN  picture p
          ON (b.repositoryid = p.id)
@@ -176,12 +172,13 @@ def getBlobsFromDB(config, startdate, enddate):
         records = []
         for r in objects.fetchall():
             tif = {}
-            for i, dbfield in enumerate('blobcsid updatedat name md5'.split(' ')):
+            for i, dbfield in enumerate('blobcsid updatedat updatedby name md5'.split(' ')):
                 tif[dbfield] = r[i]
 
             m = re.search(r'(..)(..)', tif['md5'])
             tif['fullpathtofile'] = "%s/nuxeo-server/data/binaries/data/%s/%s/%s" % (
-            environ['CATALINA_HOME'], m.group(1), m.group(2), tif['md5'])
+                # nb: we are assuming here that this app is running with the CSpace variable set...
+                environ['CATALINA_HOME'], m.group(1), m.group(2), tif['md5'])
 
             records.append(tif)
         return records
@@ -195,13 +192,14 @@ def getBlobsFromDB(config, startdate, enddate):
 
 
 def get_tifftags(fn, ret):
-
     try:
         im = Image.open(fn)
     except:
-        ret['imageOK'] = False
+        for key in 'imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK'.split(' '): ret[
+            key] = False
         return
 
+    ret['filesize'] = getsize(fn)
     #im = Image.open(fn)
     ret['format'] = im.format
     # The file format of the source file. For images created by the library itself
@@ -209,26 +207,26 @@ def get_tifftags(fn, ret):
     ret['mode'] = im.mode
     # Image mode. This is a string specifying the pixel format used by the image.
     # Typical values are "1", "L", "RGB", or "CMYK." See Concepts for a full list.
-    ret['size'] = im.size
+    ret['imagesize'] = im.size
     # Image size, in pixels. The size is given as a 2-tuple (width, height).
     ret['palette'] = im.palette
     if im.mode == 'P': ret['palette'] = 'ImagePalette'
-    # Colour palette table, if any. If mode is "P", this should be an instance of the ImagePalette class. Otherwise, it should be set to None.
+    # Colour palette table, if any. If mode is "P", this should be an instance of the ImagePalette class. Otherwise, it
+    # should be set to None.
 
 
     info = im.info
     for tag, value in info.items():
         ret[tag] = value
 
-    checks = checkImage(ret,im)
+    checks = checkImage(ret, im)
     for k in checks.keys():
         ret[k] = checks[k]
-    #print ret
+        #print ret
     ret['imageOK'] = True
-    for flag in 'resolutionOK isTiff isNotZero isCompressed depthOK colorOK syntaxOK'.split(' '):
+    for flag in 'resolutionOK isTiff sizeOK isCompressed depthOK colorOK syntaxOK'.split(' '):
         if ret[flag] == False:
             ret['imageOK'] = False
-
 
 
 def writeCsv(filename, items, writeheader):
@@ -276,44 +274,50 @@ def getBloblist(blobpath):
     return records, count
 
 
-if __name__ == "__main__":
+def doChecks(args):
+    if len(args) < 1:
+        sys.exit('Usage: %s [db|dir] ...' % args[0])
 
-    if len(sys.argv) < 1:
-        sys.exit('Usage: %s [db|dir] ...' % sys.argv[0])
-
-    if sys.argv[1] == 'db':
-        if len(sys.argv) < 6:
-            sys.exit('Usage: %s db config-file startdate enddate reportname' % sys.argv[0])
+    if args[1] == 'db':
+        if len(args) < 6:
+            sys.exit('Usage: %s db config-file startdate enddate reportname' % args[0])
 
         try:
-            #form = {'webapp': '/var/www/cgi-bin/' + sys.argv[2]}
-            form = {'webapp': sys.argv[2]}
+            #form = {'webapp': '/var/www/cgi-bin/' + args[2]}
+            form = {'webapp': args[2]}
             config = getConfig(form)
         except:
-            print "MEDIA: could not get configuration"
+            print "could not get configuration from %s.cfg. Does it exist?" % args[2]
+            raise
             sys.exit()
-        startdate = sys.argv[3]
-        enddate = sys.argv[4]
-        outputFile = sys.argv[5]
+        try:
+            connect_str = config.get('connect', 'connect_string')
+        except:
+            print "%s.cfg does not contain a parameter called 'connect_string'" % args[2]
+            sys.exit()
+        startdate = args[3]
+        enddate = args[4]
+        outputFile = args[5]
 
         records = getBlobsFromDB(config, startdate, enddate)
 
 
-    elif sys.argv[1] == 'dir':
+    elif args[1] == 'dir':
 
-        if len(sys.argv) < 4:
-            sys.exit('Usage: %s dir directory reportname' % sys.argv[0])
+        if len(args) < 4:
+            sys.exit('Usage: %s dir directory reportname' % args[0])
 
-        blobpath = sys.argv[2]
+        blobpath = args[2]
         records, count = getBloblist(blobpath)
-        print 'MEDIA: %s files found in directory %s' % (count, sys.argv[2])
-        outputFile = sys.argv[3]
+        print 'MEDIA: %s files found in directory %s' % (count, args[2])
+        outputFile = args[3]
 
     else:
         print 'datasource must either "db" or "dir"'
         sys.exit()
 
-    columns = 'name imageOK isTiff sizeOK syntaxOK isCompressed depthOK colorOK blobcsid size updatedat format mode palette compression dpi fullpathtofile'.split(' ')
+    columns = 'name imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK imagesize filesize updatedat updatedby format mode palette compression dpi blobcsid fullpathtofile'.split(
+        ' ')
     outputfh = csv.writer(open(outputFile, 'wb'), delimiter="\t")
     outputfh.writerow(columns)
 
@@ -339,8 +343,9 @@ if __name__ == "__main__":
         try:
             outputfh.writerow(row)
         except:
-            print "MEDIA: failed to write data for file %s, %8.2f" % (tif['name'], (time.time() - elapsedtimetotal))
+            print "failed to write data for file %s, %8.2f" % (tif['name'], (time.time() - elapsedtimetotal))
 
 
-
-
+if __name__ == "__main__":
+#
+    doChecks(sys.argv)
