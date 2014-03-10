@@ -2134,7 +2134,7 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td>
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
-<input class="xspan" type="text" size="26" name="ctn.%s" value="%s"></td>
+<input class="xspan" type="text" size="20" name="ctn.%s" value="%s"></td>
 <td><input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
 <td><textarea cols="60" rows="1" name="bdx.%s">%s</textarea></td>
 <td><input type="checkbox"></td>
@@ -2164,7 +2164,7 @@ def formatInfoReviewForm(form):
     elif fieldSet == 'hsrinfo':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
 </tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
-</tr><tr><th>Count Note</th><td><input class="xspan" type="text" size="30" name="ctn.user"></td>
+</tr><tr><th>Count Note</th><td><input class="xspan" type="text" size="25" name="ctn.user"></td>
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="50" name="cp.user"></td>
 </tr><tr><th>Brief Description</th><td><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
 </tr>"""
