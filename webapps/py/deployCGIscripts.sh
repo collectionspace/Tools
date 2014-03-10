@@ -14,8 +14,6 @@ cp -r ../extras/*.png /var/www/images/
 cp -r ../extras/*.jpg /var/www/images/
 cp -r ../extras/*.svg /var/www/images/
 cp -r ../extras/*.gif /var/www/icons/
-cp -r ../cfg/*Dev.cfg /var/www/cgi-bin/
-cp -r ../cfg/*V321.cfg /var/www/cgi-bin/
 
 #Don't know about the other files, i.e.
 #cp checkPlace.py      /var/www/cgi-bin/
@@ -25,6 +23,3 @@ cp -r ../cfg/*V321.cfg /var/www/cgi-bin/
 #cp getTaxname.py      /var/www/cgi-bin/
 #cp badObjectNames.py  /var/www/cgi-bin/
 #cp badObjectNamesDB.py /var/www/cgi-bin/
-
-#
-# what about .cfg files...?
