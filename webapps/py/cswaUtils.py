@@ -74,7 +74,7 @@ def authenticateUser(username, password, form,config):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
     uri = "accounts/0/accountperms"
-    sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
+    sys.stderr.write('%-13s:: %s\n' % ('creds:',username))
     try:
         url, content, elapsedtime = getxml(uri, realm, hostname, username, password, '')
         return True
