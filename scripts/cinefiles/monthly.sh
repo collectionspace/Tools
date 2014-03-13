@@ -1,4 +1,11 @@
 set -o verbose
+# note the assumptions made by this script:
+# - it will run in /home/developers/qc
+# - it will run at the beginning of a month and report on the previous month
+# - monthly reports will be retained forever..this script does not groom them
+# - config file cinefilesProd.cfg exists with the needed paramaters.
+#
+cd /home/developers/qc
 rdate=`date --date="last month" +%Y-%m`
 REPORT=image_qc_report-${rdate}
 time python checkBlobs.py db cinefilesProd `date --date="last month" +%Y-%m-01` `date --date="this month" +%Y-%m-01` $REPORT.csv
