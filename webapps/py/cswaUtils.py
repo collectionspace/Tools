@@ -70,13 +70,13 @@ def getCreds(form):
     password = form.get('cspassword')
     return username, password
 
-def authenticateUser(username, password, form,config):
+def authenticateUser(username, password, form, config):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
     uri = "accounts/0/accountperms"
     sys.stderr.write('%-13s:: %s\n' % ('creds:',username))
     try:
-        url, content, elapsedtime = getxml(uri, realm, hostname, username, password, '')
+        url, content, elapsedtime = getxml(uri, realm, hostname, username, password, None)
         return True
     except:
         return False
@@ -188,6 +188,17 @@ def search(form, config):
             pass
         else:
             print '%s : %s %s\n' % (m, mapping[m], form.get(m))
+
+def makeGroup(form,config):
+    pass
+
+
+def doRelationsEdit(form,config):
+    pass
+
+
+def doRelationsSearch(form, config):
+    pass
 
 
 def doComplexSearch(form, config, displaytype):
@@ -581,7 +592,7 @@ def doEnumerateObjects(form, config):
             locations[locationheader] = ['<tr><td colspan="3">No objects found at this location.</td></tr>']
         for r in objects:
             locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
-            if locations.has_key(locationheader):
+            if locationheader in locations:
                 pass
             else:
                 locations[locationheader] = []
@@ -1500,7 +1511,7 @@ def doHierarchyView(form, config):
 def doListGovHoldings(form, config):
     query = cswaDB.getDisplayName(config, form.get('agency'))[0]
     hostname = config.get('connect', 'hostname')
-    link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/place.html?csid='
+    link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/place.html?csid='
     if query == "None":
         print '<h3>Please Select An Agency</h><hr>'
         return
@@ -1977,6 +1988,8 @@ def updateLocations(updateItems, config, form):
 
 def formatRow(result, form, config):
     hostname = config.get('connect', 'hostname')
+    port = ''
+    protocol = 'https'
     rr = result['data']
     rr = [x if x != None else '' for x in rr]
 
@@ -1996,7 +2009,7 @@ def formatRow(result, form, config):
         groupby = str(form.get("groupby"))
         rare = 'Yes' if rr[8] == 'true' else 'No'
         dead = 'Yes' if rr[9] == 'true' else 'No'
-        link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
         if groupby == 'none':
             location = '<td>%s</td>' % rr[0]
         else:
@@ -2007,38 +2020,38 @@ def formatRow(result, form, config):
     elif result['rowtype'] in ['locreport','holdings','advsearch']:
         rare = 'Yes' if rr[7] == 'true' else 'No'
         dead = 'Yes' if rr[8] == 'true' else 'No'
-        link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6]
         #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead , 9 determination (no author)
         return '''<tr><td><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (
             link, rr[0], rr[1], rr[2], rr[3], rr[5], rare, dead)
     elif result['rowtype'] == 'was.advsearch':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
         #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
         return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (
             link, rr[4], rr[3], rr[5], rr[6])
     elif result['rowtype'] == 'inventory':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # 0 storageLocation | 1 lockey | 2 locdate | 3 objectnumber | 4 objectName | 5 objectCount | 6 fieldcollectionplace | 7 culturalgroup |
         # 8 objectCsid | 9 ethnographicfilecode | 10 fcpRefName | 11 cgRefName | 12 efcRefName | 13 computedcraterefname | 14 computedcrate
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td>%s</td></tr>""" % (
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
-        link2 = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link2 = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr>
@@ -2052,7 +2065,7 @@ def formatRow(result, form, config):
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[6], rr[8], rr[7], rr[8], rr[9])
 
     elif result['rowtype'] == 'packinglistbyculture':
-        link = 'http://' + hostname + ':8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7x | objcsid 8 | ethnographicfilecode 9x
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr>
@@ -2175,14 +2188,19 @@ def formatError(cspaceObject):
 
 
 def getxml(uri, realm, hostname, username, password, getItems):
-    server = "http://" + hostname + ":8180"
+    # port and protocol need to find their ways into the config files...
+    port = ''
+    protocol = 'https'
+    server = protocol + "://" + hostname + port
     passman = urllib2.HTTPPasswordMgr()
     passman.add_password(realm, server, username, password)
     authhandler = urllib2.HTTPBasicAuthHandler(passman)
     opener = urllib2.build_opener(authhandler)
     urllib2.install_opener(opener)
-    if getItems == None: getItems = ''
-    url = "%s/cspace-services/%s/%s" % (server, uri, getItems)
+    if getItems == None:
+        url = "%s/cspace-services/%s" % (server, uri)
+    else:
+        url = "%s/cspace-services/%s/%s" % (server, uri, getItems)
     #sys.stderr.write('url %s' % url )
     elapsedtime = 0.0
 
@@ -2206,7 +2224,9 @@ def getxml(uri, realm, hostname, username, password, getItems):
 
 
 def postxml(requestType, uri, realm, hostname, username, password, payload):
-    server = "http://" + hostname + ":8180"
+    port = ''
+    protocol = 'https'
+    server = protocol + "://" + hostname + port
     passman = urllib2.HTTPPasswordMgr()
     passman.add_password(realm, server, username, password)
     authhandler = urllib2.HTTPBasicAuthHandler(passman)
@@ -2335,6 +2355,14 @@ def getReasons(form):
 '''
     reasons = reasons.replace(('option value="%s"' % reason), ('option selected value="%s"' % reason))
     return reasons, reason
+
+
+def getAppOptions(museum):
+    webapps = getWebappList()
+    appOptions = ''
+    for w in webapps[museum]:
+        appOptions += """<option value="%s">%s</option>\n""" % (w, w)
+    return '''<select onchange="this.form.submit()" name="selectedapp">\n<option value="None">switch app</option>%s\n</select>''' % appOptions
 
 
 def getPrinters(form):
@@ -2489,7 +2517,26 @@ def getAgencies(form):
     agencies + '\n </select>'
     return agencies, selected
 
-def selectWebapp():
+def getWebappList():
+    return {
+        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
+        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
+        'ucjeps': ['ucjepsLocationReport']}
+
+
+def selectWebapp(form):
+    if form.get('webapp') == 'switchapp':
+        #sys.stderr.write('%-13s:: %s' % ('switchapp','looking for creds..'))
+        username = form.get('csusername')
+        password = form.get('cspassword')
+        payload = '''
+            <input type="hidden" name="checkauth" value="true">
+            <input type="hidden" name="csusername" value="%s">
+            <input type="hidden" name="cspassword" value="%s">''' % (username, password)
+    else:
+        payload = ''
+
     files = os.listdir(".")
 
     programName = os.path.basename(__file__).replace('Utils', 'Main') + '?webapp=' # yes, this is fragile!
@@ -2507,17 +2554,11 @@ def selectWebapp():
                 schemacolor1 = config.get('info', 'schemacolor1')
                 serverlabel = config.get('info', 'serverlabel')
                 serverlabelcolor = config.get('info', 'serverlabelcolor')
-                serverlabels[f] = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (
+                serverlabels[f] = '''<span style="color:%s;"><a target="%s" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
                     serverlabelcolor, serverlabel, programName + configfile, configfile)
                 apptitles[updateType] = config.get('info', 'apptitle')
             except:
                 badconfigfiles += '<tr><td>%s</td></tr>' % f
-
-    webapps = {
-        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
-        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
-        'ucjeps': ['ucjepsLocationReport']}
 
     #exceptions = { "barcodeprint": "BarcodePrint",
     #               "upload": "BarcodeUpload",
@@ -2526,15 +2567,31 @@ def selectWebapp():
     #               "sysinv": "SystematicInventory" }
 
     exceptions = {}
+    webapps = getWebappList()
 
     line = '''Content-type: text/html; charset=utf-8
 
 
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + getStyle('lightblue') + '''
+<style type="text/css">
+/*<![CDATA[*/
+@import "../css/jquery-ui-1.8.22.custom.css";
+@import "../css/blue/style.css";
+@import "../css/jqtree.css";
+/*]]>*/
+</style>
+<script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
+<script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
+<script src="../js/tree.jquery.js"></script>
+<style>
+.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
+</style>
 <title>Select web app</title>
 </head>
 <body>
+<form id="sysinv" method="post">
 <h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1><table cellpadding="4px">
 <p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
@@ -2544,20 +2601,20 @@ def selectWebapp():
         for webapp in webapps[museum]:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
             line += '<tr><th>%s</th><th>%s</th>' % (apptitle, webapp)
-            for sys in ['V321', 'Dev']:
+            for deployment in ['V321', 'Dev']:
                 available = ''
-                if webapp in exceptions and sys not in ['Dev', 'V321']:
-                    if os.path.isfile(exceptions[webapp] + sys + '.py'):
+                if webapp in exceptions and deployment not in ['Dev', 'V321']:
+                    if os.path.isfile(exceptions[webapp] + deployment + '.py'):
                         available = '<a target="%s" href="%s">%s</a>' % (
-                            sys, exceptions[webapp] + sys + '.py', exceptions[webapp] + sys)
-                    elif os.path.isfile(exceptions[webapp] + '.py') and sys == 'Prod':
+                            deployment, exceptions[webapp] + deployment + '.py', exceptions[webapp] + deployment)
+                    elif os.path.isfile(exceptions[webapp] + '.py') and deployment == 'Prod':
                         available = '<a target="%s" href="%s">%s</a>' % (
-                            sys, exceptions[webapp] + '.py', exceptions[webapp])
+                            deployment, exceptions[webapp] + '.py', exceptions[webapp])
                 else:
-                    available = '<a target="%s" href="%s">%s</a>' % (sys, programName + webapp + sys, webapp + sys)
-                if os.path.isfile(webapp + sys + '.cfg'):
-                    available = serverlabels[webapp + sys + '.cfg']
-                    #available = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span><span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (sys,programName+webapp+sys,webapp+sys)
+                    available = '''<a target="%s" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapp + deployment, webapp + deployment)
+                if os.path.isfile(webapp + deployment + '.cfg'):
+                    available = serverlabels[webapp + deployment + '.cfg']
+                    #available = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span><span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (deployment,programName+webapp+deployment,webapp+deployment)
                     #''' + apptitle + ' : ' + serverlabel + '''</title>''' + getStyle(schemacolor1) + '''
                 else:
                     available = ''
@@ -2569,7 +2626,8 @@ def selectWebapp():
     line += '''
 </table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013</h4>
+<h4>jblowe@berkeley.edu   7 Feb 2013, revised 15 March 2014</h4>''' + payload + '''
+</form>
 </body>
 </html>'''
 
@@ -2796,10 +2854,16 @@ def starthtml(form, config):
     username = form.get('csusername')
     password = form.get('cspassword')
     msg = ''
-    if form.get('inputusername') is not None:
+    if form.get('checkauth') is not None:
+        if authenticateUser(username, password, form, config):
+            pass
+        else:
+            username = None
+            msg = 'login again!'
+    elif form.get('inputusername') is not None:
         username = form.get('inputusername')
         password = form.get('inputpassword')
-        if authenticateUser(username, password, form,config):
+        if authenticateUser(username, password, form, config):
             pass
         else:
             username = None
@@ -2813,15 +2877,16 @@ def starthtml(form, config):
 
     button = '''<input id="actionbutton" class="save" type="submit" value="Search" name="action">'''
 
-    appOptions = '''<select onchange="this.form.submit()">
-        ...
-        </select>'''
+    #appOptions = '''<select onchange="this.form.submit()">
+    #    ...
+    #    </select>'''
 
     programName = os.path.basename(__file__).replace('Utils', 'Main') + '?webapp=' # yes, this is fragile!
+    #appOptions = getAppOptions('pahma')
+
     appOptions = '''
-    <a target="%s" class="littlebutton" href="%s">%s</a>&nbsp;
-    <a target="%s" class="littlebutton" href="%s">%s</a></span>
-    ''' % ('switchapp',programName,'switch app','logout',programName,'logout')
+    <a target="%s" class="littlebutton" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a>
+    ''' % ('switchapp', programName + 'switchapp', 'switch app')
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>
@@ -3109,18 +3174,19 @@ function formSubmit(location)
     <tbody>
       <tr>
 	<td class="cell" style="width: 500px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
-    <td style="width: 120px; text-align: right; padding-right: 10px;">
-    <span class="tiny">server</span>
-    <br/>
-    <span class="tiny">user</span>
-    <br/>
-    <span class="tiny">&nbsp;</span>
+    <td style="min-width: 100px; text-align: right; padding-right: 10px;">
+    <table>
+    <tr><td style="text-align: right;"><span class="tiny">server</span></td></tr>
+    <tr><td style="text-align: right;"><span class="tiny">user</span></td></tr>
+    <tr><td style="text-align: right;"><span class="tiny"><a class="littlebutton" href="''' + programName + '''">logout</a></span><span class="tiny"> or</span></td></tr>
+    </table>
     </td>
-    <td style="width: 150px; text-align: left; padding-right: 10px;"><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span>
-    <br/>
-    <span class="ncell">''' + username + '''</span><span class="error">''' + msg + '''</span>
-    <br/>
-    <span class="tiny">''' + appOptions + '''</span>
+    <td style="min-width: 140px; text-align: left; padding-right: 10px;">
+    <table>
+    <tr><td><span class="tiny" style="color:''' + serverlabelcolor + ''';">''' + serverlabel + '''</span></td></tr>
+    <tr><td style="height: 18px;"><span class="tiny">''' + username + '''</span><span class="error">''' + msg + '''</span></td></tr>
+    <tr><td><span class="tiny">''' + appOptions + '''</span><span class="tiny">&nbsp;</span></td></tr>
+    </table>
     </td>
     <td><div style="width:80px; ";" id="appstatus"><img height="60px" src="../images/timer-animated.gif"></div></td>
 	<th style="text-align:right;"><img height="60px" src="''' + logo + '''"></th>

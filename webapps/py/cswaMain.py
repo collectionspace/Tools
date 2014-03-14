@@ -13,19 +13,21 @@ sys.setdefaultencoding('utf-8')
 
 # NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
 actualform = cgi.FieldStorage()
-form    = cgiFieldStorageToDict(actualform)
+form       = cgiFieldStorageToDict(actualform)
+
+action      = form.get('action')
+checkServer = form.get('check')
+
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
 debug = form.get("debug")
 
 # bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
 if config == False:
-    print selectWebapp()
+    print selectWebapp(form)
     sys.exit(0)
 
 updateType  = config.get('info','updatetype')
-action      = form.get('action')
-checkServer = form.get('check')
 
 # if action has not been set, this is the first time through, and we need to set defaults. (only 1 right now!)
 if not action:
@@ -72,6 +74,7 @@ try:
             elif updateType == 'upload':       uploadFile(actualform,form,config)
             elif updateType == 'governmentholdings': doListGovHoldings(form, config)
             elif updateType == 'editrel':      doRelationsEdit(form,config)
+            elif updateType == 'makegroup':    makeGroup(form,config)
             elif action == "Recent Activity":
                 viewLog(form,config)
     ##    # special case: if only one location in range, jump to enumerate
@@ -101,12 +104,12 @@ try:
             elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
             elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)
+            elif updateType == 'makegroup':    doComplexSearch(form,config,'select')
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)
         elif action == "View Holdings":
             doListGovHoldings(form,config)
-
         elif action in ['<<','>>']:
             print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
         else:
