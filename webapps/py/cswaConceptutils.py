@@ -161,16 +161,17 @@ if __name__ == '__main__':
     #    ("Places", "places"),
     #    ("Archaeological Culture", "archculture"),
     #    ("Ethnographic File Codes", "ethusecode"),
-    #    ("Materials", "material_ca")
+    #    ("Materials", "material_ca"),
+    #    ("Taxonomy", "taxonomy")
     #]
 
-    form = {'authority': 'material_ca', 'webapp': 'hierarchyViewerDev' }
+    form = {'authority': 'taxonomy', 'webapp': 'ucbghierarchyViewerDev' }
     config = getConfig(form)
 
     doHierarchyView(form, config)
-    #sys.exit()
+    sys.exit()
 
-    res = cswaDB.gethierarchy('material_ca', config)
+    res = cswaDB.gethierarchy('taxonomy', config)
 
     PARENT = 'ROOT'
     lookup = {PARENT: PARENT}

@@ -670,6 +670,7 @@ WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
 
 def gethierarchy(query, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    institution = config.get('info', 'institution')
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -686,10 +687,10 @@ FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
 FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
 FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
 FULL OUTER JOIN taxon_common parent ON (parent.id = h2.id)
-WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:taxonomyauthority:name(taxon):item:name%'
+WHERE child.refname LIKE 'urn:cspace:%s.cspace.berkeley.edu:taxonomyauthority:name(taxon):item:name%%'
 AND misc.lifecyclestate <> 'deleted'
 ORDER BY Parent, Child
-"""
+""" % institution
     elif query != 'places':
         gethierarchy = """
 SELECT DISTINCT
@@ -703,9 +704,10 @@ FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
 FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
 FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
 FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
-WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+WHERE child.refname LIKE 'urn:cspace:%s.cspace.berkeley.edu:conceptauthorities:name({0})%%'
 AND misc.lifecyclestate <> 'deleted'
-ORDER BY Parent, Child""".format(query)
+ORDER BY Parent, Child""" % institution
+        gethierarchy = gethierarchy.format(query)
     else:
         gethierarchy = """
 SELECT DISTINCT

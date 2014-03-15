@@ -1488,7 +1488,7 @@ def doHierarchyView(form, config):
     lookup = {concept.PARENT: concept.PARENT}
     for row in res:
         prettyName = row[0].replace('"', "'")
-        if prettyName[0] == '@':
+        if len(prettyName) > 0 and prettyName[0] == '@':
             prettyName = '<' + prettyName[1:] + '>'
         lookup[row[2]] = prettyName
     print '''var data = ['''
@@ -2521,7 +2521,7 @@ def getWebappList():
     return {
         'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
                   'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
-        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbgLocationReport', 'ucbgCollHoldings'],
+        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings'],
         'ucjeps': ['ucjepsLocationReport']}
 
 
