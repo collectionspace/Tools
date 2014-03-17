@@ -72,17 +72,15 @@ RETURN NEXT docsubjRC;
 
 --9
 open docnamesubjRC FOR
-select 'Document Name Subjects' as Content, 
-case when docnamesubject is null then null else 2 end as name_id, 
-case when docnamesubject is null then '' else regexp_split_to_table(docnamesubject, '[\|]+') end as namesubj
-from cinefiles_denorm.doclist_view
+select 'Document Name Subjects' as Content, 2 as name_id, subjcitation namesubj
+from cinefiles_denorm.docnamesubjectcitation
 where doc_id = $1;
 RETURN NEXT docnamesubjRC;
 
 --10
 open docfilmsubjRC FOR
 select 'Document Film Subjects' as Content, fv.film_id,
-   case when fv.filmtitle is null then '' else fv.filmtitle end as filmsubj
+   case when fv.filmtitle is null then '' else substring(concat(fv.filmtitle, ', ', split_part(fv.director, '|', 1), ', ', cast(fv.filmyear as text)), 1, 159) end as filmsubj
 from cinefiles_denorm.doclist_view dv
 left outer join cinefiles_denorm.filmdocs fd on (dv.doc_id=fd.doc_id)
 left outer join cinefiles_denorm.filmlist_view fv on (fv.film_id=fd.film_id)
