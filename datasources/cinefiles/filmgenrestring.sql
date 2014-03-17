@@ -11,7 +11,7 @@ SELECT
 FROM works_common wc
 INNER JOIN misc m
    ON (wc.id = m.id AND m.lifecyclestate <> 'deleted')
-WHERE cinefiles_denorm.findgenres(wc.shortidentifier) is not null
+WHERE cinefiles_denorm.findfilmgenres(wc.shortidentifier) is not null
 ORDER BY wc.shortidentifier;
 	
 grant select on cinefiles_denorm.filmgenrestring to group reporters;
