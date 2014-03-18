@@ -239,22 +239,21 @@
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
    <!-- 
-	 objectnumber_s,objectname_txt,dated_s,title_txt,medium_s,dimensions_s,markings_s,curatorialremarks_txt,
-	 description_txt,provenance_ss,notes_txt,sitename_s,sitenumber_s,objnm_objname_s,objnm_remarks_s,culture_s
+	 objectnumber_s,objectname_txt,dated_txt,title_txt,medium_txt,dimensions_txt,markings_txt,curatorialremarks_txt,
+	 description_txt,provenance_ss,notes_txt,sitename_txt,sitenumber_txt,objnm_objname_txt,objnm_remarks_txt,culture_txt
    -->
    <copyField source="objectnumber_s" dest="text"/>
-   <copyField source="objectname_s" dest="text"/>
+   <copyField source="objectname_txt" dest="text"/>
    <copyField source="title_txt" dest="text"/>
-   <copyField source="medium_s" dest="text"/>
+   <copyField source="medium_txt" dest="text"/>
    <copyField source="description_txt" dest="text"/>
    <copyField source="provenance_ss" dest="text"/>
-   <copyField source="culture_s" dest="text"/>
+   <copyField source="culture_txt" dest="text"/>
    <copyField source="fieldcollnote_txt" dest="text"/>
    <copyField source="annotationnote_txt" dest="text"/>
 
    <!-- Text fields from SolrCell to search by default in our catch-all field -->
    <copyField source="title" dest="text"/>
-   <copyField source="author" dest="text"/>
    <copyField source="description" dest="text"/>
    <copyField source="keywords" dest="text"/>
    <copyField source="content" dest="text"/>
@@ -262,8 +261,17 @@
    <copyField source="resourcename" dest="text"/>
    <copyField source="url" dest="text"/>
 
-   <!-- Create a string version of author for faceting -->
-   <copyField source="author" dest="author_s"/>
+   <copyField source="provenance_ss" dest="provenance_txt"/>
+   <copyField source="objectnumber_s" dest="objectnumber_txt"/>
+
+   <!-- Create a string version of some fields for faceting -->
+   <copyField source="objectnumber_txt" dest="objectnumber_s"/>
+   <copyField source="objectnumber_txt" dest="text"/>
+   <copyField source="objectname_txt" dest="objectname_s"/>
+   <copyField source="medium_txt" dest="medium_s"/>
+   <copyField source="culture_txt" dest="culture_s"/>
+
+   <!-- Text fields from SolrCell to search by default in our catch-all field -->
 	
    <!-- Above, multiple source fields are copied to the [text] field. 
 	  Another way to map multiple source fields to the same 

@@ -1,5 +1,5 @@
 <div style="float:right; width: 400px;">
-#foreach($t in $doc.getFieldValue('blobs_ss'))
+#foreach($t in $doc.getFieldValue('blob_ss'))
 <div style="float:inherit; display: inline;">
 <a href="http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/$t/derivatives/OriginalJpeg/content">
 <image src="http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/$t/derivatives/Thumbnail/content"></a>
@@ -7,17 +7,17 @@
 #end
 </div>
 <div>
-<div class="result-title"><b>#field('objectname_s')</b></div>
+<div class="result-title"><b>#field('objectname_txt')</b></div>
 ##do we have a physical store for this product
 #set($store = $doc.getFieldValue('store'))
 #if($store)<div class="map"><img src="http://maps.google.com/maps/api/staticmap?&zoom=12&size=150x80&maptype=roadmap&markers=$doc.getFieldValue('store')&sensor=false" /><div><small><a target="_map" href="http://maps.google.com/?q=$store&amp;source=embed">Larger Map</a></small></div></div>#end
 ##<div>Id: #field('id')</div>
 <div>Museum Number: #field('objectnumber_s')</div>
 <div>Description: #field('description_txt')</div>
-<div>Cultural Group: #field('culture_s')</div>
-<div>Provenance:  #field('provenance_s')</div>
-<div>Medium: #field('medium_s')</div>
-##<div>Blob CSID: #field('blobs_ss')</div>
+<div>Cultural Group: #field('culture_txt')</div>
+<div>Provenance:  #field('provenance_txt')</div>
+<div>Medium: #field('medium_txt')</div>
+##<div>Blob CSID: #field('blob_ss')</div>
 <div class="mlt">
   #set($mlt = $mltResults.get($docId))
   #set($mltOn = $params.getBool('mlt'))
