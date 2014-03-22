@@ -72,7 +72,7 @@ from
       ON (h3.id = rg.id)
    LEFT OUTER JOIN hierarchy h4 on (oco.id=h4.id)
    LEFT OUTER JOIN contacts_common cco on (h4.name=cco.initem)
-   LEFT OUTER JOIN hierarchy h5 on (cco.id=h5.parentid and h5.name='contacts_common:webAddressGroupList')
+   LEFT OUTER JOIN hierarchy h5 on (cco.id=h5.parentid and h5.name='contacts_common:webAddressGroupList' and h5.pos=0)
    LEFT OUTER JOIN webaddressgroup wag on (h5.id=wag.id)
    LEFT OUTER JOIN cinefiles_denorm.docsubjectstring dss
       ON (cast(co.objectnumber as bigint) = dss.doc_id)
