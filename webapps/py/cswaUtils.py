@@ -1771,7 +1771,7 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     #print(etree.tostring(root, pretty_print=True))
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
-    payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root)
+    payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')
     # update collectionobject..
     #print "<br>pretending to post update to %s to REST API..." % updateItems['objectCsid']
     (url, data, csid, elapsedtime) = postxml('PUT', uri, realm, hostname, username, password, payload)
