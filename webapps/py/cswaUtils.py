@@ -1299,8 +1299,20 @@ def doHierarchyView(form, config):
     res = cswaDB.gethierarchy(query, config)
     print '<div id="tree"></div>\n<script>'
     lookup = {concept.PARENT: concept.PARENT}
+    link = ''
+    hostname = config.get('connect', 'hostname')
+    institution = config.get('info','institution')
+    port = ''
+    protocol = 'https'
+    if query == 'taxonomy':
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/' + institution + '/html/taxon.html?csid=%s'
+    elif query == 'places':
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/' + institution + '/html/place.html?csid=%s'
+    else:
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/' + institution + '/html/concept.html?csid=%s&vocab=' + query
     for row in res:
-        prettyName = row[0].replace('"', "'")
+        #prettyName = row[0].replace('"', "'")
+        prettyName = row[0].replace('"', "'") + '", url: "' + link % (row[2])
         if len(prettyName) > 0 and prettyName[0] == '@':
             prettyName = '<' + prettyName[1:] + '>'
         lookup[row[2]] = prettyName
@@ -1316,6 +1328,17 @@ def doHierarchyView(form, config):
         useContextMenu: false,
         selectable: false
     });
+    $('#tree').bind(
+    'tree.click',
+    function(event) {
+        // The clicked node is 'event.node'
+        var node = event.node;
+        var URL = node.url;
+        if (URL) {
+            window.open(URL);
+        }
+    }
+);
 });</script>"""
     #print "\n</table><hr/>"
     print "\n<hr>"
