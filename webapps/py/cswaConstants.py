@@ -329,7 +329,7 @@ def getAltNumTypes(form, csid, ant):
         ("original number", "original number"),
         ("previous museum number (recataloged from)", "prev. number (recataloged from)"),
         (u"previous number (anson blake’s number)", "prev. number (Blake)"),
-        (u"previous number (donor’s original number)", "prev. number (donor)"),
+        (u"previous number (donor's original number)", "prev. number (donor)"),
         ("previous number (uc paleontology department)", "prev. number (Paleontology)"),
         ("tb (temporary basket) number", "tb (temporary basket) number")
 
