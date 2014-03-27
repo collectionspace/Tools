@@ -1311,10 +1311,10 @@ def doHierarchyView(form, config):
     else:
         link = protocol + '://' + hostname + port + '/collectionspace/ui/' + institution + '/html/concept.html?csid=%s&vocab=' + query
     for row in res:
-        #prettyName = row[0].replace('"', "'")
-        prettyName = row[0].replace('"', "'") + '", url: "' + link % (row[2])
+        prettyName = row[0].replace('"', "'")
         if len(prettyName) > 0 and prettyName[0] == '@':
-            prettyName = '<' + prettyName[1:] + '>'
+            prettyName = '<' + prettyName[1:] + '> '
+        prettyName = prettyName + '", url: "' + link % (row[2])
         lookup[row[2]] = prettyName
     print '''var data = ['''
     #print concept.buildJSON(concept.buildConceptDict(res), 0, lookup)
