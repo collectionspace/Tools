@@ -317,7 +317,7 @@ def getAltNumTypes(form, csid, ant):
         ("previous number", "previous number"),
         (u"previous number (albert bender’s number)", "prev. number (Bender)"),
         (u"previous number (bascom’s number)", "prev. number (Bascom)"),
-        (u"previous number (collector’s original number)", "prev. number (collector)"),
+        (u"previous number (collector's original number)", "prev. number (collector)"),
         ("previous number (design dept.)", "prev. number (Design)"),
         ("previous number (mvc number, mossman-vitale collection)", "prev. number (MVC)"),
         ("previous number (ucas: university of california archaeological survey)", "prev. number (UCAS)"),
