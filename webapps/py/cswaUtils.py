@@ -745,12 +745,12 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
         msg = 'updated.'
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace')[0]:
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
                     pass
                 else:
                     msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
             if updateItems['assocPeople'] == '' and form.get('cg.' + index):
-                if form.get('cg.' + index) == cswaDB.getCSIDDetail(config, index, 'assocpeoplegroup')[0]:
+                if form.get('cg.' + index) == cswaDB.getCSIDDetail(config, index, 'assocpeoplegroup'):
                     pass
                 else:
                     msg += '<span style="color:red;"> Cultural Group: term "%s" not found, field not updated.</span>' % form.get('cg.' + index)
@@ -768,7 +768,7 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
         elif fieldset == 'hsrinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
-                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace')[0]:
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
                     pass
                 else:
                     msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
@@ -1598,7 +1598,7 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
         if not isinstance(updateItems['objectCsid'], basestring):
             objectCsid = updateItems['objectCsid']
             for csid in objectCsid:
-                updateItems['objectNumber'] = cswaDB.getCSIDDetail(config, csid[0], 'objNumber')[0]
+                updateItems['objectNumber'] = cswaDB.getCSIDDetail(config, csid[0], 'objNumber')
                 updateItems['objectCsid'] = csid[0]
                 updateLocations(updateItems, config)
                 numUpdated += 1

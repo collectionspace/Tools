@@ -845,7 +845,7 @@ WHERE h1.name = '%s'""" % csid
         return ''
     try:
         objects.execute(query)
-        return objects.fetchone()
+        return objects.fetchone()[0]
     except:
         return ''
 
