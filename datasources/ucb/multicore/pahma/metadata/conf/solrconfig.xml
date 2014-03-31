@@ -924,11 +924,10 @@
 
        <!-- Faceting defaults -->
        <str name="facet">on</str>
-       <str name="facet.field">objectname_txt</str>
-       <str name="facet.field">medium_txt</str>
-       <str name="facet.field">culture_txt</str>
-       <str name="facet.field">provenance_txt</str>
-       <str name="facet.query">mask</str>
+       <str name="facet.field">objectname_s</str>
+       <str name="facet.field">medium_s</str>
+       <str name="facet.field">culture_s</str>
+       <str name="facet.field">provenance_ss</str>
        <str name="facet.mincount">1</str>
 
        <!-- Highlighting defaults -->

@@ -1,0 +1,7 @@
+monitorImageCache.sh is a script to monitor the size of the imageserver caches.
+
+It can be run via cron using something like the following:
+
+0 4 * * * cd ~ ; ./monitorImageCache.sh "/tmp/image_cache/"  > report.txt 2>&1 ; cat report.txt | mail -s "ucjeps cache status" -- jblowe@berkeley.edu
+
+...in which case it will email a report at 4 in the morning...
