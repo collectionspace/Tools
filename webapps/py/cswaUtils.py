@@ -41,9 +41,9 @@ except ImportError:
 # the only other module: isolate postgres calls and connection
 import cswaDB as cswaDB
 import cswaConstants as cswaConstants
-import getPlaces
-import getTaxname
-import getAuthorityTree
+import cswaGetPlaces as cswaGetPlaces
+import cswaGetTaxname as cswaGetTaxname
+import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
 
@@ -201,7 +201,7 @@ def doComplexSearch(form, config, displaytype):
 
 def listAuthorities(authority, primarytype, authItem, config, form, displaytype):
     if authItem == None or authItem == '': return
-    rows = getAuthorityTree.getAuthority(authority, primarytype, authItem, config.get('connect', 'connect_string'))
+    rows = cswaGetAuthorityTree.getAuthority(authority, primarytype, authItem, config.get('connect', 'connect_string'))
 
     listSearchResults(authority, config, displaytype, form, rows)
 
@@ -878,7 +878,7 @@ def doPackingList(form, config):
 
     place = form.get("cp.place")
     if place != None:
-        places = getPlaces.getPlaces(place)
+        places = cswaGetPlaces.getPlaces(place)
     else:
         places = []
 
@@ -1054,7 +1054,7 @@ def downloadCsv(form, config):
 
         place = form.get("cp.place")
         if place != None:
-            places = getPlaces.getPlaces(place)
+            places = cswaGetPlaces.getPlaces(place)
         else:
             places = []
 

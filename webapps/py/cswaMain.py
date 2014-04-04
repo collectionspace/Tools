@@ -30,7 +30,7 @@ if config == False:
 updateType  = config.get('info','updatetype')
 
 # if action has not been set, this is the first time through, and we need to set defaults. (only 1 right now!)
-if not action:
+if not action or action == 'Login':
     form['alive'] = 'checked'
     
 # if location2 was not specified, default it to location1

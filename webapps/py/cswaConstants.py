@@ -448,8 +448,8 @@ def getHeader(updateType):
       <th data-sort="float">Accession</th>
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
-      <th data-sort="string">Rare</th>
-      <th data-sort="string">Dead</th>
+      <th data-sort="string">Rare?</th>
+      <th data-sort="string">Accession<br/>Dead?</th>
     </tr></thead><tbody>"""
     elif updateType == 'bedlistxxx' or updateType == 'advsearchxxx':
         return """
@@ -465,8 +465,8 @@ def getHeader(updateType):
       <th data-sort="float">Accession</th>
       <th data-sort="string">Family</th>
       <th data-sort="string">Taxonomic Name</th>
-      <th data-sort="string">Rare</th>
-      <th data-sort="string">Dead</th>
+      <th data-sort="string">Rare?</th>
+      <th data-sort="string">Accession<br/>Dead?</th>
       <th>Garden Location</th>
     </tr></thead><tbody>"""
     elif updateType in ['locreport','holdings','advsearch']:
@@ -477,8 +477,8 @@ def getHeader(updateType):
       <th data-sort="string">Family</th>
       <th data-sort="string">Garden Location</th>
       <th data-sort="string">Locality</th>
-      <th data-sort="string">Rare</th>
-      <th data-sort="string">Dead</th>
+      <th data-sort="string">Rare?</th>
+      <th data-sort="string">Accession<br/>Dead?</th>
     </tr></thead><tbody>"""
     elif updateType == 'keyinfoResult' or updateType == 'objinfoResult':
         return """

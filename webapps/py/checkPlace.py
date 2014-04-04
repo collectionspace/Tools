@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 import sys
-import getPlaces
+import cswaGetPlaces
 
 p = sys.argv[1]
 print 'p:', p
-places = getPlaces.getPlaces(p)
+places = cswaGetPlaces.getPlaces(p)
 if len(places) < 200:
     for place in places:
         print place

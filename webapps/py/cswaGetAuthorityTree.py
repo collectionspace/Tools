@@ -57,6 +57,7 @@ def createAuthorityHierarchyTable(authority, primarytype, term):
     index2 = "CREATE INDEX termcsid_ndx_temp ON authorityname_temp( termcsid )"
 
     cursor = conn.cursor()
+    term = term.replace("'", "''") # escape single quotes for psql
     cursor.execute(query % (authority, primarytype, primarytype, authority, 'broaderterm', term))
     res = cursor.rowcount
     if res == 0:
@@ -160,6 +161,7 @@ def getChildren(authority, primarytype, term, connect_string):
     WHERE %s ='%s'
   """
     cursor = conn.cursor()
+    term = term.replace("'", "''") # escape single quotes for psql
     cursor.execute(query % (authority, primarytype, primarytype, authority, 'broaderterm', term))
     res = cursor.fetchall()
     cursor.close()
