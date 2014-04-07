@@ -173,7 +173,7 @@ def getChildren(authority, primarytype, term, connect_string):
 if __name__ == "__main__":
 
     # get some taxonomic names and locations from botgarden-dev
-    connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+    connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:xxxxx'
 
     # test getAuthority
     primarytype = 'Locationitem'
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     sys.exit(1)
 
     # get some places and materials from PAHMA-dev
-    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:csR2p4rt2r'
+    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:xxxxx'
     primarytype = 'Placeitem'
     authority = 'places'
 

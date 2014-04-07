@@ -42,7 +42,6 @@ except ImportError:
 import cswaDB as cswaDB
 import cswaConstants as cswaConstants
 import cswaGetPlaces as cswaGetPlaces
-import cswaGetTaxname as cswaGetTaxname
 import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
@@ -878,7 +877,7 @@ def doPackingList(form, config):
 
     place = form.get("cp.place")
     if place != None:
-        places = cswaGetPlaces.getPlaces(place)
+        places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
     else:
         places = []
 
