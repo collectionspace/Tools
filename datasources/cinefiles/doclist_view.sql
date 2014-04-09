@@ -24,6 +24,7 @@ select
       when ocf.accesscode = 'Campus (UCB)' then 2
       when ocf.accesscode = 'Education (.edu)' then 3
       when ocf.accesscode = 'World' then 4
+      when (cc.source is null or cc.source='') then 4
       else null
    end
    else
