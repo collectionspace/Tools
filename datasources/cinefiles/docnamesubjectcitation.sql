@@ -1,5 +1,6 @@
 -- docnamesubjectcitation table used in cinefiles denorm in document citation function doc_detail_summary.sql
 -- CRH 3/17/2014
+-- 4/7/2014 using concat_personname function
 
 create table cinefiles_denorm.docnamesubjectcitation as
 SELECT
@@ -9,7 +10,7 @@ SELECT
       when ccn.item like '%orgauthorities%'
         then trim(trailing ', ' from replace(replace(concat_ws(', ', cinefiles_denorm.getdispl(ccn.item), ocf.foundingcity, ocf.foundingcity, cinefiles_denorm.getdispl(oc.foundingplace)), ', , , ', ', '), ', , ', ', '))       
       else
-        trim(trailing ', ' from replace(replace(concat_ws(', ', cinefiles_denorm.getdispl(ccn.item), pcf.birthcity, pcf.birthstate, cinefiles_denorm.getdispl(pc.birthplace)), ', , , ', ', '), ', , ', ', '))       
+        cinefiles_denorm.concat_personname(cinefiles_denorm.getshortid(ccn.item))     
    end as subjcitation
 FROM
    hierarchy h1
