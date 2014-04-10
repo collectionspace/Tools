@@ -1,0 +1,198 @@
++ set -v
+#perl -ne "print if /\|1\-1439\|/" delphi.csv 
+cut -f3 -d"|" delphi.csv > objectnames.txt
++ cut -f3 '-d|' delphi.csv
+wc -l objectnames.txt
++ wc -l objectnames.txt
+771464 objectnames.txt
+# make a concordance of object names, pareto-ordered
+sort objectnames.txt | uniq -c | sort -rn | perl -pe "s/^ +(\d+) /\1\t/" > objectnames.concordance.csv
++ sort objectnames.txt
++ perl -pe 's/^ +(\d+) /\1\t/'
++ uniq -c
++ sort -rn
+wc -l objectnames.concordance.csv
++ wc -l objectnames.concordance.csv
+50118 objectnames.concordance.csv
+head -20 objectnames.concordance.csv 
++ head -20 objectnames.concordance.csv
+100445	
+36255	Photograph & negative
+16721	Potsherd
+14340	Scraper
+13042	Projectile point
+11766	Number not used
+11574	Bone
+9517	Point
+8439	Basket
+7898	Color transparency
+7812	Jar
+7211	Beads
+7052	Sherd
+6466	Flake
+6434	Duplicate Number Assignment
+6281	Photograph
+5455	Shell
+5279	Ornament
+5252	Projectile point fragment
+5248	Audio recording
+# how many occur once...
+perl -ne 'print if /^1\t/' objectnames.concordance.csv | wc
++ perl -ne 'print if /^1\t/' objectnames.concordance.csv
++ wc
+  31336  167970  932580
+# how many occur twice...
+perl -ne 'print if /^2\t/' objectnames.concordance.csv | wc
++ perl -ne 'print if /^2\t/' objectnames.concordance.csv
++ wc
+   6998   32323  176581
+# examine "projectile point" a little..
+grep -i 'projectile' objectnames.concordance.csv | wc -l
++ grep -i projectile objectnames.concordance.csv
++ wc -l
+203
+grep -i 'projectile' objectnames.concordance.csv | grep -v -i 'point' | wc -l
++ grep -i projectile objectnames.concordance.csv
++ wc -l
++ grep -v -i point
+31
+grep -i 'projectile' objectnames.concordance.csv | grep -v -i 'point' | head -20
++ grep -i projectile objectnames.concordance.csv
++ head -20
++ grep -v -i point
+164	Projectile
+60	Projectile or knife
+58	Projectile fragment
+33	projectile
+7	Projectiles
+3	wood projectiles, broken
+3	Projectile fragments
+3	Projectile 
+3	Plate; Projectile
+3	Blade or projectile
+2	projectile dart
+2	projectile base
+2	Foreshaft projectile
+2	Cloth: Pouch; Projectile
+1	scraper or projectile
+1	projectile tip
+1	projectile pont tip
+1	projectile pont
+1	Projectile or blade fragment
+1	Projectile Fragments
+# count number of "normalized" values
+perl -pe 'tr/A-Z/a-z/;s/\d+[,\.]*\d*/99/g;s/\W+/ /g;print "\n"' objectnames.txt | sort | uniq -c | perl -pe 's/^ +(\d+) /\1\t/' > normalizednames.csv
++ perl -pe 'tr/A-Z/a-z/;s/\d+[,\.]*\d*/99/g;s/\W+/ /g;print "\n"' objectnames.txt
++ perl -pe 's/^ +(\d+) /\1\t/'
++ sort
++ uniq -c
+wc -l normalizednames.csv
++ wc -l normalizednames.csv
+39059 normalizednames.csv
+# count number of "normalized" values, collapsed (most) plurals (i.e. remove -s)
+perl -pe 'tr/A-Z/a-z/;s/s$//;s/\d+[,\.]*\d*/99/g;s/\W+/ /g;print "\n"' objectnames.txt | sort | uniq -c | perl -pe 's/^ +(\d+) /\1\t/' | wc -l
++ perl -pe 'tr/A-Z/a-z/;s/s$//;s/\d+[,\.]*\d*/99/g;s/\W+/ /g;print "\n"' objectnames.txt
++ perl -pe 's/^ +(\d+) /\1\t/'
++ sort
++ wc -l
++ uniq -c
+37477
+# make concordance of (lower-case) tokens
+perl -pe "tr/A-Z/a-z/;s/\W+/\n/g" objectnames.txt | sort | uniq -c > objectnames.tokens.csv
++ perl -pe 'tr/A-Z/a-z/;s/\W+/\n/g' objectnames.txt
++ uniq -c
++ sort
+wc -l objectnames.tokens.csv
++ wc -l objectnames.tokens.csv
+15261 objectnames.tokens.csv
+perl -pe "tr/A-Z/a-z/;s/\W+/\n/g" objectnames.txt | wc -l
++ perl -pe 'tr/A-Z/a-z/;s/\W+/\n/g' objectnames.txt
++ wc -l
+1370738
+sort -rn objectnames.tokens.csv | head -40
++ sort -rn objectnames.tokens.csv
++ head -40
+ 101775 
+  50965 fragment
+  50257 negative
+  45612 point
+  42843 photograph
+  33209 bone
+  25303 projectile
+  23854 scraper
+  22000 potsherd
+  18264 number
+  17346 shell
+  15004 stone
+  13542 sherd
+  12220 basket
+  12078 not
+  11928 used
+  11786 textile
+  11703 fragments
+  10581 and
+  10546 glass
+  10334 flake
+  10293 jar
+  10289 knife
+   9796 beads
+   9702 sample
+   9092 remains
+   8637 frag
+   8251 blade
+   8045 color
+   7898 transparency
+   7876 bowl
+   7729 of
+   7678 recording
+   7460 ornament
+   7204 bead
+   7053 ceramic
+   6727 clay
+   6706 arrow
+   6465 plate
+   6448 frags
+head -20 objectnames.tokens.csv
++ head -20 objectnames.tokens.csv
+ 101775 
+     22 _
+      7 __
+     29 ___
+      1 ____
+      1 _____
+    241 0
+      5 00
+      9 000
+      3 0036
+      2 01
+      2 02
+      5 03
+      4 04
+      6 05
+      3 06
+      1 0666
+      5 08
+      2 09
+      1 0900
+tail -20 objectnames.tokens.csv
++ tail -20 objectnames.tokens.csv
+     19 zigzag
+     10 zigzags
+      4 zinacantan
+      2 zinc
+      2 zincantan
+      1 zingiberacaea
+      1 zipper
+      7 zippered
+      2 zither
+      2 zoned
+    359 zoomorph
+     15 zoomorphic
+      2 zoomorphs
+      1 zr
+      1 ztg
+     18 zuni
+      1 zunil
+      3 zur
+     13 zygomatic
+      3 zz
