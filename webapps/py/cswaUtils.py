@@ -1053,7 +1053,7 @@ def downloadCsv(form, config):
 
         place = form.get("cp.place")
         if place != None:
-            places = cswaGetPlaces.getPlaces(place)
+            places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
         else:
             places = []
 
