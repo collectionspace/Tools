@@ -13,22 +13,24 @@ sys.setdefaultencoding('utf-8')
 
 # NB we convert FieldStorage to a dict, but we need the actual form for barcode upload...
 actualform = cgi.FieldStorage()
-form    = cgiFieldStorageToDict(actualform)
+form       = cgiFieldStorageToDict(actualform)
+
+action      = form.get('action')
+checkServer = form.get('check')
+
 config  = getConfig(form)
 # we don't do anything with debug now, but it is a comfort to have
 debug = form.get("debug")
 
 # bail if we don't know which webapp to be...(i.e. no config object passed in from cswaMain)
 if config == False:
-    print selectWebapp()
+    print selectWebapp(form)
     sys.exit(0)
 
 updateType  = config.get('info','updatetype')
-action      = form.get('action')
-checkServer = form.get('check')
 
 # if action has not been set, this is the first time through, and we need to set defaults. (only 1 right now!)
-if not action:
+if not action or action == 'Login':
     form['alive'] = 'checked'
     
 # if location2 was not specified, default it to location1
@@ -39,7 +41,7 @@ if str(form.get('lo.location2')) == '':
 if str(form.get('ob.objno2')) == '':
     form['ob.objno2'] = form.get('ob.objno1')
 
-if updateType == 'packinglist' and action == 'Download as CSV':  
+if (updateType == 'packinglist' or updateType == 'governmentholdings') and action == 'Download as CSV':  
     downloadCsv(form,config)
     sys.exit(0)
 elif updateType == 'collectionstats':
@@ -66,11 +68,13 @@ try:
             elif updateType == 'moveobject':   doUpdateLocations(form,config)
             elif updateType == 'objinfo':      doUpdateKeyinfo(form,config)
             elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
+            elif updateType == 'bulkedit':     doBulkEdit(form,config)
             elif updateType == 'bedlist':      doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
             elif updateType == 'upload':       uploadFile(actualform,form,config)
             elif updateType == 'governmentholdings': doListGovHoldings(form, config)
             elif updateType == 'editrel':      doRelationsEdit(form,config)
+            elif updateType == 'makegroup':    makeGroup(form,config)
             elif action == "Recent Activity":
                 viewLog(form,config)
     ##    # special case: if only one location in range, jump to enumerate
@@ -90,6 +94,7 @@ try:
                 else:
                     doLocationSearch(form, config, 'nolist')
             elif updateType == 'bedlist':      doComplexSearch(form,config,'select')
+            elif updateType == 'bulkedit':     doBulkEditForm(form,config,'nolist')
             elif updateType == 'holdings':     doAuthorityScan(form,config)
             elif updateType == 'locreport':    doAuthorityScan(form,config)
             elif updateType == 'advsearch':    doComplexSearch(form,config,'select')
@@ -99,12 +104,12 @@ try:
             elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
             elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)
+            elif updateType == 'makegroup':    doComplexSearch(form,config,'select')
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)
         elif action == "View Holdings":
             doListGovHoldings(form,config)
-
         elif action in ['<<','>>']:
             print "<h3>Sorry not implemented yet! Please try again tomorrow!</h3>"
         else:
@@ -113,7 +118,7 @@ try:
 
 except:
     sys.stderr.write("error! %s" % traceback.format_exc())
-    print '''<h3><span style="color:red;">Sorry! An error occurred; it has been logged and will be investigated.<br/>
+    print '''<h3><span class="error">Sorry! An error occurred; it has been logged and will be investigated.<br/>
         However, it may take some days before the log is reviewed, so please contact John Lowe jblowe@berkeley.edu directly
         if you have even the <i>slightest</i> concern about getting this issue resolved.
         Also, please record the time and what you were doing when this unfortunate event happened. Screenshots, are helpful, too.

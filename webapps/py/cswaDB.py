@@ -86,57 +86,71 @@ LIMIT 30000"""
 
         if type == 'bedlist':
             sortkey = 'gardenlocation'
-            searchkey = 'mc.currentlocation'
+            searchkey = 'lct.termdisplayname'
         elif type == 'locreport':
             sortkey = 'determination'
             searchkey = 'tig.taxon'
 
-        return """
-select 
-case when (mc.currentlocation is not null and mc.currentlocation <> '')
-     then regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')
-end as gardenlocation,
+        queryTemplate = """
+select distinct on (to_number(objectnumber,'9999.9999'))
+case when (mc.currentlocation is not null and mc.currentlocation <> '') then regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1') end as gardenlocation,
 lct.termname shortgardenlocation,
-case when (lc.locationtype is not null and lc.locationtype <> '')
-     then regexp_replace(lc.locationtype, '^.*\\)''(.*)''$', '\\1')
-end as locationtype,
+case when (lc.locationtype is not null and lc.locationtype <> '') then regexp_replace(lc.locationtype, '^.*\\)''(.*)''$', '\\1') end as locationtype,
 co1.recordstatus,
 co1.objectnumber,
 findhybridaffinname(tig.id) as determination,
-case when (tn.family is not null and tn.family <> '')
-     then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1')
-end as family,
+case when (tn.family is not null and tn.family <> '') then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1') end as family,
 h1.name as objectcsid,
 con.rare,
-cob.deadflag
-
-from collectionobjects_common co1
-left outer join hierarchy h1 on co1.id=h1.id
-left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
-left outer join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
-left outer join movements_common mc on (mc.id=h2.id)
-left outer join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')=lct.termdisplayname)
-inner join misc misc1 on (mc.id=misc1.id and misc1.lifecyclestate <> 'deleted')
-
-join collectionobjects_botgarden cob on (co1.id=cob.id)
-join collectionobjects_naturalhistory con on (co1.id = con.id)
-
-left outer join hierarchy htig 
-     on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
-left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
-
-join collectionspace_core core on (core.id=co1.id and core.tenantid='35')
-join misc misc2 on (misc2.id = co1.id and misc2.lifecyclestate <> 'deleted')
-
-left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id)
-
-left outer join locations_common lc on (mc.currentlocation=lc.refname)
-
-where regexp_replace(%s, '^.*\\)''(.*)''$', '\\1') = '%s'
-   
-ORDER BY %s,to_number(objectnumber,'9999.9999')
-LIMIT 6000""" % (searchkey, location, sortkey)
+cob.deadflag,
+case when (tn.family is not null and tn.family <> '') then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1') end as family,
+date(mc.locationdate + interval '8 hours') actiondate,
+mc.reasonformove actionreason,
+case when (mb.previouslocation is not null and mb.previouslocation <> '') then regexp_replace(mb.previouslocation, '^.*\\)''(.*)''$', '\\1') end as previouslocation 
+from collectionobjects_common co1 
+join hierarchy h1 on co1.id=h1.id
+left outer 
+join hierarchy htig on (co1.id = htig.parentid and htig.pos = 0 and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
+left outer 
+join taxonomicIdentGroup tig on (tig.id = htig.id)
+left outer 
+join taxon_common tc on (tig.taxon=tc.refname)
+left outer 
+join taxon_naturalhistory tn on (tc.id=tn.id) 
+join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement') 
+join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is %s true) 
+join movements_common mc on (mc.id=h2.id) 
+join movements_botgarden mb on (mc.id=mb.id)
+left outer
+join loctermgroup lct on (regexp_replace(mb.previouslocation, '^.*\\)''(.*)''$', '\\1')=lct.termdisplayname) 
+%s
+join collectionspace_core core on mc.id=core.id 
+join collectionobjects_botgarden cob on (co1.id=cob.id) 
+join collectionobjects_naturalhistory con on (co1.id = con.id) 
+left outer join locations_common lc on (mc.currentlocation=lc.refname) 
+where %s  %s = '%s'
+ORDER BY to_number(objectnumber,'9999.9999')
+LIMIT 6000"""
+            
+        if qualifier == 'alive':
+            queryPart1 = " mc.reasonformove != 'Dead' and "
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            return queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
+        elif qualifier == 'dead':
+            queryPart1 = " mc.reasonformove = 'Dead' and "
+            queryPart2 = "inner join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            return queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
+        elif qualifier == 'dead or alive':
+            queryPart1 = " mc.reasonformove != 'Dead' and "
+            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            part1 = queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
+            queryPart1 = " mc.reasonformove = 'Dead' and "
+            queryPart2 = " "
+            part2 = queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
+            return part1 + ' UNION ' + part2
+        else:
+            raise
+            # houston, we got a problem...query not qualified
 
     elif type == 'keyinfo' or type == 'barcodeprint' or type == 'packinglist':
         return """
@@ -181,7 +195,8 @@ pc.item pcRefName,
 ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
-h9.name accCSID
+h9.name accCSID,
+cp.inventoryCount
 
 FROM loctermgroup l
 
@@ -250,7 +265,10 @@ h1.name as objectcsid,
 con.rare,
 cob.deadflag,
 regexp_replace(tig2.taxon, '^.*\\)''(.*)''$', '\\1') as determinationNoAuth,
-mc.reasonformove
+mc.reasonformove,
+case when (tn.family is not null and tn.family <> '') then regexp_replace(tn.family, '^.*\\)''(.*)''$', '\\1') end as family,
+date(mc.locationdate + interval '8 hours') actiondate,
+case when (mb.previouslocation is not null and mb.previouslocation <> '') then regexp_replace(mb.previouslocation, '^.*\\)''(.*)''$', '\\1') end as previouslocation 
 
 from collectionobjects_common co1
 
@@ -258,6 +276,7 @@ join hierarchy h1 on co1.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
 join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
 join movements_common mc on (mc.id=h2.id %s)
+join movements_botgarden mb on (mc.id=mb.id)
 %s
 
 join collectionobjects_naturalhistory con on (co1.id = con.id)
@@ -332,7 +351,6 @@ def getlocations(location1, location2, num2ret, config, updateType):
             sys.stderr.write("some other getlocations database error!")
             return result
 
-            # a hack: check each object to make it is really in this location
         try:
             rows = objects.fetchall()
         except pgdb.DatabaseError, e:
@@ -360,7 +378,7 @@ def getplants(location1, location2, num2ret, config, updateType, qualifier):
 
     #for loc in getloclist('set',location1,'',num2ret,config):
     getobjects = setquery(updateType, location1, qualifier)
-    #print getobjects
+    #print "<span>%s</span>" % getobjects
     try:
         elapsedtime = time.time()
         objects.execute(getobjects)
@@ -375,7 +393,6 @@ def getplants(location1, location2, num2ret, config, updateType, qualifier):
         sys.stderr.write("some other getplants database error!")
         return result
 
-    # a hack: check each object to make it is really in this location
     try:
         result = objects.fetchall()
         if debug: sys.stderr.write('object count: %s\n' % (len(result)))
@@ -493,7 +510,8 @@ pc.item pcRefName,
 ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
-h9.name accCSID
+h9.name accCSID,
+cp.inventoryCount
 
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
@@ -652,10 +670,28 @@ WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
 
 def gethierarchy(query, config):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    institution = config.get('info', 'institution')
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
-    if query != 'places':
+    if query == 'taxonomy':
+        gethierarchy = """
+SELECT DISTINCT
+        regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
+        regexp_replace(parent.refname, '^.*\\)''(.*)''$', '\\1') AS Parent, 
+        h1.name AS ChildKey,
+        h2.name AS ParentKey
+FROM taxon_common child
+JOIN misc ON (misc.id = child.id)
+FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
+FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
+FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
+FULL OUTER JOIN taxon_common parent ON (parent.id = h2.id)
+WHERE child.refname LIKE 'urn:cspace:%s.cspace.berkeley.edu:taxonomyauthority:name(taxon):item:name%%'
+AND misc.lifecyclestate <> 'deleted'
+ORDER BY Parent, Child
+""" % institution
+    elif query != 'places':
         gethierarchy = """
 SELECT DISTINCT
         regexp_replace(child.refname, '^.*\\)''(.*)''$', '\\1') AS Child, 
@@ -668,9 +704,10 @@ FULL OUTER JOIN hierarchy h1 ON (child.id = h1.id)
 FULL OUTER JOIN relations_common rc ON (h1.name = rc.subjectcsid)
 FULL OUTER JOIN hierarchy h2 ON (rc.objectcsid = h2.name)
 FULL OUTER JOIN concepts_common parent ON (parent.id = h2.id)
-WHERE child.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:conceptauthorities:name({0})%'
+WHERE child.refname LIKE 'urn:cspace:%s.cspace.berkeley.edu:conceptauthorities:name({0})%%'
 AND misc.lifecyclestate <> 'deleted'
-ORDER BY Parent, Child""".format(query)
+ORDER BY Parent, Child""" % institution
+        gethierarchy = gethierarchy.format(query)
     else:
         gethierarchy = """
 SELECT DISTINCT
@@ -808,7 +845,7 @@ WHERE h1.name = '%s'""" % csid
         return ''
     try:
         objects.execute(query)
-        return objects.fetchone()
+        return objects.fetchone()[0]
     except:
         return ''
 

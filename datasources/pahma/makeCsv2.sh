@@ -8,10 +8,11 @@ time psql -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne '$x = $_ ;s/[^\|]//g; if (length eq 31) { print $x;} '     d3.csv | perl -pe 's/\"/\\"/g;' > d4.csv
 time perl -ne '$x = $_ ;s/[^\|]//g; unless (length eq 31) { print $x;} ' d3.csv | perl -pe 's/\"/\\"/g;' > errors.csv &
-time psql -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f delphiMediaV1.sql -o media.csv 
 time perl -pe 's/\\"/\"\"/g;s/^/\"/;s/$/\"/;s/\|/\"\|\"/g;' d4.csv | cut -f1-27 -d"|" > d4a.csv
 mv d4.csv metadata.csv
-rm d1.csv d3.csv
+time psql -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f delphiMediaV1.sql -o m1.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv
+rm d1.csv d3.csv m1.csv
 # add the blobcsids to the rest of the data
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
@@ -24,6 +25,9 @@ rm d6.csv d4a.csv
 # rm d7.csv
 mv media.csv 4solr.$HOST.media.csv
 wc -l *.csv
-#
+# clear out the existing data
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+# load the data into solr using the csv datahandler
 time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%7C&f.provenance_txt.split=true&f.provenance_txt.separator=,&f.blobs_ss.split=true&f.blobs_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 date
