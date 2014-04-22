@@ -65,15 +65,15 @@ select
       (SELECT CASE WHEN (tig2.taxon IS NOT NULL AND tig2.taxon <>'' and tig2.taxon not like '%no name%') THEN (getdispl(tig2.taxon) 
 	||CASE WHEN (tig2.identby IS NOT NULL AND tig2.identby <>'' and tig2.identby not like '%unknown%') THEN ', by ' || getdispl(tig2.identby) ELSE '' END
 	||CASE WHEN (tig2.institution IS NOT NULL AND tig2.institution <>'') THEN ', ' || getdispl(tig2.institution) ELSE '' END
-	||CASE WHEN (sdg.datedisplaydate IS NOT NULL AND sdg.datedisplaydate <>'' and sdg.datedisplaydate <>' ') THEN ', ' || sdg.datedisplaydate ELSE '' END
-	||CASE WHEN (tig2.identkind IS NOT NULL AND tig2.identkind <>'') THEN  ', ' || tig2.identkind ELSE '' END) ELSE '' END
+	||CASE WHEN (prevdetsdg.datedisplaydate IS NOT NULL AND prevdetsdg.datedisplaydate <>'' and prevdetsdg.datedisplaydate <>' ') THEN ', ' || prevdetsdg.datedisplaydate ELSE '' END
+	||CASE WHEN (tig2.identkind IS NOT NULL AND tig2.identkind <>'') THEN  ' (' || tig2.identkind || ')' ELSE '' END) ELSE '' END
        from collectionobjects_common co1
         inner join hierarchy h1int on co1.id = h1int.id
         left outer join hierarchy htig2 on (co1.id = htig2.parentid and htig2.pos > 0
         and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
         left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
-        left outer join hierarchy hfcdg on (tig2.id = hfcdg.parentid and hfcdg.name = 'identDateGroup')
-        left outer join structureddategroup sdg on (sdg.id = hfcdg.id)
+        left outer join hierarchy hprevdet on (tig2.id = hprevdet.parentid and hprevdet.name = 'identDateGroup')
+        left outer join structureddategroup prevdetsdg on (prevdetsdg.id = hprevdet.id)
        where h1int.name=h1.name order by htig2.pos), '␥', '') Previous_Determinations,
     lng.localname as Local_Name,
     case when cocbd.item is null or cocbd.item = '' then null else cocbd.item end as Brief_Description,
@@ -112,7 +112,11 @@ select
          and hong.name = 'collectionobjects_common:otherNumberList')
        left outer join othernumber ong on (ong.id = hong.id)
        where h3int.name = h1.name
-       order by hong.pos), '␥', '') Other_Numbers
+       order by hong.pos), '␥', '') Other_Numbers,
+    CASE WHEN (tig.identby IS NOT NULL AND tig.identby <>'' and tig.identby not like '%unknown%') THEN (getdispl(tig.identby) 
+	||CASE WHEN (tig.institution IS NOT NULL AND tig.institution <>'') THEN ', ' || getdispl(tig.institution) ELSE '' END
+	||CASE WHEN (detdetailssdg.datedisplaydate IS NOT NULL AND detdetailssdg.datedisplaydate <>'' and detdetailssdg.datedisplaydate <>' ') THEN ', ' || detdetailssdg.datedisplaydate ELSE '' END
+	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS Determination_Details
 from collectionobjects_common co
 inner join misc on co.id = misc.id
 inner join hierarchy h1 on co.id = h1.id
@@ -126,6 +130,8 @@ left outer join hierarchy htig
         on (co.id = htig.parentid and htig.pos = 0
         and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
 left outer join taxonomicIdentGroup tig on (tig.id = htig.id)
+left outer join hierarchy hdetdetailsdate on (tig.id = hdetdetailsdate.parentid and hdetdetailsdate.name = 'identDateGroup')
+left outer join structureddategroup detdetailssdg on (detdetailssdg.id = hdetdetailsdate.id)
 left outer join hierarchy hlg
         on (co.id = hlg.parentid and hlg.pos = 0
         and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
@@ -137,5 +143,9 @@ left outer join hierarchy hlng on (co.id = hlng.parentid and hlng.primarytype = 
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join collectionobjects_common_briefdescriptions cocbd on (co.id = cocbd.id and cocbd.pos = 0)
 where misc.lifecyclestate <> 'deleted'
+-- and h1.name = '3380bad9-5bea-4eed-860e' -- UCcrhtest on ucjeps-dev
+-- and h1.name = '338075de-821c-49b3-8f34-969cc666a61e' -- JEPS46872 
+-- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
+and h1.name like '3380%'
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS', 'GOD')
 order by co.objectnumber
