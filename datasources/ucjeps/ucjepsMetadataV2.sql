@@ -146,6 +146,6 @@ where misc.lifecyclestate <> 'deleted'
 -- and h1.name = '3380bad9-5bea-4eed-860e' -- UCcrhtest on ucjeps-dev
 -- and h1.name = '338075de-821c-49b3-8f34-969cc666a61e' -- JEPS46872 
 -- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
-and h1.name like '3380%'
+-- and h1.name like '3380%'
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS', 'GOD')
 order by co.objectnumber
