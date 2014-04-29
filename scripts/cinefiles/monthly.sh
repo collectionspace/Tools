@@ -15,5 +15,6 @@ rm bad.temp
 all=`wc -l $REPORT.csv | cut -f1 -d" "`
 bad=`wc -l $REPORT.problems.csv | cut -f1 -d" "`
 echo "bad: $bad :: all: $all"
+rm $REPORT.csv.gz
 gzip $REPORT.csv
 echo "Report for the month starting $rdate: $all images, $bad problems, see attached." | mail -a $REPORT.problems.csv -a $REPORT.csv.gz -s "image qc for $rdate: $all images, $bad problems" -- $1
