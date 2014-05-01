@@ -135,14 +135,11 @@ def getProhibitedLocations(appconfig):
 def getHandlers(form):
     selected = form.get('handlerRefName')
     handlerlist = [
-        ("Lisa Beyer","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LisaBeyer1372717980469)'Lisa Beyer'"),
         ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
         ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
         ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
         ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
         ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
-        ("Rowan Gard", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RowanGard1342219780674)'Rowan Gard'"),
-        ("Leilani Hunter","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LeilaniHunter1389986789001)'Leilani Hunter'"),
         ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
         ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
         ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
@@ -235,8 +232,8 @@ def getPrinters(form):
     selected = form.get('printer')
 
     printerlist = [ \
-        ("Kroeber Hall", "kroeberBCP"),
-        ("Regatta Building", "regattaBCP")
+        ("Hearst Gym Basement", "cluster1"),
+        ("Marchant", "cluster2")
     ]
 
     printers = '''
@@ -250,7 +247,7 @@ def getPrinters(form):
         printers = printers + printerOption
 
     printers + '\n      </select>'
-    return printers, selected
+    return printers, selected, printerlist
 
 
 def getFieldset(form):

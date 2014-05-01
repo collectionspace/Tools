@@ -100,16 +100,16 @@ def serverCheck(form, config):
             elapsedtime = time.time()
             result += "<tr><td>barcode audit file</td><td>" + config.get('files', 'cmdrauditfile') + "</td></tr>"
             result += "<tr><td>trying...</td><td> to write empty test files to commanderWatch directory</td></tr>"
-            result += "<tr><td>location labels</td><td>" + writeCommanderFile('test', 'kroeberBCP', 'locationLabels',
-                                                                              'locations', [], config) + "</td></tr>"
-            result += "<tr><td>object labels</td><td>" + writeCommanderFile('test', 'kroeberBCP', 'objectLabels',
-                                                                            'objects', [], config) + "</td></tr>"
+            printers, selected, printerlist = cswaConstants.getPrinters(form)
+            for printer in printerlist:
+                result += ("<tr><td>location labels @ %s</td><td>" % printer[1]) + writeCommanderFile('test', printer[1], 'locationLabels', 'locations',  [], config) + "</td></tr>"
+                result += ("<tr><td>object labels @ %s</td><td>" % printer[1]) + writeCommanderFile('test', printer[1], 'objectLabels', 'objects', [], config) + "</td></tr>"
             elapsedtime = time.time() - elapsedtime
             result += "<tr><td>barcode check time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
         except:
-            result += "<tr><td>barcode funtionality check</td><td>FAILED.</td></tr>"
+            result += '<tr><td>barcode funtionality check</td><td><span class="error">FAILED.</span></td></tr>'
     except:
-        result += "<tr><td>barcode funtionality check</td><td>skipped, not configured.</td></tr>"
+        result += "<tr><td>barcode funtionality check</td><td>skipped, not configured in config file.</td></tr>"
 
     elapsedtime = time.time()
     # rest check...
@@ -124,7 +124,7 @@ def serverCheck(form, config):
 
 
 def handleTimeout(source, form):
-    print '<h3><span style="color:red;">Time limit exceeded! The problem has been logged and will be examined. Feel free to try again though!</span></h3>'
+    print '<h3><span class="error">Time limit exceeded! The problem has been logged and will be examined. Feel free to try again though!</span></h3>'
     sys.stderr.write('TIMEOUT::' + source + '::location::' + str(form.get("lo.location1")) + '::')
 
 
@@ -1115,8 +1115,7 @@ def doBarCodes(form, config):
         objectsHandled = []
         rows.reverse()
         if action == "Create Labels for Locations Only":
-            labelFilename = writeCommanderFile('locations', form.get("printer"), 'locationLabels', 'locations', rows,
-                                               config)
+            labelFilename = writeCommanderFile('locations', form.get("printer"), 'locationLabels', 'locations', rows, config)
             print '<tr><td>%s</td><td colspan="4"><i>%s</i></td></tr>' % (len(rows), labelFilename)
             print "\n</table>"
             return
@@ -1132,8 +1131,7 @@ def doBarCodes(form, config):
                 totalobjects += len(objects)
                 # hack: move the ethnographic file code to the right spot for this app... :-(
                 objects = [o[0:8] + [o[9]] for o in objects]
-                labelFilename = writeCommanderFile(r[0], form.get("printer"), 'objectLabels', 'objects', objects,
-                                                   config)
+                labelFilename = writeCommanderFile(r[0], form.get("printer"), 'objectLabels', 'objects', objects, config)
                 print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
                     r[0], len(objects), labelFilename)
 
@@ -2638,7 +2636,7 @@ def starthtml(form, config):
 	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th></tr>'''
 
     elif updateType == 'barcodeprint':
-        printers, selected = cswaConstants.getPrinters(form)
+        printers, selected, printerlist = cswaConstants.getPrinters(form)
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         otherfields += '''
@@ -2646,7 +2644,7 @@ def starthtml(form, config):
 <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
-<tr><th><span class="cell">printer:</span></th><th>''' + printers + '''</th>
+<tr><th><span class="cell">printer cluster:</span></th><th>''' + printers + '''</th>
 <th colspan="4"><i>NB: object number range supersedes location range, if entered.</i></th>
 </tr>'''
 
