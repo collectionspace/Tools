@@ -1,6 +1,10 @@
+#!/usr/bin/env /usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import csv
+import csv, sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def getStyle(schemacolor1):
     return '''
@@ -9,7 +13,7 @@ body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
 table { width: 100%; }
 td { cell-padding: 3px; }
 th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
-h1 { font-size:32px; padding:10px; margin:0px; border-bottom: none; }
+h2 { font-size:32px; padding:10px; margin:0px; border-bottom: none; }
 h2 { font-size:24px; color:white; background:blue; }
 p { padding:10px 10px 10px 10px; }
 li { text-align: left; list-style-type: none; }
@@ -117,8 +121,8 @@ def infoHeaders(fieldSet):
     else:
         return "<table><tr>DEBUG</tr>"
 
-def getProhibitedLocations(appconfig):
-    #fileName = appconfig.get('files','prohibitedLocations.csv')
+def getProhibitedLocations(config):
+    #fileName = config.get('files','prohibitedLocations.csv')
     fileName = 'prohibitedLocations.csv'
     locList = []
     try:
@@ -131,6 +135,7 @@ def getProhibitedLocations(appconfig):
         raise
 
     return locList
+
 
 def getHandlers(form):
     selected = form.get('handlerRefName')
@@ -218,6 +223,14 @@ def getReasons(form):
 '''
     reasons = reasons.replace(('option value="%s"' % reason), ('option selected value="%s"' % reason))
     return reasons, reason
+
+
+def getWebappList():
+    return {
+        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
+        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings'],
+        'ucjeps': ['ucjepsLocationReport']}
 
 
 def getAppOptions(museum):
@@ -381,12 +394,6 @@ def getAgencies(form):
     agencies + '\n </select>'
     return agencies, selected
 
-def getWebappList():
-    return {
-        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
-        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings'],
-        'ucjeps': ['ucjepsLocationReport']}
 
 
 
@@ -517,3 +524,68 @@ def getHeader(updateType):
       <th>Note</th>
       <th>Update status</th>
     </tr>"""
+
+
+if __name__ == "__main__":
+
+    def handleResult(result,header):
+        header = '\n<tr><td>%s<td>' % header
+        if type(result) == type(()) and len(result) >= 2:
+            return header + result[0]
+        elif type(result) == type('string'):
+            return header + result
+        else:
+            raise
+            #return result
+            #return "\n<h2>some other result</h2>\n"
+
+    form = {}
+    config = {}
+
+    result = '<html>\n'
+
+    result += getStyle('blue')
+
+    # all the following return HTML)
+    result += '<h2>Dropdowns</h2><table border="1">'
+    result += handleResult(getAppOptions('pahma'),'getAppOptions')
+    result += handleResult(getAltNumTypes(form, 'test-csid', 'attributed pahma number'),'getAltNumTypes')
+    result += handleResult(getHandlers(form),'getHandlers')
+    result += handleResult(getReasons(form),'getReasons')
+    result += handleResult(getPrinters(form),'getPrinters')
+    result += handleResult(getFieldset(form),'getFieldset')
+    result += handleResult(getHierarchies(form),'getHierarchies')
+    result += handleResult(getAgencies(form),'getAgencies')
+    result += '</table>'
+
+    # these two return python objects
+    result += '<h2>Tricoder users</h2><table border="1">'
+    t = tricoderUsers()
+    for k in t.keys():
+        result += '<tr><td>%s</td><td>%s</td></tr>' % (k,t[k])
+    result += '</table>'
+    result += '<h2>Prohibited Locations</h2>'
+    for p in getProhibitedLocations(config):
+        result += '<li>%s</li>' % p
+
+    result += '<h2>Headers</h2>'
+    for h in 'inventory movecrate packinglist packinglistbyculture moveobject bedlist bedlistnone keyinfoResult objinfoResult inventoryResult barcodeprint barcodeprintlocations upload'.split(' '):
+        result += '<h3>Header for %s</h3>' % h
+        header = getHeader(h)
+        result += header.replace('<table','<table border="1" ')
+        result += '</table>'
+
+    result += '<h2>KIR/OIR/BOE Fieldset Headers</h2>'
+    for h in 'keyinfo namedesc hsrinfo registration'.split(' '):
+        result += '<h3>Header for %s</h3>' % h
+        header = infoHeaders(h)
+        result += header.replace('<table','<table border="1" ')
+        result += '</table>'
+
+    print '''Content-Type: text/html; charset=utf-8
+
+    '''
+    print result
+
+
+    result += '</html>\n'
