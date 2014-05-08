@@ -329,6 +329,11 @@ def makeTable(code, longcode, dbsource, config):
    statgroup = {'cont': 'objByCntntType', 'obj': 'objByObjType', 'cult': 'objByCult', 'cat': 'objByLegCat',
                 'don': 'objByDonor','acc': 'objByAccStatus', 'efc': 'objByFileCode', 'coll': 'objByCollMan',
                 'total': 'totalCounts', 'iot': 'objByImgObjType'}
+
+   if code == 'total':
+      howToUse(code)
+      return
+   
    tableresults = cswaCollectionDB.latestcollectionstats(dbsource, statgroup[code], config)
 
    if tableresults == "Not Implemented Yet!":
@@ -418,6 +423,29 @@ def makeTable(code, longcode, dbsource, config):
    print "     </table>"
    print "     <hr>"
    print "     </div>"
+
+def howToUse(code):
+   print """
+<div class="table" id=""" + code + """table>
+  <span class="useHead">How to use this web app</span><br>
+  <span class="useBody">&nbsp;&nbsp;&nbsp;&nbsp;From the landing page, click on a button for a statistic that interests you (for instance, Counts by object type).  You'll be directed to a default diagram (either a pie chart or a bar chart) that is set to a default value. The default diagram is interactive-you can change it by altering the one, two, or three options available above the diagram. Play around with these values-that's what they're there for!
+    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;To see change or progress in estimates over time, click the "View as time series" button on the left. This will open a bivariate plot showing the change of one of the counts over time. The time series starts with a default value, but as with the pie and bar charts, this diagram is interactive - you can alter it by changing the option (or sometimes two options) available above the time series. Feel free to play around with these values to see what interesting patterns you can find in the Museum's collection data. You can also alte the timeframe over which change to a count is shown by using the cliders in the overview diagram directly below the main timeseries diagram.
+    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;The "View as tabular data" option on the left presents the same data as is presented by the pie chart or bar chart, but in a tabular or spreadsheet format, rather than as a graphic display.
+    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;Finally, the "See other stats" option will bring you back to the main CollectionStats page (as will closing the stats display by clicking on the 'X' at the top right of the display).
+  </span><br><br>
+  <span class="useHead">How to interpret the statistics</span><br>
+  <span class="useBody">&nbsp;&nbsp;&nbsp;&nbsp;Changes in the values of most of the statistics available on this page reflect progress towards an accurate and precise estimate of the various counts, rather than changes in the actual counts.  For instance, when the total piece count rose from 2.5 million to 2.6 million, we didn't actually accession 100,000 new pieces; instead, it indicated that we'd counted an additional 100,000 pieces in our collection that were either uncounted (set to "1" by default) or undercounted.
+    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;The exception to this is the "Total Museum Numbers" option under "Total counts of the collection." With the exception of "temporary Museum numbers" created to help with reconciliation during inventories, the "Total Museum Numbers" count indicates actual change in the number of cataloged objects in the Museum's collection.
+  </span><br><br>
+  <span class="useHead">How does it work?</span><br>
+  <span class="useBody">&nbsp;&nbsp;&nbsp;&nbsp;Every night at a minute past 3:00am, a program is triggered that sends specific queries to the CollectionSpace database. While these queries inquire about every object in our collection, their purpose is not to gather data about individual objects, but rather to compute descriptive statistics of the entire collection. 
+    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;During the calculation of each descriptive statistic, care is taken to avoid including the count of the parent objects for those objects that have parents, and to avoid counting placeholder records such as "Number not used". Recataloged and deaccessioned objects still need to be removed from these counts.
+  </span><br><br>
+  <span class="useHead">Can other statistics be added?</span><br>
+  <span class="useBody">&nbsp;&nbsp;&nbsp;&nbsp;Absolutely, as long as the data is in CSpace. If you have suggestions for other statistics, please send your suggestion to <a href="mailto:pahma-cspace@berkeley.edu?Subject=Comment%20on%20Collection%20Stats" target="_top">pahma-cspace@berkeley.edu</a></span>
+</div>
+"""
+
 
 # #########################################################################
 
