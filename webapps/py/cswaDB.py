@@ -122,7 +122,7 @@ join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is %s true)
 join movements_common mc on (mc.id=h2.id) 
 join movements_botgarden mb on (mc.id=mb.id)
 left outer
-join loctermgroup lct on (regexp_replace(mb.previouslocation, '^.*\\)''(.*)''$', '\\1')=lct.termdisplayname) 
+join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', '\\1')=lct.termdisplayname)
 %s
 join collectionspace_core core on mc.id=core.id 
 join collectionobjects_botgarden cob on (co1.id=cob.id) 
