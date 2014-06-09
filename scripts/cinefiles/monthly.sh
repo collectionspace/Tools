@@ -14,6 +14,8 @@ head -1 $REPORT.csv | cat - bad.temp > $REPORT.problems.csv
 rm bad.temp
 all=`wc -l $REPORT.csv | cut -f1 -d" "`
 bad=`wc -l $REPORT.problems.csv | cut -f1 -d" "`
+all=$((all-1))
+bad=$((bad-1))
 echo "bad: $bad :: all: $all"
 rm $REPORT.csv.gz
 gzip $REPORT.csv
