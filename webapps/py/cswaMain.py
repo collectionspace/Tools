@@ -29,9 +29,9 @@ if config == False:
 
 updateType  = config.get('info','updatetype')
 
-# if action has not been set, this is the first time through, and we need to set defaults. (only 1 right now!)
+# if action has not been set, this is the first time through, and we need to set defaults. (only 2 right now!)
 if not action or action == 'Login':
-    form['alive'] = 'checked'
+    form['dora'] = 'alive'
     
 # if location2 was not specified, default it to location1
 if str(form.get('lo.location2')) == '':
