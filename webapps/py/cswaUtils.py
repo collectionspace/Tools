@@ -126,6 +126,7 @@ def serverCheck(form, config):
 def handleTimeout(source, form):
     print '<h3><span class="error">Time limit exceeded! The problem has been logged and will be examined. Feel free to try again though!</span></h3>'
     sys.stderr.write('TIMEOUT::' + source + '::location::' + str(form.get("lo.location1")) + '::')
+    raise
 
 
 def validateParameters(form, config):
@@ -189,7 +190,7 @@ def doRelationsSearch(form, config):
 
 def doComplexSearch(form, config, displaytype):
     #if not validateParameters(form,config): return
-    listAuthorities('taxon', 'TaxonTenant35', form.get("ta.taxon"), config, form, displaytype)
+    listAuthorities('taxon', 'TaxonTenant35', form.get("ut.taxon"), config, form, displaytype)
     listAuthorities('locations', 'Locationitem', form.get("lo.location1"), config, form, displaytype)
     listAuthorities('places', 'Placeitem', form.get("px.place"), config, form, displaytype)
     #listAuthorities('taxon',     'TaxonTenant35',  form.get("ob.objectnumber"),config, form, displaytype)
@@ -222,7 +223,6 @@ def doLocationSearch(form, config, displaytype):
             rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS, config)
     except:
         raise
-        #handleTimeout('search', form)
 
     listSearchResults('locations', config, displaytype, form, rows)
 
@@ -253,7 +253,6 @@ def doObjectSearch(form, config, displaytype):
         rows = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 500, config)
     except:
         raise
-        #handleTimeout('search', form)
 
     if len(rows) == 0:
         print '<span style="color:red;">No objects in this range! Sorry!</span>'
@@ -418,8 +417,6 @@ def doEnumerateObjects(form, config):
                                          config)
     except:
         raise
-        #handleTimeout(updateType, form)
-        locationList = []
 
     rowcount = len(locationList)
 
@@ -439,8 +436,6 @@ def doEnumerateObjects(form, config):
             objects = cswaDB.getlocations(l[0], '', 1, config, updateType)
         except:
             raise
-            #handleTimeout(updateType + ' getting objects', form)
-            return
 
         rowcount = len(objects)
         locations = {}
@@ -522,8 +517,6 @@ def doCheckMove(form, config):
         objects = cswaDB.getlocations(form.get("lo.location1"), '', 1, config, 'inventory')
     except:
         raise
-        #handleTimeout(updateType + ' getting objects', form)
-        return
 
     locations = {}
     if len(objects) == 0:
@@ -886,8 +879,6 @@ def doPackingList(form, config):
                                          config)
     except:
         raise
-        #handleTimeout(updateType, form)
-        locationList = []
 
     rowcount = len(locationList)
 
@@ -905,8 +896,6 @@ def doPackingList(form, config):
             objects = cswaDB.getlocations(l[0], '', 1, config, 'packinglist')
         except:
             raise
-            #handleTimeout(updateType + ' getting objects', form)
-            #return
 
         rowcount = len(objects)
         if rowcount == 0:
@@ -967,7 +956,7 @@ def doAuthorityScan(form, config):
     dead,rare,qualifier = setFilters(form)
 
     if updateType == 'locreport':
-        Taxon = form.get("ta.taxon")
+        Taxon = form.get("ut.taxon")
         if Taxon != None:
             Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'silent')
         else:
@@ -988,8 +977,6 @@ def doAuthorityScan(form, config):
         objects = cswaDB.getplants('', '', 1, config, 'getalltaxa', qualifier)
     except:
         raise
-        #handleTimeout('getalltaxa', form)
-        objects = []
 
     rowcount = len(objects)
 
@@ -1048,8 +1035,6 @@ def downloadCsv(form, config):
             rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), 500, config)
         except:
             raise
-            #handleTimeout('downloadCSV', form)
-            rows = []
 
         place = form.get("cp.place")
         if place != None:
@@ -1107,8 +1092,6 @@ def doBarCodes(form, config):
                 rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location1"), 500, config)
         except:
             raise
-            #handleTimeout(updateType, form)
-            rows = []
 
         rowcount = len(rows)
 
@@ -1154,12 +1137,14 @@ def setFilters(form):
     if form.get('notrare'): rare.append('false')
     dead = []
     qualifier = []
-    if form.get('dead'):
-        dead.append('true')
-        qualifier.append('dead')
-    if form.get('alive'):
-        dead.append('false')
-        qualifier.append('alive')
+    if 'dora' in form:
+        dora = form.get('dora')
+        if dora == 'dead':
+            dead.append('true')
+            qualifier.append('dead')
+        elif dora == 'alive':
+            dead.append('false')
+            qualifier.append('alive')
 
     qualifier = ' or '.join(qualifier)
 
@@ -1187,8 +1172,6 @@ def doAdvancedSearch(form, config):
         objects = cswaDB.getplants('', '', 1, config, 'getalltaxa', qualifier)
     except:
         raise
-        #handleTimeout('getalltaxa: advancedsearch', form)
-        objects = []
 
     print cswaConstants.getHeader(updateType)
     #totalobjects = 0
@@ -1240,8 +1223,6 @@ def doBedList(form, config):
             objects = cswaDB.getplants(l, '', 1, config, updateType, qualifier)
         except:
             raise
-            #handleTimeout('getplants', form)
-            objects = []
 
         sys.stderr.write('%-13s:: %s\n' % (updateType, 'l=%s, q=%s, objects: %s' % (l,qualifier,len(objects))))
         if groupby == 'none':
@@ -2472,15 +2453,19 @@ def starthtml(form, config):
 	  <input id="notrare" class="cell" type="checkbox" name="notrare" value="notrare" class="xspan">
           ||
 	  <span class="cell">alive </span>
-	  <input id="alive" class="cell" type="checkbox" name="alive" value="alive" class="xspan">
+	  <input id="alive" class="cell" type="radio" name="dora" value="alive" class="xspan">
 	  <span class="cell">dead </span>
-	  <input id="dead" class="cell" type="checkbox" name="dead" value="dead" class="xspan"></th>'''
+	  <input id="dead" class="cell" type="radio" name="dora" value="dead" class="xspan"></th>'''
 
-    for v in ['rare', 'notrare', 'dead', 'alive']:
+    for v in ['rare', 'notrare']:
         if form.get(v):
             deadoralive = deadoralive.replace('value="%s"' % v, 'checked value="%s"' % v)
         else:
             deadoralive = deadoralive.replace('checked value="%s"' % v, 'value="%s"' % v)
+    if 'dora' in form:
+        deadoralive = deadoralive.replace('value="%s"' % form['dora'], 'checked value="%s"' % form['dora'])
+    else:
+        deadoralive = deadoralive.replace('value="%s"' % 'alive', 'checked value="%s"' % 'alive')
 
     location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
     location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
@@ -2586,10 +2571,10 @@ def starthtml(form, config):
           </tr>'''
 
     elif updateType == 'locreport':
-        taxName = str(form.get('ta.taxon')) if form.get('ta.taxon') else ''
+        taxName = str(form.get('ut.taxon')) if form.get('ut.taxon') else ''
         otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
-	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th>
+	  <th><input id="ut.taxon" class="cell" type="text" size="40" name="ut.taxon" value="''' + taxName + '''" class="xspan"></th>
           ''' + deadoralive + '''</tr> '''
 
     elif updateType == 'holdings':
@@ -2601,14 +2586,14 @@ def starthtml(form, config):
 
     elif updateType == 'advsearch':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
-        taxName = str(form.get('ta.taxon')) if form.get('ta.taxon') else ''
+        taxName = str(form.get('ut.taxon')) if form.get('ut.taxon') else ''
         objectnumber = str(form.get('ob.objectnumber')) if form.get('ob.objectnumber') else ''
         place = str(form.get('px.place')) if form.get('px.place') else ''
         concept = str(form.get('cx.concept')) if form.get('cx.concept') else ''
 
         otherfields = '''
 	  <tr><th><span class="cell">taxonomic name:</span></th>
-	  <th><input id="ta.taxon" class="cell" type="text" size="40" name="ta.taxon" value="''' + taxName + '''" class="xspan"></th>
+	  <th><input id="ut.taxon" class="cell" type="text" size="40" name="ut.taxon" value="''' + taxName + '''" class="xspan"></th>
           ''' + groupbyelement + '''</tr>
 	  <tr>
           <th><span class="cell">bed:</span></th>
@@ -2955,7 +2940,12 @@ if __name__ == "__main__":
             'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
     }
 
+    form = {'webapp': 'ucbgLocationReportDev', 'dora': 'alive'}
     config = getConfig(form)
+
+    starthtml(form, config)
+    print setFilters(form)
+
     doUpdateKeyinfo(form, config)
 
     #sys.exit()
@@ -3022,7 +3012,6 @@ if __name__ == "__main__":
     print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport', 'dead')
     #sys.exit()
 
-    starthtml(form, config)
     endhtml(form, config, 0.0)
 
     #print "starting packing list"

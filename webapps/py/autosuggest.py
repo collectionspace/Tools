@@ -45,6 +45,8 @@ def dbtransaction(form):
         srchindex = 'place'
     elif srchindex in ['ta']:
         srchindex = 'taxon'
+    elif srchindex in ['ut']:
+        srchindex = 'ucgbtaxon'
     elif srchindex in ['cx']:
         srchindex = 'concept2'
     elif srchindex in ['fc']:
@@ -74,6 +76,20 @@ def dbtransaction(form):
             JOIN misc ON misc.id = cc.id AND misc.lifecyclestate <> 'deleted'
             WHERE cc.objectnumber like '%s%%'
             ORDER BY cp.sortableobjectnumber LIMIT 30;"""
+        elif srchindex == 'ucgbtaxon':
+            template = """SELECT termdisplayname
+            -- , tc.refname, h_tg.*
+            FROM taxontermgroup tg
+            INNER JOIN hierarchy h_tg ON h_tg.id=tg.id
+            INNER JOIN hierarchy h_loc ON h_loc.id=h_tg.parentid
+            INNER JOIN misc ON misc.id=h_loc.id AND misc.lifecyclestate <> 'deleted'
+            INNER JOIN taxon_common tc on tc.id=h_tg.parentid
+            WHERE termdisplayname like '%s%%'
+            and h_tg.name='taxon_common:taxonTermGroupList'
+            and h_tg.pos=0
+            and tc.refname like '%%(taxon)%%'
+            ORDER BY termdisplayname LIMIT 30
+            """
         elif srchindex == 'group':
             template = makeTemplate('grouptermgroup', 'termdisplayname', "like '%s%%'")
         elif srchindex == 'place':
