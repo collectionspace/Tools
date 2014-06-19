@@ -1,0 +1,4 @@
+name	imageOK	isTiff	sizeOK	syntaxOK	resolutionOK	isCompressed	depthOK	colorOK	imagesize	filesize	updatedat	updatedby	format	mode	palette	compression	dpi	blobcsid	fullpathtofile
+9998.p99.400dpi.tif	True	True	True	True	True	True	True	True	(2503, 3994)	29164			TIFF	1		group4	(400, 400)		tiffs/9998.p99.400dpi.tif
+9999.p1.300gray.tif	False	True	True	True	True	True	True	False	(2219, 3146)	104290			TIFF	1		tiff_lzw	(300, 300)		tiffs/9999.p1.300gray.tif
+empty.file	False	False	False	False	False	False	False	False											tiffs/empty.file

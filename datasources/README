@@ -1,0 +1,10 @@
+Data Sources
+
+jblowe@berkeley.edu 8/25/2013
+
+scripts, etc. to pull out tabular data from CSpace instances and prepare it for loading into other systems, notably Delphi (for PAHMA), and Solr4.
+
+the ucb/ directory contains schema, etc. to configure solar to accept the .csv format files extracted via psql.
+
+More documentation to follow!
+

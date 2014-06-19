@@ -11,10 +11,10 @@
 	<parameter name="tenantid" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[15]]></defaultValueExpression>
 	</parameter>
-	<parameter name="location1" class="java.lang.String">
+	<parameter name="Start Location" class="java.lang.String">
 		<defaultValueExpression><![CDATA["Kroeber, 20A, AA  1,  1"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="location2" class="java.lang.String">
+	<parameter name="End Location" class="java.lang.String">
 		<defaultValueExpression><![CDATA["Kroeber, 20A, AA  1, 10"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -51,8 +51,8 @@ left outer join hierarchy h3 on (c.id=h3.parentid and h3.pos=0 and h3.name='coll
 left outer join assocpeoplegroup apg on (apg.id=h3.id)
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=c.id and pef.pos=0)
 
-WHERE replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') >= replace($P{location1}, ' ', '0')
-  and replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') <= replace($P{location2}, ' ', '0')
+WHERE replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') >= replace($P{Start Location}, ' ', '0')
+  and replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') <= replace($P{End Location}, ' ', '0')
 order by locationkey, sortableobjectnumber, objectName desc]]>
 	</queryString>
 	<field name="storagelocation" class="java.lang.String"/>
@@ -115,14 +115,14 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{location1}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Start Location}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="171" y="28" width="129" height="16"/>
 				<textElement>
 					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression class="java.lang.String"><![CDATA[$P{location2}]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{End Location}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement style="SubTitle" x="0" y="29" width="28" height="16"/>

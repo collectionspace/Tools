@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="object" language="groovy" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36" uuid="8cfd83db-4693-4ca2-9299-5f70614cea72">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="68"/>
 	<property name="ireport.y" value="0"/>
 	<style name="Title" fontName="SansSerif" fontSize="26" isBold="true" pdfFontName="Helvetica-Bold"/>
 	<style name="SubTitle" forecolor="#666666" fontName="SansSerif" fontSize="18"/>
@@ -197,7 +197,7 @@ order by gardenLocation, objectnumber]]>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="5d4430ef-c720-4dc6-abb5-4402af0d9c05" stretchType="RelativeToBandHeight" x="132" y="88" width="388" height="18" isRemoveLineWhenBlank="true"/>
 				<textElement/>
-				<textFieldExpression><![CDATA[$F{subsectionparent}.isEmpty() ? null : "Subsection: " + $F{subsectionparent}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{subsectionparent}.isEmpty() ? null : "Subsection " + $F{subsectionparent}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="eda197b1-f9b0-4f5b-afe2-f66c01019224" stretchType="RelativeToBandHeight" x="132" y="54" width="388" height="18" isPrintWhenDetailOverflows="true"/>

@@ -1,0 +1,11 @@
+
+rm nohup.out 
+rm imagelog.txt 
+#vi /usr/local/share/django/pahma_project/imagesaver/views.py 
+#sudo service httpd graceful
+cut -f8 -d"|" media.csv | perl -ne 's/\\r//;print unless /^$/' > mediacsids.txt
+#perl -ne 'print unless /\|\|f$/' media.csv | wc
+perl -ne 'chomp; print "wget -a imagelog.txt -O content http://dev.cspace.berkeley.edu/pahma_project/imagesaver/blobs/$_/derivatives/Thumbnail/content ; cat content >> content.log\n"' mediacsids.txt > wgetter.sh
+head -10 wgetter.sh > wtest.sh
+chmod +x w*.sh
+nohup ./wtest.sh &

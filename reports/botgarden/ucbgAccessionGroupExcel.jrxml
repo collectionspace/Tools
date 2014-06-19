@@ -17,7 +17,7 @@ co1.id objectid,
 co1.objectnumber objectNumber,
 date(con.accessiondate + interval '8 hours') accessiondate, -- only used on Accession report
 findhybridaffinname(tig.id) Determination,
-cob.deadflag,
+case when cob.deadflag = 'true' then 'dead' end as deadflag,
 case when (fc.item is not null and fc.item <> '')
      then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
 end as Collector,
