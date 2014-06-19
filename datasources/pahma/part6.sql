@@ -1,4 +1,4 @@
-SELECT cc.id, ug.usage AS "objcontextuse"
+SELECT cc.id, ug.usage AS "objcontextuse_txt"
 FROM collectionobjects_common cc
 JOIN hierarchy hu ON (hu.parentid=cc.id AND hu.primarytype='usageGroup' AND (hu.pos=0 OR hu.pos IS NULL))
 JOIN usagegroup ug ON (ug.id=hu.id)

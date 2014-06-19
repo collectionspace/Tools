@@ -1,4 +1,4 @@
-SELECT DISTINCT cc.id, STRING_AGG(DISTINCT REGEXP_REPLACE(apg.assocpeople, '^.*\)''(.*)''$', '\1'),'␥') AS "objassoccult", STRING_AGG(DISTINCT utils.culture_hierarchy.csid_hierarchy, '␥') AS "objculturetree"
+SELECT DISTINCT cc.id, STRING_AGG(DISTINCT REGEXP_REPLACE(apg.assocpeople, '^.*\)''(.*)''$', '\1'),'␥') AS "objassoccult_ss", STRING_AGG(DISTINCT utils.culture_hierarchy.csid_hierarchy, '␥') AS "objculturetree_ss"
 FROM collectionobjects_common cc
 JOIN hierarchy hc ON (hc.parentid=cc.id AND hc.primarytype='assocPeopleGroup')
 JOIN assocpeoplegroup apg ON (apg.id=hc.id)

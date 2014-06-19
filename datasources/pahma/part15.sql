@@ -1,6 +1,6 @@
-SELECT DISTINCT cc.id, STRING_AGG(DISTINCT ac.acquisitionreferencenumber, '␥') AS "objaccno",
-STRING_AGG(DISTINCT sad1.datedisplaydate, '␥') AS "objaccdate",
-STRING_AGG(DISTINCT sad2.datedisplaydate, '␥') AS "objacqdate"
+SELECT DISTINCT cc.id, STRING_AGG(DISTINCT ac.acquisitionreferencenumber, '␥') AS "objaccno_ss",
+STRING_AGG(DISTINCT sad1.datedisplaydate, '␥') AS "objaccdate_ss",
+STRING_AGG(DISTINCT sad2.datedisplaydate, '␥') AS "objacqdate_ss"
 FROM collectionobjects_common cc
 JOIN hierarchy h1 ON (h1.id=cc.id)
 JOIN relations_common rca ON (h1.name=rca.subjectcsid AND rca.objectdocumenttype='Acquisition')
