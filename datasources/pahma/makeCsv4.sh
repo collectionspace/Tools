@@ -18,9 +18,8 @@ do
  cp temp.csv intermediate.csv
 done
 rm temp.csv
-cat solrHeader.csv intermediate.csv > d4.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} ' d4.csv | perl -pe 's/\"/\\"/g;' > 4solr.$HOST.metadata.csv
-rm d4.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > 4solr.$HOST.metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 32) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > errors.csv
 rm intermediate.csv
 #
 # add the blobcsids to the rest of the data
@@ -37,5 +36,7 @@ curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'C
 # load the data into solr using the csv datahandler
 #
 time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%09&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+# wrap things up: make a gzipped version of what was loaded
+rm 4solr*.csv.gz
 gzip 4solr.*.csv
 date
