@@ -18,8 +18,8 @@ do
  cp temp.csv intermediate.csv
 done
 rm temp.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > 4solr.$HOST.metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 32) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > errors.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > 4solr.$HOST.metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > errors.csv
 rm intermediate.csv
 #
 # add the blobcsids to the rest of the data
