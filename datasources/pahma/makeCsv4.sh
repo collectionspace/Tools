@@ -61,7 +61,7 @@ wc -l *.csv
 # clear out the existing data
 ##############################################################################
 curl "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'# load the data into solr using the csv datahandler
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ##############################################################################
 # this POSTs the csv to the Solr / update endpoint
 ##############################################################################
