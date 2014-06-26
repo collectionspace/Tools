@@ -59,14 +59,13 @@ wc -l *.csv
 ##############################################################################
 # ok, now let's load this into solr...
 # clear out the existing data
-c##############################################################################
-url "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+##############################################################################
+curl "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'# load the data into solr using the csv datahandler
 ##############################################################################
-# this POSTs the csv to the Solr /update endpoint
+# this POSTs the csv to the Solr / update endpoint
 ##############################################################################
-time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%09&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,' --data-binary @4solr.
-$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%09&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
