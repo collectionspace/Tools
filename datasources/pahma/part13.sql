@@ -29,7 +29,7 @@ CASE
                         ELSE '-'||(1950-DATE_PART('year', spd.dateearliestscalarvalue))||SUBSTRING(CAST(spd.dateearliestscalarvalue AS text),5,6)||'T19:00:00Z'
                 END
         ELSE DATE(spd.dateearliestscalarvalue)||'T19:00:00Z'
-        END AS "objproddate_begin_txt",
+        END AS "objproddate_begin_dt",
 CASE
         WHEN spd.datelatestera = '' THEN DATE(spd.datelatestscalarvalue)+1||'T19:00:00Z'
         WHEN spd.datelatestera = 'ce' THEN DATE(spd.datelatestscalarvalue)+1||'T19:00:00Z'
@@ -60,7 +60,7 @@ CASE
                         ELSE '-'||(1950-DATE_PART('year', spd.datelatestscalarvalue))||SUBSTRING(CAST(spd.datelatestscalarvalue AS text),5,6)||'T19:00:00Z'
                 END
         ELSE DATE(spd.datelatestscalarvalue)||'T19:00:00Z'
-        END AS "objproddate_end_txt"
+        END AS "objproddate_end_dt"
 FROM collectionobjects_common cc
 JOIN hierarchy hpd ON (hpd.parentid=cc.id AND hpd.primarytype='structuredDateGroup' AND hpd.name='collectionobjects_common:objectProductionDateGroupList' AND (hpd.pos=0 or hpd.pos IS NULL))
 JOIN structureddategroup spd ON (spd.id=hpd.id)

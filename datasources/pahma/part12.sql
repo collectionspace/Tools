@@ -29,7 +29,7 @@ CASE
                         ELSE '-'||(1950-DATE_PART('year', scd.dateearliestscalarvalue))||SUBSTRING(CAST(scd.dateearliestscalarvalue AS text),5,6)||'T19:00:00Z'
                 END
         ELSE DATE(scd.dateearliestscalarvalue)||'T19:00:00Z'
-        END AS "objcolldate_begin_txt",
+        END AS "objcolldate_begin_dt",
 CASE
         WHEN scd.datelatestera = '' THEN DATE(scd.datelatestscalarvalue)+1||'T19:00:00Z'
         WHEN scd.datelatestera = 'ce' THEN DATE(scd.datelatestscalarvalue)+1||'T19:00:00Z'
@@ -60,7 +60,7 @@ CASE
                         ELSE '-'||(1950-DATE_PART('year', scd.datelatestscalarvalue))||SUBSTRING(CAST(scd.datelatestscalarvalue AS text),5,6)||'T19:00:00Z'
                 END
         ELSE DATE(scd.datelatestscalarvalue)||'T19:00:00Z'
-        END AS "objcolldate_end_txt"
+        END AS "objcolldate_end_dt"
 FROM collectionobjects_common cc
 JOIN hierarchy hcd ON (hcd.parentid=cc.id AND hcd.primarytype='structuredDateGroup' AND hcd.name='collectionobjects_pahma:pahmaFieldCollectionDateGroupList' AND (hcd.pos=0 or hcd.pos IS NULL))
 JOIN structureddategroup scd ON (scd.id=hcd.id)
