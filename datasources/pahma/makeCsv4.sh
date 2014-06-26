@@ -53,7 +53,7 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_txt/; s/_tx
 ##############################################################################
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/;  print "f.$_.split=true&f.$_.separator=%7C"' > uploadparms.txt
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/;  print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
 rm d6.csv d7.csv
 wc -l *.csv
 ##############################################################################
