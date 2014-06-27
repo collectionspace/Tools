@@ -1,5 +1,5 @@
 SELECT cc.id, REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\1') AS "objfcp_txt",
-geo.decimallatitude || ', ' || geo.decimallongitude AS "objfcpgeoloc_txt",
+geo.decimallatitude || ', ' || geo.decimallongitude AS "objfcpgeoloc_p",
 pc.velevation AS "objfcpelevation_txt",
 utils.placename_hierarchy.csid_hierarchy AS "objfcptree_txt"
 FROM collectionobjects_common cc
