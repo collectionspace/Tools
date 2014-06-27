@@ -44,6 +44,8 @@ time perl mergeObjectsAndMedia.pl 4solr.$HOST.media.csv 4solr.$HOST.metadata.csv
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid d6.csv > header4Solr.csv
+# add the blob field name to the header (the header already ends with a tab
+perl -i -pe 's/$/blob_ss/' header4Solr.csv
 grep -v csid d6.csv > d7.csv
 cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
