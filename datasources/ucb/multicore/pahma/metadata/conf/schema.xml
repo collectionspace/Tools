@@ -116,25 +116,36 @@
        "content_type": From the HTTP headers of incoming stream
        "resourcename": From SolrCell request param resource.name
    -->
-   <field name="title" type="text_general" indexed="true" stored="true" multiValued="true"/>
-   <field name="subject" type="text_general" indexed="true" stored="true"/>
-   <field name="description" type="text_general" indexed="true" stored="true"/>
-   <field name="comments" type="text_general" indexed="true" stored="true"/>
-   <field name="author" type="text_general" indexed="true" stored="true"/>
-   <field name="keywords" type="text_general" indexed="true" stored="true"/>
-   <field name="category" type="text_general" indexed="true" stored="true"/>
-   <field name="resourcename" type="text_general" indexed="true" stored="true"/>
-   <field name="url" type="text_general" indexed="true" stored="true"/>
-   <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="last_modified" type="date" indexed="true" stored="true"/>
-   <field name="links" type="string" indexed="true" stored="true" multiValued="true"/>
+<!-- Create a string version of some fields for faceting -->
+    <copyField source="objcsid_txt" dest="objcsid_s"/>
+    <copyField source="objsortnum_txt" dest="objsortnum_s"/>
+    <copyField source="objmusno_txt" dest="objmusno_s"/>
+    <copyField source="objdept_txt" dest="objdept_s"/>
+    <copyField source="objtype_txt" dest="objtype_s"/>
+    <copyField source="objcount_txt" dest="objcount_s"/>
+    <copyField source="objcountnote_txt" dest="objcountnote_s"/>
+    <copyField source="objkeelingser_txt" dest="objkeelingser_s"/>
+    <copyField source="objfcpverbatim_txt" dest="objfcpverbatim_s"/>
+    <copyField source="objname_txt" dest="objname_s"/>
+    <copyField source="objinventory_txt" dest="objinventory_s"/>
+    <copyField source="objdescr_txt" dest="objdescr_s"/>
+    <copyField source="objcontextuse_txt" dest="objcontextuse_s"/>
+    <copyField source="objcomment_txt" dest="objcomment_s"/>
+    <copyField source="objtitle_txt" dest="objtitle_s"/>
+    <copyField source="objcolldate_txt" dest="objcolldate_s"/>
+    <copyField source="objproddate_txt" dest="objproddate_s"/>
+    <copyField source="objfcp_txt" dest="objfcp_s"/>
+    <copyField source="objfcpelevation_txt" dest="objfcpelevation_s"/>
+    <copyField source="objfcptree_txt" dest="objfcptree_s"/>
 
+    <copyField source="objassoccult_ss" dest="objassoccult_txt"/>
+    <copyField source="objfilecode_ss" dest="objfilecode_txt"/>
+   
    <!-- Main body of document extracted by SolrCell.
         NOTE: This field is not indexed by default, since it is also copied to "text"
         using copyField below. This is to save space. Use this field for returning and
         highlighting document content. Use the "text" field to search the content. -->
-   <field name="content" type="text_general" indexed="false" stored="true" multiValued="true"/>
-   
+   <field name="content" type="text_general" indexed="false" stored="true" multiValued="true"/>   
 
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
@@ -238,38 +249,10 @@
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
-   <!-- 
-	 objectnumber_s,objectname_txt,dated_txt,title_txt,medium_txt,dimensions_txt,markings_txt,curatorialremarks_txt,
-	 description_txt,provenance_ss,notes_txt,sitename_txt,sitenumber_txt,objnm_objname_txt,objnm_remarks_txt,culture_txt
-   -->
-   <copyField source="objectnumber_s" dest="text"/>
-   <copyField source="objectname_txt" dest="text"/>
-   <copyField source="title_txt" dest="text"/>
-   <copyField source="medium_txt" dest="text"/>
-   <copyField source="description_txt" dest="text"/>
-   <copyField source="provenance_ss" dest="text"/>
-   <copyField source="culture_txt" dest="text"/>
-   <copyField source="fieldcollnote_txt" dest="text"/>
-   <copyField source="annotationnote_txt" dest="text"/>
 
-   <!-- Text fields from SolrCell to search by default in our catch-all field -->
-   <copyField source="title" dest="text"/>
-   <copyField source="description" dest="text"/>
-   <copyField source="keywords" dest="text"/>
-   <copyField source="content" dest="text"/>
-   <copyField source="content_type" dest="text"/>
-   <copyField source="resourcename" dest="text"/>
-   <copyField source="url" dest="text"/>
-
-   <copyField source="provenance_ss" dest="provenance_txt"/>
-   <copyField source="objectnumber_s" dest="objectnumber_txt"/>
-
-   <!-- Create a string version of some fields for faceting -->
-   <copyField source="objectnumber_txt" dest="objectnumber_s"/>
-   <copyField source="objectnumber_txt" dest="text"/>
-   <copyField source="objectname_txt" dest="objectname_s"/>
-   <copyField source="medium_txt" dest="medium_s"/>
-   <copyField source="culture_txt" dest="culture_s"/>
+   <copyField source="*_s" dest="text"/>
+   <copyField source="*_ss" dest="text"/>
+   <copyField source="*_txt" dest="text"/>
 
    <!-- Text fields from SolrCell to search by default in our catch-all field -->
 	
