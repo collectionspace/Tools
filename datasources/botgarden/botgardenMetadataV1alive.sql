@@ -1,14 +1,14 @@
 select
     co.id as id,
-    co.objectnumber as AccessionNumber_txt,
+    co.objectnumber as AccessionNumber_s,
     case when (tig.taxon is not null and tig.taxon <> '')
                 then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
-    end as Determination_txt,
+    end as Determination_s,
     case when (fc.item is not null and fc.item <> '')
                 then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
-    end as Collector_txt,
-    co.fieldcollectionnumber as CollectorNumber_txt,
-    sdg.datedisplaydate as CollectionDate_txt,
+    end as Collector_s,
+    co.fieldcollectionnumber as CollectorNumber_s,
+    sdg.datedisplaydate as CollectionDate_s,
     case
         when
             sdg.dateearliestsingleyear != 0
@@ -21,7 +21,7 @@ select
             sdg.dateearliestsingleday::varchar(2),
             'yyyy-mm-dd')
         else null
-    end as EarlyCollectionDate_txt,
+    end as EarlyCollectionDate_s,
     case
         when
             sdg.datelatestyear != 0
@@ -34,41 +34,41 @@ select
             sdg.datelatestday::varchar(2),
             'yyyy-mm-dd')
         else null
-    end as LateCollectionDate_txt,
-    lg.fieldlocverbatim as fcpverbatim_txt,
-    lg.fieldloccounty as CollCounty_txt,
+    end as LateCollectionDate_s,
+    lg.fieldlocverbatim as fcpverbatim_s,
+    lg.fieldloccounty as CollCounty_ss,
 -- adding state and country
-    lg.fieldlocstate as CollState_txt,
-    lg.fieldloccountry as CollCountry_txt,
-    lg.velevation as Elevation_txt,
-    lg.minelevation as MinElevation_txt,
-    lg.maxelevation as MaxElevation_txt,
-    lg.elevationunit as ElevationUnit_txt,
-        co.fieldcollectionnote as Habitat_txt,
+    lg.fieldlocstate as CollState_ss,
+    lg.fieldloccountry as CollCountry_ss,
+    lg.velevation as Elevation_s,
+    lg.minelevation as MinElevation_s,
+    lg.maxelevation as MaxElevation_s,
+    lg.elevationunit as ElevationUnit_s,
+        co.fieldcollectionnote as Habitat_s,
     lg.decimallatitude || ', ' || lg.decimallongitude as latlong_p,
     case when lg.vcoordsys like 'Township%'
                 then lg.vcoordinates
-    end as TRSCoordinates_txt,
-    lg.geodeticdatum as Datum_txt,
-    lg.localitysource as CoordinateSource_txt,
-    lg.coorduncertainty as CoordinateUncertainty_txt,
-    lg.coorduncertaintyunit as CoordinateUncertaintyUnit_txt,
+    end as TRSCoordinates_s,
+    lg.geodeticdatum as Datum_s,
+    lg.localitysource as CoordinateSource_s,
+    lg.coorduncertainty as CoordinateUncertainty_s,
+    lg.coorduncertaintyunit as CoordinateUncertaintyUnit_s,
     
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
-end as family_txt,
+end as family_s,
 case when (mc.currentlocation is not null and mc.currentlocation <> '')
      then regexp_replace(mc.currentlocation, '^.*\)''(.*)''$', '\1')
-end as gardenlocation_txt,
-co.recordstatus dataQuality_txt,
+end as gardenlocation_s,
+co.recordstatus dataQuality_s,
 case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_replace(lg.fieldlocplace, '^.*\)''(.*)''$', '\1')
      when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
-end as locality_txt,
-h1.name as csid_txt,
-con.rare as rare_txt,
-cob.deadflag as deadflag_txt,
-regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_txt,
-mc.reasonformove as reasonformove_txt
+end as locality_s,
+h1.name as csid_s,
+con.rare as rare_s,
+cob.deadflag as deadflag_s,
+regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
+mc.reasonformove as reasonformove_s
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
