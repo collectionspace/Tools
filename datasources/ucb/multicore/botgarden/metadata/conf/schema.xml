@@ -242,46 +242,47 @@
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
-   <!-- 
-	 objectnumber_s,objectname_txt,dated_s,title_txt,medium_s,dimensions_s,markings_s,curatorialremarks_txt,
-	 description_txt,provenance_ss,notes_txt,sitename_s,sitenumber_s,objnm_objname_s,objnm_remarks_s,culture_s
-   -->
 
-   <copyField source="accessionnumber_txt" dest="text"/>
-   <copyField source="determination_txt" dest="text"/>
-   <copyField source="collectornumber_txt" dest="text"/>
+   <!-- Create keyword versions for searching -->
 
-   <copyField source="locality_ss" dest="text"/>
+    <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
+    <copyField source="determination_s" dest="determination_txt"/>
+    <copyField source="collector_s" dest="collector_txt"/>
+    <copyField source="collectornumber_s" dest="collectornumber_txt"/>
+    <copyField source="collectiondate_s" dest="collectiondate_txt"/>
+    <copyField source="earlycollectiondate_s" dest="earlycollectiondate_txt"/>
+    <copyField source="latecollectiondate_s" dest="latecollectiondate_txt"/>
+    <copyField source="fcpverbatim_s" dest="fcpverbatim_txt"/>
+    <copyField source="locality_s" dest="locality_txt"/>
+    <copyField source="elevation_s" dest="elevation_txt"/>
+    <copyField source="minelevation_s" dest="minelevation_txt"/>
+    <copyField source="maxelevation_s" dest="maxelevation_txt"/>
+    <copyField source="elevationunit_s" dest="elevationunit_txt"/>
+    <copyField source="habitat_s" dest="habitat_txt"/>
+    <copyField source="trscoordinates_s" dest="trscoordinates_txt"/>
+    <copyField source="datum_s" dest="datum_txt"/>
+    <copyField source="coordinatesource_s" dest="coordinatesource_txt"/>
+    <copyField source="coordinateuncertainty_s" dest="coordinateuncertainty_txt"/>
+    <copyField source="coordinateuncertaintyunit_s" dest="coordinateuncertaintyunit_txt"/>
+    <copyField source="family_s" dest="family_txt"/>
+    <copyField source="gardenlocation_s" dest="gardenlocation_txt"/>
+    <copyField source="dataquality_s" dest="dataquality_txt"/>
+    <copyField source="locality_s" dest="locality_txt"/>
+    <copyField source="csid_s" dest="csid_txt"/>
+    <copyField source="rare_s" dest="rare_txt"/>
+    <copyField source="deadflag_s" dest="deadflag_txt"/>
+    <copyField source="determinationnoauth_s" dest="determinationnoauth_txt"/>
+    <copyField source="reasonformove_s" dest="reasonformove_txt"/>
 
-   <copyField source="collector_txt" dest="text"/>
-   <copyField source="habitat_txt" dest="text"/>
+   <copyField source="*_s" dest="text"/>
+   <copyField source="*_ss" dest="text"/>
+   <copyField source="*_txt" dest="text"/>
 
-   <copyField source="elevation_txt" dest="text"/>
-   <copyField source="datum_txt" dest="text"/>
-
-   <!-- Text fields from SolrCell to search by default in our catch-all field -->
-   <copyField source="title" dest="text"/>
-   <copyField source="author" dest="text"/>
-   <copyField source="description" dest="text"/>
-   <copyField source="keywords" dest="text"/>
-   <copyField source="content" dest="text"/>
-   <copyField source="content_type" dest="text"/>
-   <copyField source="resourcename" dest="text"/>
-   <copyField source="url" dest="text"/>
-
-   <!-- Create a string versions for faceting -->
-   <copyField source="author" dest="author_s"/>
-   <copyField source="accessionnumber_txt" dest="accessionnumber_s"/>
-   <copyField source="determination_txt" dest="determination_s"/>
-   <copyField source="gardenlocation_txt" dest="gardenlocation_s"/>
-   <copyField source="family_txt" dest="family_s"/>
-   <copyField source="collector_txt" dest="text"/>
-	
    <!-- Above, multiple source fields are copied to the [text] field. 
 	  Another way to map multiple source fields to the same 
 	  destination field is to use the dynamic field syntax. 
 	  copyField also supports a maxChars to copy setting.  -->
-	   
+
    <!-- <copyField source="*_t" dest="text" maxChars="3000"/> -->
 
    <!-- copy name to alphaNameSort, a field designed for sorting by name -->
