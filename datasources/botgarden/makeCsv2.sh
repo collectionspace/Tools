@@ -28,14 +28,15 @@ grep csid metadata.csv | head -1 > header4Solr.csv
 grep -v csid metadata.csv > d7.csv
 cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
-# here are the schema changes needed
+# here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_s/; s/_s$//; print "    <copyField source=\"" .$_."_s\" dest=\"".$_."_txt\"/>\n"' > schemaFragment.xml
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/ ; s/_ss$// ; print "    <copyField source=\"" .$_."_ss\"  dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_txt/; s/_txt$//; print "    <copyField source=\"" .$_."_txt\" dest=\"".$_."_s\"/>\n"' > schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_s$/; s/_s$//; print "    <copyField source=\"" .$_."_s\" dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss$//; print "    <copyField source=\"" .$_."_ss\" dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
 ##############################################################################
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/;  print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
 
 rm d7.csv
 wc -l *.csv
