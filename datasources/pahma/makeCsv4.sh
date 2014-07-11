@@ -11,21 +11,21 @@ HOST=$1
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
-time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f media.sql -o m1.csv
+time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f media.sql -o m1.csv
 # cleanup newlines and crlf in data, then switch record separator.
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > 4solr.$HOST.media.csv
 rm m1.csv
 ##############################################################################
 # start the stitching process: extract the "basic" data
 ##############################################################################
-time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f basic.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > basic.csv
+time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f basic.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > basic.csv
 cp basic.csv intermediate.csv
 ##############################################################################
 # stitch this together with the results of the rest of the "subqueries"
 ##############################################################################
 for i in {1..17}
 do
- time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
+ time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
  time python join.py intermediate.csv part$i.csv > temp.csv
  cp temp.csv intermediate.csv
 done

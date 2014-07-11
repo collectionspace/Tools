@@ -5,8 +5,8 @@ HOST=$1
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
-time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f botgardenMetadataV1alive.sql -o d1a.csv
-time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f botgardenMetadataV1dead.sql -o d1b.csv
+time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1alive.sql -o d1a.csv
+time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1dead.sql -o d1b.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2.csv 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv >> d2.csv 
