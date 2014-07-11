@@ -1,4 +1,4 @@
-SELECT cc.id, scd.datedisplaydate AS "objcolldate_txt",
+SELECT cc.id, scd.datedisplaydate AS "objcolldate_s",
 CASE
         WHEN scd.dateearliestsingleera = '' THEN DATE(scd.dateearliestscalarvalue)+1||'T19:00:00Z'
         WHEN scd.dateearliestsingleera = 'ce' THEN DATE(scd.dateearliestscalarvalue)+1||'T19:00:00Z'
