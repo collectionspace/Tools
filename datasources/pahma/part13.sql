@@ -1,4 +1,4 @@
-SELECT cc.id, spd.datedisplaydate AS "objproddate_txt",
+SELECT cc.id, spd.datedisplaydate AS "objproddate_s",
 CASE
         WHEN spd.dateearliestsingleera = '' THEN DATE(spd.dateearliestscalarvalue)+1||'T19:00:00Z'
         WHEN spd.dateearliestsingleera = 'ce' THEN DATE(spd.dateearliestscalarvalue)+1||'T19:00:00Z'

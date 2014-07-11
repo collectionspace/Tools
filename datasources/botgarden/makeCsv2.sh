@@ -5,8 +5,8 @@ HOST=$1
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
-time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f botgardenMetadataV1alive.sql -o d1a.csv
-time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=csR2p4rt2r" -f botgardenMetadataV1dead.sql -o d1b.csv
+time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1alive.sql -o d1a.csv
+time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1dead.sql -o d1b.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2.csv 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv >> d2.csv 
@@ -28,14 +28,15 @@ grep csid metadata.csv | head -1 > header4Solr.csv
 grep -v csid metadata.csv > d7.csv
 cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
-# here are the schema changes needed
+# here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_s/; s/_s$//; print "    <copyField source=\"" .$_."_s\" dest=\"".$_."_txt\"/>\n"' > schemaFragment.xml
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/ ; s/_ss$// ; print "    <copyField source=\"" .$_."_ss\"  dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_txt/; s/_txt$//; print "    <copyField source=\"" .$_."_txt\" dest=\"".$_."_s\"/>\n"' > schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_s$/; s/_s$//; print "    <copyField source=\"" .$_."_s\" dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss$//; print "    <copyField source=\"" .$_."_ss\" dest=\"".$_."_txt\"/>\n"' >> schemaFragment.xml
 ##############################################################################
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
-perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/;  print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
+perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
 
 rm d7.csv
 wc -l *.csv
