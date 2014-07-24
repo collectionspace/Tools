@@ -67,6 +67,8 @@ end as locality_s,
 h1.name as csid_s,
 con.rare as rare_s,
 cob.deadflag as deadflag_s,
+cob.flowerColor as flowerColor_s,
+co.fieldCollectionNumber as fieldCollectionNumber_s,
 regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
 mc.reasonformove as reasonformove_s
 

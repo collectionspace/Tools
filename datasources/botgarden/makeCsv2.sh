@@ -11,8 +11,8 @@ time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbn
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2.csv 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv >> d2.csv 
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 31) { print $x;} '     d3.csv | perl -pe 's/\"/\\"/g;' > d4.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 31) { print $x;} ' d3.csv | perl -pe 's/\"/\\"/g;' > errors.csv &
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 33) { print $x;} '     d3.csv | perl -pe 's/\"/\\"/g;' > d4.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 33) { print $x;} ' d3.csv | perl -pe 's/\"/\\"/g;' > errors.csv &
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
