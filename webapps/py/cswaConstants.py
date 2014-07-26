@@ -1,7 +1,7 @@
 #!/usr/bin/env /usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import csv, sys
+import csv, sys, time
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -10,9 +10,9 @@ def getStyle(schemacolor1):
     return '''
 <style type="text/css">
 body { margin:10px 10px 0px 10px; font-family: Arial, Helvetica, sans-serif; }
-table { width: 100%; }
-td { cell-padding: 3px; }
-th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; cell-padding: 3px;}
+table { }
+td { padding-right: 10px; }
+th { text-align: left ;color: #666666; font-size: 16px; font-weight: bold; padding-right: 20px;}
 h2 { font-size:32px; padding:10px; margin:0px; border-bottom: none; }
 h2 { font-size:24px; color:white; background:blue; }
 p { padding:10px 10px 10px 10px; }
@@ -24,6 +24,8 @@ button { font-size: 150%; width:85px; text-align: center; text-transform: upperc
 img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .authority { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 18px; }
 .ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
+.zcell { min-width:250px; cell-padding: 2px; font-size: 16px;}
+.shortcell { width:180px; cell-padding: 2px; font-size: 16px;}
 .objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
 .objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
@@ -34,9 +36,9 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .subheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 24px; font-weight: bold; }
 .smallheader { background-color: ''' + schemacolor1 + '''; color: #FFFFFF; font-size: 12px; font-weight: bold; }
 .veryshortinput { width:60px; }
-.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; }
+.xspan { color: #000000; background-color: #FFFFFF; font-weight: bold; font-size: 12px; min-width:240px; }
 th[data-sort]{ cursor:pointer; }
-.littlebutton {color: #FFFFFF; background-color: gray; font-size: 11px; padding: 2px;}
+.littlebutton {color: #FFFFFF; background-color: gray; font-size: 11px; padding: 2px; cursor: pointer; }
 .imagecell { padding: 8px ; align: center; }
 .rightlabel { text-align: right ; vertical-align: top; padding: 2px 12px 2px 2px; width: 30%; }
 .objtitle { font-size:28px; float:left; padding:4px; margin:0px; border-bottom: thin dotted #aaaaaa; color: #000000; }
@@ -84,7 +86,6 @@ def infoHeaders(fieldSet):
       <th>Field Collection Place</th>
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
-      <th>P?</th>
     </tr>"""
     elif fieldSet == 'namedesc':
         return """
@@ -93,7 +94,6 @@ def infoHeaders(fieldSet):
       <th>Object name</th>
       <th></th>
       <th style="text-align:center">Brief Description</th>
-      <th>P?</th>
     </tr>"""
     elif fieldSet == 'registration':
         return """
@@ -105,7 +105,6 @@ def infoHeaders(fieldSet):
       <th>Field Collector</th>
       <th>Donor</th>
       <th>Accession</th>
-      <th>P?</th>
     </tr>"""
     elif fieldSet == 'hsrinfo':
         return """
@@ -116,7 +115,6 @@ def infoHeaders(fieldSet):
       <th>Count Note</th>
       <th>Field Collection Place</th>
       <th style="text-align:center">Brief Description</th>
-      <th>P?</th>
     </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
@@ -137,23 +135,33 @@ def getProhibitedLocations(config):
     return locList
 
 
-def getHandlers(form):
+def getHandlers(form, institution):
     selected = form.get('handlerRefName')
-    handlerlist = [
-        ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
-        ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
-        ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
-        ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
-        ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
-        ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
-        ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
-        ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
-        ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
-        ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
-        ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
-        ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
-        ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
-    ]
+
+
+    if institution == 'bampfa':
+        handlerlist = [
+            ("Lisa", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Nancy","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Orlando", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+        ]
+    else:
+
+        handlerlist = [
+            ("Lisa ", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
+            ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
+            ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
+            ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
+            ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
+            ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
+            ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
+            ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
+            ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
+            ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
+            ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
+            ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
+        ]
 
     handlers = '''
           <select class="cell" name="handlerRefName">
@@ -167,71 +175,91 @@ def getHandlers(form):
             handlerOption = handlerOption.replace('option', 'option selected')
         handlers = handlers + handlerOption
 
-    handlers = handlers + '\n      </select>'
+    handlers += '\n      </select>'
     return handlers, selected
 
 
-def getReasons(form):
+def getReasons(form, institution):
     reason = form.get('reason')
 
-    reasons = '''
-<select class="cell" name="reason">
-<option value="None">(none selected)</option>
-<option value="(not entered)">(not entered)</option>
-<option value="Inventory">Inventory</option>
-<option value="GeneralCollManagement">General Collections Management</option>
-<option value="Research">Research</option>
-<option value="NAGPRA">NAGPRA</option>
-<option value="pershelflabel">per shelf label</option>
-<option value="NewHomeLocation">New Home Location</option>
-<option value="Loan">Loan</option>
-<option value="Exhibit">Exhibit</option>
-<option value="ClassUse">Class Use</option>
-<option value="PhotoRequest">Photo Request</option>
-<option value="Tour">Tour</option>
-<option value="Conservation">Conservation</option>
-<option value="CulturalHeritage">cultural heritage</option>
-<option value="">----------------------------</option>
-<option value="2012 HGB surge pre-move inventory">2012 HGB surge pre-move inventory</option>
-<option value="2014 Marchant inventory and move">2014 Marchant inventory and move</option>
-<option value="AsianTextileGrant">Asian Textile Grant</option>
-<option value="BasketryRehousingProj">Basketry Rehousing Proj</option>
-<option value="BORProj">BOR Proj</option>
-<option value="BuildingMaintenance">Building Maintenance: Seismic</option>
-<option value="CaliforniaArchaeologyProj">California Archaeology Proj</option>
-<option value="CatNumIssueInvestigation">Cat. No. Issue Investigation</option>
-<option value="DuctCleaningProj">Duct Cleaning Proj</option>
-<option value="FederalCurationAct">Federal Curation Act</option>
-<option value="FireAlarmProj">Fire Alarm Proj</option>
-<option value="FirstTimeStorage">First Time Storage</option>
-<option value="FoundinColl">Found in Collections</option>
-<option value="HearstGymBasementMoveKroeber20">Hearst Gym Basement move to Kroeber 20A</option>
-<option value="HGB Surge">HGB Surge</option>
-<option value="Kro20MezzLWeaponProj2011">Kro20Mezz LWeapon Proj 2011</option>
-<option value="Kroeber20AMoveRegatta">Kroeber 20A move to Regatta</option>
-<option value="MarchantFlood2007">Marchant Flood 12/2007</option>
-<option value="NAAGVisit">Native Am Adv Grp Visit</option>
-<option value="NEHEgyptianCollectionGrant">NEH Egyptian Collection Grant</option>
-<option value="Regattamovein">Regatta move-in</option>
-<option value="Regattapremoveinventory">Regatta pre-move inventory</option>
-<option value="Regattapremoveobjectprep">Regatta pre-move object prep.</option>
-<option value="Regattapremovestaging">Regatta pre-move staging</option>
-<option value="SATgrant">SAT grant</option>
-<option value="TemporaryStorage">Temporary Storage</option>
-<option value="TextileRehousingProj">Textile Rehousing Proj</option>
-<option value="YorubaMLNGrant">Yoruba MLN Grant</option>
-</select>
-'''
+    if institution == 'bampfa':
+        reasons = '''
+        <select class="cell" name="reason">
+          <options>
+            <option value="None" default="yes">(none selected)</option>
+            <option value="conservation">Conservation</option>
+            <option value="exhibition">Exhibition</option>
+            <option value="inventory">Inventory</option>
+            <option value="loan">Loan</option>
+            <option value="newstoragelocation">New Storage Location</option>
+            <option value="photography">Photography</option>
+            <option value="research">Research</option>
+          </options>
+        </select>
+
+        '''
+    else:
+        # these are for PAHMA
+        reasons = '''
+    <select class="cell" name="reason">
+    <option value="None">(none selected)</option>
+    <option value="(not entered)">(not entered)</option>
+    <option value="Inventory">Inventory</option>
+    <option value="GeneralCollManagement">General Collections Management</option>
+    <option value="Research">Research</option>
+    <option value="NAGPRA">NAGPRA</option>
+    <option value="pershelflabel">per shelf label</option>
+    <option value="NewHomeLocation">New Home Location</option>
+    <option value="Loan">Loan</option>
+    <option value="Exhibit">Exhibit</option>
+    <option value="ClassUse">Class Use</option>
+    <option value="PhotoRequest">Photo Request</option>
+    <option value="Tour">Tour</option>
+    <option value="Conservation">Conservation</option>
+    <option value="CulturalHeritage">cultural heritage</option>
+    <option value="">----------------------------</option>
+    <option value="2012 HGB surge pre-move inventory">2012 HGB surge pre-move inventory</option>
+    <option value="2014 Marchant inventory and move">2014 Marchant inventory and move</option>
+    <option value="AsianTextileGrant">Asian Textile Grant</option>
+    <option value="BasketryRehousingProj">Basketry Rehousing Proj</option>
+    <option value="BORProj">BOR Proj</option>
+    <option value="BuildingMaintenance">Building Maintenance: Seismic</option>
+    <option value="CaliforniaArchaeologyProj">California Archaeology Proj</option>
+    <option value="CatNumIssueInvestigation">Cat. No. Issue Investigation</option>
+    <option value="DuctCleaningProj">Duct Cleaning Proj</option>
+    <option value="FederalCurationAct">Federal Curation Act</option>
+    <option value="FireAlarmProj">Fire Alarm Proj</option>
+    <option value="FirstTimeStorage">First Time Storage</option>
+    <option value="FoundinColl">Found in Collections</option>
+    <option value="HearstGymBasementMoveKroeber20">Hearst Gym Basement move to Kroeber 20A</option>
+    <option value="HGB Surge">HGB Surge</option>
+    <option value="Kro20MezzLWeaponProj2011">Kro20Mezz LWeapon Proj 2011</option>
+    <option value="Kroeber20AMoveRegatta">Kroeber 20A move to Regatta</option>
+    <option value="MarchantFlood2007">Marchant Flood 12/2007</option>
+    <option value="NAAGVisit">Native Am Adv Grp Visit</option>
+    <option value="NEHEgyptianCollectionGrant">NEH Egyptian Collection Grant</option>
+    <option value="Regattamovein">Regatta move-in</option>
+    <option value="Regattapremoveinventory">Regatta pre-move inventory</option>
+    <option value="Regattapremoveobjectprep">Regatta pre-move object prep.</option>
+    <option value="Regattapremovestaging">Regatta pre-move staging</option>
+    <option value="SATgrant">SAT grant</option>
+    <option value="TemporaryStorage">Temporary Storage</option>
+    <option value="TextileRehousingProj">Textile Rehousing Proj</option>
+    <option value="YorubaMLNGrant">Yoruba MLN Grant</option>
+    </select>
+    '''
+
     reasons = reasons.replace(('option value="%s"' % reason), ('option selected value="%s"' % reason))
     return reasons, reason
 
 
 def getWebappList():
     return {
-        'pahma': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"],
-        'ucbg': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings'],
-        'ucjeps': ['ucjepsLocationReport']}
+        'pahma': {'apps': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"]},
+        'ucbg':  {'apps': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings']},
+        'ucjeps':  {'apps': ['ucjepsLocationReport']},
+        'bampfa':  {'apps': ['bamInventory', 'bamIntake', 'bamMoveobject', 'bamPackinglist', 'bamMovecrate']} }
 
 
 def getAppOptions(museum):
@@ -245,7 +273,7 @@ def getAppOptions(museum):
 def getPrinters(form):
     selected = form.get('printer')
 
-    printerlist = [ \
+    printerlist = [
         ("Hearst Gym Basement", "cluster1"),
         ("Marchant", "cluster2")
     ]
@@ -258,16 +286,16 @@ def getPrinters(form):
         printerOption = """<option value="%s">%s</option>""" % (printer[1], printer[0])
         if selected and str(selected) == printer[1]:
             printerOption = printerOption.replace('option', 'option selected')
-        printers = printers + printerOption
+        printers += printerOption
 
-    printers + '\n      </select>'
+    printers += '\n      </select>'
     return printers, selected, printerlist
 
 
 def getFieldset(form):
     selected = form.get('fieldset')
 
-    fields = [ \
+    fields = [
         ("Key Info", "keyinfo"),
         ("Name & Desc.", "namedesc"),
         ("Registration", "registration"),
@@ -281,7 +309,7 @@ def getFieldset(form):
         fieldsetOption = """<option value="%s">%s</option>""" % (field[1], field[0])
         if selected and str(selected) == field[1]:
             fieldsetOption = fieldsetOption.replace('option', 'option selected')
-        fieldset = fieldset + fieldsetOption
+        fieldset += fieldsetOption
 
     fieldset += '\n      </select>'
     return fieldset, selected
@@ -290,7 +318,7 @@ def getFieldset(form):
 def getHierarchies(form):
     selected = form.get('authority')
 
-    authoritylist = [ \
+    authoritylist = [
         ("Ethnographic Culture", "concept"),
         ("Places", "places"),
         ("Archaeological Culture", "archculture"),
@@ -312,7 +340,7 @@ def getHierarchies(form):
             authorityOption = authorityOption.replace('option', 'option selected')
         authorities = authorities + authorityOption
 
-    authorities + '\n </select>'
+    authorities += '\n </select>'
     return authorities, selected
 
 
@@ -347,8 +375,7 @@ def getAltNumTypes(form, csid, ant):
 
     ]
 
-    altnumtypes = \
-          '''<select class="cell" name="ant.''' + csid + '''">
+    altnumtypes = '''<select class="cell" name="ant.''' + csid + '''">
               <option value="None">Select a number type</option>'''
 
     for altnumtype in altnumtypelist:
@@ -390,12 +417,39 @@ def getAgencies(form):
         agencyOption = """<option value="%s">%s</option>""" % (agency[1], agency[0])
         if selected == agency[1]:
             agencyOption = agencyOption.replace('option', 'option selected')
-        agencies = agencies + agencyOption
+        agencies += agencyOption
 
-    agencies + '\n </select>'
+    agencies += '\n </select>'
     return agencies, selected
 
+def getIntakeFields(fieldset):
 
+    if fieldset == 'intake':
+
+        return [
+            ('TR', 20, 'tr','31','fixed'),
+            ('Number of Objects:', 5, 'numobjects','1','text'),
+            ('Source:', 40, 'pc.source','','text'),
+            ('Date in:', 30, 'datein',time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),'text'),
+            ('Receipt?', 40, 'receipt','','checkbox'),
+            ('Location:', 40, 'lo.location','','text'),
+            ('Disposition:', 30, 'disposition','','text'),
+            ('Artist/Title/Medium', 10, 'atm','','text'),
+            ('Purpose:', 40, 'purpose','','text')
+        ]
+    elif fieldset == 'objects':
+
+        return [
+            ('Identification number', 30, 'id','','text'),
+            ('Title', 30, 'title','','text'),
+            ('Comments', 30, 'comments','','text'),
+            ('Artist', 30, 'pc.artist','','text'),
+            ('Creation date', 30, 'cd','','text'),
+            ('Creation technique', 30, 'ct','','text'),
+            ('Dimensions', 30, 'dim','','text'),
+            ('Responsible department', 30, 'rd','','text'),
+            ('Computed current location', 30, 'lo.loc','','text')
+            ]
 
 
 def getHeader(updateType):
@@ -475,7 +529,7 @@ def getHeader(updateType):
       <th data-sort="string">Accession<br/>Dead?</th>
       <th>Garden Location</th>
     </tr></thead><tbody>"""
-    elif updateType in ['locreport','holdings','advsearch']:
+    elif updateType in ['locreport', 'holdings', 'advsearch']:
         return """
     <table class="tablesorter" id="sortTable"><thead><tr>
       <th data-sort="float">Accession</th>
@@ -525,7 +579,27 @@ def getHeader(updateType):
       <th>Note</th>
       <th>Update status</th>
     </tr>"""
-
+    elif updateType == 'intakeValues':
+        return """
+    <tr>
+      <th>Field</th>
+      <th>Value</th>
+    </tr>"""
+    elif updateType == 'intakeResult':
+        return """
+    <table width="100%" border="1">
+    <tr>
+      <th>Museum #</th>
+      <th>Note</th>
+      <th>Update status</th>
+    </tr>"""
+    elif updateType == 'intakeObjects':
+        return """
+    <tr>
+      <th>Museum #</th>
+      <th>Note</th>
+      <th>Update status</th>
+    </tr>"""
 
 if __name__ == "__main__":
 
@@ -563,7 +637,7 @@ if __name__ == "__main__":
     result += '<h2>Tricoder users</h2><table border="1">'
     t = tricoderUsers()
     for k in t.keys():
-        result += '<tr><td>%s</td><td>%s</td></tr>' % (k,t[k])
+        result += '<tr><td>%s</td><td>%s</td></tr>' % (k, t[k])
     result += '</table>'
     result += '<h2>Prohibited Locations</h2>'
     for p in getProhibitedLocations(config):
@@ -573,14 +647,14 @@ if __name__ == "__main__":
     for h in 'inventory movecrate packinglist packinglistbyculture moveobject bedlist bedlistnone keyinfoResult objinfoResult inventoryResult barcodeprint barcodeprintlocations upload'.split(' '):
         result += '<h3>Header for %s</h3>' % h
         header = getHeader(h)
-        result += header.replace('<table','<table border="1" ')
+        result += header.replace('<table', '<table border="1" ')
         result += '</table>'
 
     result += '<h2>KIR/OIR/BOE Fieldset Headers</h2>'
     for h in 'keyinfo namedesc hsrinfo registration'.split(' '):
         result += '<h3>Header for %s</h3>' % h
         header = infoHeaders(h)
-        result += header.replace('<table','<table border="1" ')
+        result += header.replace('<table', '<table border="1" ')
         result += '</table>'
 
     print '''Content-Type: text/html; charset=utf-8

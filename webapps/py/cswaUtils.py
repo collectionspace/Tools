@@ -85,42 +85,42 @@ def authenticateUser(username, password, form, config):
 
 
 def serverCheck(form, config):
-    result = "<tr><td>start server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    result = '<tr><td class="shortcell">start server check</td><td class="shortcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
 
     elapsedtime = time.time()
     # do an sql search...
-    result += "<tr><td>SQL check</td><td>" + cswaDB.testDB(config) + "</td></tr>"
+    result += '<tr><td class="shortcell">SQL check</td><td class="shortcell">' + cswaDB.testDB(config) + "</td></tr>"
     elapsedtime = time.time() - elapsedtime
-    result += "<tr><td>SQL time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+    result += '<tr><td class="shortcell">SQL time</td><td class="shortcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
 
     # if we are configured for barcodes, try that...
     try:
         config.get('files', 'cmdrfileprefix') + config.get('files', 'cmdrauditfile')
         try:
             elapsedtime = time.time()
-            result += "<tr><td>barcode audit file</td><td>" + config.get('files', 'cmdrauditfile') + "</td></tr>"
-            result += "<tr><td>trying...</td><td> to write empty test files to commanderWatch directory</td></tr>"
+            result += '<tr><td class="shortcell">barcode audit file</td><td class="shortcell">' + config.get('files', 'cmdrauditfile') + "</td></tr>"
+            result += '<tr><td class="shortcell">trying...</td><td class="shortcell"> to write empty test files to commanderWatch directory</td></tr>'
             printers, selected, printerlist = cswaConstants.getPrinters(form)
             for printer in printerlist:
-                result += ("<tr><td>location labels @ %s</td><td>" % printer[1]) + writeCommanderFile('test', printer[1], 'locationLabels', 'locations',  [], config) + "</td></tr>"
-                result += ("<tr><td>object labels @ %s</td><td>" % printer[1]) + writeCommanderFile('test', printer[1], 'objectLabels', 'objects', [], config) + "</td></tr>"
+                result += ('<tr><td class="shortcell">location labels @ %s</td><td class="shortcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'locationLabels', 'locations',  [], config) + "</td></tr>"
+                result += ('<tr><td class="shortcell">object labels @ %s</td><td class="shortcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'objectLabels', 'objects', [], config) + "</td></tr>"
             elapsedtime = time.time() - elapsedtime
-            result += "<tr><td>barcode check time</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+            result += '<tr><td class="shortcell">barcode check time</td><td class="shortcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
         except:
-            result += '<tr><td>barcode funtionality check</td><td><span class="error">FAILED.</span></td></tr>'
+            result += '<tr><td class="shortcell">barcode funtionality check</td><td class="shortcell"><span class="error">FAILED.</span></td></tr>'
     except:
-        result += "<tr><td>barcode funtionality check</td><td>skipped, not configured in config file.</td></tr>"
+        result += '<tr><td class="shortcell">barcode funtionality check</td><td class="shortcell">skipped, not configured in config file.</td></tr>'
 
     elapsedtime = time.time()
     # rest check...
     elapsedtime = time.time() - elapsedtime
-    result += "<tr><td>REST check</td><td>Not ready yet.</td></tr>"
-    #result += "<tr><td>REST check</td><td>" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+    result += '<tr><td class="shortcell">REST check</td><td class="shortcell">Not ready yet.</td></tr>'
+    #result += "<tr><td class="shortcell">REST check</td><td class="shortcell">" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
 
-    result += "<tr><td>end server check</td><td>" + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    result += '<tr><td class="shortcell">end server check</td><td class="shortcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
     result += '''<tr><td colspan="2"><hr/></td></tr>'''
 
-    return '''<table width="100%"><tbody><tr><td><h3>Server Status Check</h3></td></tr>''' + result + '''</tbody></table>'''
+    return '''<table><tbody><tr><td><h3>Server Status Check</h3></td></tr>''' + result + '''</tbody></table>'''
 
 
 def handleTimeout(source, form):
@@ -266,12 +266,12 @@ def doObjectSearch(form, config, displaytype):
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
 
-        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
+        print '\n</table><hr/><table width="100%"'
         print """<tr><td align="center" colspan="3">"""
         msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
-
         print "\n</table><hr/>"
+
         if updateType == 'moveobject':
             print '<input type="hidden" name="toRefname" value="%s">' % toRefname
             print '<input type="hidden" name="toCrate" value="%s">' % toCrate
@@ -290,11 +290,11 @@ def doOjectRangeSearch(form, config, displaytype=''):
         if form.get('ob.objno2'):
             objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
         else:
-            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)            
+            objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno1"), 1000, config)
     except:
         raise
     print """
-    <table width="100%"><tr>
+    <table><tr>
     <th>Object</th>
     <th>Count</th>
     <th>Object Name</th>
@@ -313,6 +313,7 @@ def doOjectRangeSearch(form, config, displaytype=''):
 
 def listSearchResults(authority, config, displaytype, form, rows):
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
 
     if not rows: rows = []
     rows.sort()
@@ -322,7 +323,7 @@ def listSearchResults(authority, config, displaytype, form, rows):
     if label[-1] == 's' and rowcount == 1: label = label[:-1]
 
     if displaytype == 'silent':
-        print """<table width="100%">"""
+        print """<table>"""
     elif displaytype == 'select':
         print """<div style="float:left; width: 300px;">%s %s in this range</th>""" % (rowcount, label)
     else:
@@ -331,7 +332,7 @@ def listSearchResults(authority, config, displaytype, form, rows):
             count = 0
             objectsHandled = []
             for r in rows:
-                objects = cswaDB.getlocations(r[0], '', 1, config, updateType)
+                objects = cswaDB.getlocations(r[0], '', 1, config, updateType,institution)
                 for o in objects:
                     if o[3] + o[4] in objectsHandled:
                         objects.remove(o)
@@ -383,7 +384,7 @@ def listSearchResults(authority, config, displaytype, form, rows):
 def getTableFooter(config, displaytype):
     updateType = config.get('info', 'updatetype')
 
-    print """<table width="100%"><tr><td align="center" colspan="2"><hr></tr>"""
+    print """<table width="100%"><tr><td align="center" colspan="3"><hr></tr>"""
     if displaytype == 'list':
         print """<tr><td align="center">"""
         button = 'Enumerate Objects'
@@ -404,12 +405,14 @@ def getTableFooter(config, displaytype):
         else:
             print "<td></td>"
         print "</tr>"
-    print "</table>"
+    print "</table><hr/>"
 
 
 def doEnumerateObjects(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
+
     if not validateParameters(form, config): return
 
     try:
@@ -433,7 +436,7 @@ def doEnumerateObjects(form, config):
     for l in locationList:
 
         try:
-            objects = cswaDB.getlocations(l[0], '', 1, config, updateType)
+            objects = cswaDB.getlocations(l[0], '', 1, config, updateType,institution)
         except:
             raise
 
@@ -459,10 +462,13 @@ def doEnumerateObjects(form, config):
             print header
             print '\n'.join(locations[header])
 
+
+    print "\n</table>\n"
     if totalobjects == 0:
         pass
     else:
-        print """<tr><td align="center" colspan="99"><hr><td></tr>"""
+        print "<hr/>"
+        print '\n<table width="100%">\n'
         print """<tr><td align="center" colspan="3">"""
         if updateType == 'keyinfo' or updateType == 'objinfo':
             msg = "Caution: clicking on the button at left will revise the above fields for <b>ALL %s objects</b> shown in these %s locations!" % (
@@ -471,8 +477,7 @@ def doEnumerateObjects(form, config):
             msg = "Caution: clicking on the button at left will change the " + updateType + " of <b>ALL %s objects</b> shown in these %s locations!" % (
                 totalobjects, totallocations)
         print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="4">%s</td></tr>''' % msg
-
-    print "\n</table><hr/>"
+        print "\n</table><hr/>"
 
 
 def verifyLocation(loc, form, config):
@@ -486,6 +491,8 @@ def verifyLocation(loc, form, config):
 def doCheckMove(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
+
     if not validateParameters(form, config): return
 
     crate = verifyLocation(form.get("lo.crate"), form, config)
@@ -514,7 +521,7 @@ def doCheckMove(form, config):
 
     try:
         # NB: the movecrate webapp uses the inventory query...naturally!
-        objects = cswaDB.getlocations(form.get("lo.location1"), '', 1, config, 'inventory')
+        objects = cswaDB.getlocations(form.get("lo.location1"), '', 1, config, 'inventory',institution)
     except:
         raise
 
@@ -649,6 +656,73 @@ def doBulkEditForm(form, config, displaytype):
     print "<hr/>"
 
 
+def doSetupIntake(form, config):
+
+    updateType = config.get('info', 'updatetype')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    print '<table width="100%">'
+    print formatRow({'rowtype': 'subheader', 'data': ['Intake Values']}, form, config)
+
+    print cswaConstants.getHeader('intakeValues')
+
+    # get numbobjects
+    numobjects = 1
+    for i in cswaConstants.getIntakeFields('intake'):
+        if i[2] == 'numobjects':
+            try:
+                numobjects = int(form.get(i[2]))
+            except:
+                pass
+
+    for i,box in enumerate(cswaConstants.getIntakeFields('intake')):
+        if box[2] == 'dummy':
+            continue
+        if box[4] == 'fixed':
+            if box[2] == 'tr':
+                if numobjects == 1:
+                    objectrange = '1'
+                else:
+                    objectrange = '1-' + str(numobjects)
+                computedresult = 'TR. ' + form.get(box[2]) + '.14.' + objectrange
+                print '<tr><th class="zcell">%s</th><td>%s</td></tr>' % (box[0],computedresult)
+            else:
+                print '<tr><th class="zcell">%s</th><td>%s</td></tr>' % (box[0],form.get(box[2]))
+        else:
+            print '<tr><th class="zcell">%s</th><td>%s</td></tr>' % (box[0],form.get(box[2]))
+
+    print formatRow({'rowtype': 'subheader', 'data': ['Basic Collection Object Info']}, form, config)
+
+    objectDescriptions = cswaConstants.getIntakeFields('objects')
+
+    #print "<tr>"
+    #for o in objectDescriptions:
+    #    print '<th>%s</th>' % o[0]
+    #print "</tr>"
+
+    for row in range(numobjects):
+        print '<tr>'
+        for i,box in enumerate(objectDescriptions):
+            if i % 5 == 0:
+                print "</tr><tr>"
+            print '''
+            <td>%s<br/>
+            <input id="%s.%s" class="xspan" type="%s" size="%s" name="%s.%s" value="%s"></td>
+            ''' % (box[0],box[2],row,box[4],box[1],box[2],row,box[3])
+        print '</tr>'
+        print '<tr><td colspan="7"><hr/></td></tr>'
+
+    print '\n</table><hr/><table width="100%"'
+    print """<tr><td align="center" colspan="3">"""
+    msg = "Caution: clicking on the button at left will create <b>intake and %s object records</b> as entered on this page!" % numobjects
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+    print "\n</table><hr/>"
+
+
+
+def doCommitIntake(form, config):
+    pass
+
 def doUpdateKeyinfo(form, config):
     #print form
     CSIDs = []
@@ -775,7 +849,7 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             #pass
             updateMsg = updateKeyInfo(fieldset, updateItems, config, form)
             if updateMsg != '':
-                msg += '<span style="color:red;">cowardly refusal to add "%s": value already exists</span>' % updateMsg
+                msg += '<span style="color:red;">%s</span>' % updateMsg
             numUpdated += 1
         except:
             raise
@@ -864,6 +938,8 @@ def checkObject(places, objectInfo):
 def doPackingList(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
+
     if form.get('groupbyculture') is not None:
         updateType = 'packinglistbyculture'
     if not validateParameters(form, config): return
@@ -893,7 +969,7 @@ def doPackingList(form, config):
     for l in locationList:
 
         try:
-            objects = cswaDB.getlocations(l[0], '', 1, config, 'packinglist')
+            objects = cswaDB.getlocations(l[0], '', 1, config, 'packinglist',institution)
         except:
             raise
 
@@ -1011,6 +1087,8 @@ def doAuthorityScan(form, config):
 
 def downloadCsv(form, config):
     updateType = config.get('info', 'updateType')
+    institution = config.get('info','institution')
+
     if updateType == 'governmentholdings':
         try:
             query = cswaDB.getDisplayName(config, form.get('agency'))[0]
@@ -1021,7 +1099,7 @@ def downloadCsv(form, config):
             sites = cswaDB.getSitesByOwner(config, form.get('agency'))
         except:
             raise
-        
+
         rowcount = len(sites)
         print 'Content-type: application/octet-stream; charset=utf-8'
         print 'Content-Disposition: attachment; filename="Sites By %s.csv"' % query
@@ -1029,7 +1107,7 @@ def downloadCsv(form, config):
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for s in sites:
                 writer.writerow((s[0], s[1], s[2], s[3]))
-        
+
     else:
         try:
             rows = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), 500, config)
@@ -1048,7 +1126,7 @@ def downloadCsv(form, config):
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
-            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo')
+            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
             for o in objects:
                 if checkObject(places, o):
                     writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
@@ -1059,6 +1137,8 @@ def downloadCsv(form, config):
 def doBarCodes(form, config):
     #updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
+
     action = form.get('action')
     if not validateParameters(form, config): return
 
@@ -1104,7 +1184,7 @@ def doBarCodes(form, config):
             return
         else:
             for r in rows:
-                objects = cswaDB.getlocations(r[0], '', 1, config, updateType)
+                objects = cswaDB.getlocations(r[0], '', 1, config, updateType,institution)
                 for o in objects:
                     if o[3] + o[4] in objectsHandled:
                         objects.remove(o)
@@ -1325,14 +1405,15 @@ def doHierarchyView(form, config):
 def doListGovHoldings(form, config):
     query = cswaDB.getDisplayName(config, form.get('agency'))[0]
     hostname = config.get('connect', 'hostname')
+    institution = config.get('info', 'institution')
     protocol = 'https'
     port = ''
-    link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/place.html?csid='
+    link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/place.html?csid='
     if query == "None":
         print '<h3>Please Select An Agency</h><hr>'
         return
     sites = cswaDB.getSitesByOwner(config, form.get('agency'))
-    print "<table>"
+    print '<table width="100%">'
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
     print '''<tbody align="center" width=75 style="font-weight:bold">
         <tr><td>Site</td><td>Ownership Note</td><td>Place Note</td></tr></tbody>'''
@@ -1341,9 +1422,9 @@ def doListGovHoldings(form, config):
         for field in site:
             if not field:
                 field = ''
-        print '<td align="left" width=75><a href="' + link + str(cswaDB.getCSID('placeName',site[0], config)[0]) + '&vocab=place">' + site[0] + '</td>'
-        print '<td align="left" width=75>' + (site[2] or '') + "</td>"
-        print '<td align="left" width=75>' + (site[3] or '') + "</td>"
+        print '<td align="left"><a href="' + link + str(cswaDB.getCSID('placeName',site[0], config)[0]) + '&vocab=place">' + site[0] + '</td>'
+        print '<td align="left">' + (site[2] or '') + "</td>"
+        print '<td align="left">' + (site[3] or '') + "</td>"
         print '</tr><tr><td colspan="3"><hr></td></tr>'
     print "</table>"
     print '<h4>', len(sites), ' sites listed.</h4>'
@@ -1459,7 +1540,7 @@ def processTricoderFile(barcodefile, form, config):
         #print cswaConstants.getHeader('upload')
 
         numUpdated = 0
-        
+
         barcodebuffer = {}
         flag = 0
         while True:
@@ -1531,10 +1612,10 @@ def checkData(data, line, id2ref, config):
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nCrate not found!</span>" % line)
         if not cswaDB.checkData(config, data[4], "location")[0]:
             raise Exception("<span style='color:red'>Error encountered in line '%s':\nLocation not found!</span>" % line)
-    
 
 
-def doUploadUpdateLocs(data, line, id2ref, form, config):  
+
+def doUploadUpdateLocs(data, line, id2ref, form, config):
     updateItems = {'crate': '', 'objectNumber': ''}
     if data[0] == "C":
         #Ex: "C","A1234567","07/22/2013 15:54","8-4216","Asian Archaeology Storage Box 0013","Kroeber, 20A, AA  1,  5"
@@ -1600,7 +1681,7 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
 def viewLog(form, config):
     num2ret = int(form.get('num2ret')) if str(form.get('num2ret')).isdigit() else 100
 
-    print '<table width="100%">\n'
+    print '<table>\n'
     print ('<tr>' + (4 * '<th class="ncell">%s</td>') + '</tr>\n') % (
         'locationDate', 'objectNumber', 'objectStatus', 'handler')
     try:
@@ -1732,7 +1813,7 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
             #    sys.stderr.write(' e: %s\n' % e.text)
-            if  alreadyExists(updateItems[relationType], Entries):
+            if alreadyExists(updateItems[relationType], Entries):
                 if not IsAlreadyPreferred(updateItems[relationType], Entries):
                     message += "%s=%s;" % (relationType,updateItems[relationType])
                 continue
@@ -1746,8 +1827,11 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
-                #message += "%s=%s;" % (relationType,updateItems[relationType])
-                continue
+                if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
+                    continue
+                else:
+                    message += "%s: %s already exists. Now duplicated with this as preferred.;" % (relationType,updateItems[relationType])
+                    pass
             newElement = etree.Element(relationType)
             newElement.text = updateItems[relationType]
             metadata.insert(0, newElement)
@@ -1813,13 +1897,14 @@ def updateLocations(updateItems, config, form):
     payload = relationsPayload(updateItems)
     (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
 
-    writeLog(updateItems, uri, 'POST', username, config)    
+    writeLog(updateItems, uri, 'POST', username, config)
 
     #print "<h3>Done w update!</h3>"
 
 
 def formatRow(result, form, config):
     hostname = config.get('connect', 'hostname')
+    institution = config.get('info', 'institution')
     port = ''
     protocol = 'https'
     rr = result['data']
@@ -1841,49 +1926,49 @@ def formatRow(result, form, config):
         groupby = str(form.get("groupby"))
         rare = 'Yes' if rr[8] == 'true' else 'No'
         dead = 'Yes' if rr[9] == 'true' else 'No'
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[7]
         if groupby == 'none':
-            location = '<td>%s</td>' % rr[0]
+            location = '<td class="zcell">%s</td>' % rr[0]
         else:
             location = ''
             # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid | 8 rare | 9 dead
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>''' % (
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td>%s</tr>''' % (
             link, rr[4], rr[6], rr[5], rare, dead,location)
     elif result['rowtype'] in ['locreport','holdings','advsearch']:
         rare = 'Yes' if rr[7] == 'true' else 'No'
         dead = 'Yes' if rr[8] == 'true' else 'No'
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[6]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[6]
         #  0 objectnumber, 1 determination, 2 family, 3 gardenlocation, 4 dataQuality, 5 locality, 6 csid, 7 rare , 8 dead , 9 determination (no author)
-        return '''<tr><td><a target="cspace" href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (
+        return '''<tr><td class="zcell"><a target="cspace" href="%s">%s</a></td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td></tr>''' % (
             link, rr[0], rr[1], rr[2], rr[3], rr[5], rare, dead)
     elif result['rowtype'] == 'was.advsearch':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/botgarden/html/cataloging.html?csid=%s' % rr[7]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[7]
         # 3 recordstatus | 4 Accession number | 5 Determination | 6 Family | 7 object csid
         #### 3 Accession number | 4 Data quality | 5 Taxonomic name | 6 Family | 7 object csid
-        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td>%s</td><td>%s</td><td>%s</td></tr>''' % (
+        return '''<tr><td class="objno"><a target="cspace" href="%s">%s</a</td><td class="zcell">%s</td><td class="zcell">%s</td><td class="zcell">%s</td></tr>''' % (
             link, rr[4], rr[3], rr[5], rr[6])
     elif result['rowtype'] == 'inventory':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # 0 storageLocation | 1 lockey | 2 locdate | 3 objectnumber | 4 objectName | 5 objectCount | 6 fieldcollectionplace | 7 culturalgroup |
         # 8 objectCsid | 9 ethnographicfilecode | 10 fcpRefName | 11 cgRefName | 12 efcRefName | 13 computedcraterefname | 14 computedcrate
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td>%s</td></tr>""" % (
+        return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="zcell">%s</td><td class="zcell">%s</td></tr>""" % (
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
-        link2 = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/acquisition.html?csid=%s' % rr[24]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
+        link2 = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr>
@@ -1893,11 +1978,10 @@ def formatRow(result, form, config):
 <td class="xspan" name="cp.%s">%s</td>
 <td class="xspan" name="cg.%s">%s</td>
 <td class="xspan" name="fc.%s">%s</td>
-<td><input type="checkbox"></td>
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[8], rr[6], rr[8], rr[7], rr[8], rr[9])
 
     elif result['rowtype'] == 'packinglistbyculture':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/pahma/html/cataloging.html?csid=%s' % rr[8]
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7x | objcsid 8 | ethnographicfilecode 9x
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return """<tr>
@@ -1906,7 +1990,6 @@ def formatRow(result, form, config):
 <td class="xspan" name="ocn.%s">%s</td>
 <td class="xspan">%s</td>
 <td class="xspan" name="fc.%s">%s</td>
-<td><input type="checkbox"></td>
 </tr>""" % (link, rr[3], rr[8], rr[4], rr[8], rr[5], rr[7], rr[8], rr[6])
 
 
@@ -1923,11 +2006,10 @@ def formatInfoReviewRow(form, link, rr, link2):
 <input class="objname" type="text" name="onm.%s" value="%s">
 </td>
 <td width="0"></td>
-<td>
+<td class="zcell">
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <textarea cols="78" rows="1" name="bdx.%s">%s</textarea></td>
-<td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
             rr[8], cgi.escape(rr[15], True))
     elif fieldSet == 'registration':
@@ -1937,15 +2019,14 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td class="objname">
 <input class="objname" type="text" name="onm.%s" value="%s">
 </td>
-<td>
+<td class="zcell">
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="13" name="anm.%s" value="%s"></td>
-<td>%s</td>
-<td><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
-<td><span style="font-size:8">%s</span></td>
-<td><a target="cspace" href="%s">%s</a></td>
-<td><input type="checkbox"></td>
+<td class="zcell">%s</td>
+<td class="zcell"><input class="xspan" type="text" size="26" name="pc.%s" value="%s"></td>
+<td class="zcell"><span style="font-size:8">%s</span></td>
+<td class="zcell"><a target="cspace" href="%s">%s</a></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[3], True), rr[8], rr[8],
             rr[8], cgi.escape(rr[18], True), altnumtypes, rr[8], cgi.escape(rr[16], True),
             cgi.escape(rr[17], True), link2, cgi.escape(rr[21], True))
@@ -1958,13 +2039,12 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td class="veryshortinput">
 <input class="veryshortinput" type="text" name="ocn.%s" value="%s">
 </td>
-<td>
+<td class="zcell">
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
-<td><input type="checkbox"></td>
+<td class="zcell"><input class="xspan" type="text" size="26" name="cg.%s" value="%s"></td>
+<td class="zcell"><input class="xspan" type="text" size="26" name="fc.%s" value="%s"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
             rr[8], rr[8], rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[7], True), rr[8], cgi.escape(rr[9], True))
     elif fieldSet == 'hsrinfo':
@@ -1976,13 +2056,12 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td class="veryshortinput">
 <input class="veryshortinput" type="text" name="ocn.%s" value="%s">
 </td>
-<td>
+<td class="zcell">
 <input type="hidden" name="oox.%s" value="%s">
 <input type="hidden" name="csid.%s" value="%s">
 <input class="xspan" type="text" size="20" name="ctn.%s" value="%s"></td>
-<td><input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
-<td><textarea cols="60" rows="1" name="bdx.%s">%s</textarea></td>
-<td><input type="checkbox"></td>
+<td class="zcell"><input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
+<td class="zcell"><textarea cols="60" rows="1" name="bdx.%s">%s</textarea></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
             rr[8], rr[8], rr[8], cgi.escape(rr[25], True), rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[15], True))
 
@@ -1990,28 +2069,28 @@ def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
     if fieldSet == 'namedesc':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
-</tr><tr><th>Brief Description</th><td><textarea cols="78" rows="7" name="bdx.user"></textarea></td>
+</tr><tr><th>Brief Description</th><td class="zcell"><textarea cols="78" rows="7" name="bdx.user"></textarea></td>
 </tr>"""
     elif fieldSet == 'registration':
         altnumtypes, selected = cswaConstants.getAltNumTypes(form, 'user','')
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
-</tr><tr><th>Alternate Number</th><td><input class="xspan" type="text" size="60" name="anm.user"></td>
-</tr><tr><th>Alternate Number Types</th><td>%s</td>
-</tr><tr><th>Field Collector (person)</th><td><input class="xspan" type="text" size="60" name="pc.user"></td>
+</tr><tr><th>Alternate Number</th><td class="zcell"><input class="xspan" type="text" size="60" name="anm.user"></td>
+</tr><tr><th>Alternate Number Types</th><td class="zcell">%s</td>
+</tr><tr><th>Field Collector (person)</th><td class="zcell"><input class="xspan" type="text" size="60" name="pc.user"></td>
 </tr>""" % altnumtypes
     elif fieldSet == 'keyinfo':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
 </tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
-</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
-</tr><tr><th>Cultural Group</th><td><input class="xspan" type="text" size="60" name="cg.user"></td>
-</tr><tr><th>Ethnographic File Code</th><td><input class="xspan" type="text" size="60" name="fc.user"></td>
+</tr><tr><th>Field Collection Place</th><td class="zcell"><input class="xspan" type="text" size="60" name="cp.user"></td>
+</tr><tr><th>Cultural Group</th><td class="zcell"><input class="xspan" type="text" size="60" name="cg.user"></td>
+</tr><tr><th>Ethnographic File Code</th><td class="zcell"><input class="xspan" type="text" size="60" name="fc.user"></td>
 </tr>"""
     elif fieldSet == 'hsrinfo':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
 </tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
-</tr><tr><th>Count Note</th><td><input class="xspan" type="text" size="25" name="ctn.user"></td>
-</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="50" name="cp.user"></td>
-</tr><tr><th>Brief Description</th><td><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
+</tr><tr><th>Count Note</th><td class="zcell"><input class="xspan" type="text" size="25" name="ctn.user"></td>
+</tr><tr><th>Field Collection Place</th><td class="zcell"><input class="xspan" type="text" size="50" name="cp.user"></td>
+</tr><tr><th>Brief Description</th><td class="zcell"><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
 </tr>"""
 
 
@@ -2086,7 +2165,7 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
             sys.stderr.write(url)
             sys.stderr.write(payload)
             raise
-        
+
     data = f.read()
     info = f.info()
     # if a POST, the Location element contains the new CSID
@@ -2118,6 +2197,10 @@ def selectWebapp(form):
     apptitles = {}
     serverlabels = {}
     badconfigfiles = ''
+
+    exceptions = {}
+    webapps = cswaConstants.getWebappList()
+
     for f in files:
         if '.cfg' in f:
             config = ConfigParser.RawConfigParser()
@@ -2127,10 +2210,13 @@ def selectWebapp(form):
                 logo = config.get('info', 'logo')
                 updateType = config.get('info', 'updatetype')
                 schemacolor1 = config.get('info', 'schemacolor1')
+                apptitle = config.get('info', 'apptitle')
                 serverlabel = config.get('info', 'serverlabel')
+                serverlabel = serverlabel.replace('production','Prod')
+                serverlabel = serverlabel.replace('development','Dev')
                 serverlabelcolor = config.get('info', 'serverlabelcolor')
-                serverlabels[f] = '''<span style="color:%s;"><a target="%s" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
-                    serverlabelcolor, serverlabel, programName + configfile, configfile)
+                serverlabels[f] = '''<span style="cursor:pointer;color:%s;"><a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
+                    serverlabelcolor, serverlabel, programName + configfile, serverlabel)
                 apptitles[updateType] = config.get('info', 'apptitle')
             except:
                 badconfigfiles += '<tr><td>%s</td></tr>' % f
@@ -2139,10 +2225,8 @@ def selectWebapp(form):
     #               "upload": "BarcodeUpload",
     #               "keyinfo": "KeyInfoRev",
     #               "packlist": "PackingList",
-    #               "sysinv": "SystematicInventory" }
+    #               "ucbwebapp": "SystematicInventory" }
 
-    exceptions = {}
-    webapps = cswaConstants.getWebappList()
 
     line = '''Content-type: text/html; charset=utf-8
 
@@ -2166,16 +2250,17 @@ def selectWebapp(form):
 <title>Select web app</title>
 </head>
 <body>
-<form id="sysinv" method="post">
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1><table cellpadding="4px">
+<form id="ucbwebapp" method="post">
+<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
+<table cellpadding="4px"><tr>
 <p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
 
     for museum in webapps:
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr><tr><th>Webpp Name</th><th>App. Abbrev.</th><th>Production</th><th>Dev "Test"</th></tr>\n' % museum
-        for webapp in webapps[museum]:
+        line += '<td valign="top"><table><tr><td colspan="3"><h2>%s</h2></td></tr><tr><th>Web App</th><th colspan="2">Deployment</th></tr>\n' % museum
+        for webapp in webapps[museum]['apps']:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
-            line += '<tr><th>%s</th><th>%s</th>' % (apptitle, webapp)
+            line += '<tr><th>%s</th>' % apptitle
             for deployment in ['V321', 'Dev']:
                 available = ''
                 if webapp in exceptions and deployment not in ['Dev', 'V321']:
@@ -2186,22 +2271,21 @@ def selectWebapp(form):
                         available = '<a target="%s" href="%s">%s</a>' % (
                             deployment, exceptions[webapp] + '.py', exceptions[webapp])
                 else:
-                    available = '''<a target="%s" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapp + deployment, webapp + deployment)
+                    available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapp + deployment, webapp + deployment)
                 if os.path.isfile(webapp + deployment + '.cfg'):
                     available = serverlabels[webapp + deployment + '.cfg']
-                    #available = '<span style="color:%s;"><a target="%s" href="%s">%s</a></span><span style="color:%s;"><a target="%s" href="%s">%s</a></span>' % (deployment,programName+webapp+deployment,webapp+deployment)
-                    #''' + apptitle + ' : ' + serverlabel + '''</title>''' + cswaConstants.getStyle(schemacolor1) + '''
                 else:
                     available = ''
                 line += ' <td>%s</td>\n' % available
-            line += '</tr>\n'
+            line += '</tr>'
+        line += '</table></td>\n'
     if badconfigfiles != '':
-        line += '<tr><td colspan="6"><h2>%s</h2></td></tr>' % 'bad config files'
+        line += '<tr><td colspan="2"><h2>%s</h2></td></tr>' % 'bad config files'
         line += badconfigfiles
     line += '''
-</table>
+</tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, revised 15 March 2014</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, revised 21 July 2014</h4>''' + payload + '''
 </form>
 </body>
 </html>'''
@@ -2222,7 +2306,7 @@ def printCollectionStats(form, config):
 
     print '''Content-type: text/html; charset=utf-8
 
-    
+
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>''' + apptitle + ' : ' + serverlabel + '''</title>
 <style type="text/css">
@@ -2305,15 +2389,15 @@ function formSubmit(location)
     document.getElementById('lo.location2').value = location
     //document.getElementById('num2ret').value = 1
     //document.getElementById('actionbutton').value = "Next"
-    document.forms['sysinv'].submit();
+    document.forms['ucbwebapp'].submit();
 }
 </script>
 </head>
 <body>
-<form id="sysinv" enctype="multipart/form-data" method="post">
+<form id="ucbwebapp" enctype="multipart/form-data" method="post">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody><tr><td width="3%">&nbsp;</td><td align="center">''' + divsize + '''
-    <table width="100%">
+    <table>
     <tbody>
       <tr>
 	<td style="width: 400px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
@@ -2388,6 +2472,7 @@ def starthtml(form, config):
     serverlabelcolor = config.get('info', 'serverlabelcolor')
     apptitle = config.get('info', 'apptitle')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info', 'institution')
     username = form.get('csusername')
     password = form.get('cspassword')
     msg = ''
@@ -2422,8 +2507,10 @@ def starthtml(form, config):
     #appOptions = getAppOptions('pahma')
 
     appOptions = '''
-    <a target="%s" class="littlebutton" onclick="$('#sysinv').attr('action', '%s').submit(); return false;">%s</a>
-    ''' % ('switchapp', programName + 'switchapp', 'switch app')
+    <a target="%s" class="littlebutton" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a target="help" href="%s">Help</a>
+    ''' % ('switchapp', programName + 'switchapp', 'switch app', 'https://dev.cspace.berkeley.edu/webappmanual/webappmanual.html')
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>
@@ -2526,8 +2613,8 @@ def starthtml(form, config):
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         crate = str(form.get("lo.crate")) if form.get("lo.crate") else ''
-        handlers, selected = cswaConstants.getHandlers(form)
-        reasons, selected = cswaConstants.getReasons(form)
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
 
         otherfields = '''
         <tr><th><span class="cell">start object no:</span></th>
@@ -2555,8 +2642,8 @@ def starthtml(form, config):
           <th><input id="lo.crate" class="cell" type="text" size="40" name="lo.crate" value="''' + crate + '''" class="xspan"></th></tr>
     '''
 
-        handlers, selected = cswaConstants.getHandlers(form)
-        reasons, selected = cswaConstants.getReasons(form)
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
         otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
@@ -2634,8 +2721,8 @@ def starthtml(form, config):
 </tr>'''
 
     elif updateType == 'inventory':
-        handlers, selected = cswaConstants.getHandlers(form)
-        reasons, selected = cswaConstants.getReasons(form)
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
         otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
@@ -2667,7 +2754,28 @@ def starthtml(form, config):
         agencies, selected = cswaConstants.getAgencies(form)
         button = '''<input id="actionbutton" class="save" type="submit" value="View Holdings" name="action">'''
         otherfields = '''<tr><th><span class="cell">Agency:</span></th><th>''' + agencies + '''</th>'''
-        otherfields += """<td><input type="submit" class="save" value="%s" name="action"</td>""" % 'Download as CSV'
+        otherfields += """<td><input type="submit" class="save" value="%s" name="action"></td>""" % 'Download as CSV'
+
+    elif updateType == 'intake':
+
+        fielddescription = cswaConstants.getIntakeFields('intake')
+
+        otherfields = '<tr>'
+        for i,box in enumerate(fielddescription):
+            if i % 3 == 0:
+                otherfields += "</tr><tr>"
+            if box[4] == 'fixed':
+                otherfields += '''
+                <th><span class="cell">%s</span></th>
+                <th><input id="%s" class="cell" type="hidden" size="%s" name="%s" value="%s" class="xspan">
+                <b>%s</b></th>
+                ''' % (box[0],box[2],box[1],box[2],box[3],box[3])
+            else:
+                otherfields += '''
+                 <th><span class="cell">%s</span></th>
+                <th><input id="%s" class="cell" type="%s" size="%s" name="%s" value="%s" class="xspan"></th>
+                ''' % (box[0],box[2],box[4],box[1],box[2],box[3])
+        otherfields += '</tr>'
 
     else:
         otherfields = '''
@@ -2701,17 +2809,16 @@ function formSubmit(location)
     document.getElementById('lo.location1').value = location
     document.getElementById('lo.location2').value = location
     //document.getElementById('actionbutton').value = "Next"
-    document.forms['sysinv'].submit();
+    document.forms['ucbwebapp'].submit();
 }
 </script>
 </head>
 <body>
-<form id="sysinv" enctype="multipart/form-data" method="post">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<form id="ucbwebapp" enctype="multipart/form-data" method="post">
+<table cellpadding="0" cellspacing="0" border="0">
   <tbody><tr><td width="2%">&nbsp;</td>
-  <td align="center">
-  <div id="sidiv" style="position:relative;width:1000px;height:750px;">
-    <table width="100%">
+  <td>
+    <table>
     <tbody>
       <tr>
 	<td class="cell" style="width: 500px; color: #000000; font-size: 32px; font-weight: bold;">''' + apptitle + '''</td>
@@ -2734,7 +2841,7 @@ function formSubmit(location)
       </tr>
       <tr><td colspan="5"><hr/></td></tr>
       <tr><th colspan="5">
-    <table>
+    <table width="100%">
         <tr>
         <th>
         <table>
@@ -2743,9 +2850,9 @@ function formSubmit(location)
         </th>
         <td style="width:80px;text-align:center;">''' + button + '''</td>
         </tr>
-        </table>
-      </th></tr>
-      <tr><td colspan="5"><div id="status"><hr/></div></td></tr>
+    </table>
+    </th></tr>
+    <tr><td colspan="5"><div id="status"><hr/></div></td></tr>
     </tbody>
     </table>
     <input type="hidden" name="csusername" value="''' + username + '''">
@@ -2807,7 +2914,7 @@ d.innerHTML = '&nbsp;';
 	});
 });'''
     return '''
-  <table width="100%">
+  <table>
     <tbody>
     <tr>
       <td width="80px"><input id="checkbutton" class="cell" type="submit" value="check server" name="check"></td>
@@ -2819,7 +2926,6 @@ d.innerHTML = '&nbsp;';
     </tr>
     </tbody>
   </table>
-</div>
 </td><td width="2%">&nbsp;</td></tr>
 </tbody></table>
 </form>
@@ -2954,6 +3060,7 @@ if __name__ == "__main__":
     hostname = config.get('connect', 'hostname')
     username = config.get('connect', 'username')
     password = config.get('connect', 'password')
+    institution = config.get('info', 'institution')
 
     #print lmiPayload(f)
     #print relationsPayload(f)
@@ -3030,7 +3137,7 @@ if __name__ == "__main__":
         print loc
 
     print '\nobjects\n'
-    rows = cswaDB.getlocations('Kroeber, 20A, CC  4', '', 3, config, 'keyinfo')
+    rows = cswaDB.getlocations('Kroeber, 20A, CC  4', '', 3, config, 'keyinfo','pahma')
     for r in rows:
         print r
 

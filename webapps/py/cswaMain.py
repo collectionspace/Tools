@@ -73,6 +73,7 @@ try:
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
             elif updateType == 'upload':       uploadFile(actualform,form,config)
             elif updateType == 'governmentholdings': doListGovHoldings(form, config)
+            elif updateType == 'intake':       doCommitIntake(form, config)
             elif updateType == 'editrel':      doRelationsEdit(form,config)
             elif updateType == 'makegroup':    makeGroup(form,config)
             elif action == "Recent Activity":
@@ -105,6 +106,7 @@ try:
             elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)
             elif updateType == 'makegroup':    doComplexSearch(form,config,'select')
+            elif updateType == 'intake':       doSetupIntake(form, config)
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)

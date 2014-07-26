@@ -31,8 +31,56 @@ def dbtransaction(command, config):
     cursor.execute(command)
 
 
-def setquery(type, location, qualifier):
+def setquery(type, location, qualifier, institution):
+
     if type == 'inventory':
+
+        if institution == 'bampfa':
+            return """
+            SELECT distinct on (locationkey,h3.name)
+l.termdisplayName AS storageLocation,
+regexp_replace(l.termdisplayName,' ','0') AS locationkey,
+m.locationdate,
+cc.objectnumber objectnumber,
+cc.numberofobjects objectCount,
+(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
+rc.subjectcsid movementCsid,
+lc.refname movementRefname,
+rc.objectcsid  objectCsid,
+''  objectRefname,
+m.id moveid,
+rc.subjectdocumenttype,
+rc.objectdocumenttype,
+cc.objectnumber sortableobjectnumber,
+'' AS crateRefname,
+'' AS crate
+
+FROM loctermgroup l
+
+join hierarchy h1 on l.id = h1.id
+join locations_common lc on lc.id = h1.parentid
+join movements_common m on m.currentlocation = lc.refname
+
+join hierarchy h2 on m.id = h2.id
+join relations_common rc on rc.subjectcsid = h2.name
+
+join hierarchy h3 on rc.objectcsid = h3.name
+join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
+
+left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name = 'collectionobjects_common:objectNameList' and h5.pos=0)
+left outer join objectnamegroup ong on (ong.id=h5.id)
+
+join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
+
+WHERE
+   l.termdisplayName = '""" + str(location) + """'
+
+ORDER BY locationkey,h3.name desc
+
+            """
+
+        # else:
+
         return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  
@@ -327,7 +375,7 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id) """
 # mc.reasonformove = 'Dead'.
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
-def getlocations(location1, location2, num2ret, config, updateType):
+def getlocations(location1, location2, num2ret, config, updateType, institution):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -337,7 +385,7 @@ def getlocations(location1, location2, num2ret, config, updateType):
     result = []
 
     for loc in getloclist('set', location1, '', num2ret, config):
-        getobjects = setquery(updateType, loc[0], '')
+        getobjects = setquery(updateType, loc[0], '', institution)
 
         try:
             elapsedtime = time.time()
@@ -377,7 +425,7 @@ def getplants(location1, location2, num2ret, config, updateType, qualifier):
     result = []
 
     #for loc in getloclist('set',location1,'',num2ret,config):
-    getobjects = setquery(updateType, location1, qualifier)
+    getobjects = setquery(updateType, location1, qualifier, 'ucbg')
     #print "<span>%s</span>" % getobjects
     try:
         elapsedtime = time.time()
@@ -958,7 +1006,7 @@ if __name__ == "__main__":
     print '\nkeyinfo\n'
     # Kroeber, 20A, X  1,  1
     # Kroeber, 20AMez, 128 A
-    for i, loc in enumerate(getlocations('Kroeber, 20A, X  1,  3', '', 1, config, 'keyinfo')):
+    for i, loc in enumerate(getlocations('Kroeber, 20A, X  1,  3', '', 1, config, 'keyinfo','pahma')):
         print 'location', i + 1, loc[0:12]
 
     sys.exit()
@@ -986,14 +1034,9 @@ if __name__ == "__main__":
         print loc
 
     print '\nobjects\n'
-    #for loc in getlocations('no location entered',1):
-    #for i,loc in enumerate(getlocations('Regatta, A150, Cat. 3 cabinet  1 A,  4',1,config)):
-    #for i,loc in enumerate(getlocations('Kroeber, 20A, W 23,  9',1,config,'inventory')):
-    #for i,loc in enumerate(getlocations('Regatta, A150, RiveTier 27, C',1,config,'inventory')):
-    #for i,loc in enumerate(getlocations('Kroeber, 20AMez, 128 A','',1,config,'inventory')):
-    for i, loc in enumerate(getlocations('Regatta, A150, South Nexel Unit 6, C', '', 1, config, 'inventory')):
+    for i, loc in enumerate(getlocations('Regatta, A150, South Nexel Unit 6, C', '', 1, config, 'inventory','pahma')):
         print 'location', i + 1, loc[0:6]
 
     print '\nkeyinfo\n'
-    for i, loc in enumerate(getlocations('Kroeber, 20AMez, 128 A', '', 1, config, 'keyinfo')):
+    for i, loc in enumerate(getlocations('Kroeber, 20AMez, 128 A', '', 1, config, 'keyinfo','pahma')):
         print 'location', i + 1, loc[0:12]
