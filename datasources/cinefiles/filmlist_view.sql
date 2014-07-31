@@ -1,6 +1,7 @@
 -- filmlist_view.sql, used in cinefiles_denorm
 -- gets concatenated strings for repeating information insteaad of cartesian products
 -- CRH 2/23/2014
+-- CRH 7/31/2014 adding production company identifiers for Mediatrope
 
 -- drop table cinefiles_denorm.filmlist_view
 
@@ -19,7 +20,8 @@ SELECT
    fps.filmprodcos prodco,
    fss.filmsubjects subject,
    fgs.filmgenres genre,
-   fts.filmtitles title
+   fts.filmtitles title,
+   fpids.filmprodcoids prodco_id
 FROM
    hierarchy h1
    INNER JOIN works_common wc
@@ -40,6 +42,7 @@ FROM
    LEFT OUTER JOIN cinefiles_denorm.filmtitlestring fts on (wc.shortidentifier=fts.filmid)
    LEFT OUTER JOIN cinefiles_denorm.filmprodcostring fps on (wc.shortidentifier=fps.filmid)
    LEFT OUTER JOIN cinefiles_denorm.filmdoccount fdc on (wc.shortidentifier=fdc.filmid)
+   LEFT OUTER JOIN cinefiles_denorm.filmprodcoidstring fpids on (wc.shortidentifier=fpids.filmid)   
 where fdc.doccount is not null
 order by wc.shortidentifier;
 

@@ -1,5 +1,6 @@
 -- doclist_view, used in CineFiles denorm as primary source for searching documents
 -- CRH 2/23/2014
+-- CRH 7/31/2014 adding doc author ids for Mediatrope
 
 -- drop table cinefiles_denorm.doclist_view;
 
@@ -14,7 +15,7 @@ select
    cinefiles_denorm.getdispl(cc.source) source,
    cinefiles_denorm.getshortid(cc.source) src_id,
    das.docauthors author,
-   2 as name_id, -- not used?
+   daids.docauthorids as name_id, -- not used?
    dls.doclanguages doclanguage,
    sdg.datedisplaydate pubdate, 
   case when (cc.accesscode is null or cc.accesscode = '') 
@@ -79,6 +80,8 @@ from
       ON (cast(co.objectnumber as bigint) = dss.doc_id)
    LEFT OUTER JOIN cinefiles_denorm.docnamesubjectstring dnss
       ON (cast(co.objectnumber as bigint) = dnss.doc_id)
+   LEFT OUTER JOIN cinefiles_denorm.docauthoridstring daids
+      ON (cast(co.objectnumber as bigint) = daids.doc_id)
 WHERE (co.objectnumber ~ '^[0-9]+$' ) and co.recordstatus='approved'
 order by cast(co.objectnumber as bigint);
 
