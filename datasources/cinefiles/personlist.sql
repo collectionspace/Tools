@@ -16,3 +16,4 @@ where misc.lifecyclestate <> 'deleted'
 order by personname;
 
 grant select on cinefiles_denorm.personlist to group reporters;
+grant select on cinefiles_denorm.personlist to group cinereaders;

@@ -22,3 +22,4 @@ where misc.lifecyclestate <> 'deleted'
 order by orgname;
 
 grant select on cinefiles_denorm.organizationlist to group reporters;
+grant select on cinefiles_denorm.organizationlist to group cinereaders;
