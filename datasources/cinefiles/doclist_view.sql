@@ -1,6 +1,6 @@
 -- doclist_view, used in CineFiles denorm as primary source for searching documents
 -- CRH 2/23/2014
--- CRH 7/31/2014 adding doc author ids for Mediatrope
+-- CRH 7/31/2014 adding doc author ids and updatedaat for Mediatrope
 
 -- drop table cinefiles_denorm.doclist_view;
 
@@ -15,7 +15,7 @@ select
    cinefiles_denorm.getdispl(cc.source) source,
    cinefiles_denorm.getshortid(cc.source) src_id,
    das.docauthors author,
-   daids.docauthorids as name_id, -- not used?
+   daids.docauthorids as name_id,
    dls.doclanguages doclanguage,
    sdg.datedisplaydate pubdate, 
   case when (cc.accesscode is null or cc.accesscode = '') 
@@ -50,7 +50,8 @@ select
    sdg.dateearliestscalarvalue pubdatescalar,
    wag.webaddress srcUrl,
    dss.docsubjects docsubject,
-   dnss.docnamesubjects docnamesubject
+   dnss.docnamesubjects docnamesubject,
+   core.updatedat
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co
@@ -82,7 +83,9 @@ from
       ON (cast(co.objectnumber as bigint) = dnss.doc_id)
    LEFT OUTER JOIN cinefiles_denorm.docauthoridstring daids
       ON (cast(co.objectnumber as bigint) = daids.doc_id)
+   INNER JOIN collectionspace_core core on co.id=core.id
 WHERE (co.objectnumber ~ '^[0-9]+$' ) and co.recordstatus='approved'
 order by cast(co.objectnumber as bigint);
 
 grant select on cinefiles_denorm.doclist_view to group reporters;
+grant select on cinefiles_denorm.doclist_view to group cinereaders;
