@@ -1,10 +1,8 @@
 -- create in cinefiles_domain database, cinefiles_denorm schema
 
 CREATE OR REPLACE FUNCTION cinefiles_denorm.concat_worktitles (shortid VARCHAR)
-RETURNS VARCHAR
-AS
+RETURNS VARCHAR AS
 $$
-
 DECLARE
     titlestring VARCHAR(1000);
     preftitle VARCHAR(500);
@@ -12,9 +10,7 @@ DECLARE
     prefcount INTEGER;
     englcount INTEGER;
     errormsg VARCHAR(500);
-
 BEGIN
-
 select into prefcount count(*)
 from works_common wc
 inner join hierarchy hwc on (
@@ -96,5 +92,4 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
-GRANT EXECUTE ON FUNCTION concat_worktitles (filmid VARCHAR) TO PUBLIC;
-
+GRANT EXECUTE ON FUNCTION cinefiles_denorm.concat_worktitles (filmid VARCHAR) TO PUBLIC;
