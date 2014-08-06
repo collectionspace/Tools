@@ -1,0 +1,33 @@
+# A list of sql scripts executed by cinefiles_denorm_nightly,
+# creating new cinefiles_denorm tables. The scripts create
+# temporary tables with "tmp" appended to the table name.
+# After all of the temporary tables have been created, they
+# are checked, the old tables are dropped and the temporary
+# tables are renamed to replace them.
+
+persontermgroup.sql
+alldoctitles_view.sql
+allfilmtitles_view.sql
+docsubjects_view.sql
+filmdoccount.sql
+filmdocs.sql
+filmgenres.sql
+docnamesubjectcitation.sql
+docauthorstring.sql
+doclanguagestring.sql
+docnamesubjectstring.sql
+docsubjectstring.sql
+filmcountrystring.sql
+filmdirectoridstring.sql
+filmdirectorstring.sql
+filmgenrestring.sql
+filmlanguagestring.sql
+filmprodcostring.sql
+filmsubjectstring.sql
+filmtitlestring.sql
+doclist_view.sql
+filmlist_view.sql
+docauthoridstring.sql
+filmprodcoidstring.sql
+organizationlist.sql
+personlist.sql
