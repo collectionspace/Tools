@@ -34,6 +34,19 @@
 # 
 # EXAMPLES
 #
+# this script fetches a report that takes no parameters (e.g. ucbgVoucherLabel) using a dummy payload
+#
+# takes the csid of the report and the name of a pdf file to create.
+#
+$ ./fr.sh de1f82ab-a9b2-4c7b-a4b9 voucherlabel.pdf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  209k    0  209k  125   250  25899     30  0:00:08  0:00:08 --:--:-- 50492
+
+$ ls -ltr | tail -1
+-rw-r--r--  1 jblowe  staff  214744 Aug 18 13:24 voucherlabel.pdf
+
+
 # script to set environment variables.
 # this should be customized for the systems you are using.
 
