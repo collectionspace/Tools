@@ -35,5 +35,6 @@
     <core name="ucjeps-metadata" instanceDir="ucjeps/metadata" />
     <core name="botgarden-images" instanceDir="botgarden/images" />
     <core name="botgarden-metadata" instanceDir="botgarden/metadata" />
+    <core name="botgarden-propagations" instanceDir="botgarden/propagations" />
   </cores>
 </solr>
