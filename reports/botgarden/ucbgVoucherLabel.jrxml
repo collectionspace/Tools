@@ -26,7 +26,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="115" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{collectioninfo}]]></textFieldExpression>
@@ -34,7 +34,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="49" width="267" height="14" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
@@ -42,7 +42,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="196" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{annotation}]]></textFieldExpression>
@@ -50,7 +50,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="93" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{fieldcollectionnote}]]></textFieldExpression>
@@ -58,7 +58,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="137" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchertype}]]></textFieldExpression>
@@ -66,7 +66,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="152" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchercollectioninfo}]]></textFieldExpression>
@@ -74,7 +74,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="71" width="267" height="14" isPrintWhenDetailOverflows="true"/>
                                 <textElement markup="html">
-
+                                        <font fontName="Serif" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{determinationformatted}]]></textFieldExpression>
@@ -85,14 +85,14 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="FixRelativeToBottom" x="31" y="273" width="200" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement textAlignment="Center" verticalAlignment="Bottom">
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchernumber}]]></textFieldExpression>
                         </textField>
                         <textField>
                                 <reportElement x="0" y="10" width="267" height="20"/>
                                 <textElement textAlignment="Center">
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
                         </textField>
@@ -105,7 +105,7 @@
                         <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                                 <reportElement positionType="Float" x="0" y="174" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
                                 <textElement>
-
+                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
                                         <paragraph spacingBefore="2"/>
                                 </textElement>
                                 <textFieldExpression class="java.lang.String"><![CDATA[$F{gardeninfo}]]></textFieldExpression>
@@ -113,3 +113,4 @@
                 </band>
         </detail>
 </jasperReport>
+
