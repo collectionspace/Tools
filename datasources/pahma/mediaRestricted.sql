@@ -1,5 +1,5 @@
-SELECT h2.name AS "objectcsid", cc.objectnumber, 'd301293f-1a53-4d4e-a95d' AS "mediacsid", mc.description, '59a733dd-d641-4e1a-8552' AS "bc.name", mc.creator creatorRefname, REGEXP_REPLACE(mc.creator, '^.*\)''(.*)''$', '\1') AS "creator", 
-mc.blobcsid, mc.copyrightstatement, mc.identificationnumber, mc.rightsholder rightsholderRefname, REGEXP_REPLACE(mc.rightsholder, '^.*\)''(.*)''$', '\1') AS "rightsholder",
+SELECT h2.name AS "objectcsid", cc.objectnumber, 'd301293f-1a53-4d4e-a95d' AS "mediacsid", mc.description, bc.name AS filename, mc.creator creatorRefname, REGEXP_REPLACE(mc.creator, '^.*\)''(.*)''$', '\1') AS "creator", 
+'59a733dd-d641-4e1a-8552' AS blobcsid, mc.copyrightstatement, mc.identificationnumber, mc.rightsholder rightsholderRefname, REGEXP_REPLACE(mc.rightsholder, '^.*\)''(.*)''$', '\1') AS "rightsholder",
 mc.contributor, mp.approvedforweb, 'notcard' AS "imageType"
 
 FROM media_common mc

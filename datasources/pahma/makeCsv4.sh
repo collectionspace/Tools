@@ -11,9 +11,9 @@ HOST=$1
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
-time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaApprovedForWeb.sql -o m1.csv &
-time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaRestricted.sql -o m2.csv &
-time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaCatalogCards.sql -o m3.csv &
+time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaApprovedForWeb.sql -o m1.csv
+time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaRestricted.sql -o m2.csv
+time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaCatalogCards.sql -o m3.csv
 
 # cleanup newlines and crlf in data, then switch record separator.
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > 4solr.$HOST.mediaApprovedForWeb.csv
