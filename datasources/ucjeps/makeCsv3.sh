@@ -17,7 +17,7 @@ time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv | perl fixdate.pl > d7.csv
 cat metadataHeaderV3.csv d7.csv > 4solr.$HOST.metadata.csv
-rm d6.csv d7.csv
+rm d6.csv d7.csv m1.csv d1.csv d3.csv
 wc -l *.csv
 # clear out the existing data
 curl "http://localhost:8983/solr/ucjeps-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
