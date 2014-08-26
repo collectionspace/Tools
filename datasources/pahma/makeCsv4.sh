@@ -6,15 +6,21 @@
 # prep them for load into Solr4 using the "csv datahandler"
 ##############################################################################
 date
-#cd /home/developers/pahma
+cd /home/developers/pahma
 HOST=$1
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
-time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f media.sql -o m1.csv
+time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaApprovedForWeb.sql -o m1.csv &
+time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaRestricted.sql -o m2.csv &
+time psql -F '	' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f mediaCatalogCards.sql -o m3.csv &
+
 # cleanup newlines and crlf in data, then switch record separator.
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > 4solr.$HOST.media.csv
-rm m1.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > 4solr.$HOST.mediaApprovedForWeb.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m2.csv > 4solr.$HOST.mediaRestricted.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m3.csv > 4solr.$HOST.mediaCatalogCards.csv
+rm m1.csv m2.csv m3.csv
+cat 4solr.$HOST.mediaApprovedForWeb.csv 4solr.$HOST.mediaRestricted.csv > 4solr.$HOST.media.csv
 ##############################################################################
 # start the stitching process: extract the "basic" data
 ##############################################################################

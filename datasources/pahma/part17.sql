@@ -1,7 +1,7 @@
 SELECT cc.id, REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\1') AS "objfcp_s",
 geo.decimallatitude || ', ' || geo.decimallongitude AS "objfcpgeoloc_p",
 pc.velevation AS "objfcpelevation_s",
-utils.placename_hierarchy.csid_hierarchy AS "objfcptree_s"
+utils.placename_hierarchy.place_hierarchy AS "objfcptree_s"
 FROM collectionobjects_common cc
 JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (fcp.id=cc.id AND (fcp.pos=0 OR fcp.pos IS NULL))
 JOIN places_common pc ON (pc.shortidentifier=REGEXP_REPLACE(fcp.item, '^.*item:name\((.*)\)''.*', '\1'))
