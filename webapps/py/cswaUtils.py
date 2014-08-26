@@ -9,6 +9,7 @@ import copy
 import csv
 import codecs
 import ConfigParser
+import collections
 
 import time, datetime
 import httplib, urllib2
@@ -228,6 +229,57 @@ def doLocationSearch(form, config, displaytype):
 
     if len(rows) != 0: getTableFooter(config, displaytype)
 
+
+
+def doProcedureSearch(form, config, displaytype):
+    if not validateParameters(form, config): return
+
+    updateType = config.get('info', 'updatetype')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    if updateType == 'intake':
+        crate = verifyLocation(form.get("lo.crate"), form, config)
+        toLocation = verifyLocation(form.get("lo.location1"), form, config)
+
+        if str(form.get("lo.crate")) != '' and crate == '':
+            print '<span style="color:red;">Crate is not valid! Sorry!</span><br/>'
+        if toLocation == '':
+            print '<span style="color:red;">Destination is not valid! Sorry!</span><br/>'
+        if (str(form.get("lo.crate")) != '' and crate == '') or toLocation == '':
+            return
+
+        toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+        toCrate = cswaDB.getrefname('locations_common', crate, config)
+
+    try:
+        rows = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 500, config)
+    except:
+        raise
+
+    if len(rows) == 0:
+        print '<span style="color:red;">No objects in this range! Sorry!</span>'
+    else:
+        totalobjects = 0
+        if updateType == 'objinfo':
+            print cswaConstants.infoHeaders(form.get('fieldset'))
+        else:
+            print cswaConstants.getHeader(updateType)
+        for r in rows:
+            totalobjects += 1
+            print formatRow({'rowtype': updateType, 'data': r}, form, config)
+
+        print '\n</table><hr/><table width="100%"'
+        print """<tr><td align="center" colspan="3">"""
+        msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+        print "\n</table><hr/>"
+
+        if updateType == 'moveobject':
+            print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+            print '<input type="hidden" name="toCrate" value="%s">' % toCrate
+            print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
+
+            #if len(rows) != 0: getTableFooter(config,displaytype)
 
 def doObjectSearch(form, config, displaytype):
     if not validateParameters(form, config): return
@@ -1065,8 +1117,17 @@ def doAuthorityScan(form, config):
     #   print '<tr><td width="500px"><h2>%s locations will be listed for %s.</h2></td></tr>' % (rowcount,showTaxon)
 
     print cswaConstants.getHeader(updateType)
+    counts = {}
+    statistics = { 'Total items': 'totalobjects',
+                   'Accessions': 0,
+                   'Unique taxonomic names': 1,
+                   'Unique species': 'species',
+                   'Unique genera': 'genus'
+    }
+    for s in statistics.keys():
+        counts[s] = cswaConstants.Counter()
+
     totalobjects = 0
-    accessions = {}
     for t in objects:
         if t[column] in tList:
             if updateType in ['locreport','holdings'] and checkMembership(t[7], rare) and checkMembership(t[8], dead):
@@ -1076,14 +1137,34 @@ def doAuthorityScan(form, config):
                     pass
                 print formatRow({'rowtype': updateType, 'data': t}, form, config)
                 totalobjects += 1
+                countStuff(statistics,counts,t,totalobjects)
 
     #print '\n'.join(accessions)
-    print """</table><table>"""
-    print """<tr><td align="center">&nbsp;</tr>"""
-    print """<tr><td align="center"><hr></tr>"""
-    print """<tr><td align="center">Report completed. %s objects displayed</td></tr>""" % (totalobjects)
+    print """</table>"""
+    print """<hr/>"""
+    print """<table width="100%">"""
+    print """<tr><td colspan="2"><b>Summary Statistics</b></tr>"""
+
+    for s in sorted(statistics.keys()):
+        print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
+
+    #print """<tr><td align="center">Report completed.</td></tr>"""
     print "\n</table><hr/>"
 
+def countStuff(statistics,counts,data,totalobjects):
+    for s in statistics.keys():
+        x = counts[s]
+        if statistics[s] == 'totalobjects':
+            x[totalobjects] += 1
+        elif statistics[s] == 'genus':
+            parts = data[1].split(' ')
+            x[parts[0]] += 1
+        elif statistics[s] == 'species':
+            parts = data[1].split(' ex ')
+            parts = parts[0].split(' var. ')
+            x[parts[0]] += 1
+        else:
+            x[data[statistics[s]]] += 1
 
 def downloadCsv(form, config):
     updateType = config.get('info', 'updateType')
@@ -2759,6 +2840,11 @@ def starthtml(form, config):
     elif updateType == 'intake':
 
         fielddescription = cswaConstants.getIntakeFields('intake')
+
+        button = '''
+            <input id="actionbutton" class="save" type="submit" value="Start Intake" name="action">
+            <input id="actionbutton" class="save" type="submit" value="View Intakes" name="action"><br/>
+            '''
 
         otherfields = '<tr>'
         for i,box in enumerate(fielddescription):

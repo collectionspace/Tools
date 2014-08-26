@@ -60,6 +60,10 @@ try:
             doEnumerateObjects(form,config)
         elif action == "Create Labels for Locations Only":
             doBarCodes(form,config)
+        elif action == "Start Intake":
+            doSetupIntake(form, config)
+        elif action == "View Intakes":
+            doProcedureSearch(form, config)
         elif action == config.get('info','updateactionlabel'):
             if   updateType == 'packinglist':  doPackingList(form,config)
             elif updateType == 'movecrate':    doUpdateLocations(form,config)
@@ -106,7 +110,6 @@ try:
             elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)
             elif updateType == 'makegroup':    doComplexSearch(form,config,'select')
-            elif updateType == 'intake':       doSetupIntake(form, config)
 
         elif action == "View Hierarchy":
             doHierarchyView(form,config)
