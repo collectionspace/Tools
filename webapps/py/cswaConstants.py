@@ -26,7 +26,7 @@ img#logo { float:left; height:50px; padding:10px 10px 10px 10px;}
 .ncell { line-height: 1.0; cell-padding: 2px; font-size: 16px;}
 .zcell { min-width:250px; cell-padding: 2px; font-size: 16px;}
 .shortcell { width:180px; cell-padding: 2px; font-size: 16px;}
-.objname { font-weight: bold; font-size: 16px; font-style: italic; width:200px; }
+.objname { font-weight: bold; font-size: 16px; font-style: italic; min-width:200px; }
 .objno { font-weight: bold; font-size: 16px; font-style: italic; width:160px; }
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
 .rdo { text-align: center; width:60px; }
@@ -452,7 +452,7 @@ def getIntakeFields(fieldset):
             ]
 
 
-def getHeader(updateType):
+def getHeader(updateType, institution):
     if updateType == 'inventory':
         return """
     <table><tr>
@@ -472,6 +472,19 @@ def getHeader(updateType):
       <th>Notes</th>
     </tr>"""
     elif updateType == 'packinglist':
+
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>Museum #</th>
+      <th style="width:150px;">Title</th>
+      <th>Artist</th>
+      <th>Medium</th>
+      <th>Dimensions</th>
+      <th>Credit Line</th>
+    </tr>
+        """
+
         return """
     <table><tr>
       <th>Museum #</th>
@@ -816,8 +829,10 @@ if __name__ == "__main__":
     result += '<h2>Dropdowns</h2><table border="1">'
     result += handleResult(getAppOptions('pahma'),'getAppOptions')
     result += handleResult(getAltNumTypes(form, 'test-csid', 'attributed pahma number'),'getAltNumTypes')
-    result += handleResult(getHandlers(form),'getHandlers')
-    result += handleResult(getReasons(form),'getReasons')
+    result += handleResult(getHandlers(form,'bampfa'),'getHandlers: bampfa')
+    result += handleResult(getHandlers(form,''),'getHandlers')
+    result += handleResult(getReasons(form,'bampfa'),'getReasons:bampfa')
+    result += handleResult(getReasons(form,''),'getReasons')
     result += handleResult(getPrinters(form),'getPrinters')
     result += handleResult(getFieldset(form),'getFieldset')
     result += handleResult(getHierarchies(form),'getHierarchies')
@@ -837,7 +852,7 @@ if __name__ == "__main__":
     result += '<h2>Headers</h2>'
     for h in 'inventory movecrate packinglist packinglistbyculture moveobject bedlist bedlistnone keyinfoResult objinfoResult inventoryResult barcodeprint barcodeprintlocations upload'.split(' '):
         result += '<h3>Header for %s</h3>' % h
-        header = getHeader(h)
+        header = getHeader(h,'')
         result += header.replace('<table', '<table border="1" ')
         result += '</table>'
 

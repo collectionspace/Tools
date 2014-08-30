@@ -37,16 +37,16 @@ def setquery(type, location, qualifier, institution):
 
         if institution == 'bampfa':
             return """
-            SELECT distinct on (locationkey,h3.name)
+            SELECT distinct on (locationkey,objectnumber,h3.name)
 l.termdisplayName AS storageLocation,
 regexp_replace(l.termdisplayName,' ','0') AS locationkey,
 m.locationdate,
 cc.objectnumber objectnumber,
 cc.numberofobjects objectCount,
-(case when ong.objectName is NULL then '' else ong.objectName end) objectName,
+tg.bampfatitle,
 rc.subjectcsid movementCsid,
 lc.refname movementRefname,
-rc.objectcsid  objectCsid,
+rc.subjectcsid  objectCsid,
 ''  objectRefname,
 m.id moveid,
 rc.subjectdocumenttype,
@@ -62,20 +62,20 @@ join locations_common lc on lc.id = h1.parentid
 join movements_common m on m.currentlocation = lc.refname
 
 join hierarchy h2 on m.id = h2.id
-join relations_common rc on rc.subjectcsid = h2.name
+join relations_common rc on rc.objectcsid = h2.name
 
-join hierarchy h3 on rc.objectcsid = h3.name
+join hierarchy h3 on rc.subjectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
-left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name = 'collectionobjects_common:objectNameList' and h5.pos=0)
-left outer join objectnamegroup ong on (ong.id=h5.id)
+join hierarchy h4 ON (cc.id = h4.parentid AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' AND (h4.pos = 0 OR h4.pos IS NULL))
+join bampfatitlegroup tg ON (h4.id = tg.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
 WHERE
    l.termdisplayName = '""" + str(location) + """'
 
-ORDER BY locationkey,h3.name desc
+ORDER BY locationkey,objectnumber asc
 
             """
 
@@ -201,6 +201,63 @@ LIMIT 6000"""
             # houston, we got a problem...query not qualified
 
     elif type == 'keyinfo' or type == 'barcodeprint' or type == 'packinglist':
+
+        if institution == 'bampfa':
+            return """
+            SELECT distinct on (location,objectnumber)
+l.termdisplayName AS location,
+cc.objectnumber AS objectnumber,
+h3.name,
+tg.bampfatitle AS Title,
+regexp_replace(pg.bampfaobjectproductionperson, '^.*\\)''(.*)''$', '\\1') AS Artist,
+regexp_replace(pg.bampfaobjectproductionpersonrole, '^.*\\)''(.*)''$', '\\1') AS ArtistRole,
+'medium' AS Medium,
+'dim' AS Dimensions,
+cc.collection AS Collection,
+cb.creditline AS CreditLine,
+cb.legalstatus AS LegalStatus,
+'dd MM YYYY' AS AcqDate,
+case when (bd.item is not null and bd.item <> '') then bd.item end AS briefdescription,
+cb.accNumberPrefix,
+cb.accNumberPart1 ,
+cb.accNumberPart2,
+cb.accNumberPart3,
+cb.accNumberPart4 ,
+cb.accNumberPart5 ,
+pg.bampfaobjectproductionperson AS Artistrefname,
+pg.bampfaobjectproductionpersonrole AS ArtistRolerefname
+
+FROM loctermgroup l
+
+join hierarchy h1 on l.id = h1.id
+join locations_common lc on lc.id = h1.parentid
+join movements_common m on m.currentlocation = lc.refname
+
+join hierarchy h2 on m.id = h2.id
+join relations_common rc on rc.objectcsid = h2.name
+
+join hierarchy h3 on rc.subjectcsid = h3.name
+
+join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
+join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
+join collectionobjects_bampfa cb on (cb.id=cc.id)
+
+join hierarchy h4 ON (cc.id = h4.parentid AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' AND (h4.pos = 0 OR h4.pos IS NULL))
+join bampfatitlegroup tg ON (h4.id = tg.id)
+
+left outer join hierarchy h5 ON (cc.id = h5.parentid AND h5.name = 'collectionobjects_bampfa:bampfaObjectProductionPersonGroupList' AND (h5.pos = 0 OR h5.pos IS NULL))
+left outer join bampfaobjectproductionpersongroup pg ON (h5.id = pg.id)
+
+join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
+
+WHERE
+   l.termdisplayName = '""" + str(location) + """'
+
+
+ORDER BY location,objectnumber asc
+LIMIT 30000
+            """
+
         return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  

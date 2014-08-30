@@ -235,6 +235,7 @@ def doProcedureSearch(form, config, displaytype):
     if not validateParameters(form, config): return
 
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     updateactionlabel = config.get('info', 'updateactionlabel')
 
     if updateType == 'intake':
@@ -263,7 +264,7 @@ def doProcedureSearch(form, config, displaytype):
         if updateType == 'objinfo':
             print cswaConstants.infoHeaders(form.get('fieldset'))
         else:
-            print cswaConstants.getHeader(updateType)
+            print cswaConstants.getHeader(updateType,institution)
         for r in rows:
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
@@ -285,6 +286,7 @@ def doObjectSearch(form, config, displaytype):
     if not validateParameters(form, config): return
 
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     updateactionlabel = config.get('info', 'updateactionlabel')
 
     if updateType == 'moveobject':
@@ -313,7 +315,7 @@ def doObjectSearch(form, config, displaytype):
         if updateType == 'objinfo':
             print cswaConstants.infoHeaders(form.get('fieldset'))
         else:
-            print cswaConstants.getHeader(updateType)
+            print cswaConstants.getHeader(updateType,institution)
         for r in rows:
             totalobjects += 1
             print formatRow({'rowtype': updateType, 'data': r}, form, config)
@@ -482,7 +484,7 @@ def doEnumerateObjects(form, config):
     if updateType == 'keyinfo' or updateType == 'objinfo':
         print cswaConstants.infoHeaders(form.get('fieldset'))
     else:
-        print cswaConstants.getHeader(updateType)
+        print cswaConstants.getHeader(updateType,institution)
     totalobjects = 0
     totallocations = 0
     for l in locationList:
@@ -607,7 +609,7 @@ def doCheckMove(form, config):
         print '<span style="color:red;">Did not find this crate at this location! Sorry!</span>'
         return
 
-    print cswaConstants.getHeader(updateType)
+    print cswaConstants.getHeader(updateType,institution)
     for header in locs:
         print header
         print '\n'.join(locations[header])
@@ -711,12 +713,13 @@ def doBulkEditForm(form, config, displaytype):
 def doSetupIntake(form, config):
 
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     updateactionlabel = config.get('info', 'updateactionlabel')
 
     print '<table width="100%">'
     print formatRow({'rowtype': 'subheader', 'data': ['Intake Values']}, form, config)
 
-    print cswaConstants.getHeader('intakeValues')
+    print cswaConstants.getHeader('intakeValues',institution)
 
     # get numbobjects
     numobjects = 1
@@ -816,8 +819,9 @@ def doUpdateKeyinfo(form, config):
 def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
 
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
 
-    print cswaConstants.getHeader('keyinfoResult')
+    print cswaConstants.getHeader('keyinfoResult',institution)
 
     #for r in refNames2find:
     #    print '<tr><td>%s<td>%s<td>%s</tr>' % ('refname',refNames2find[r],r)
@@ -921,9 +925,11 @@ def doNothing(form, config):
 
 
 def doUpdateLocations(form, config):
+
+    institution = config.get('info','institution')
     updateValues = [form.get(i) for i in form if 'r.' in i]
 
-    print cswaConstants.getHeader('inventoryResult')
+    print cswaConstants.getHeader('inventoryResult',institution)
 
     numUpdated = 0
     for row, object in enumerate(updateValues):
@@ -1014,7 +1020,7 @@ def doPackingList(form, config):
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
         return
 
-    print cswaConstants.getHeader(updateType)
+    print cswaConstants.getHeader(updateType,institution)
     totalobjects = 0
     totallocations = 0
     locations = {}
@@ -1079,6 +1085,7 @@ def doPackingList(form, config):
 def doAuthorityScan(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     if not validateParameters(form, config): return
 
     dead,rare,qualifier = setFilters(form)
@@ -1116,7 +1123,7 @@ def doAuthorityScan(form, config):
     #   if showTaxon == '' : showTaxon = 'all Taxons in this range'
     #   print '<tr><td width="500px"><h2>%s locations will be listed for %s.</h2></td></tr>' % (rowcount,showTaxon)
 
-    print cswaConstants.getHeader(updateType)
+    print cswaConstants.getHeader(updateType,institution)
     counts = {}
     statistics = { 'Total items': 'totalobjects',
                    'Accessions': 0,
@@ -1224,9 +1231,9 @@ def doBarCodes(form, config):
     if not validateParameters(form, config): return
 
     if action == "Create Labels for Locations Only":
-        print cswaConstants.getHeader('barcodeprintlocations')
+        print cswaConstants.getHeader('barcodeprintlocations',institution)
     else:
-        print cswaConstants.getHeader(updateType)
+        print cswaConstants.getHeader(updateType,institution)
 
     totalobjects = 0
     #If the museum number field has input, print by object
@@ -1314,6 +1321,7 @@ def setFilters(form):
 def doAdvancedSearch(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     groupby = form.get('groupby')
 
     if not validateParameters(form, config): return
@@ -1334,7 +1342,7 @@ def doAdvancedSearch(form, config):
     except:
         raise
 
-    print cswaConstants.getHeader(updateType)
+    print cswaConstants.getHeader(updateType,institution)
     #totalobjects = 0
     accessions = []
     for t in objects:
@@ -1359,6 +1367,7 @@ def checkMembership(item, qlist):
 def doBedList(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
     groupby = form.get('groupby')
 
     if not validateParameters(form, config): return
@@ -1374,7 +1383,7 @@ def doBedList(form, config):
     rowcount = len(rows)
     totalobjects = 0
     if groupby == 'none':
-        print cswaConstants.getHeader(updateType + groupby)
+        print cswaConstants.getHeader(updateType + groupby, institution)
     else:
         print '<table>'
     rows.sort()
@@ -1395,7 +1404,7 @@ def doBedList(form, config):
             else:
                 print formatRow({'rowtype': 'subheader', 'data': [l, ]}, form, config)
                 print '<tr><td colspan="6">'
-                print cswaConstants.getHeader(updateType + groupby if groupby == 'none' else updateType) % headerid
+                print cswaConstants.getHeader(updateType + groupby if groupby == 'none' else updateType, institution) % headerid
 
         for r in objects:
             #print "<tr><td>%s<td>%s</tr>" % (len(places),r[6])
@@ -1618,7 +1627,7 @@ def processTricoderFile(barcodefile, form, config):
     id2ref = cswaConstants.tricoderUsers()
 
     try:
-        #print cswaConstants.getHeader('upload')
+        #print cswaConstants.getHeader('upload','')
 
         numUpdated = 0
 
@@ -2049,6 +2058,18 @@ def formatRow(result, form, config):
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return formatInfoReviewRow(form, link, rr, link2)
     elif result['rowtype'] == 'packinglist':
+        if institution == 'bampfa':
+            link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[2]
+            return """
+            <tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname" name="ti.%s">%s</td>
+<td class="ncell" name="ar.%s">%s</td>
+<td class="ncell" name="me.%s">%s</td>
+<td class="ncell" name="di.%s">%s</td>
+<td class="ncell" name="cl.%s">%s</td>
+</tr>""" % (link, rr[1], rr[2], rr[3], rr[2], rr[4], rr[2], rr[6], rr[2], rr[7], rr[2], rr[9])
+
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
@@ -2809,14 +2830,17 @@ def starthtml(form, config):
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
 
     elif updateType == 'packinglist' or updateType == 'packinglistbyculture':
-        place = str(form.get('cp.place')) if form.get('cp.place') else ''
-        otherfields += '''
+        if institution == 'bampfa':
+            pass
+        else:
+            place = str(form.get('cp.place')) if form.get('cp.place') else ''
+            otherfields += '''
 	  <tr><th><span class="cell">collection place:</span></th>
 	  <th><input id="cp.place" class="cell" type="text" size="40" name="cp.place" value="''' + place + '''" class="xspan"></th>'''
-        otherfields += '''
+            otherfields += '''
           <th><span class="cell">group by culture </span></th>
 	  <th><input id="groupbyculture" class="cell" type="checkbox" name="groupbyculture" value="groupbyculture" class="xspan"></th</tr>'''
-        if form.get('groupbyculture'): otherfields = otherfields.replace('value="groupbyculture"',
+            if form.get('groupbyculture'): otherfields = otherfields.replace('value="groupbyculture"',
                                                                          'checked value="groupbyculture"')
 
     elif updateType == 'upload':
