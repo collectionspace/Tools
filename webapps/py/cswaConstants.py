@@ -454,7 +454,17 @@ def getIntakeFields(fieldset):
 
 def getHeader(updateType, institution):
     if updateType == 'inventory':
-        return """
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>ID number </th>
+      <th>Title</th>
+      <th>Found</th>
+      <th style="width:60px; text-align:center;">Not Found</th>
+      <th>Notes</th>
+    </tr>"""
+        else:
+            return """
     <table><tr>
       <th>Museum #</th>
       <th>Object name</th>
@@ -476,7 +486,7 @@ def getHeader(updateType, institution):
         if institution == 'bampfa':
             return """
     <table><tr>
-      <th>Museum #</th>
+      <th>ID number</th>
       <th style="width:150px;">Title</th>
       <th>Artist</th>
       <th>Medium</th>
@@ -484,8 +494,8 @@ def getHeader(updateType, institution):
       <th>Credit Line</th>
     </tr>
         """
-
-        return """
+        else:
+            return """
     <table><tr>
       <th>Museum #</th>
       <th>Object name</th>
