@@ -14,13 +14,24 @@ LEFT OUTER JOIN collectionobjects_pahma cp on (h2.id = cp.id)
 JOIN hierarchy h3 ON (mc.blobcsid = h3.name)
 LEFT OUTER JOIN blobs_common bc on (h3.id = bc.id)
 
-WHERE mc.id NOT IN (SELECT mc.id
-FROM media_common mc
-WHERE mc.description LIKE 'Primary catalog card%'
-OR mc.description ILIKE 'Catalog card%'
-OR mc.description ILIKE 'Bulk entry catalog card%'
-OR mc.description ILIKE 'Problematic catalog card%'
-OR mc.description ILIKE 'Recataloged objects catalog card%'
-OR mc.description ILIKE 'Revised catalog card%'
-OR mc.description ILIKE 'Index%')
-AND (osl.item LIKE '%culturally%' AND cp.pahmatmslegacydepartment = 'Human Remains')
+WHERE mc.id NOT IN (    SELECT mc.id
+                        FROM media_common mc
+                        WHERE mc.description LIKE 'Primary catalog card%'
+                        OR mc.description ILIKE 'Catalog card%'
+                        OR mc.description ILIKE 'Bulk entry catalog card%'
+                        OR mc.description ILIKE 'Problematic catalog card%'
+                        OR mc.description ILIKE 'Recataloged objects catalog card%'
+                        OR mc.description ILIKE 'Revised catalog card%'
+                        OR mc.description ILIKE 'Index%')
+
+AND (h2.name IN (       SELECT h.name AS "objectcsid"
+                        FROM collectionobjects_common cc
+                        JOIN hierarchy h ON (cc.id = h.id)
+                        JOIN collectionobjects_pahma cp on (cc.id = cp.id)
+                        FULL OUTER JOIN collectionobjects_pahma_pahmaobjectstatuslist osl0 ON (cc.id = osl0.id AND osl0.pos=0)
+                        FULL OUTER JOIN collectionobjects_pahma_pahmaobjectstatuslist osl1 ON (cc.id = osl1.id AND osl1.pos=1)
+                        FULL OUTER JOIN collectionobjects_pahma_pahmaobjectstatuslist osl2 ON (cc.id = osl2.id AND osl2.pos=2)
+                        WHERE      (cp.pahmatmslegacydepartment = 'Human Remains' AND osl0.item LIKE '%culturally%')
+                                     OR (cp.pahmatmslegacydepartment = 'Human Remains' AND osl1.item LIKE '%culturally%')
+                                     OR (cp.pahmatmslegacydepartment = 'Human Remains' AND osl2.item LIKE '%culturally%'))
+                                     OR mp.approvedforweb = 'false')
