@@ -39,8 +39,8 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv > 4solr.$HOST.metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv > errors.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g' > 4solr.$HOST.metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g' > errors.csv
 rm intermediate.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata
