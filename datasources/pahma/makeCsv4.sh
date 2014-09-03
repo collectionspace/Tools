@@ -39,8 +39,8 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > 4solr.$HOST.metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\"/\\"/g;' > errors.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv > 4solr.$HOST.metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv > errors.csv
 rm intermediate.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata
@@ -70,12 +70,13 @@ wc -l *.csv
 # ok, now let's load this into solr...
 # clear out the existing data
 ##############################################################################
-curl "http://localhost:8983/solr/pahma-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/pahma-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ##############################################################################
 # this POSTs the csv to the Solr / update endpoint
+# note, among other things, the overriding of the encapsulator with \
 ##############################################################################
-time curl 'http://localhost:8983/solr/pahma-metadata/update/csv?commit=true&header=true&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,' --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&skip=csid_s&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################

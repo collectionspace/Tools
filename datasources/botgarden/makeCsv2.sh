@@ -11,8 +11,8 @@ time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbn
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2.csv 
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv >> d2.csv 
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} '     d3.csv | perl -pe 's/\"/\\"/g;' > d4.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 32) { print $x;} ' d3.csv | perl -pe 's/\"/\\"/g;' > errors.csv &
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} '     d3.csv > d4.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 32) { print $x;} ' d3.csv > errors.csv &
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
@@ -43,5 +43,5 @@ wc -l *.csv
 #
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.collcounty_ss.split=true&f.collcounty_ss.separator=%7C&f.collstate_ss.split=true&f.collstate_ss.separator=%7C&f.collcountry_ss.split=true&f.collcountry_ss.separator=%7C&f.blobs_ss.split=true&f.blobs_ss.separator=," --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.collcounty_ss.split=true&f.collcounty_ss.separator=%7C&f.collstate_ss.split=true&f.collstate_ss.separator=%7C&f.collcountry_ss.split=true&f.collcountry_ss.separator=%7C&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 date
