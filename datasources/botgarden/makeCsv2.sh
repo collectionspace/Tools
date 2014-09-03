@@ -1,6 +1,6 @@
 #!/bin/bash -x
 date
-#cd /home/developers/botgarden
+cd /home/developers/botgarden
 HOST=$1
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
