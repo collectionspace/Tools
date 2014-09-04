@@ -271,6 +271,7 @@
     <copyField source="csid_s" dest="csid_txt"/>
     <copyField source="rare_s" dest="rare_txt"/>
     <copyField source="deadflag_s" dest="deadflag_txt"/>
+    <copyField source="flowercolor_s" dest="flowercolor_txt"/>
     <copyField source="determinationnoauth_s" dest="determinationnoauth_txt"/>
     <copyField source="reasonformove_s" dest="reasonformove_txt"/>
 
