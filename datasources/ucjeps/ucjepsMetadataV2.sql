@@ -101,6 +101,7 @@ select
        left outer join typespecimengroup tsg on (tsg.id = htsg.id)
        where h2int.name = h1.name
        order by htsg.pos), '␥', '') Type_Assertions,
+    case when conh.cultivated is null or conh.cultivated = '' then null else conh.cultivated end as Cultivated,
     case when co.sex is null or co.sex = '' then null else co.sex end as Sex,
     co.phase as Phase,
     array_to_string(array
