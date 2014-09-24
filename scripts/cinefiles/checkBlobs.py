@@ -71,7 +71,7 @@ def checkCompression(img):
     elif cell == "IMAG PAC":
         return True
     else:
-        #print "Unknown compression format:", cell
+        # print "Unknown compression format:", cell
         return False
 
 
@@ -91,10 +91,10 @@ def checkImage(tif, img):
     return {'isTiff': checkFormat(img),
             'syntaxOK': syntaxOK,
             'sizeOK': True if tif['filesize'] > 0 else False,
-            #'isNotZero': checkSize(img),
+            # 'isNotZero': checkSize(img),
             'isCompressed': checkCompression(img),
             'depthOK': True,
-            #'depthOK': checkSyntax(parsedName,1,getBits(img)),
+            # 'depthOK': checkSyntax(parsedName,1,getBits(img)),
             'colorOK': checkSyntax(parsedName, 4, getColorModel(img)),
             'resolutionOK': checkSyntax(parsedName, 3, resolution)
     }
@@ -104,7 +104,7 @@ def checkSyntax(parsedName, n, value):
     if parsedName is None:
         return False
     else:
-        #print '%s :: %s' % (parsedName.group(n),value)
+        # print '%s :: %s' % (parsedName.group(n),value)
         if parsedName.group(n) in value:
             return True
         else:
@@ -145,8 +145,8 @@ def getBlobsFromDB(config, startdate, enddate):
     dbconn = pgdb.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
 
-    #SELECT b.id as blobid, c.id as contentid, b.name as filename,
-    #   c.data AS md5, cc.createdat, cc.updatedat
+    # SELECT b.id as blobid, c.id as contentid, b.name as filename,
+    # c.data AS md5, cc.createdat, cc.updatedat
 
     query = """
     SELECT cc.id, cc.updatedat, cc.updatedby, b.name, c.data AS md5
@@ -200,7 +200,7 @@ def get_tifftags(fn, ret):
         return
 
     ret['filesize'] = getsize(fn)
-    #im = Image.open(fn)
+    # im = Image.open(fn)
     ret['format'] = im.format
     # The file format of the source file. For images created by the library itself
     # (via a factory function, or by running a method on an existing image), this attribute is set to None.  
@@ -222,7 +222,7 @@ def get_tifftags(fn, ret):
     checks = checkImage(ret, im)
     for k in checks.keys():
         ret[k] = checks[k]
-        #print ret
+        # print ret
     ret['imageOK'] = True
     for flag in 'resolutionOK isTiff sizeOK isCompressed depthOK colorOK syntaxOK'.split(' '):
         if ret[flag] == False:
@@ -262,7 +262,7 @@ def getRecords(rawFile):
 
 
 def getBloblist(blobpath):
-    #filelist = [ f for f in listdir(blobpath) if isfile(join(blobpath,f)) and ('.csv' in f or 'trace.log' in f) ]
+    # filelist = [ f for f in listdir(blobpath) if isfile(join(blobpath,f)) and ('.csv' in f or 'trace.log' in f) ]
     filelist = [f for f in listdir(blobpath) if isfile(join(blobpath, f))]
     records = []
     for f in sorted(filelist):
@@ -283,7 +283,7 @@ def doChecks(args):
             sys.exit('Usage: %s db config-file startdate enddate reportname' % args[0])
 
         try:
-            #form = {'webapp': '/var/www/cgi-bin/' + args[2]}
+            # form = {'webapp': '/var/www/cgi-bin/' + args[2]}
             form = {'webapp': args[2]}
             config = getConfig(form)
         except:
@@ -316,8 +316,8 @@ def doChecks(args):
         print 'datasource must either "db" or "dir"'
         sys.exit()
 
-    columns = 'name imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK imagesize filesize updatedat updatedby format mode palette compression dpi blobcsid fullpathtofile'.split(
-        ' ')
+    columns = ('name imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK imagesize' +
+        ' filesize updatedat updatedby format mode palette compression dpi blobcsid fullpathtofile md5').split(' ')
     outputfh = csv.writer(open(outputFile, 'wb'), delimiter="\t")
     outputfh.writerow(columns)
 
@@ -326,13 +326,13 @@ def doChecks(args):
         elapsedtimetotal = time.time()
         row = []
         try:
-            #print "checking file", i, tif['fullpathtofile']
+            # print "checking file", i, tif['fullpathtofile']
             get_tifftags(tif['fullpathtofile'], tif)
         except:
             print "failed on file", i, tif['fullpathtofile']
             raise
-            #tif['istiff'] = 'Error'
-            #print '%s: no tiff data' % tif['name']
+            # tif['istiff'] = 'Error'
+            # print '%s: no tiff data' % tif['name']
 
         for v1, v2 in enumerate(columns):
             try:
@@ -347,5 +347,5 @@ def doChecks(args):
 
 
 if __name__ == "__main__":
-#
+    #
     doChecks(sys.argv)
