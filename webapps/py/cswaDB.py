@@ -11,7 +11,7 @@ sys.setdefaultencoding('utf-8')
 timeoutcommand = "set statement_timeout to 270000; SET NAMES 'utf8';"
 
 def testDB(config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     try:
         objects.execute('set statement_timeout to 5000')
@@ -26,7 +26,7 @@ def testDB(config):
 
 
 def dbtransaction(command, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     cursor = dbconn.cursor()
     cursor.execute(command)
 
@@ -434,7 +434,7 @@ left outer join taxon_naturalhistory tn on (tc.id=tn.id) """
 #left outer join taxon_naturalhistory tn on (tc.id=tn.id)""" % ("and con.rare = 'true'","and cob.deadflag = 'false'")
 
 def getlocations(location1, location2, num2ret, config, updateType, institution):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -474,7 +474,7 @@ def getlocations(location1, location2, num2ret, config, updateType, institution)
 
 
 def getplants(location1, location2, num2ret, config, updateType, qualifier):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -512,12 +512,14 @@ def getloclist(searchType, location1, location2, num2ret, config):
     # 'set' means 'next num2ret locations', otherwise prefix match
     if searchType == 'set':
         whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0')"
+    elif searchType == 'exact':
+        whereclause = "WHERE locationkey = replace('" + location1 + "',' ','0')"
     elif searchType == 'prefix':
         whereclause = "WHERE locationkey LIKE replace('" + location1 + "%',' ','0')"
     elif searchType == 'range':
         whereclause = "WHERE locationkey >= replace('" + location1 + "',' ','0') AND locationkey <= replace('" + location2 + "',' ','0')"
 
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
     if int(num2ret) > 30000: num2ret = 30000
@@ -557,7 +559,7 @@ INNER JOIN misc
 WHERE
      cc.objectNumber = '%s'"""
 
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
     if int(num2ret) > 1000: num2ret = 1000
@@ -662,7 +664,7 @@ limit """ + str(num2ret)
 
 
 def findcurrentlocation(csid, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -677,7 +679,7 @@ def findcurrentlocation(csid, config):
 
 
 def getrefname(table, term, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -712,7 +714,7 @@ def getrefname(table, term, config):
 
 
 def findrefnames(table, termlist, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -731,7 +733,7 @@ def findrefnames(table, termlist, config):
     return result
 
 def finddoctypes(table, doctype, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     doctypes = dbconn.cursor()
     doctypes.execute(timeoutcommand)
 
@@ -746,7 +748,7 @@ def finddoctypes(table, doctype, config):
 
 
 def getobjinfo(museumNumber, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -775,7 +777,7 @@ WHERE co.objectnumber = '%s' LIMIT 1""" % museumNumber
 
 
 def gethierarchy(query, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     institution = config.get('info', 'institution')
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
@@ -837,7 +839,7 @@ ORDER BY ParentPlace, Place
 
 
 def getCSID(argType, arg, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -859,7 +861,7 @@ WHERE pc.refname ILIKE '%""" + arg + "%%'"
 
 
 def getCSIDs(argType, arg, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -873,7 +875,7 @@ WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
 
 
 def findparents(refname, config):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
     query = """WITH RECURSIVE ethnculture_hierarchyquery as (
@@ -913,7 +915,7 @@ order by level""" % refname.replace("'", "''")
         return [["findparents error"]]
 
 def getCSIDDetail(config, csid, detail):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
     
@@ -956,7 +958,7 @@ WHERE h1.name = '%s'""" % csid
         return ''
 
 def checkData(config, data, datatype):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -978,7 +980,7 @@ AND lc.refname LIKE 'urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:na
     return objects.fetchone()
 
 def getSitesByOwner(config, owner):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -997,7 +999,7 @@ ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
     return objects.fetchall()
 
 def getDisplayName(config, refname):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
@@ -1009,7 +1011,7 @@ WHERE pog.owner LIKE '""" + refname + "%'"
     return objects.fetchone()
 
 def getObjDetailsByOwner(config, owner):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 

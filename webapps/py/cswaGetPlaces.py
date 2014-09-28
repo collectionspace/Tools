@@ -10,7 +10,7 @@ def openConnection(connect_string):
     global conn
 
     try:
-        conn = pgdb.connect(connect_string)
+        conn = pgdb.connect(database=connect_string)
     except Exception:
         print "In openConnection(), unable to open connection"
         sys.exit(1)

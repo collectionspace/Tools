@@ -47,11 +47,19 @@ import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
 
+
+# updateactionlabel = config.get('info', 'updateactionlabel')
+# updateType = config.get('info', 'updatetype')
+# institution = config.get('info','institution')
+
+#if not validateParameters(form, config): return
+
 ## {{{ http://code.activestate.com/recipes/81547/ (r1)
 def cgiFieldStorageToDict(fieldStorage):
     """Get a plain dictionary, rather than the '.value' system used by the cgi module."""
     params = {}
     for key in fieldStorage.keys():
+        #sys.stderr.write('%-13s:: %s' % ('key:',key))
         params[key] = fieldStorage[key].value
     return params
 
@@ -60,7 +68,7 @@ def getConfig(form):
     try:
         fileName = form.get('webapp') + '.cfg'
         config = ConfigParser.RawConfigParser()
-        config.read(fileName)
+        config.read(os.path.join('../cfgs',fileName))
         # test to see if it seems like it is really a config file
         updateType = config.get('info', 'updatetype')
         return config
@@ -535,12 +543,12 @@ def doEnumerateObjects(form, config):
 
 
 def verifyLocation(loc, form, config):
-    location = cswaDB.getloclist('set', loc, '', 1, config)
+    location = cswaDB.getloclist('exact', loc, '', 1, config)
+    if location == [] : return
     if loc == location[0][0]:
         return loc
     else:
         return ''
-
 
 def doCheckMove(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
@@ -591,6 +599,101 @@ def doCheckMove(form, config):
     for r in objects:
         if r[15] != crate: # skip if this is not the crate we want
             continue
+        #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[15],  r[0]))
+        locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
+        if locations.has_key(locationheader):
+            pass
+        else:
+            locations[locationheader] = []
+            totallocations += 1
+
+        totalobjects += 1
+        locations[locationheader].append(formatRow({'rowtype': 'inventory', 'data': r}, form, config))
+
+    locs = locations.keys()
+    locs.sort()
+
+    if len(locs) == 0:
+        print '<span style="color:red;">Did not find this crate at this location! Sorry!</span>'
+        return
+
+    print cswaConstants.getHeader(updateType,institution)
+    for header in locs:
+        print header
+        print '\n'.join(locations[header])
+
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="3">"""
+    msg = "Caution: clicking on the button at left will move <b>ALL %s objects</b> shown in this crate!" % totalobjects
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+
+    print "\n</table><hr/>"
+    print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+    print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
+
+
+def doCheckPowerMove(form, config):
+    updateactionlabel = config.get('info', 'updateactionlabel')
+    updateType = config.get('info', 'updatetype')
+    institution = config.get('info','institution')
+
+    if not validateParameters(form, config): return
+
+    if updateType == 'powermove':
+        crate1 = verifyLocation(form.get("lo.crate1"), form, config)
+        crate2 = verifyLocation(form.get("lo.crate2"), form, config)
+        crate = ''
+    else:
+        crate = verifyLocation(form.get("lo.crate"), form, config)
+
+    fromLocation = verifyLocation(form.get("lo.location1"), form, config)
+    toLocation = verifyLocation(form.get("lo.location2"), form, config)
+
+    toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+
+    #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'toRefName', toRefname))
+
+    # DEBUG
+    #print '<table cellpadding="8px" border="1">'
+    #print '<tr><td>%s</td><td>%s</td></tr>' % ('From',fromLocation)
+    #print '<tr><td>%s</td><td>%s</td></tr>' % ('Crate',crate)
+    #print '<tr><td>%s</td><td>%s</td></tr>' % ('To',toLocation)
+    #print '</table>'
+
+    if updateType == 'powermove':
+        if crate1 == '':
+            print '<span style="color:red;">From Crate is not valid! Sorry!</span><br/>'
+        if crate2 == '':
+            print '<span style="color:red;">To Crate is not valid! Sorry!</span><br/>'
+    else:
+        if crate == '':
+            print '<span style="color:red;">Crate is not valid! Sorry!</span><br/>'
+
+    if fromLocation == '':
+        print '<span style="color:red;">From location is not valid! Sorry!</span><br/>'
+    if toLocation == '':
+        print '<span style="color:red;">To location is not valid! Sorry!</span><br/>'
+    if fromLocation == '' or toLocation == '':
+        return
+
+    try:
+        # NB: the movecrate webapp uses the inventory query...naturally!
+        objects = cswaDB.getlocations(form.get("lo.location1"), '', 1, config, 'inventory',institution)
+    except:
+        raise
+
+    locations = {}
+    if len(objects) == 0:
+        print '<span style="color:red;">No objects found at this location! Sorry!</span>'
+        return
+
+    totalobjects = 0
+    totallocations = 0
+
+    #sys.stderr.write('%-13s:: %s :: %-18s:: %s\n' % (updateType, crate, 'objects', len(objects)))
+    for r in objects:
+        if r[15] != crate and crate != '': # skip if this is not the crate we want
+                continue
         #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[15],  r[0]))
         locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
         if locations.has_key(locationheader):
@@ -939,8 +1042,7 @@ def doUpdateLocations(form, config):
         updateItems['objectStatus'] = cells[0]
         updateItems['objectCsid'] = cells[1]
         updateItems['locationRefname'] = cells[2]
-        updateItems[
-            'subjectCsid'] = '' # cells[3] is actually the csid of the movement record for the current location; the updated value gets inserted later
+        updateItems['subjectCsid'] = '' # cells[3] is actually the csid of the movement record for the current location; the updated value gets inserted later
         updateItems['objectNumber'] = cells[4]
         updateItems['crate'] = cells[5]
         updateItems['inventoryNote'] = form.get('n.' + cells[4]) if form.get('n.' + cells[4]) else ''
@@ -2280,121 +2382,6 @@ def postxml(requestType, uri, realm, hostname, username, password, payload):
     return (url, data, csid, elapsedtime)
 
 
-
-def selectWebapp(form):
-    if form.get('webapp') == 'switchapp':
-        #sys.stderr.write('%-13s:: %s' % ('switchapp','looking for creds..'))
-        username = form.get('csusername')
-        password = form.get('cspassword')
-        payload = '''
-            <input type="hidden" name="checkauth" value="true">
-            <input type="hidden" name="csusername" value="%s">
-            <input type="hidden" name="cspassword" value="%s">''' % (username, password)
-    else:
-        payload = ''
-
-    files = os.listdir(".")
-
-    programName = os.path.basename(__file__).replace('Utils', 'Main') + '?webapp=' # yes, this is fragile!
-    apptitles = {}
-    serverlabels = {}
-    badconfigfiles = ''
-
-    exceptions = {}
-    webapps = cswaConstants.getWebappList()
-
-    for f in files:
-        if '.cfg' in f:
-            config = ConfigParser.RawConfigParser()
-            config.read(f)
-            try:
-                configfile = f.replace('.cfg', '')
-                logo = config.get('info', 'logo')
-                updateType = config.get('info', 'updatetype')
-                schemacolor1 = config.get('info', 'schemacolor1')
-                apptitle = config.get('info', 'apptitle')
-                serverlabel = config.get('info', 'serverlabel')
-                serverlabel = serverlabel.replace('production','Prod')
-                serverlabel = serverlabel.replace('development','Dev')
-                serverlabelcolor = config.get('info', 'serverlabelcolor')
-                serverlabels[f] = '''<span style="cursor:pointer;color:%s;"><a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
-                    serverlabelcolor, serverlabel, programName + configfile, serverlabel)
-                apptitles[updateType] = config.get('info', 'apptitle')
-            except:
-                badconfigfiles += '<tr><td>%s</td></tr>' % f
-
-    #exceptions = { "barcodeprint": "BarcodePrint",
-    #               "upload": "BarcodeUpload",
-    #               "keyinfo": "KeyInfoRev",
-    #               "packlist": "PackingList",
-    #               "ucbwebapp": "SystematicInventory" }
-
-
-    line = '''Content-type: text/html; charset=utf-8
-
-
-<html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + cswaConstants.getStyle('lightblue') + '''
-<style type="text/css">
-/*<![CDATA[*/
-@import "../css/jquery-ui-1.8.22.custom.css";
-@import "../css/blue/style.css";
-@import "../css/jqtree.css";
-/*]]>*/
-</style>
-<script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
-<script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
-<script src="../js/tree.jquery.js"></script>
-<style>
-.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
-</style>
-<title>Select web app</title>
-</head>
-<body>
-<form id="ucbwebapp" method="post">
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
-<table cellpadding="4px"><tr>
-<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
-        "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
-
-    for museum in webapps:
-        line += '<td valign="top"><table><tr><td colspan="3"><h2>%s</h2></td></tr><tr><th>Web App</th><th colspan="2">Deployment</th></tr>\n' % museum
-        for webapp in webapps[museum]['apps']:
-            apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
-            line += '<tr><th>%s</th>' % apptitle
-            for deployment in ['V321', 'Dev']:
-                available = ''
-                if webapp in exceptions and deployment not in ['Dev', 'V321']:
-                    if os.path.isfile(exceptions[webapp] + deployment + '.py'):
-                        available = '<a target="%s" href="%s">%s</a>' % (
-                            deployment, exceptions[webapp] + deployment + '.py', exceptions[webapp] + deployment)
-                    elif os.path.isfile(exceptions[webapp] + '.py') and deployment == 'Prod':
-                        available = '<a target="%s" href="%s">%s</a>' % (
-                            deployment, exceptions[webapp] + '.py', exceptions[webapp])
-                else:
-                    available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapp + deployment, webapp + deployment)
-                if os.path.isfile(webapp + deployment + '.cfg'):
-                    available = serverlabels[webapp + deployment + '.cfg']
-                else:
-                    available = ''
-                line += ' <td>%s</td>\n' % available
-            line += '</tr>'
-        line += '</table></td>\n'
-    if badconfigfiles != '':
-        line += '<tr><td colspan="2"><h2>%s</h2></td></tr>' % 'bad config files'
-        line += badconfigfiles
-    line += '''
-</tr></table>
-<hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, revised 21 July 2014</h4>''' + payload + '''
-</form>
-</body>
-</html>'''
-
-    return line
-
-
 def printCollectionStats(form, config):
     writeInfo2log('start', form, config, 0.0)
     logo = config.get('info', 'logo')
@@ -2750,6 +2737,27 @@ def starthtml(form, config):
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
 
+
+    elif updateType == 'powermove':
+        crate1 = str(form.get("lo.crate1")) if form.get("lo.crate1") else ''
+        crate2 = str(form.get("lo.crate2")) if form.get("lo.crate2") else ''
+        otherfields = '''
+	      <tr><th><span class="cell">from location:</span></th>
+	      <th><input id="lo.location1" class="cell" type="text" size="40" name="lo.location1" value="''' + location1 + '''" class="xspan"></th>
+	      <th><span class="cell">to location:</span></th>
+          <th><input id="lo.location2" class="cell" type="text" size="40" name="lo.location2" value="''' + location2 + '''" class="xspan"></th></tr>
+          <tr><th><span class="cell">crate (optional):</span></th>
+          <th><input id="lo.crate1" class="cell" type="text" size="40" name="lo.crate1" value="''' + crate1 + '''" class="xspan"></th>
+          <th><span class="cell">crate (optional):</span></th>
+          <th><input id="lo.crate2" class="cell" type="text" size="40" name="lo.crate2" value="''' + crate2 + '''" class="xspan"></th></tr>
+    '''
+
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
+        otherfields += '''
+          <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+          <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
+
     elif updateType == 'bedlist':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
         otherfields = '''
@@ -3069,7 +3077,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggestNV.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,

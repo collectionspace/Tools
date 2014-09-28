@@ -12,7 +12,7 @@ form = cgi.FieldStorage()
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-timeoutcommand = "set statement_timeout to 500; SET NAMES 'utf8';"
+timeoutcommand = "set statement_timeout to 6000; SET NAMES 'utf8';"
 
 def makeTemplate(table, term, expression):
     return """select distinct(%s)
@@ -24,8 +24,7 @@ def makeTemplate(table, term, expression):
 
 
 def dbtransaction(form):
-    #postgresdb = pgdb.connect(connect_string)
-    postgresdb = pgdb.connect(form.getvalue('connect_string'))
+    postgresdb = pgdb.connect(database=form.getvalue('connect_string'))
     q = form.getvalue("q")
     elementID = form.getvalue("elementID")
     cursor = postgresdb.cursor()
@@ -116,6 +115,7 @@ def dbtransaction(form):
         q = q.replace("'", "''")
         query = template % q
         #sys.stderr.write("autosuggest query: %s" % query)
+        cursor.execute(timeoutcommand)
         cursor.execute(query)
         result = []
         for r in cursor.fetchall():

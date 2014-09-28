@@ -1,7 +1,8 @@
 #!/usr/bin/env /usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import csv, sys, time
+import csv, sys, time, os, datetime
+import ConfigParser
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -141,14 +142,14 @@ def getHandlers(form, institution):
 
     if institution == 'bampfa':
         handlerlist = [
-            ("Lisa", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
-            ("Nancy","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
-            ("Orlando", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Lisa", "Lisa"),
+            ("Nancy","Nancy"),
+            ("Orlando", "Orlando"),
         ]
     else:
 
         handlerlist = [
-            ("Lisa ", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
             ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
             ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
             ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
@@ -255,19 +256,135 @@ def getReasons(form, institution):
 
 def getWebappList():
     return {
-        'pahma': {'apps': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'upload',
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', "governmentholdings"]},
+        'pahma': {'apps': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'pahmaPowerMove', 'upload',
+                  'barcodeprint', 'hierarchyViewer', 'collectionStats', 'governmentholdings']},
         'ucbg':  {'apps': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings']},
         'ucjeps':  {'apps': ['ucjepsLocationReport']},
-        'bampfa':  {'apps': ['bamInventory', 'bamIntake', 'bamMoveobject', 'bamPackinglist', 'bamMovecrate']} }
+        'bampfa':  {'apps': ['bamInventory', 'bamIntake', 'bamMoveobject', 'bamPackinglist', 'bamMovecrate', 'bamPowerMove']} }
 
 
+# NB: not currently used
 def getAppOptions(museum):
     webapps = getWebappList()
     appOptions = ''
     for w in webapps[museum]:
         appOptions += """<option value="%s">%s</option>\n""" % (w, w)
     return '''<select onchange="this.form.submit()" name="selectedapp">\n<option value="None">switch app</option>%s\n</select>''' % appOptions
+
+
+def selectWebapp(form):
+    if form.get('webapp') == 'switchapp':
+        #sys.stderr.write('%-13s:: %s' % ('switchapp','looking for creds..'))
+        username = form.get('csusername')
+        password = form.get('cspassword')
+        payload = '''
+            <input type="hidden" name="checkauth" value="true">
+            <input type="hidden" name="csusername" value="%s">
+            <input type="hidden" name="cspassword" value="%s">''' % (username, password)
+    else:
+        payload = ''
+
+    files = os.listdir("../cfgs")
+
+    programName = os.path.basename(__file__).replace('Constants', 'Main') + '?webapp=' # yes, this is fragile!
+    apptitles = {}
+    serverlabels = {}
+    badconfigfiles = ''
+
+    webapps = {}
+
+    for f in files:
+        if '.cfg' in f:
+            config = ConfigParser.RawConfigParser()
+            config.read(os.path.join('../cfgs',f))
+            try:
+                configfile = f
+                configfile = configfile.replace('Dev.cfg','')
+                configfile = configfile.replace('V321.cfg','')
+                configfile = configfile.replace('Prod.cfg','')
+                logo = config.get('info', 'logo')
+                updateType = config.get('info', 'updatetype')
+                schemacolor1 = config.get('info', 'schemacolor1')
+                institution = config.get('info', 'institution')
+                apptitle = config.get('info', 'apptitle')
+                serverlabel = config.get('info', 'serverlabel')
+                # only show dev or prod options in this app
+                if not serverlabel in ['production','development']:
+                    continue
+                serverlabel = serverlabel.replace('production','Prod')
+                serverlabel = serverlabel.replace('development','Dev')
+                serverlabelcolor = config.get('info', 'serverlabelcolor')
+                serverlabels['%s.%s.%s' % (institution,updateType,serverlabel)] = '''<span style="cursor:pointer;color:%s;"><a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
+                    serverlabelcolor, serverlabel, programName + configfile + serverlabel.replace('Prod','V321'), serverlabel)
+                if institution in webapps:
+                    webapps[institution]['apps'][updateType] = [serverlabel,configfile]
+                else:
+                    webapps[institution] = {'apps': {}}
+                apptitles[updateType] = apptitle
+            except:
+                badconfigfiles += '<tr><td>%s</td></tr>' % f
+
+    #exceptions = { "barcodeprint": "BarcodePrint",
+    #               "upload": "BarcodeUpload",
+    #               "keyinfo": "KeyInfoRev",
+    #               "packlist": "PackingList",
+    #               "ucbwebapp": "SystematicInventory" }
+
+
+    line = '''Content-type: text/html; charset=utf-8
+
+
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + getStyle('lightblue') + '''
+<style type="text/css">
+/*<![CDATA[*/
+@import "../css/jquery-ui-1.8.22.custom.css";
+@import "../css/blue/style.css";
+@import "../css/jqtree.css";
+/*]]>*/
+</style>
+<script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
+<script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
+<script src="../js/tree.jquery.js"></script>
+<style>
+.ui-autocomplete-loading { background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat; }
+</style>
+<title>Select web app</title>
+</head>
+<body>
+<form id="ucbwebapp" method="post">
+<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
+<table cellpadding="4px"><tr>
+<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
+        "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
+
+    for museum in webapps:
+        line += '<td valign="top"><table><tr><td colspan="3"><h2>%s</h2></td></tr><tr><th>Web App</th><th colspan="2">Deployment</th></tr>\n' % museum
+        for webapp in webapps[museum]['apps'].keys():
+            apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
+            line += '<tr><th>%s</th>' % apptitle
+            for deployment in ['Prod', 'Dev']:
+                #available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapps[museum]['cfgs'][webapp] + deployment.replace('Prod','V321'), webapp + deployment)
+                if os.path.isfile(os.path.join('../cfgs',webapps[museum]['apps'][webapp][1] + deployment.replace('Prod','V321') + '.cfg')):
+                    available = serverlabels['%s.%s.%s' % (museum,webapp,deployment)]
+                else:
+                    available = ''
+                line += ' <td>%s</td>\n' % available
+            line += '</tr>'
+        line += '</table></td>\n'
+    if badconfigfiles != '':
+        line += '<tr><td colspan="2"><h2>%s</h2></td></tr>' % 'bad config files'
+        line += badconfigfiles
+    line += '''
+</tr></table>
+<hr/>
+<h4>jblowe@berkeley.edu   7 Feb 2013, revised 21 July 2014</h4>''' + payload + '''
+</form>
+</body>
+</html>'''
+
+    return line
 
 
 def getPrinters(form):
@@ -472,7 +589,7 @@ def getHeader(updateType, institution):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'movecrate':
+    elif updateType == 'movecrate' or updateType == 'powermove':
         return """
     <table><tr>
       <th>Museum #</th>
@@ -811,11 +928,6 @@ class Counter(dict):
 
 
 if __name__ == '__main__':
-    import doctest
-    print doctest.testmod()
-
-
-if __name__ == "__main__":
 
     def handleResult(result,header):
         header = '\n<tr><td>%s<td>' % header

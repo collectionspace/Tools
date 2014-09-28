@@ -13,7 +13,7 @@ timeoutcommand = 'set statement_timeout to 300000'
 # ###############################
 
 def getparentinfo(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -56,7 +56,7 @@ WHERE cp2.iscomponent = 'no' AND c1.objectnumber = '%s'""" % museumNumber
 # ###############################
 
 def getchildinfo(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -83,7 +83,7 @@ WHERE cp2.iscomponent = 'yes' AND cp1.iscomponent = 'no' AND c1.objectnumber = '
 # ###############################
 
 def getchildlocations(childcsid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -107,7 +107,7 @@ LIMIT 1""" % childcsid
 # ###############################
 
 def getobjinfo(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -152,7 +152,7 @@ WHERE co.objectnumber = '%s'""" % museumNumber
 # ###############################
 
 def getaccinfo(objectcsid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -175,7 +175,7 @@ WHERE rc.subjectcsid = '%s'""" % objectcsid
 # ###############################
 
 def getparentaccinfo(parentcsid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -198,7 +198,7 @@ WHERE rc.subjectcsid = '%s'""" % parentcsid
 # ###############################
 
 def getaltnums(objectid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -219,7 +219,7 @@ AND h1.parentid = '%s'""" % objectid
 # ###############################
 
 def getallaltnums(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -241,7 +241,7 @@ WHERE co.objectnumber = '%s'""" % museumNumber
 # ###############################
 
 def getparentaltnums(parentid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -263,7 +263,7 @@ WHERE co.id = '%s'""" % parentid
 # ###############################
 
 def getassoccultures(objectid, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -282,7 +282,7 @@ ORDER BY h1.pos""" % objectid
 # ###############################
 
 def getproddates(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -301,7 +301,7 @@ WHERE co.objectnumber = '%s'""" % museumNumber
 # ###############################
 
 def getmedia(museumNumber, config):
-    pahmadb = pgdb.connect(config.get('connect', 'connect_string'))
+    pahmadb = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
