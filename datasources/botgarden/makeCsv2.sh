@@ -8,8 +8,8 @@ HOST=$1
 time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1alive.sql -o d1a.csv
 time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f botgardenMetadataV1dead.sql -o d1b.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2.csv 
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv >> d2.csv 
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv > d2.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv >> d2.csv
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 32) { print $x;} '     d3.csv > d4.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 32) { print $x;} ' d3.csv > errors.csv &
