@@ -3,7 +3,7 @@ date
 #cd /home/developers/botgarden
 HOST=$1
 PASSWORD=$2
-NUMFIELDS=28
+export NUMFIELDS=28
 ##############################################################################
 # extract propagations info from CSpace
 ##############################################################################
