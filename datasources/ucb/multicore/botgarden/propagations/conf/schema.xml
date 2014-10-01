@@ -187,37 +187,41 @@
   The default is OR, which is generally assumed so it is not a good idea to change it
   globally here.  The "q.op" request parameter takes precedence over this.
  <solrQueryParser defaultOperator="OR"/> -->
+i
+   <!-- Create keyword versions for searching -->
 
-  <!-- copyField commands copy one field to another at the time a document
-        is added to the index.  It's used either to index the same field differently,
-        or to add multiple fields to the same field for easier/faster searching.
+    <copyField source="objid_s" dest="objid_txt"/>
+    <copyField source="pcid_s" dest="pcid_txt"/>
+    <copyField source="objectnumber_s" dest="objectnumber_txt"/>
+    <copyField source="propnumber_s" dest="propnumber_txt"/>
+    <copyField source="order_s" dest="order_txt"/>
+    <copyField source="conditions_s" dest="conditions_txt"/>
+    <copyField source="nurserylocation_s" dest="nurserylocation_txt"/>
+    <copyField source="activitycomments_s" dest="activitycomments_txt"/>
+    <copyField source="potsize_s" dest="potsize_txt"/>
+    <copyField source="chemicalapplied_s" dest="chemicalapplied_txt"/>
+    <copyField source="activityconcentration_s" dest="activityconcentration_txt"/>
+    <copyField source="activitytype_s" dest="activitytype_txt"/>
+    <copyField source="medium_s" dest="medium_txt"/>
+    <copyField source="propcount_s" dest="propcount_txt"/>
+    <copyField source="propcomments_s" dest="propcomments_txt"/>
+    <copyField source="numstarted_s" dest="numstarted_txt"/>
+    <copyField source="extraseeds_s" dest="extraseeds_txt"/>
+    <copyField source="spores_s" dest="spores_txt"/>
+    <copyField source="successrate_s" dest="successrate_txt"/>
+    <copyField source="planttype_s" dest="planttype_txt"/>
+    <copyField source="concentration_s" dest="concentration_txt"/>
+    <copyField source="germinationdate_s" dest="germinationdate_txt"/>
+    <copyField source="wounded_s" dest="wounded_txt"/>
+    <copyField source="hormone_s" dest="hormone_txt"/>
+    <copyField source="proptype_s" dest="proptype_txt"/>
+    <copyField source="cuttingtype_s" dest="cuttingtype_txt"/>
+    <copyField source="propreason_s" dest="propreason_txt"/>
+    <copyField source="propdate_s" dest="propdate_txt"/>
 
-   <copyField source="cat" dest="text"/>
-   <copyField source="name" dest="text"/>
-   <copyField source="manu" dest="text"/>
-   <copyField source="features" dest="text"/>
-   <copyField source="includes" dest="text"/>
-   <copyField source="manu" dest="manu_exact"/>
-   -->
-
-  <!-- Copy the price into a currency enabled field (default USD)
-   <copyField source="price" dest="price_c"/>
-   -->
-
-  <!-- Text fields from SolrCell to search by default in our catch-all field
-   <copyField source="title" dest="text"/>
-   <copyField source="author" dest="text"/>
-   <copyField source="description" dest="text"/>
-   <copyField source="keywords" dest="text"/>
-   <copyField source="content" dest="text"/>
-   <copyField source="content_type" dest="text"/>
-   <copyField source="resourcename" dest="text"/>
-   <copyField source="url" dest="text"/>
-   -->
-
-  <!-- Create a string version of author for faceting
-   <copyField source="author" dest="author_s"/>
-   -->
+   <copyField source="*_s" dest="text"/>
+   <copyField source="*_ss" dest="text"/>
+   <copyField source="*_txt" dest="text"/>
 	
   <!-- Above, multiple source fields are copied to the [text] field. 
 	  Another way to map multiple source fields to the same 
