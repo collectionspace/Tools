@@ -231,6 +231,9 @@ def doLocationSearch(form, config, displaytype):
 
 def doObjectSearch(form, config, displaytype):
     if not validateParameters(form, config): return
+    if form.get('ob.objno1') == '':
+        print '<h3>Please enter a starting object number!</h3><hr>'
+        return
 
     updateType = config.get('info', 'updatetype')
     updateactionlabel = config.get('info', 'updateactionlabel')
@@ -605,6 +608,9 @@ def doBulkEdit(form, config):
     elif fieldset == 'hsrinfo':
         if not refNames2find.has_key(form.get('cp.' + index)):
             refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
+    elif fieldset == 'objtypecm':
+        if not refNames2find.has_key(form.get('cp.' + index)):
+            refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
     else:
         pass
         #error! fieldset not set!
@@ -680,6 +686,9 @@ def doUpdateKeyinfo(form, config):
         elif fieldset == 'hsrinfo':
             if not refNames2find.has_key(form.get('cp.' + index)):
                 refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
+        elif fieldset == 'objtypecm':
+            if not refNames2find.has_key(form.get('cp.' + index)):
+                refNames2find[form.get('cp.' + index)] = cswaDB.getrefname('places_common', form.get('cp.' + index), config)
         else:
             pass
             #error! fieldset not set!
@@ -726,6 +735,10 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['inventoryCount'] = form.get('ctn.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['briefDescription'] = form.get('bdx.' + index)
+        elif fieldset == 'objtypecm':
+            updateItems['collection'] = form.get('ot.' + index)
+            updateItems['responsibleDepartment'] = form.get('cm.' + index)
+            updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
         else:
             pass
             #error!
@@ -759,6 +772,19 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             if updateItems['fieldCollector'] == '' and form.get('pc.' + index):
                 msg += '<span style="color:red;"> Field Collector: term "%s" not found, field not updated.</span>' % form.get('pc.' + index)
         elif fieldset == 'hsrinfo':
+            if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
+                if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
+                    pass
+                else:
+                    msg += '<span style="color:red;"> Field Collection Place: term "%s" not found, field not updated.</span>' % form.get('cp.' + index)
+            if 'objectCount' in updateItems:
+                try:
+                    int(updateItems['objectCount'])
+                    int(updateItems['objectCount'][0])
+                except ValueError:
+                    msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
+                    del updateItems['objectCount']
+        elif fieldset == 'objtypecm':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
                 if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
                     pass
@@ -1274,6 +1300,10 @@ def doBedList(form, config):
 
 def doHierarchyView(form, config):
     query = form.get('authority')
+    if query == 'None':
+        #hook
+        print '<h3>Please select an authority!</h3><hr>'
+        return
     res = cswaDB.gethierarchy(query, config)
     print '<div id="tree"></div>\n<script>'
     lookup = {concept.PARENT: concept.PARENT}
@@ -1684,6 +1714,8 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         fieldList = ('objectName', 'pahmaAltNum', 'fieldCollector')
     elif fieldset == 'hsrinfo':
         fieldList = ('objectName', 'pahmaFieldCollectionPlace', 'briefDescription')
+    elif fieldset == 'objtypecm':
+        fieldList = ('objectName', 'collection', 'responsibleDepartment', 'pahmaFieldCollectionPlace')
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -1698,8 +1730,10 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             continue
         if relationType == 'assocPeople' or relationType == 'pahmaAltNum':
             extra = 'Group'
-        elif relationType in ['briefDescription', 'fieldCollector']:
+        elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             listSuffix = 's'
+        elif relationType in ['collection']:
+            listSuffix = ''
         else:
             pass
             #print ">>> ",'.//'+relationType+extra+'List'
@@ -1728,7 +1762,7 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                     apgType = metadata.find('.//' + relationType + 'Type')
                     apgType.text = updateItems[relationType + 'Type']
                     #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
-        elif relationType in ['briefDescription', 'fieldCollector']:
+        elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
             #    sys.stderr.write(' e: %s\n' % e.text)
@@ -1736,13 +1770,16 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                 if not IsAlreadyPreferred(updateItems[relationType], Entries):
                     message += "%s=%s;" % (relationType,updateItems[relationType])
                 continue
-            if Entries == []:
-                newElement = etree.Element(relationType)
-                newElement.text = updateItems[relationType]
-                metadata.insert(0, newElement)
+            new_element = etree.Element(relationType)
+            new_element.text = updateItems[relationType]
+            metadata.insert(0,new_element)
+            if Entries:
+                for entry in Entries:
+                    print "first loop"
+                    print '%s, %s<br>' % (entry.tag, entry.text)
+                Entries.insert(0, new_element)
             else:
-                #sys.stderr.write(' obliterating: %s for %s\n' % (Entries[0].text,updateItems[relationType]))
-                Entries[0].text = updateItems[relationType]
+                metadata.insert(0, new_element)
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
@@ -1770,6 +1807,15 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             collectionobjects_pahma.insert(0, inventoryCount)
         inventoryCount.text = updateItems['inventoryCount']
     #print(etree.tostring(root, pretty_print=True))
+
+    collection = root.find('.//collection')
+    if 'collection' in updateItems:
+        if collection is None:
+            collection = etree.Element('collection')
+            collectionobjects_common = root.find(
+                './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
+            collectionobjects_common.insert(0, collection)
+        collection.text = updateItems['collection']
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
     payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')
@@ -1985,6 +2031,26 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
             rr[8], rr[8], rr[8], cgi.escape(rr[25], True), rr[8], cgi.escape(rr[6], True), rr[8], cgi.escape(rr[15], True))
+    elif fieldSet == 'objtypecm':
+        objtypes, selected = cswaConstants.getObjType(form, rr[8], rr[26])
+        collmans, selected = cswaConstants.getCollMan(form, rr[8], rr[27])
+        return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input class="objname" type="text" name="onm.%s" value="%s">
+</td>
+<td class="veryshortinput">
+<input class="veryshortinput" type="text" name="ocn.%s" value="%s">
+</td>
+<td>
+<input type="hidden" name="oox.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+%s</td>
+<td>%s</td>
+<td><input class="xspan" type="text" size="26" name="cp.%s" value="%s"></td>
+<td><input type="checkbox"></td>
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
+                  rr[8], rr[8], objtypes, collmans, rr[8], cgi.escape(rr[6], True))
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
@@ -2013,6 +2079,15 @@ def formatInfoReviewForm(form):
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="50" name="cp.user"></td>
 </tr><tr><th>Brief Description</th><td><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
 </tr>"""
+    elif fieldSet == 'objtypecm':
+        objtypes, selected = getObjType(form, rr[8], rr[26])
+        collmans, selected = getCollMan(form, rr[8], rr[27])
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
+</tr><tr><th>Object Type</th><td>%s</td>
+</tr><tr><th>Collection Manager</th><td>%s</td>
+</tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
+</tr>""" % (objtypes, collmans)
 
 
 def formatError(cspaceObject):
