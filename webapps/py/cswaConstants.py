@@ -117,6 +117,17 @@ def infoHeaders(fieldSet):
       <th>Field Collection Place</th>
       <th style="text-align:center">Brief Description</th>
     </tr>"""
+    elif fieldSet == 'objtypecm':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Count</th>
+      <th>Object Type</th>
+      <th>Collection Manager</th>
+      <th>Field Collection Place</th>
+      <th>P?</th>
+    </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
 
@@ -416,7 +427,8 @@ def getFieldset(form):
         ("Key Info", "keyinfo"),
         ("Name & Desc.", "namedesc"),
         ("Registration", "registration"),
-        ("HSR Info", "hsrinfo")
+        ("HSR Info", "hsrinfo"),
+        ("Object Type/CM", "objtypecm"),
     ]
 
     fieldset = '''
@@ -505,6 +517,60 @@ def getAltNumTypes(form, csid, ant):
     altnumtypes += '\n      </select>'
     return altnumtypes, selected
 
+def getObjType(form, csid, ot):
+    selected = form.get('objectType')
+
+    objtypelist = [ \
+        ("Archaeology", "archaeology"),
+        ("Ethnography", "ethnography"),
+        ("(not specified)", "(not specified)"),
+        ("Documentation", "documentation"),
+        ("None (Registration)", "none (Registration)"),
+        ("None", "None"),
+        ("Sample", "sample"),
+        ("Indeterminate", "indeterminate"),
+        ("Unknown", "unknown")
+    ]
+
+    objtypes = \
+          '''<select class="cell" name="ot.''' + csid + '''">
+              <option value="None">Select an object type</option>'''
+
+    for objtype in objtypelist:
+        if objtype[1] == ot:
+            objtypeOption = """<option value="%s" selected>%s</option>""" % (objtype[1], objtype[0])
+        else:
+            objtypeOption = """<option value="%s">%s</option>""" % (objtype[1], objtype[0])
+        objtypes = objtypes + objtypeOption
+
+    objtypes += '\n      </select>'
+    return objtypes, selected
+
+def getCollMan(form, csid, cm):
+    selected = form.get('collMan')
+
+    collmanlist = [ \
+        ("Natasha Johnson", "Natasha Johnson"),
+        ("Leslie Freund", "Leslie Freund"),
+        ("Alicja Egbert", "Alicja Egbert"),
+        ("Victoria Bradshaw", "Victoria Bradshaw"),
+        ("Uncertain", "uncertain"),
+        ("None (Registration)", "No collection manager (Registration)")
+    ]
+
+    collmans = \
+          '''<select class="cell" name="cm.''' + csid + '''">
+              <option value="None">Select a collection manager</option>'''
+
+    for collman in collmanlist:
+        if collman[1] == cm:
+            collmanOption = """<option value="%s" selected>%s</option>""" % (collman[1], collman[0])
+        else:
+            collmanOption = """<option value="%s">%s</option>""" % (collman[1], collman[0])
+        collmans = collmans + collmanOption
+
+    collmans += '\n      </select>'
+    return collmans, selected
 def getAgencies(form):
     selected = form.get('agency')
 
