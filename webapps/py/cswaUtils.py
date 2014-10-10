@@ -2108,12 +2108,13 @@ def updateKeyInfo(fieldset, updateItems, config, form):
 def updateLocations(updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
+    institution = config.get('info', 'institution')
     username, password = getCreds(form)
 
     uri = 'movements'
 
     #print "<br>posting to movements REST API..."
-    payload = lmiPayload(updateItems)
+    payload = lmiPayload(updateItems, institution)
     (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
     updateItems['subjectCsid'] = csid
 
@@ -2973,7 +2974,7 @@ def starthtml(form, config):
     else:
         otherfields = '''
           <th><span class="cell">problem:</span></th>
-          <th>internal error: updateType not specified</th?</tr>
+          <th>internal error: updateType not specified</th></tr>
           <tr><th/><th/><th/><th/></tr>'''
 
     return '''Content-type: text/html; charset=utf-8
@@ -3190,8 +3191,26 @@ def relationsPayload(f):
     return payload
 
 
-def lmiPayload(f):
-    payload = """<?xml version="1.0" encoding="UTF-8"?>
+def lmiPayload(f,institution):
+    if institution == 'bampfa':
+        payload = """<?xml version="1.0" encoding="UTF-8"?>
+<document name="movements">
+<ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<reasonForMove>%s</reasonForMove>
+<currentLocation>%s</currentLocation>
+<currentLocationFitness>suitable</currentLocationFitness>
+<locationDate>%s</locationDate>
+<movementNote>%s</movementNote>
+</ns2:movements_common>
+<ns2:movements_anthropology xmlns:ns2="http://collectionspace.org/services/movement/domain/anthropology" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<computedSummary>%s</computedSummary>
+<crate>%s</crate>
+<movementContact>%s</movementContact>
+</ns2:movements_anthropology>
+</document>
+"""
+    else:
+        payload = """<?xml version="1.0" encoding="UTF-8"?>
 <document name="movements">
 <ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <reasonForMove>%s</reasonForMove>
