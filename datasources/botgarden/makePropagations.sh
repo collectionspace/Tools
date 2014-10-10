@@ -1,6 +1,6 @@
 #!/bin/bash -x
 date
-#cd /home/developers/botgarden
+cd /home/developers/botgarden
 HOST=$1
 PASSWORD=$2
 export NUMFIELDS=28
