@@ -43,7 +43,7 @@ do
 done
 
 CURL_EXECUTABLE=`which curl`
-if [ "xCURL_EXECUTABLE" == "x" ]
+if [ -z "$CURL_EXECUTABLE" ]
   then
     echo "Could not find 'curl' application"
     exit 1
@@ -109,7 +109,7 @@ do
   done
       
   # If we got a session cookie, then initialize authorities using that cookie
-  if [ "xcookie" != "x" ]
+  if [ -n "$cookie" ]
     then
         echo "Initializing authorities in the '$tenant' tenant ..."
 
