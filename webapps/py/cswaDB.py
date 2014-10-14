@@ -511,7 +511,9 @@ ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
 h9.name accCSID,
-cp.inventoryCount
+cp.inventoryCount,
+cc.collection,
+rd.item
 
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
@@ -545,6 +547,7 @@ FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
  
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
+left outer join collectionobjects_common_responsibledepartments rd on (rd.id=cc.id and rd.pos=0)
 """ + whereclause + """
 ORDER BY sortableobjectnumber
 limit """ + str(num2ret)
