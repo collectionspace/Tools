@@ -38,8 +38,11 @@ def setquery(type, location, qualifier, institution):
         if institution == 'bampfa':
             return """
             SELECT distinct on (locationkey,objectnumber,h3.name)
-l.termdisplayName AS storageLocation,
-regexp_replace(l.termdisplayName,' ','0') AS locationkey,
+(case when cb.computedcrate is Null then l.termdisplayName
+     else concat(l.termdisplayName,
+     ': ',regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1')) end) AS storageLocation,
+replace(concat(l.termdisplayName,
+     ': ',regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1')),' ','0') AS locationkey,
 m.locationdate,
 cc.objectnumber objectnumber,
 cc.numberofobjects objectCount,
@@ -52,8 +55,8 @@ m.id moveid,
 rc.subjectdocumenttype,
 rc.objectdocumenttype,
 cc.objectnumber sortableobjectnumber,
-'' AS crateRefname,
-'' AS crate
+cb.computedcrate crateRefname,
+regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
 
 FROM loctermgroup l
 
@@ -66,6 +69,8 @@ join relations_common rc on rc.objectcsid = h2.name
 
 join hierarchy h3 on rc.subjectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
+
+left outer join collectionobjects_bampfa cb on (cb.id=cc.id)
 
 join hierarchy h4 ON (cc.id = h4.parentid AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' AND (h4.pos = 0 OR h4.pos IS NULL))
 join bampfatitlegroup tg ON (h4.id = tg.id)
@@ -116,8 +121,7 @@ join hierarchy h3 on rc.objectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
-left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name =
-'collectionobjects_common:objectNameList' and h5.pos=0)
+left outer join hierarchy h5 on (cc.id = h5.parentid and h5.name = 'collectionobjects_common:objectNameList' and h5.pos=0)
 left outer join objectnamegroup ong on (ong.id=h5.id)
 
 left outer join collectionobjects_pahma cp on (cp.id=cc.id)
@@ -205,7 +209,9 @@ LIMIT 6000"""
         if institution == 'bampfa':
             return """
             SELECT distinct on (location,objectnumber)
-l.termdisplayName AS location,
+(case when cb.computedcrate is Null then l.termdisplayName
+     else concat(l.termdisplayName,
+     ': ',regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1')) end) AS location,
 cc.objectnumber AS objectnumber,
 h3.name,
 tg.bampfatitle AS Title,
@@ -259,7 +265,9 @@ ORDER BY location,objectnumber asc
 LIMIT 30000
             """
 
-        return """
+        else:
+
+            return """
 SELECT distinct on (locationkey,sortableobjectnumber,h3.name)
 (case when ca.computedcrate is Null then l.termdisplayName  
      else concat(l.termdisplayName,
@@ -316,8 +324,7 @@ join relations_common rc on rc.subjectcsid = h2.name
 join hierarchy h3 on rc.objectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 
-left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name =
-'collectionobjects_common:objectNameList' and (h4.pos=0 or h4.pos is null))
+left outer join hierarchy h4 on (cc.id = h4.parentid and h4.name = 'collectionobjects_common:objectNameList' and (h4.pos=0 or h4.pos is null))
 left outer join objectnamegroup ong on (ong.id=h4.id)
 
 left outer join collectionobjects_anthropology ca on (ca.id=cc.id)
