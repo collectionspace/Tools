@@ -99,7 +99,7 @@ ALTER TABLE IF EXISTS cinefiles_denorm.filmprodcoidstringtmp
 
 DROP TABLE IF EXISTS cinefiles_denorm.organizationlist;
 ALTER TABLE IF EXISTS cinefiles_denorm.organizationlisttmp
-    RENAME TO oranizationlist;
+    RENAME TO organizationlist;
 
 DROP TABLE IF EXISTS cinefiles_denorm.personlist;
 ALTER TABLE IF EXISTS cinefiles_denorm.personlisttmp
