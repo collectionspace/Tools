@@ -1073,7 +1073,10 @@ def doUpdateLocations(form, config):
         updateItems['crate'] = cells[5]
         updateItems['inventoryNote'] = form.get('n.' + cells[4]) if form.get('n.' + cells[4]) else ''
         updateItems['locationDate'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-        updateItems['computedSummary'] = updateItems['locationDate'][0:10] + (' (%s)' % form.get('reason'))
+        # if reason is a refname (e.g. bampfa), extract just the displayname
+        reason = form.get('reason')
+        reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
+        updateItems['computedSummary'] = updateItems['locationDate'][0:10] + (' (%s)' % reason)
 
         for i in ('handlerRefName', 'reason'):
             updateItems[i] = form.get(i)
@@ -1091,8 +1094,10 @@ def doUpdateLocations(form, config):
             msg = 'object moved to %s.' % form.get('toLocAndCrate')
 
         if updateItems['objectStatus'] == 'not found':
-            updateItems[
-                'locationRefname'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
+            if institution == 'bampfa':
+                updateItems['locationRefname'] = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x770)'Not Located'"
+            else:
+                updateItems['locationRefname'] = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
             updateItems['crate'] = ''
             msg = "moved to 'Not Located'."
             #updateItems['crate'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(Notlocated1360806150870)'Not located'"
@@ -1871,7 +1876,10 @@ def doUploadUpdateLocs(data, line, id2ref, form, config):
     updateItems[
         'subjectCsid'] = '' # cells[3] is actually the csid of the movement record for the current location; the updated value gets inserted later
     updateItems['inventoryNote'] = ''
-    updateItems['computedSummary'] = updateItems['locationDate'][0:10] + ' (%s)' % form.get('reason')
+    # if reason is a refname (e.g. bampfa), extract just the displayname
+    reason = form.get('reason')
+    reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
+    updateItems['computedSummary'] = updateItems['locationDate'][0:10] + (' (%s)' % reason)
 
     #print updateItems
     numUpdated = 0
@@ -2364,14 +2372,12 @@ def formatInfoReviewForm(form):
 </tr><tr><th>Brief Description</th><td class="zcell"><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
 </tr>"""
     elif fieldSet == 'objtypecm':
-        objtypes, selected = getObjType(form, rr[8], rr[26])
-        collmans, selected = getCollMan(form, rr[8], rr[27])
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
 </tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
-</tr><tr><th>Object Type</th><td>%s</td>
-</tr><tr><th>Collection Manager</th><td>%s</td>
+</tr><tr><th>Object Type</th><td><td class="zcell"><input class="xspan" type="text" size="60" name="ot.user"></td></td>
+</tr><tr><th>Collection Manager</th><td><td class="zcell"><input class="xspan" type="text" size="60" name="collMan.user"></td></td>
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
-</tr>""" % (objtypes, collmans)
+</tr>"""
 
 
 def formatError(cspaceObject):
@@ -3201,14 +3207,19 @@ def lmiPayload(f,institution):
 <currentLocationFitness>suitable</currentLocationFitness>
 <locationDate>%s</locationDate>
 <movementNote>%s</movementNote>
+<movementContact>%s</movementContact>
 </ns2:movements_common>
-<ns2:movements_anthropology xmlns:ns2="http://collectionspace.org/services/movement/domain/anthropology" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ns2:movements_bampfa xmlns:ns2="http://collectionspace.org/services/movement/domain/anthropology" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <computedSummary>%s</computedSummary>
 <crate>%s</crate>
-<movementContact>%s</movementContact>
-</ns2:movements_anthropology>
+</ns2:movements_bampfa>
 </document>
 """
+
+        payload = payload % (
+            f['reason'], f['locationRefname'], f['locationDate'], f['inventoryNote'], f['handlerRefName'],
+            f['computedSummary'], f['crate'])
+
     else:
         payload = """<?xml version="1.0" encoding="UTF-8"?>
 <document name="movements">
@@ -3228,9 +3239,10 @@ def lmiPayload(f,institution):
 </ns2:movements_anthropology>
 </document>
 """
-    payload = payload % (
-        f['reason'], f['locationRefname'], f['locationDate'], f['inventoryNote'], f['computedSummary'], f['crate'],
-        f['handlerRefName'])
+        payload = payload % (
+            f['reason'], f['locationRefname'], f['locationDate'], f['inventoryNote'], f['computedSummary'], f['crate'],
+            f['handlerRefName'])
+
     return payload
 
 
@@ -3246,133 +3258,212 @@ if __name__ == "__main__":
 
     updateItems = {}
 
-    form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
-            'fieldset': 'namedesc',
-            #'fieldset': 'registration',
-            'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
-            'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
-            'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
-            'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
-            'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-            'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-            'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
-    }
+    if False:
 
-    form = {'webapp': 'ucbgLocationReportDev', 'dora': 'alive'}
-    config = getConfig(form)
+        form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
+                'fieldset': 'namedesc',
+                #'fieldset': 'registration',
+                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+                'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
+                'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
+        }
 
-    starthtml(form, config)
-    print setFilters(form)
+        form = {'webapp': 'ucbgLocationReportDev', 'dora': 'alive'}
+        config = getConfig(form)
 
-    doUpdateKeyinfo(form, config)
+        starthtml(form, config)
+        print setFilters(form)
 
-    #sys.exit()
+        doUpdateKeyinfo(form, config)
 
-    realm = config.get('connect', 'realm')
-    hostname = config.get('connect', 'hostname')
-    username = config.get('connect', 'username')
-    password = config.get('connect', 'password')
-    institution = config.get('info', 'institution')
+        #sys.exit()
 
-    #print lmiPayload(f)
-    #print relationsPayload(f)
+    if True:
 
-    f2 = {'objectStatus': 'found',
-          'subjectCsid': '',
-          'inventoryNote': '',
-          'crate': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(cr2113)'Faunal Box 421'",
-          'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(999)'Michael T. Black'",
-          'objectCsid': '35d1e048-e803-4e19-81de-ac1079f9bf47',
-          'reason': 'Inventory',
-          'computedSummary': 'systematic inventory test',
-          'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl12158)'Kroeber, 20A, AA 1, 2'",
-          'locationDate': '2012-07-24T05:45:30Z',
-          'objectNumber': '9-12689'}
+        form = {'webapp': 'bamInventoryDev'}
+        config = getConfig(form)
 
-    #updateLocations(f2,config)
-    #print "updateLocations succeeded..."
-    #sys.exit(0)
+        realm = config.get('connect', 'realm')
+        hostname = config.get('connect', 'hostname')
+        username = 'import@bampfa.cspace.berkeley.edu'
+        password = 'bjeScwj2'
+        institution = config.get('info', 'institution')
 
-    uri = 'movements'
+        #print relationsPayload(f)
 
-    print "<br>posting to movements REST API..."
-    payload = lmiPayload(updateItems)
-    (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-    updateItems['subjectCsid'] = csid
-    print 'got csid', csid, '. elapsedtime', elapsedtime
-    print "relations REST API post succeeded..."
+        updateItems = {'objectStatus': 'found',
+              'subjectCsid': '41568668-00a7-439b-8a09-8525578e5df4',
+              'objectCsid': '41568668-00a7-439b-8a09-8525578e5df4',
+              'inventoryNote': 'inventory note',
+              'crate': '',
+              'handlerRefName': "JW",
+              'reason': "urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'",
+              'computedSummary': 'systematic inventory test',
+              'locationRefname': "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x793)'Print Storage, Bin 02 Lower'",
+              'locationDate': '2014-10-23T05:45:30Z',
+              'objectNumber': '9-12689'}
 
-    uri = 'relations'
+        #updateLocations(f2,config)
+        #print "updateLocations succeeded..."
+        #sys.exit(0)
 
-    print "<br>posting inv2obj to relations REST API..."
-    updateItems['subjectDocumentType'] = 'Movement'
-    updateItems['objectDocumentType'] = 'CollectionObject'
-    payload = relationsPayload(updateItems)
-    (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-    print 'got csid', csid, '. elapsedtime', elapsedtime
-    print "relations REST API post succeeded..."
+        uri = 'movements'
 
-    # reverse the roles
-    print "<br>posting obj2inv to relations REST API..."
-    temp = updateItems['objectCsid']
-    updateItems['objectCsid'] = updateItems['subjectCsid']
-    updateItems['subjectCsid'] = temp
-    updateItems['subjectDocumentType'] = 'CollectionObject'
-    updateItems['objectDocumentType'] = 'Movement'
-    payload = relationsPayload(updateItems)
-    (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-    print 'got csid', csid, '. elapsedtime', elapsedtime
-    print "relations REST API post succeeded..."
+        print "<br>posting to movements REST API..."
+        payload = lmiPayload(updateItems,institution)
+        print payload
+        #sys.exit(0)
 
-    print "<h3>Done w update!</h3>"
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        updateItems['subjectCsid'] = csid
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "movements REST API post succeeded..."
 
-    #sys.exit()
+        uri = 'relations'
 
-    print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport', 'dead')
-    #sys.exit()
+        print "<br>posting inv2obj to relations REST API..."
+        updateItems['subjectDocumentType'] = 'Movement'
+        updateItems['objectDocumentType'] = 'CollectionObject'
+        payload = relationsPayload(updateItems)
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "relations REST API post succeeded..."
 
-    endhtml(form, config, 0.0)
+        # reverse the roles
+        print "<br>posting obj2inv to relations REST API..."
+        temp = updateItems['objectCsid']
+        updateItems['objectCsid'] = updateItems['subjectCsid']
+        updateItems['subjectCsid'] = temp
+        updateItems['subjectDocumentType'] = 'CollectionObject'
+        updateItems['objectDocumentType'] = 'Movement'
+        payload = relationsPayload(updateItems)
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "relations REST API post succeeded..."
 
-    #print "starting packing list"
-    #doPackingList(form,config)
-    #sys.exit()
-    print '\nlocations\n'
-    for loc in cswaDB.getloclist('range', '1001, Green House 1', '1003, Tropical House', 1000, config):
-        print loc
+        print "<h3>Done w update!</h3>"
 
-    print '\nlocations\n'
-    for loc in cswaDB.getloclist('set', 'Kroeber, 20A, W B', '', 10, config):
-        print loc
+        #sys.exit()
 
-    print '\nlocations\n'
-    for loc in cswaDB.getloclist('set', 'Kroeber, 20A, CC  4', '', 3, config):
-        print loc
 
-    print '\nobjects\n'
-    rows = cswaDB.getlocations('Kroeber, 20A, CC  4', '', 3, config, 'keyinfo','pahma')
-    for r in rows:
-        print r
+    if False:
 
-    #urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl31520)'Regatta, A150, RiveTier 1, B'
-    f = {'objectCsid': '242e9ee7-983a-49e9-b3b5-7b49dd403aa2',
-         'subjectCsid': '250d75dc-c704-4b3b-abaa',
-         'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl284)'Kroeber, 20Mez, 53 D'",
-         'locationDate': '2000-01-01T00:00:00Z',
-         'computedSummary': 'systematic inventory test',
-         'inventoryNote': 'this is a test inventory note',
-         'objectDocumentType': 'CollectionObject',
-         'subjectDocumentType': 'Movement',
-         'reason': 'Inventory',
-         'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7412)'Madeleine W. Fang'"
+        form = {'webapp': 'bamInventoryDev'}
+        config = getConfig(form)
 
-    }
+        realm = config.get('connect', 'realm')
+        hostname = config.get('connect', 'hostname')
+        username = config.get('connect', 'username')
+        password = config.get('connect', 'password')
+        institution = config.get('info', 'institution')
 
-    #print lmiPayload(f)
-    #print relationsPayload(f)
+        #print lmiPayload(f)
+        #print relationsPayload(f)
 
-    form = {'webapp': 'barcodeprintDev', 'ob.objectnumber': '1-504', 'action': 'Create Labels for Objects'}
+        f2 = {'objectStatus': 'found',
+              'subjectCsid': '',
+              'inventoryNote': '',
+              'crate': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(cr2113)'Faunal Box 421'",
+              'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(999)'Michael T. Black'",
+              'objectCsid': '35d1e048-e803-4e19-81de-ac1079f9bf47',
+              'reason': 'Inventory',
+              'computedSummary': 'systematic inventory test',
+              'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl12158)'Kroeber, 20A, AA 1, 2'",
+              'locationDate': '2012-07-24T05:45:30Z',
+              'objectNumber': '9-12689'}
 
-    config = getConfig(form)
+        #updateLocations(f2,config)
+        #print "updateLocations succeeded..."
+        #sys.exit(0)
 
-    print doBarCodes(form, config)
-    #sys.exit()
+        uri = 'movements'
+
+        print "<br>posting to movements REST API..."
+        payload = lmiPayload(updateItems)
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        updateItems['subjectCsid'] = csid
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "movements REST API post succeeded..."
+
+        uri = 'relations'
+
+        print "<br>posting inv2obj to relations REST API..."
+        updateItems['subjectDocumentType'] = 'Movement'
+        updateItems['objectDocumentType'] = 'CollectionObject'
+        payload = relationsPayload(updateItems)
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "relations REST API post succeeded..."
+
+        # reverse the roles
+        print "<br>posting obj2inv to relations REST API..."
+        temp = updateItems['objectCsid']
+        updateItems['objectCsid'] = updateItems['subjectCsid']
+        updateItems['subjectCsid'] = temp
+        updateItems['subjectDocumentType'] = 'CollectionObject'
+        updateItems['objectDocumentType'] = 'Movement'
+        payload = relationsPayload(updateItems)
+        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+        print 'got csid', csid, '. elapsedtime', elapsedtime
+        print "relations REST API post succeeded..."
+
+        print "<h3>Done w update!</h3>"
+
+        #sys.exit()
+
+    if False:
+
+        print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport', 'dead')
+        #sys.exit()
+
+        endhtml(form, config, 0.0)
+
+
+    if False:
+        #print "starting packing list"
+        #doPackingList(form,config)
+        #sys.exit()
+        print '\nlocations\n'
+        for loc in cswaDB.getloclist('range', '1001, Green House 1', '1003, Tropical House', 1000, config):
+            print loc
+
+        print '\nlocations\n'
+        for loc in cswaDB.getloclist('set', 'Kroeber, 20A, W B', '', 10, config):
+            print loc
+
+        print '\nlocations\n'
+        for loc in cswaDB.getloclist('set', 'Kroeber, 20A, CC  4', '', 3, config):
+            print loc
+
+        print '\nobjects\n'
+        rows = cswaDB.getlocations('Kroeber, 20A, CC  4', '', 3, config, 'keyinfo','pahma')
+        for r in rows:
+            print r
+
+        #urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl31520)'Regatta, A150, RiveTier 1, B'
+        f = {'objectCsid': '242e9ee7-983a-49e9-b3b5-7b49dd403aa2',
+             'subjectCsid': '250d75dc-c704-4b3b-abaa',
+             'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl284)'Kroeber, 20Mez, 53 D'",
+             'locationDate': '2000-01-01T00:00:00Z',
+             'computedSummary': 'systematic inventory test',
+             'inventoryNote': 'this is a test inventory note',
+             'objectDocumentType': 'CollectionObject',
+             'subjectDocumentType': 'Movement',
+             'reason': 'Inventory',
+             'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7412)'Madeleine W. Fang'"
+
+        }
+
+        #print lmiPayload(f)
+        #print relationsPayload(f)
+
+        form = {'webapp': 'barcodeprintDev', 'ob.objectnumber': '1-504', 'action': 'Create Labels for Objects'}
+
+        config = getConfig(form)
+
+        print doBarCodes(form, config)
+        #sys.exit()

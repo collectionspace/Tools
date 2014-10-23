@@ -153,9 +153,16 @@ def getHandlers(form, institution):
 
     if institution == 'bampfa':
         handlerlist = [
-            ("Lisa", "Lisa"),
-            ("Nancy","Nancy"),
-            ("Orlando", "Orlando"),
+            ('Kelly Bennett', 'KB'),
+            ('Gary Bogus', 'GB'),
+            ('Lisa Calden', 'LC'),
+            ('Stephanie Cannizzo', 'SC'),
+            ('Genevieve Cottraux', 'GC'),
+            ('Laura Hansen', 'LH'),
+            ('Michael Meyers', 'MM'),
+            ('Scott Orloff', 'SO'),
+            ('Pamela Pack', 'PP'),
+            ('Julia White', 'JW'),
         ]
     else:
 
@@ -197,16 +204,16 @@ def getReasons(form, institution):
     if institution == 'bampfa':
         reasons = '''
         <select class="cell" name="reason">
-          <options>
-            <option value="None" default="yes">(none selected)</option>
-            <option value="conservation">Conservation</option>
-            <option value="exhibition">Exhibition</option>
-            <option value="inventory">Inventory</option>
-            <option value="loan">Loan</option>
-            <option value="newstoragelocation">New Storage Location</option>
-            <option value="photography">Photography</option>
-            <option value="research">Research</option>
-          </options>
+        <options>
+        <option value="None" default="yes">(none selected)</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason001)'Conservation'">Conservation</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason003)'Inventory'">Inventory</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason004)'Loan'">Loan</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason005)'New Storage Locatio'">New Storage Location</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason006)'Photography'">Photography</option>
+		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason007)'Research'">Research</option>
+        </options>
         </select>
 
         '''

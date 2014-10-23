@@ -218,7 +218,7 @@ tg.bampfatitle AS Title,
 regexp_replace(pg.bampfaobjectproductionperson, '^.*\\)''(.*)''$', '\\1') AS Artist,
 regexp_replace(pg.bampfaobjectproductionpersonrole, '^.*\\)''(.*)''$', '\\1') AS ArtistRole,
 cc.physicalDescription AS Medium,
-'dim' AS Dimensions,
+mp.dimensionsummary AS measurement,
 cc.collection AS Collection,
 cb.creditline AS CreditLine,
 cb.legalstatus AS LegalStatus,
@@ -254,6 +254,9 @@ join bampfatitlegroup tg ON (h4.id = tg.id)
 
 left outer join hierarchy h5 ON (cc.id = h5.parentid AND h5.name = 'collectionobjects_bampfa:bampfaObjectProductionPersonGroupList' AND (h5.pos = 0 OR h5.pos IS NULL))
 left outer join bampfaobjectproductionpersongroup pg ON (h5.id = pg.id)
+
+left outer join hierarchy h7 ON (h7.parentid = cc.id AND h7.name = 'collectionobjects_common:measuredPartGroupList' and h7.pos=0)
+left outer join measuredpartgroup mp ON (h7.id = mp.id)
 
 join collectionobjects_common_briefdescriptions bd on (bd.id=cc.id and bd.pos=0)
 
