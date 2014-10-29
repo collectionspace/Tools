@@ -72,8 +72,8 @@ join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocatio
 
 left outer join collectionobjects_bampfa cb on (cb.id=cc.id)
 
-join hierarchy h4 ON (cc.id = h4.parentid AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' AND (h4.pos = 0 OR h4.pos IS NULL))
-join bampfatitlegroup tg ON (h4.id = tg.id)
+LEFT OUTER JOIN hierarchy h4 ON (h4.parentid = cc.id AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' and h4.pos=0)
+LEFT OUTER JOIN bampfatitlegroup tg ON (h4.id = tg.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
