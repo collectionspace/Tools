@@ -642,17 +642,26 @@ def doCheckPowerMove(form, config):
 
     if not validateParameters(form, config): return
 
-    if updateType == 'powermove':
-        crate1 = verifyLocation(form.get("lo.crate1"), form, config)
-        crate2 = verifyLocation(form.get("lo.crate2"), form, config)
-        crate = ''
-    else:
-        crate = verifyLocation(form.get("lo.crate"), form, config)
+    crate1 = verifyLocation(form.get("lo.crate1"), form, config)
+    crate2 = verifyLocation(form.get("lo.crate2"), form, config)
+
+    if crate1 == '':
+        print '<span style="color:red;">From Crate is not valid! Sorry!</span><br/>'
+    if crate2 == '':
+        print '<span style="color:red;">To Crate is not valid! Sorry!</span><br/>'
 
     fromLocation = verifyLocation(form.get("lo.location1"), form, config)
     toLocation = verifyLocation(form.get("lo.location2"), form, config)
 
+    if fromLocation == '':
+        print '<span style="color:red;">From location is not valid! Sorry!</span><br/>'
+    if toLocation == '':
+        print '<span style="color:red;">To location is not valid! Sorry!</span><br/>'
+    if fromLocation == '' or toLocation == '':
+        return
+
     toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+    fromRefname = cswaDB.getrefname('locations_common', fromLocation, config)
 
     #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'toRefName', toRefname))
 
@@ -662,22 +671,6 @@ def doCheckPowerMove(form, config):
     #print '<tr><td>%s</td><td>%s</td></tr>' % ('Crate',crate)
     #print '<tr><td>%s</td><td>%s</td></tr>' % ('To',toLocation)
     #print '</table>'
-
-    if updateType == 'powermove':
-        if crate1 == '':
-            print '<span style="color:red;">From Crate is not valid! Sorry!</span><br/>'
-        if crate2 == '':
-            print '<span style="color:red;">To Crate is not valid! Sorry!</span><br/>'
-    else:
-        if crate == '':
-            print '<span style="color:red;">Crate is not valid! Sorry!</span><br/>'
-
-    if fromLocation == '':
-        print '<span style="color:red;">From location is not valid! Sorry!</span><br/>'
-    if toLocation == '':
-        print '<span style="color:red;">To location is not valid! Sorry!</span><br/>'
-    if fromLocation == '' or toLocation == '':
-        return
 
     try:
         # NB: the movecrate webapp uses the inventory query...naturally!
@@ -695,7 +688,7 @@ def doCheckPowerMove(form, config):
 
     #sys.stderr.write('%-13s:: %s :: %-18s:: %s\n' % (updateType, crate, 'objects', len(objects)))
     for r in objects:
-        if r[15] != crate and crate != '': # skip if this is not the crate we want
+        if r[15] != crate1 and crate1 != '': # skip if this is not the crate we want
                 continue
         #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[15],  r[0]))
         locationheader = formatRow({'rowtype': 'subheader', 'data': r}, form, config)
@@ -727,7 +720,8 @@ def doCheckPowerMove(form, config):
 
     print "\n</table><hr/>"
     print '<input type="hidden" name="toRefname" value="%s">' % toRefname
-    print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
+    print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate2)
+    print '<input type="hidden" name="toCrate" value="%s">' % crate2
 
 def doBulkEdit(form, config):
 
@@ -1056,7 +1050,18 @@ def doNothing(form, config):
 def doUpdateLocations(form, config):
 
     institution = config.get('info','institution')
+    #notlocated = config.get('info','notlocated')
+    if institution == 'bampfa':
+        notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x781)'Not Located'"
+    else:
+        notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
     updateValues = [form.get(i) for i in form if 'r.' in i]
+
+    # if reason is a refname (e.g. bampfa), extract just the displayname
+    reason = form.get('reason')
+    reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
+
+    Now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     print cswaConstants.getHeader('inventoryResult',institution)
 
@@ -1072,10 +1077,7 @@ def doUpdateLocations(form, config):
         updateItems['objectNumber'] = cells[4]
         updateItems['crate'] = cells[5]
         updateItems['inventoryNote'] = form.get('n.' + cells[4]) if form.get('n.' + cells[4]) else ''
-        updateItems['locationDate'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-        # if reason is a refname (e.g. bampfa), extract just the displayname
-        reason = form.get('reason')
-        reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
+        updateItems['locationDate'] = Now
         updateItems['computedSummary'] = updateItems['locationDate'][0:10] + (' (%s)' % reason)
 
         for i in ('handlerRefName', 'reason'):
@@ -1088,21 +1090,15 @@ def doUpdateLocations(form, config):
             updateItems['locationRefname'] = form.get('toRefname')
             msg = 'crate moved to %s.' % form.get('toLocAndCrate')
 
-        if config.get('info', 'updatetype') == 'moveobject':
+        if config.get('info', 'updatetype') in ['moveobject', 'powermove']:
             updateItems['locationRefname'] = form.get('toRefname')
             updateItems['crate'] = form.get('toCrate')
             msg = 'object moved to %s.' % form.get('toLocAndCrate')
 
         if updateItems['objectStatus'] == 'not found':
-            if institution == 'bampfa':
-                updateItems['locationRefname'] = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x770)'Not Located'"
-            else:
-                updateItems['locationRefname'] = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
+            updateItems['locationRefname'] = notlocated
             updateItems['crate'] = ''
             msg = "moved to 'Not Located'."
-            #updateItems['crate'] = "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(Notlocated1360806150870)'Not located'"
-
-        #print updateItems
         try:
             updateLocations(updateItems, config, form)
             numUpdated += 1
@@ -3204,7 +3200,6 @@ def lmiPayload(f,institution):
 <ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <reasonForMove>%s</reasonForMove>
 <currentLocation>%s</currentLocation>
-<currentLocationFitness>suitable</currentLocationFitness>
 <locationDate>%s</locationDate>
 <movementNote>%s</movementNote>
 <movementContact>%s</movementContact>

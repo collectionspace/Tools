@@ -272,22 +272,23 @@ def getReasons(form, institution):
     return reasons, reason
 
 
-def getWebappList():
-    return {
-        'pahma': {'apps': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'pahmaPowerMove', 'upload',
-                  'barcodeprint', 'hierarchyViewer', 'collectionStats', 'governmentholdings']},
-        'ucbg':  {'apps': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings']},
-        'ucjeps':  {'apps': ['ucjepsLocationReport']},
-        'bampfa':  {'apps': ['bamInventory', 'bamIntake', 'bamMoveobject', 'bamPackinglist', 'bamMovecrate', 'bamPowerMove']} }
+# NB: not currently used
+#def getWebappList():
+#    return {
+#        'pahma': {'apps': ['inventory', 'keyinfo', 'objinfo', 'objdetails', 'bulkedit', 'moveobject', 'packinglist', 'movecrate', 'pahmaPowerMove', 'upload',
+#                  'barcodeprint', 'hierarchyViewer', 'collectionStats', 'governmentholdings']},
+#        'ucbg':  {'apps': ['ucbgAccessions', 'ucbgAdvancedSearch', 'ucbgBedList', 'ucbghierarchyViewer', 'ucbgLocationReport', 'ucbgCollHoldings']},
+#        'ucjeps':  {'apps': ['ucjepsLocationReport']},
+#        'bampfa':  {'apps': ['bamInventory', 'bamIntake', 'bamMoveobject', 'bamPackinglist', 'bamMovecrate', 'bamPowerMove']} }
 
 
 # NB: not currently used
-def getAppOptions(museum):
-    webapps = getWebappList()
-    appOptions = ''
-    for w in webapps[museum]:
-        appOptions += """<option value="%s">%s</option>\n""" % (w, w)
-    return '''<select onchange="this.form.submit()" name="selectedapp">\n<option value="None">switch app</option>%s\n</select>''' % appOptions
+#def getAppOptions(museum):
+#    webapps = getWebappList()
+#    appOptions = ''
+#    for w in webapps[museum]:
+#        appOptions += """<option value="%s">%s</option>\n""" % (w, w)
+#    return '''<select onchange="this.form.submit()" name="selectedapp">\n<option value="None">switch app</option>%s\n</select>''' % appOptions
 
 
 def selectWebapp(form):
@@ -668,7 +669,7 @@ def getHeader(updateType, institution):
       <th>Museum #</th>
       <th>Object name</th>
       <th>Move</th>
-      <th style="width:60px; text-align:center;">Not Found</th>
+      <th style="width:60px; text-align:center;">Don't Move</th>
       <th>Notes</th>
     </tr>"""
     elif updateType == 'packinglist':
