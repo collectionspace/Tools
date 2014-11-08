@@ -16,11 +16,11 @@ open METADATA,'metadata.csv';
 while (<METADATA>) {
   $count{'metadata'}++;
   chomp;
-  my ($objectid, @rest) = split '\|';
+  my ($objectid, @rest) = split "\t";
   # insert list of blobs as final column
   my $mediablobs = $media{$objectid};
   $mediablobs =~ s/,$//; # get rid of trailing comma
-  print $_ . '|' . $mediablobs . "\n";
+  print $_ . "\t" . $mediablobs . "\n";
 }
 
 foreach my $s (sort keys %count) {
