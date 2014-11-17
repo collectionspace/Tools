@@ -7,7 +7,7 @@ my %media ;
 while (<MEDIA>) {
   $count{'media'}++;
   chomp;
-  my ($objectcsid, $objectnumber, $mediacsid, $description, $filename, $creatorrefname, $creator, $blobcsid, $copyrightstatement, $identificationnumber, $rightsholderrefname, $rightsholder, $contributor) = split '\|';
+  my ($objectcsid, $objectnumber, $mediacsid, $description, $filename, $creatorrefname, $creator, $blobcsid, $copyrightstatement, $identificationnumber, $rightsholderrefname, $rightsholder, $contributor) = split "\t";
   #print "$blobcsid $objectcsid\n";
   $media{$objectcsid} .= $blobcsid . ',';
 }
