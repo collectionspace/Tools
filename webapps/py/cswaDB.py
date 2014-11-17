@@ -8,7 +8,7 @@ import pgdb
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-timeoutcommand = "set statement_timeout to 270000; SET NAMES 'utf8';"
+timeoutcommand = "set statement_timeout to 240000; SET NAMES 'utf8';"
 
 def testDB(config):
     dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
@@ -455,6 +455,8 @@ def getlocations(location1, location2, num2ret, config, updateType, institution)
     for loc in getloclist('set', location1, '', num2ret, config):
         getobjects = setquery(updateType, loc[0], '', institution)
 
+        sys.stderr.write("getloclist %s" % location1)
+
         try:
             elapsedtime = time.time()
             objects.execute(getobjects)
@@ -462,10 +464,12 @@ def getlocations(location1, location2, num2ret, config, updateType, institution)
             if debug: sys.stderr.write('all objects: %s :: %s\n' % (loc[0], elapsedtime))
         except pgdb.DatabaseError, e:
             sys.stderr.write('getlocations select error: %s' % e)
-            return result
+            #return result
+            raise
         except:
             sys.stderr.write("some other getlocations database error!")
-            return result
+            #return result
+            raise
 
         try:
             rows = objects.fetchall()
@@ -477,8 +481,8 @@ def getlocations(location1, location2, num2ret, config, updateType, institution)
             for row in rows:
                 result.append(row)
         except:
+            sys.stderr.write("other getobjects error: %s" % len(rows))
             raise
-            #sys.stderr.write("other getobjects error: %s" % len(rows))
 
     return result
 
@@ -550,10 +554,13 @@ INNER JOIN misc
 order by locationkey
 limit """ + str(num2ret)
 
-    objects.execute(getobjects)
-    #for object in objects.fetchall():
-    #print object
-    return objects.fetchall()
+    try:
+        objects.execute(getobjects)
+        #for object in objects.fetchall():
+        #print object
+        return objects.fetchall()
+    except:
+        raise
 
 
 def getobjlist(searchType, object1, object2, num2ret, config):
