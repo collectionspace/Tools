@@ -660,7 +660,8 @@ def doCheckPowerMove(form, config):
     if fromLocation == '' or toLocation == '':
         return
 
-    toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+    toLocRefname = cswaDB.getrefname('locations_common', toLocation, config)
+    toCrateRefname = cswaDB.getrefname('locations_common', crate2, config)
     fromRefname = cswaDB.getrefname('locations_common', fromLocation, config)
 
     #sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType, 'toRefName', toRefname))
@@ -699,7 +700,7 @@ def doCheckPowerMove(form, config):
             totallocations += 1
 
         totalobjects += 1
-        locations[locationheader].append(formatRow({'rowtype': 'inventory', 'data': r}, form, config))
+        locations[locationheader].append(formatRow({'rowtype': 'powermove', 'data': r}, form, config))
 
     locs = locations.keys()
     locs.sort()
@@ -719,9 +720,10 @@ def doCheckPowerMove(form, config):
     print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
 
     print "\n</table><hr/>"
-    print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+    if crate2 is None: crate2 = ''
+    print '<input type="hidden" name="toRefname" value="%s">' % toLocRefname
     print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate2)
-    print '<input type="hidden" name="toCrate" value="%s">' % crate2
+    print '<input type="hidden" name="toCrate" value="%s">' % toCrateRefname
 
 def doBulkEdit(form, config):
 
@@ -1091,9 +1093,14 @@ def doUpdateLocations(form, config):
             msg = 'crate moved to %s.' % form.get('toLocAndCrate')
 
         if config.get('info', 'updatetype') in ['moveobject', 'powermove']:
-            updateItems['locationRefname'] = form.get('toRefname')
-            updateItems['crate'] = form.get('toCrate')
-            msg = 'object moved to %s.' % form.get('toLocAndCrate')
+            if updateItems['objectStatus'] == 'do not move':
+                msg = "not moved."
+            else:
+                updateItems['locationRefname'] = form.get('toRefname')
+                updateItems['crate'] = form.get('toCrate')
+                msg = 'object moved to %s.' % form.get('toLocAndCrate')
+
+
 
         if updateItems['objectStatus'] == 'not found':
             updateItems['locationRefname'] = notlocated
@@ -2197,6 +2204,13 @@ def formatRow(result, form, config):
         return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
+    elif result['rowtype'] == 'powermove':
+        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
+        # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
+        # f/nf | objcsid | locrefname | [loccsid] | objnum
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
+            rr[3])
     elif result['rowtype'] == 'moveobject':
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # 0 storageLocation | 1 lockey | 2 locdate | 3 objectnumber | 4 objectName | 5 objectCount | 6 fieldcollectionplace | 7 culturalgroup |
@@ -2817,6 +2831,8 @@ def starthtml(form, config):
 
 
     elif updateType == 'powermove':
+        location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
+        location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
         crate1 = str(form.get("lo.crate1")) if form.get("lo.crate1") else ''
         crate2 = str(form.get("lo.crate2")) if form.get("lo.crate2") else ''
         otherfields = '''
