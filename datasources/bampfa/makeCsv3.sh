@@ -16,7 +16,7 @@ time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv
 # make the header
 head -1 metadata.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab); rewrite objectcsid_s to id (for solr id...)
-perl -i -pe 's/\|/_s\|/g;s/objectcsid_s/id/;s/$/|blob_ss/' header4Solr.csv
+perl -i -pe 's/\|/_s\|/g;s/objectcsid_s/id/;s/$/_s|blob_ss/' header4Solr.csv
 # add the blobcsids to the rest of the data
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
