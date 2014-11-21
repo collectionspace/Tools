@@ -3134,7 +3134,7 @@ d.innerHTML = '&nbsp;';
       <td width="120px" class="cell">elapsed time: </td>
       <td class="xspan">''' + ('%8.2f' % elapsedtime) + ''' seconds</td>
       <td style="text-align: right;" class="cell">powered by </td>
-      <td style="text-align: right;width: 170;" class="cell"><img src="http://www.collectionspace.org/sites/all/themes/CStheme/images/CSpaceLogo.png" height="30px"></td>
+      <td style="text-align: right;width: 170;" class="cell"><img src="../images/header-logo-cspace.png" height="30px"></td>
     </tr>
     </tbody>
   </table>
