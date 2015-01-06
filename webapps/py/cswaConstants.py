@@ -320,7 +320,6 @@ def selectWebapp(form):
             try:
                 configfile = f
                 configfile = configfile.replace('Dev.cfg','')
-                configfile = configfile.replace('V321.cfg','')
                 configfile = configfile.replace('Prod.cfg','')
                 logo = config.get('info', 'logo')
                 updateType = config.get('info', 'updatetype')
@@ -335,7 +334,7 @@ def selectWebapp(form):
                 serverlabel = serverlabel.replace('development','Dev')
                 serverlabelcolor = config.get('info', 'serverlabelcolor')
                 serverlabels['%s.%s.%s' % (institution,updateType,serverlabel)] = '''<span style="cursor:pointer;color:%s;"><a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
-                    serverlabelcolor, serverlabel, programName + configfile + serverlabel.replace('Prod','V321'), serverlabel)
+                    serverlabelcolor, serverlabel, programName + configfile + serverlabel, serverlabel)
                 if institution in webapps:
                     webapps[institution]['apps'][updateType] = [serverlabel,configfile]
                 else:
@@ -386,7 +385,7 @@ def selectWebapp(form):
             line += '<tr><th>%s</th>' % apptitle
             for deployment in ['Prod', 'Dev']:
                 #available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapps[museum]['cfgs'][webapp] + deployment.replace('Prod','V321'), webapp + deployment)
-                if os.path.isfile(os.path.join('../cfgs',webapps[museum]['apps'][webapp][1] + deployment.replace('Prod','V321') + '.cfg')):
+                if os.path.isfile(os.path.join('../cfgs',webapps[museum]['apps'][webapp][1] + deployment + '.cfg')):
                     available = serverlabels['%s.%s.%s' % (museum,webapp,deployment)]
                 else:
                     available = ''
@@ -399,7 +398,7 @@ def selectWebapp(form):
     line += '''
 </tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, revised 21 July 2014</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, revised 5 January 2015</h4>''' + payload + '''
 </form>
 </body>
 </html>'''

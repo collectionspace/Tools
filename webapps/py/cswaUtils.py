@@ -94,39 +94,39 @@ def authenticateUser(username, password, form, config):
 
 
 def serverCheck(form, config):
-    result = '<tr><td class="shortcell">start server check</td><td class="shortcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    result = '<tr><td class="zcell">start server check</td><td class="zcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
 
     elapsedtime = time.time()
     # do an sql search...
-    result += '<tr><td class="shortcell">SQL check</td><td class="shortcell">' + cswaDB.testDB(config) + "</td></tr>"
+    result += '<tr><td class="zcell">SQL check</td><td class="zcell">' + cswaDB.testDB(config) + "</td></tr>"
     elapsedtime = time.time() - elapsedtime
-    result += '<tr><td class="shortcell">SQL time</td><td class="shortcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+    result += '<tr><td class="zcell">SQL time</td><td class="zcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
 
     # if we are configured for barcodes, try that...
     try:
         config.get('files', 'cmdrfileprefix') + config.get('files', 'cmdrauditfile')
         try:
             elapsedtime = time.time()
-            result += '<tr><td class="shortcell">barcode audit file</td><td class="shortcell">' + config.get('files', 'cmdrauditfile') + "</td></tr>"
-            result += '<tr><td class="shortcell">trying...</td><td class="shortcell"> to write empty test files to commanderWatch directory</td></tr>'
+            result += '<tr><td class="zcell">barcode audit file</td><td class="zcell">' + config.get('files', 'cmdrauditfile') + "</td></tr>"
+            result += '<tr><td class="zcell">trying...</td><td class="zcell"> to write empty test files to commanderWatch directory</td></tr>'
             printers, selected, printerlist = cswaConstants.getPrinters(form)
             for printer in printerlist:
-                result += ('<tr><td class="shortcell">location labels @ %s</td><td class="shortcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'locationLabels', 'locations',  [], config) + "</td></tr>"
-                result += ('<tr><td class="shortcell">object labels @ %s</td><td class="shortcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'objectLabels', 'objects', [], config) + "</td></tr>"
+                result += ('<tr><td class="zcell">location labels @ %s</td><td class="zcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'locationLabels', 'locations',  [], config) + "</td></tr>"
+                result += ('<tr><td class="zcell">object labels @ %s</td><td class="zcell">' % printer[1]) + writeCommanderFile('test', printer[1], 'objectLabels', 'objects', [], config) + "</td></tr>"
             elapsedtime = time.time() - elapsedtime
-            result += '<tr><td class="shortcell">barcode check time</td><td class="shortcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+            result += '<tr><td class="zcell">barcode check time</td><td class="zcell">' + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
         except:
-            result += '<tr><td class="shortcell">barcode funtionality check</td><td class="shortcell"><span class="error">FAILED.</span></td></tr>'
+            result += '<tr><td class="zcell">barcode functionality check</td><td class="zcell"><span class="error">FAILED.</span></td></tr>'
     except:
-        result += '<tr><td class="shortcell">barcode funtionality check</td><td class="shortcell">skipped, not configured in config file.</td></tr>'
+        result += '<tr><td class="zcell">barcode functionality check</td><td class="zcell">skipped, not configured in config file.</td></tr>'
 
     elapsedtime = time.time()
     # rest check...
     elapsedtime = time.time() - elapsedtime
-    result += '<tr><td class="shortcell">REST check</td><td class="shortcell">Not ready yet.</td></tr>'
-    #result += "<tr><td class="shortcell">REST check</td><td class="shortcell">" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
+    result += '<tr><td class="zcell">REST check</td><td class="zcell">Not ready yet.</td></tr>'
+    #result += "<tr><td class="zcell">REST check</td><td class="zcell">" + ('%8.2f' % elapsedtime) + " seconds</td></tr>"
 
-    result += '<tr><td class="shortcell">end server check</td><td class="shortcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
+    result += '<tr><td class="zcell">end server check</td><td class="zcell">' + time.strftime("%b %d %Y %H:%M:%S", time.localtime()) + "</td></tr>"
     result += '''<tr><td colspan="2"><hr/></td></tr>'''
 
     return '''<table><tbody><tr><td><h3>Server Status Check</h3></td></tr>''' + result + '''</tbody></table>'''
@@ -1286,7 +1286,7 @@ def doAuthorityScan(form, config):
     print """</table>"""
     print """<hr/>"""
     print """<table width="100%">"""
-    print """<tr><td colspan="2"><b>Summary Statistics</b></tr>"""
+    print """<tr><td colspan="2"><b>Summary Statistics (experimental and unverified!)</b></tr>"""
 
     for s in sorted(statistics.keys()):
         print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
@@ -2049,21 +2049,16 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
-            #    sys.stderr.write(' e: %s\n' % e.text)
+                #print '%s, %s<br>' % (e.tag, e.text)
+                #sys.stderr.write(' e: %s\n' % e.text)
             if alreadyExists(updateItems[relationType], Entries):
                 if not IsAlreadyPreferred(updateItems[relationType], Entries):
                     message += "%s=%s;" % (relationType,updateItems[relationType])
+                #print 'already exists: %s<br>' % updateItems[relationType]
                 continue
             new_element = etree.Element(relationType)
             new_element.text = updateItems[relationType]
             metadata.insert(0,new_element)
-            if Entries:
-                for entry in Entries:
-                    print "first loop"
-                    print '%s, %s<br>' % (entry.tag, entry.text)
-                Entries.insert(0, new_element)
-            else:
-                metadata.insert(0, new_element)
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
@@ -2356,6 +2351,7 @@ def formatInfoReviewRow(form, link, rr, link2):
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
+
     if fieldSet == 'namedesc':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text"  size="60" name="onm.user"></td>
 </tr><tr><th>Brief Description</th><td class="zcell"><textarea cols="78" rows="7" name="bdx.user"></textarea></td>
@@ -2382,12 +2378,15 @@ def formatInfoReviewForm(form):
 </tr><tr><th>Brief Description</th><td class="zcell"><textarea cols="60" rows="4" name="bdx.user"></textarea></td>
 </tr>"""
     elif fieldSet == 'objtypecm':
+        objtypes, selected = cswaConstants.getObjType(form, 'user', '')
+        collmans, selected = cswaConstants.getCollMan(form, 'user', '')
+
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
 </tr><tr><th>Count</th><td class="veryshortinput"><input class="veryshortinput" type="text" name="ocn.user"></td>
-</tr><tr><th>Object Type</th><td><td class="zcell"><input class="xspan" type="text" size="60" name="ot.user"></td></td>
-</tr><tr><th>Collection Manager</th><td><td class="zcell"><input class="xspan" type="text" size="60" name="collMan.user"></td></td>
+</tr><tr><th>Object Type</th><td class="zcell">%s</td>
+</tr><tr><th>Collection Manager</th><td class="zcell">%s</td>
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
-</tr>"""
+</tr>""" % (objtypes, collmans)
 
 
 def formatError(cspaceObject):
