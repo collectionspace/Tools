@@ -313,7 +313,9 @@ ac.acquisitionreferencenumber accNum,
 donor.item pdRefName,
 ac.id accID,
 h9.name accCSID,
-cp.inventoryCount
+cp.inventoryCount,
+cc.collection,
+rd.item
 
 FROM loctermgroup l
 
@@ -354,6 +356,8 @@ FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionob
 FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
+
+left outer join collectionobjects_common_responsibledepartments rd on (rd.id=cc.id and rd.pos=0)
 
 WHERE 
    l.termdisplayName = '""" + str(location) + """'
