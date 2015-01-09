@@ -380,15 +380,17 @@ def selectWebapp(form):
 
     for museum in webapps:
         line += '<td valign="top"><table><tr><td colspan="3"><h2>%s</h2></td></tr><tr><th>Web App</th><th colspan="2">Deployment</th></tr>\n' % museum
-        for webapp in webapps[museum]['apps'].keys():
+        listOfWebapps = sorted(webapps[museum]['apps'].keys())
+        for webapp in listOfWebapps:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
             line += '<tr><th>%s</th>' % apptitle
             for deployment in ['Prod', 'Dev']:
+                available = ''
                 #available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapps[museum]['cfgs'][webapp] + deployment.replace('Prod','V321'), webapp + deployment)
                 if os.path.isfile(os.path.join('../cfgs',webapps[museum]['apps'][webapp][1] + deployment + '.cfg')):
-                    available = serverlabels['%s.%s.%s' % (museum,webapp,deployment)]
-                else:
-                    available = ''
+                    label = '%s.%s.%s' % (museum,webapp,deployment)
+                    if label in serverlabels:
+                        available = serverlabels['%s.%s.%s' % (museum,webapp,deployment)]
                 line += ' <td>%s</td>\n' % available
             line += '</tr>'
         line += '</table></td>\n'
@@ -1023,7 +1025,7 @@ if __name__ == '__main__':
 
     # all the following return HTML)
     result += '<h2>Dropdowns</h2><table border="1">'
-    result += handleResult(getAppOptions('pahma'),'getAppOptions')
+    #result += handleResult(getAppOptions('pahma'),'getAppOptions')
     result += handleResult(getAltNumTypes(form, 'test-csid', 'attributed pahma number'),'getAltNumTypes')
     result += handleResult(getHandlers(form,'bampfa'),'getHandlers: bampfa')
     result += handleResult(getHandlers(form,''),'getHandlers')

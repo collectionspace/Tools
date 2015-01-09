@@ -2690,7 +2690,8 @@ def starthtml(form, config):
     <a target="%s" class="littlebutton" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a target="help" href="%s">Help</a>
-    ''' % ('switchapp', programName + 'switchapp', 'switch app', 'https://dev.cspace.berkeley.edu/webappmanual/webappmanual.html')
+    ''' % ('switchapp', programName + 'switchapp', 'switch app',
+           'https://dev.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>
