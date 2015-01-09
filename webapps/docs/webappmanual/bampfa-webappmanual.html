@@ -81,7 +81,7 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
             <td style="page-break-before:avoid">
               <hr/>
               <div><a href="2-pm-before.png"><img src="2-pm-before.png" width="600px"/></a></div>
-              <p>This webapp allows registrars, collections managers, and conservators to record the movement of a specific range of Museum numbers to a new storage location (and a new crate, if so desired). Once the user has entered a range of Museum numbers, a new destination/storage location, a reason, and a handler and clicked "Search", all objects in that range of Museum numbers are displayed, along with their object names, counts, and current locations. The user can choose to exclude any objects in this range from the move by deselecting those objects using the provided checkboxes. Once "Move Selected Objects" is clicked, all non-excluded displayed objects will be recorded as having been moved to the new storage location.</p>
+              <p>This webapp allows registrars, collections managers, and conservators to record the movement of a box or other container&#x2014;and all of its contained objects&#x2014;to a new storage location. The user must specify the box, crate, or container name, its current storage location, and the desired new storage location. The user can choose to exclude any objects from the planned move (for instance, if objects were removed just prior to the planned move) by selecting the "Not Found" radio button.  Once "Move Objects" is clicked, all displayed objects not marked as "Not Found" will be recorded as having been moved to the new storage location, while remaining in their current box. Objects marked as "Not Found" will have their new location set to "Not Found," and will have to have their actual current location manually set in the CSpace UI. This webapp can also be used to inventory the contents of a box or crate, as it performs the same functionality as the Systematic Inventory webapp, but allows selection of a single box, rather than all boxes and all objects at a specific location.</p>
             </td>
           </tr>
           <tr>
@@ -181,7 +181,6 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
       <h4>Inputs and Outputs</h4>
       <ul>
         <li>A set of files, selected via the Browse button</li>
-        <li>"Overide" values, if needed</li>
       </ul>
       <h4>Remarks</h4>
       <ul>
