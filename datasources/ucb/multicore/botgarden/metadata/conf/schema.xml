@@ -224,6 +224,15 @@
     <copyField source="flowercolor_s" dest="flowercolor_txt"/>
     <copyField source="determinationnoauth_s" dest="determinationnoauth_txt"/>
     <copyField source="reasonformove_s" dest="reasonformove_txt"/>
+    <copyField source="vouchers_s" dest="vouchers_txt"/>
+    <copyField source="vouchercount_s" dest="vouchercount_txt"/>
+    <copyField source="collcounty_ss" dest="collcounty_txt"/>
+    <copyField source="collstate_ss" dest="collstate_txt"/>
+    <copyField source="collcountry_ss" dest="collcountry_txt"/>
+    <copyField source="conservationinfo_ss" dest="conservationinfo_txt"/>
+    <copyField source="conserveorg_ss" dest="conserveorg_txt"/>
+    <copyField source="conservecat_ss" dest="conservecat_txt"/>
+    <copyField source="voucherlist_ss" dest="voucherlist_txt"/>
 
    <copyField source="*_s" dest="text"/>
    <copyField source="*_ss" dest="text"/>
