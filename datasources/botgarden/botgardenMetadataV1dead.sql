@@ -53,7 +53,7 @@ select
     lg.localitysource as CoordinateSource_s,
     lg.coorduncertainty as CoordinateUncertainty_s,
     lg.coorduncertaintyunit as CoordinateUncertaintyUnit_s,
-    
+
 case when (tn.family is not null and tn.family <> '')
      then regexp_replace(tn.family, '^.*\)''(.*)''$', '\1')
 end as family_s,
@@ -65,12 +65,25 @@ case when (lg.fieldlocplace is not null and lg.fieldlocplace <> '') then regexp_
      when (lg.fieldlocplace is null and lg.taxonomicrange is not null) then 'Geographic range: '||lg.taxonomicrange
 end as locality_s,
 h1.name as csid_s,
-con.rare as rare_s,
-cob.deadflag as deadflag_s,
+case when (con.rare = 'true') then 'yes' else 'no' end as rare_s,
+case when (cob.deadflag = 'true') then 'yes' else 'no' end as deadflag_s,
 cob.flowercolor as flowercolor_s,
 regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
-mc.reasonformove as reasonformove_s
+mc.reasonformove as reasonformove_s,
 
+-- CONCAT(pag.conservationgorganization,': ',pag.conservationcategory) as conservationinfo_s)
+-- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationgorganization, '^.*\)''(.*)''$', '\1') as conserveorg_ss
+-- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationcategory, '^.*\)''(.*)''$', '\1') as conservecat_ss
+'International Union for Conservation of Nature and Natural Resources - 1997: EN - IUCN-1997,California Native Plant Society: 1B.1 - CNPS' as conservationinfo_ss,
+'International Union for Conservation of Nature and Natural Resources - 1997,California Native Plant Society' as conserveorg_ss,
+'1B.1 - CNPS,EN - IUCN-1997' as conservecat_ss,
+
+--lc.loanoutnumber as vouchernumber_s,
+--regexp_replace(lc.borrower, '^.*\)''(.*)''$', '\1') as voucherinstitution_ss,
+
+'yes' as vouchers_s,
+'1' as vouchercount_s,
+'voucher1,voucher2' as voucherlist_ss
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
@@ -108,4 +121,13 @@ join collectionspace_core core on (core.id=co.id and core.tenantid=35)
 join misc misc2 on (misc2.id = co.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
-left outer join taxon_naturalhistory tn on (tc.id=tn.id) 
+left outer join taxon_naturalhistory tn on (tc.id=tn.id)
+
+-- join plantattributesgroup pag on (pag.id = xx.id)
+
+--join hierarchy h3 on (co.id=h3.id)
+--join relations_common r2 on (h3.name=r2.subjectcsid and r2.objectdocumenttype='Loanout')
+--join hierarchy h4 on (r2.objectcsid=h4.name)
+--join loansout_common lc on (lc.id = h4.id)
+--join misc misc3 on (misc3.id = lc.id and misc3.lifecyclestate <> 'deleted') -- voucher not deleted
+
