@@ -23,11 +23,11 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
     <div style="width: 97%">
       <h3 class="subheader">Introduction</h3>
       <p>The webapps are a suite of browser-based tools which access the CollectionSpace database to provide critical functionality not provided by the "regular" interface.</p>
-      <p>In general, the webapps operate on sets of records, a set
-  being defined as "all objects in a range of Museum numbers", e.g.,
+      <p>In general, the webapps operate on <i>sets of records</i>, a set
+  being defined as something like "all objects in a range of Museum numbers", e.g.,
   "1-100 to 1-105a", or "all objects in a location or sequence of
   locations" (e.g. "Kroeber 51A, 500, 13" to "Kroeber 51A, 500,
-  23"). Typical operations performed are updating the data for those sets of records, or creating move or inventory actions for them.</p>
+  23"). Typical operations performed are updating the data for sets of records, or creating move or inventory actions for them.</p>
       <p>Besides move and data update operations, a few other webapps provide a means to print barcodes and view database content (e.g., authority hierarchies) in useful ways.</p>
       <p>There are four classes of webapps in use at PAHMA:</p>
       <ol>
@@ -99,6 +99,41 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
           </td>
         </tr>
       </table>
+      <p>Don't forget to read up on the <a href="#foibles">gotchas!</a> to be found in these webapps.</p>
+      
+      <p>Click <a href="pahma-webapps-manual.pdf">here</a> for a PDF version of this document.</p>
+    
+      <a id="login"/>
+        <h3 class="subheader">Getting to the Webapps</h3>
+        <table width="100%" border="0">
+          <tr>
+            <td style="vertical-align:top">
+              <h4>Logging in</h4>
+              <ul>
+                <li>Visit: 
+      <a target="new" href="https://dev.cspace.berkeley.edu/cgi-bin/cswaMainNV.py">https://dev.cspace.berkeley.edu/cgi-bin/cswaMainNV.py</a></li>
+
+  <p/>
+  <li>You will need login in two steps:</li>
+  <p/>
+  <li>First, you will see an <i>Authentication Required</i> dialog box like the one shown above right. Login using the
+  "shared page protection login/password." (I.e. there is a single,
+  common login and password that everyone uses to get to the starting
+  page. Ask around if you don't know it.</li>
+    <li>Now you should see the "landing page" at right, showing the
+  various webapps that are available.</li>
+  <li><span style="color:green">Green</span> indicates a Development
+  webapp: Harmless! Feel free to play around and experiment!</li>
+    <li><span style="color:red">Red</span> indicates a Production webapp: Do real work here.</li>
+  <li>Clicking on one of the colored links will bring you to the
+  desired webapp as shown below at right. Now, login with your own
+  CSpace credentials.</li>
+  <p/>
+  <li>...And begin to enjoy using the webapps!</li>
+</ul></td><td style="vertical-align:middle;text-align:center"><img src="authenticationrequired.png" width="250px"/><p/>
+<img style="border:none" src="splashpage.png" width="400px"/><p/>
+<img style="border:none" src="webapplogin.png" width="400px"/></td></tr></table>
+
       <h3 class="subheader">Short Description of Each Webapp</h3>
       <p>A screenshot of each of these is provided below with a short description of its operation.  </p>
       <center>
@@ -237,24 +272,7 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
           </tr>
         </table>
       </center>
-      <h3 class="subheader">Foibles and Caveats</h3>
-      The webapps have a number of foibles you should know about: 
-      <ul>
-        <li>Term matching for authority fields, e.g. Field Collection Place or Ethnographic Group may include terms from other vocabularies and non-preferred terms (however, deleted terms no longer show up.) In fact, the selection algorithm is a bit complicated. </li>
-        <li>Term matching for museum numbers is on the literal value of the object number, but the range is calculated on the basis of the museum number sort field (which you cannot see, except when viewing the catalog record). </li>
-        <li>For locations, however, both matching and ranges are based on the literal value (Locations do not have a sort field, they sort &#x201C;as themselves&#x201D;.) </li>
-        <li>You do not have to enter an End Location. If you don&#x2019;t the app will use the Start Location and fill it in for you. </li>
-        <li>Most of the webapps have a limit of 500 locations in a range, and 500 objects in a location. The Packing List is the exception: it will try to render the whole museum if you ask it. This value, incidentally, is based solely on the limitations of the &#x201C;average web browser&#x201D;.</li>
-      </ul>
-      <a id="login"/>
-        <h3 class="subheader">Getting to the Webapps</h3>
-        <table width="100%" border="0">
-          <tr>
-            <td>
-              <h4>Logging in</h4>
-              <ul>
-                <li>Visit: 
-      <a target="new" href="https://dev.cspace.berkeley.edu/cgi-bin/cswaMainNV.py">https://dev.cspace.berkeley.edu/cgi-bin/cswaMainNV.py</a></li><li>You will need login in two steps</li><li>First, login using the shared page protection login/password.</li><li>Then, login with your CSpace credentials.</li></ul><h4>Selecting a webapp</h4><ul><li>You should now see the "landing page" at right</li><li>Red indicates a Production webapp</li><li>Red indicates a Development webapp</li><li>Pick the app you want to use by clicking on the link</li></ul></td><td><img src="01.png" width="500px"/></td></tr></table>
+	<h2></h2>
       <a id="si"/>
         <h3 class="subheader">Systematic Inventory: Step 1, Initial Data Entry</h3>
         <img src="07.png" width="800px"/> 
@@ -549,6 +567,18 @@ div { padding-right: 20px; padding-bottom: 10px; float: left; }
         <li>When it sees your file, it reads the data from it and prints the label</li>
         <li>If you think there is a problem, keep the name of the file around for problem analysis.</li>
       </ul>
+
+      <a id="foibles"/>
+      <h3 class="subheader">Foibles and Caveats</h3>
+      The webapps have a number of foibles you should know about: 
+      <ul>
+        <li>Term matching for authority fields, e.g. Field Collection Place or Ethnographic Group may include terms from other vocabularies and non-preferred terms (however, deleted terms no longer show up.) In fact, the selection algorithm is a bit complicated. </li>
+        <li>Term matching for museum numbers is on the literal value of the object number, but the range is calculated on the basis of the museum number sort field (which you cannot see, except when viewing the catalog record). </li>
+        <li>For locations, however, both matching and ranges are based on the literal value (Locations do not have a sort field, they sort &#x201C;as themselves&#x201D;.) </li>
+        <li>You do not have to enter an End Location. If you don&#x2019;t the app will use the Start Location and fill it in for you. </li>
+        <li>Most of the webapps have a limit of 500 locations in a range, and 500 objects in a location. The Packing List is the exception: it will try to render the whole museum if you ask it. This value, incidentally, is based solely on the limitations of the &#x201C;average web browser&#x201D;.</li>
+      </ul>
+      
     </div>
   </body>
 </html>
