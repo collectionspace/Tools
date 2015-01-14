@@ -335,20 +335,13 @@ def selectWebapp(form):
                 serverlabelcolor = config.get('info', 'serverlabelcolor')
                 serverlabels['%s.%s.%s' % (institution,updateType,serverlabel)] = '''<span style="cursor:pointer;color:%s;"><a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a></span>''' % (
                     serverlabelcolor, serverlabel, programName + configfile + serverlabel, serverlabel)
-                if institution in webapps:
-                    webapps[institution]['apps'][updateType] = [serverlabel,configfile]
-                else:
+                if not institution in webapps.keys():
                     webapps[institution] = {'apps': {}}
+                webapps[institution]['logo'] = logo
+                webapps[institution]['apps'][updateType] = [serverlabel,configfile]
                 apptitles[updateType] = apptitle
             except:
                 badconfigfiles += '<tr><td>%s</td></tr>' % f
-
-    #exceptions = { "barcodeprint": "BarcodePrint",
-    #               "upload": "BarcodeUpload",
-    #               "keyinfo": "KeyInfoRev",
-    #               "packlist": "PackingList",
-    #               "ucbwebapp": "SystematicInventory" }
-
 
     line = '''Content-type: text/html; charset=utf-8
 
@@ -378,19 +371,19 @@ def selectWebapp(form):
 <p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
         "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
 
-    for museum in webapps:
-        line += '<td valign="top"><table><tr><td colspan="3"><h2>%s</h2></td></tr><tr><th>Web App</th><th colspan="2">Deployment</th></tr>\n' % museum
+    for museum in sorted(webapps.keys()):
+        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2>%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
         listOfWebapps = sorted(webapps[museum]['apps'].keys())
         for webapp in listOfWebapps:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
-            line += '<tr><th>%s</th>' % apptitle
+            line += '<tr class="imagecell" ><th>%s</th>' % apptitle
             for deployment in ['Prod', 'Dev']:
                 available = ''
                 #available = '''<a target="%s" onclick="$('#ucbwebapp').attr('action', '%s').submit(); return false;">%s</a>''' % (deployment, programName + webapps[museum]['cfgs'][webapp] + deployment.replace('Prod','V321'), webapp + deployment)
                 if os.path.isfile(os.path.join('../cfgs',webapps[museum]['apps'][webapp][1] + deployment + '.cfg')):
                     label = '%s.%s.%s' % (museum,webapp,deployment)
                     if label in serverlabels:
-                        available = serverlabels['%s.%s.%s' % (museum,webapp,deployment)]
+                        available = serverlabels[label]
                 line += ' <td>%s</td>\n' % available
             line += '</tr>'
         line += '</table></td>\n'
@@ -400,7 +393,7 @@ def selectWebapp(form):
     line += '''
 </tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, revised 5 January 2015</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 14 January 2015</h4>''' + payload + '''
 </form>
 </body>
 </html>'''
