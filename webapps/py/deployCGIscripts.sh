@@ -3,6 +3,8 @@
 #
 # copy files to appropriate directories
 #
+set -e
+#
 if [ -z "$1" ]
   then
     echo "Please specify GitHub branch as an argument"
@@ -36,7 +38,6 @@ cp -r ../extras/*.gif /var/www/icons/
 
 cd /var/www/cgi-bin/
 chmod a+x cswaMain.py
-cd .. && chgrp -R developers cswa*.py
 
 #Don't know about the other files, i.e.
 #cp checkPlace.py      /var/www/cgi-bin/
