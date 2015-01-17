@@ -132,8 +132,8 @@ def infoHeaders(fieldSet):
         return "<table><tr>DEBUG</tr>"
 
 def getProhibitedLocations(config):
-    #fileName = config.get('files','prohibitedLocations.csv')
-    fileName = 'prohibitedLocations.csv'
+    #fileName = config.get('files','prohibitedLocations')
+    fileName = (os.path.join('..','cfgs','prohibitedLocations.csv'))
     locList = []
     try:
         with open(fileName, 'rb') as csvfile:
@@ -141,7 +141,7 @@ def getProhibitedLocations(config):
             for row in csvreader:
                 locList.append(row[0])
     except:
-        print 'FAIL'
+        print 'FAILED to load prohibited locations'
         raise
 
     return locList
