@@ -105,6 +105,9 @@ To install these webapps (these steps have never been performed in this sequence
     $ ls /var/www
     cfgs  cgi-bin css  html  icons  images  js
 
+    there is a script, makeInstallDirs.sh in py/ that will create these if they don't exist.
+    (It will not check permissions or SELinux tags...)
+
 - git the webapps directory the target host (Linux) ("git clone https://github.com/cspace-deployment/Tools")
 - cd Tools/webapps/py; run the deplopment script ("master" is the branch to checkout and deploy; might change!)
 
@@ -137,6 +140,15 @@ If you have problems, here's a very short troubleshooting guide:
 - if you open the webapp in a browser and see nothing, or an incomplete page, look in the webserver error (often
   something like /var/logs/httpd/error_log).
 - indeed, in general, consult the log if you have problems: the program write messages to stderr from time to time.
+
+Development and Testing
+
+There are provisions for making a "test version" of the scripts for testing. It is pretty raw: it simply makes copies
+of the existing scripts in the cgi-bin, appending "NV" to the file name (and changing import statements internally).
+This is done by a script py/makeNV.sh which expects to make these "NV versions" and scp them directly to dev.cspace.
+This provides a means to execute a development version of the code in the production milieu: it uses the Prod and Dev
+config files, etc. etc. Of course, there is no reason why this primitive method of development should be followed: the
+code *could* simply be deployed on a development server in a development environment.
 
 Caveat Utilizator!
 
