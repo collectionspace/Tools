@@ -80,6 +80,8 @@ time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&he
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
+#
 rm 4solr*.csv.gz
 gzip 4solr.*.csv
+#
 date
