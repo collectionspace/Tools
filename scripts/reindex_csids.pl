@@ -13,7 +13,7 @@ my $batch_csid = 'REDACTED';
 my $batch_user = 'REDACTED';
 my $batch_password = 'REDACTED';
 
-my $batch_size = 500;
+my $batch_size = 100;
 my $start_batch = 1;
 my $stop_batch = 0;
 
@@ -61,7 +61,7 @@ while (!$complete) {
 	
 	$record_count = $record_count + $num_affected;
 	
-	if ($num_affected != $batch_size) {
+	if (scalar(@batch_csids) != $batch_size) {
 		$complete = 1;
 	}
 	
