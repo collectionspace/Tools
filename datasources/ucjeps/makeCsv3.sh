@@ -23,4 +23,8 @@ wc -l *.csv
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=;&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=;&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=;&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+#
+rm 4solr*.csv.gz
+gzip 4solr.*.csv
+#
 date
