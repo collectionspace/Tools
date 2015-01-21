@@ -65,9 +65,9 @@ E.g. entering:
 
     http://dev.cspace.berkeley.edu/cgi-bin/cswaMain.py?webapp=pahma_Packinglist_Dev
 
-will display the initial screen for the UCB-PAHMA webapp, in development mode, as specified in the config file named ../cfgs/packlistDev.cfg.
+will display the initial screen for the UCB-PAHMA webapp, in development mode, as specified in the config file named ../cfgs/pahma_Packinglist_Dev.cfg.
 
-The script communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace
+The webapps communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace
 server to and credentials a configured in the .cfg file.
 
 The config file specifies:
