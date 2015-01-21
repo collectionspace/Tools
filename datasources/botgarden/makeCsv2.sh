@@ -24,8 +24,7 @@ rm d3.csv
 ##############################################################################
 # make a unique sequence number for id
 ##############################################################################
-perl -pe '$i++;print $i . "\t"' metadata.csv > m
-mv m metadata.csv
+perl -i -pe '$i++;print $i . "\t"' metadata.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
@@ -44,6 +43,7 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
+perl -i -pe 's/International Union for Conservation of Nature and Natural Resources/IUCN/g' 4solr.$HOST.metadata.csv
 
 rm d7.csv
 wc -l *.csv

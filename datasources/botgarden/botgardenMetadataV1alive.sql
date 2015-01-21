@@ -71,13 +71,13 @@ cob.flowercolor as flowercolor_s,
 regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
 mc.reasonformove as reasonformove_s,
 
+utils.findconserveinfo(tc.refname) as conservationinfo_ss,
+utils.findconserveorg(tc.refname) as conserveorg_ss,
+utils.findconservecat(tc.refname) as conservecat_ss,
+
 -- CONCAT(pag.conservationgorganization,': ',pag.conservationcategory) as conservationinfo_s)
 -- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationgorganization, '^.*\)''(.*)''$', '\1') as conserveorg_ss
 -- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationcategory, '^.*\)''(.*)''$', '\1') as conservecat_ss
-'International Union for Conservation of Nature and Natural Resources - 1997: EN - IUCN-1997|California Native Plant Society: 1B.1 - CNPS' as conservationinfo_ss,
-'International Union for Conservation of Nature and Natural Resources - 1997|California Native Plant Society' as conserveorg_ss,
-'1B.1 - CNPS|EN - IUCN-1997' as conservecat_ss,
-
 --lc.loanoutnumber as vouchernumber_s,
 --regexp_replace(lc.borrower, '^.*\)''(.*)''$', '\1') as voucherinstitution_ss,
 
