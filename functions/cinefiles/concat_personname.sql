@@ -1,83 +1,89 @@
+-- concat_personname function used by Cinefiles denorm
+--
+-- this function creates a formated name string including lastname, firstname,
+-- middlename and name additions, date of birth, city, state, and country
+-- take a persons_common.shortid for it's only argument
+--
+-- Modified, GLJ 8/5/2014 to use a modified copy of personsnamegroup
+
 CREATE OR REPLACE FUNCTION cinefiles_denorm.concat_personname (shortid VARCHAR)
-RETURNS VARCHAR
-AS
+RETURNS VARCHAR AS
 $$
-
 DECLARE
-        namestring VARCHAR(1000);
-        lastname varchar(100);
-        restofname varchar(100);
-        birthdeath varchar(100);
-        cityname varchar(100);
-        statename varchar(100);
-        countryname varchar(100);
-        errormsg varchar(500);
-
+   namestring VARCHAR(1000);
+   lastname varchar(100);
+   restofname varchar(100);
+   birthdeath varchar(100);
+   cityname varchar(100);
+   statename varchar(100);
+   countryname varchar(100);
+   errormsg varchar(500);
 BEGIN
-
-select into
-        lastname,
-        restofname,
-        birthdeath,
-        cityname,
-        statename,
-        countryname
-coalesce(ptg.surname, ''),
-trim(coalesce(ptg.forename || ' ', '') ||
-        trim(coalesce(ptg.middlename || ' ', '') || coalesce(ptg.nameadditions, ''))),
-trim('-' from coalesce(sdgb.datedisplaydate, '') || '-' || coalesce(sdgd.datedisplaydate, '')),
-coalesce(pcf.birthcity, ''),
-coalesce(pcf.birthstate, ''),
-coalesce(getdispl(pc.birthplace), '')
-from persons_common pc
-left outer join hierarchy hptg on (
+SELECT INTO
+   lastname,
+   restofname,
+   birthdeath,
+   cityname,
+   statename,
+   countryname
+   coalesce(ptg.surname, ''),
+   trim(coalesce(ptg.forename || ' ', '') ||
+      trim(coalesce(ptg.middlename || ' ', '') ||
+      coalesce(ptg.nameadditions, ''))),
+   trim('-' from coalesce(sdgb.datedisplaydate, '') || '-' ||
+      coalesce(sdgd.datedisplaydate, '')),
+   coalesce(pcf.birthcity, ''),
+   coalesce(pcf.birthstate, ''),
+   coalesce(getdispl(pc.birthplace), '')
+FROM persons_common pc
+   LEFT OUTER JOIN hierarchy hptg ON (
         pc.id = hptg.parentid
-        and hptg.primarytype = 'personTermGroup'
-        and hptg.pos = 0)
-left outer join persontermgroup ptg on (hptg.id = ptg.id)
-left outer join hierarchy hsdgb on (
+        AND hptg.primarytype = 'personTermGroup'
+        AND hptg.pos = 0)
+   LEFT OUTER JOIN cinefiles_denorm.persontermgroup ptg ON (hptg.id = ptg.id)
+   LEFT OUTER JOIN hierarchy hsdgb ON (
         pc.id = hsdgb.parentid
-        and hsdgb.primarytype = 'structuredDateGroup'
-        and hsdgb.name = 'persons_common:birthDateGroup')
-left outer join hierarchy hsdgd on (
+        AND hsdgb.primarytype = 'structuredDateGroup'
+        AND hsdgb.name = 'persons_common:birthDateGroup')
+   LEFT OUTER JOIN hierarchy hsdgd ON (
         pc.id = hsdgd.parentid
-        and hsdgd.primarytype = 'structuredDateGroup'
-        and hsdgd.name = 'persons_common:deathDateGroup')
-left outer join structureddategroup sdgb on (hsdgb.id = sdgb.id)
-left outer join structureddategroup sdgd on (hsdgd.id = sdgd.id)
-left outer join persons_cinefiles pcf on (pc.id = pcf.id)
-where pc.shortidentifier = $1;
+        AND hsdgd.primarytype = 'structuredDateGroup'
+        AND hsdgd.name = 'persons_common:deathDateGroup')
+   LEFT OUTER JOIN structureddategroup sdgb ON (hsdgb.id = sdgb.id)
+   LEFT OUTER JOIN structureddategroup sdgd ON (hsdgd.id = sdgd.id)
+   LEFT OUTER JOIN persons_cinefiles pcf ON (pc.id = pcf.id)
+WHERE pc.shortidentifier = $1;
 
-if not found then
-    return null;
-elseif lastname = '' then
-        errormsg := 'Error: no last name';
-        raise exception '%', errormsg;
-else
-        namestring := lastname;
-end if;
+IF NOT FOUND THEN
+   RETURN null;
+ELSEIF lastname = '' THEN
+   errormsg := 'Error: no last name';
+   raise exception '%', errormsg;
+ELSE
+   namestring := lastname;
+END IF;
 
-if restofname != '' then
-        namestring := namestring || ', ' || restofname;
-end if;
+IF restofname != '' THEN
+   namestring := namestring || ', ' || restofname;
+END IF;
 
-if birthdeath != '' then
-        namestring := namestring || ' (' || birthdeath || ')';
-end if;
+IF birthdeath != '' THEN
+   namestring := namestring || ' (' || birthdeath || ')';
+END IF;
 
-if cityname != '' then
-        namestring := namestring || ', ' || cityname;
-end if;
+IF cityname != '' THEN
+   namestring := namestring || ', ' || cityname;
+END IF;
 
-if statename != '' then
-        namestring := namestring || ', ' || statename;
-end if;
+IF statename != '' THEN
+   namestring := namestring || ', ' || statename;
+END IF;
 
-if countryname != '' then
-        namestring := namestring || ', ' || countryname;
-end if;
+IF countryname != '' THEN
+   namestring := namestring || ', ' || countryname;
+END IF;
 
-return namestring;
+RETURN namestring;
 
 END;
 

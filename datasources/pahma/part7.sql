@@ -1,12 +1,13 @@
-SELECT DISTINCT cc.id, STRING_AGG(DISTINCT mpg.measuredpart 
-        ||CASE WHEN (dim.dimension IS NOT NULL) THEN '—' ELSE '' END
-        ||CASE WHEN (dim.dimension IS NOT NULL AND dim.dimension <>0) THEN dim.dimension ELSE '' END
-        ||CASE WHEN (dim.dimension IS NOT NULL AND dim.dimension <>0 AND dim.value IS NOT NULL AND dim.value <>0) THEN ' ' ELSE '' END
-        ||CASE WHEN (dim.dimension IS NOT NULL AND dim.dimension <>0 AND dim.value IS NOT NULL AND dim.value <>0) THEN dim.value END
-        ||CASE WHEN (dim.dimension IS NOT NULL AND dim.dimension <>0 AND dim.measurementunit IS NOT NULL AND dim.measurementunit <>'') THEN ' (' || dim.measurementunit || ')' ELSE '' END, '␥') AS "objdimensions_ss"
+SELECT DISTINCT cc.id,STRING_AGG((CASE WHEN dim.value = 0 OR dim.value IS NULL OR dim.measurementunit IS NULL THEN ''
+WHEN mpg.measuredpart IS NULL AND dim.dimension IS NULL THEN dim.value || ' ' || dim.measurementunit
+WHEN mpg.measuredpart IS NULL THEN dim.dimension || ' ' || dim.value || ' ' || dim.measurementunit
+WHEN dim.dimension IS NULL THEN mpg.measuredpart || '— ' || dim.value || ' ' || dim.measurementunit
+ELSE mpg.measuredpart || '— ' || dim.dimension || ' ' || dim.value || ' ' || dim.measurementunit
+END), '␥') AS "objdimensions_ss"
+
 FROM collectionobjects_common cc
-JOIN hierarchy hdm ON (hdm.parentid=cc.id AND hdm.primarytype='measuredPartGroup')
-JOIN measuredpartgroup mpg ON (mpg.id=hdm.id AND mpg.measuredpart <> 'digitalImage')
+JOIN hierarchy hdm ON (cc.id=hdm.parentid AND hdm.primarytype='measuredPartGroup')
+JOIN measuredpartgroup mpg ON (mpg.id=hdm.id)
 JOIN hierarchy hdm2 ON (mpg.id=hdm2.parentid AND hdm2.primarytype='dimensionSubGroup')
 JOIN dimensionsubgroup dim ON (dim.id=hdm2.id AND dim.measurementunit <> 'pixels' AND dim.measurementunit <> 'bits')
 GROUP BY cc.id

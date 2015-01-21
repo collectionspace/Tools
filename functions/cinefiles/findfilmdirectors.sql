@@ -1,7 +1,9 @@
--- return concatenated string of film directors, taking filmId shortidentifier as input
+-- return concatenated string of film directors, filmId shortidentifier as input
 -- used in CineFiles denorm process
 -- CRH 2/22/2014
 -- CRH 4/8/2014 Getting person names: last, first middle additions
+
+-- Modified, GLJ 7/5/2014 to use a modified copy of persontermgroup
 
 create or replace function cinefiles_denorm.findfilmdirectors(text)
 returns text
@@ -30,7 +32,7 @@ LEFT OUTER JOIN creatorgroup cg
    ON (h2.id = cg.id)
 left outer join persons_common pc on (cg.creator=pc.refname)
 left outer join hierarchy h3 on (pc.id=h3.parentid and h3.name='persons_common:personTermGroupList' and h3.pos=0)
-left outer join persontermgroup ptg on (h3.id=ptg.id)
+left outer join cinefiles_denorm.persontermgroup ptg on (h3.id=ptg.id)
 WHERE wc.shortidentifier = $1
 ORDER BY h2.pos
 

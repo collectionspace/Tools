@@ -23,3 +23,4 @@ WHERE (co.objectnumber ~ '^[0-9]+$' ) and ccf.item is not null and ccf.item <> '
 order by wc.shortidentifier, cast(co.objectnumber as bigint);
 
 grant select on cinefiles_denorm.filmdocs to group reporters;
+grant select on cinefiles_denorm.filmdocs to group cinereaders;

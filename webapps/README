@@ -1,25 +1,52 @@
 PAHMA webapps
 
-v1.0 jbl 01/27/2013
+v1.1 jbl 07/21/2014
 
 Very short, terse, sketchy notes.
 
-Currently there are 5 webapps in use by PAHMA:
+Currently there are 14 webapps in use by PAHMA:
 
-SystematicInventory
-KeyInfoRev
-BarCodePrint
-BarCodeUpload
-PackingList
+Procedural webapps
 
-and two in development for UCBG:
+  Systematic Inventory
+  Move Object Range
+  Crate Move
+  Bulk Media Upload*
+
+Data update webapps
+
+  Key Information Review
+  Object Info Review
+  Object Details
+  Bulk Object Edit
+
+Reporting webapps
+
+  Packing List Report
+  Hierarchy Viewer
+  Collection Stats
+  Government Holdings
+  iReports Viewer*
+
+Barcode webapps
+
+  Barcode Scan File Upload
+  Barcode Label Generator
+
+* these two are Django webapps, in a different repo, not covered here.
+
+
+and three for UCBG:
 
 BedList
 LocationReport
+HierarchyViewer
 
 These are all implemented as a single python CGI script, cswaMain.py. 
 
-When this script (and its associated modules and config files) are installed in a directory that is execute-enabled for a webserver (e.g. in cgi-bin with a suitably configured Apache server), it will read the config specified in the "webapp=" parameter and perform the appropriate application activity.
+When this script (and its associated modules and config files) are installed in a directory that is execute-enabled for
+a webserver (e.g. in cgi-bin with a suitably configured Apache server), it will read the config specified in
+the "webapp=" parameter and perform the appropriate application activity.
 
 E.g. entering:
 
@@ -27,7 +54,8 @@ E.g. entering:
 
 will display the initial screen for the UCB-PAHMA webapp, in development mode, as specified in the config file named packlistDev.cfg. 
 
-The script communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace server to and credentials a configured in the .cfg file.
+The script communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace
+server to and credentials a configured in the .cfg file.
 
 The config file specifies:
 
@@ -40,7 +68,7 @@ The organization and values in the config files are pretty much self-explanatory
 
 To deploy (these steps have never been performed as a real deployment...):
 
-- git the webapps directory from to your local machine ("git clone 
+- git the webapps directory the target host (Linux) ("git clone ...")
 - cd cfg; change "xxxinsertpasswordherexxx" to appropriate values in the various cfg/.cfg files you intend to to use.
 - cd py;
 - ensure the required python modules are installed and available to scripts (pgdb, lxml, ConfigParser, perhaps others)
@@ -59,12 +87,18 @@ Of course, most of the webapps expect to access a CSpace system customized for P
 
 If you have problems, here's a very short troubleshooting guide:
 
-- once you have what you think is a working setup, ssh to the server, cd to the CGI directory and try to execute the main module from the command line:
-   $ python cswaMain.py "webapp=keyinfoDev"
+- once you have what you think is a working setup, ssh to the server, cd to the CGI directory and try to execute the
+  main module from the command line:
+
+  $ python cswaMain.py "webapp=keyinfoDev"
+
   this should display html on the screen. If it does not, it should display a helpful python error message!
-- if you open the webapp in a browser and see nothing, or an incomplete page, look in the webserver error (often something like /var/logs/httpd/error_log).
+- if you open the webapp in a browser and see nothing, or an incomplete page, look in the webserver error (often
+  something like /var/logs/httpd/error_log).
 - indeed, in general, consult the log if you have problems: the program write messages to stderr from time to time.
 
-This code runs on dev.cspace and has never been tried anywhere else. There is no formal testing or deployment apparatus beyond what is here. Many development choices were predicated on being self-sufficient and constrained by the security and resource environment present on the server on which it runs.
+This code runs on dev.cspace and has never been tried anywhere else. There is no formal testing or deployment apparatus beyond what is here.
+Many development choices were predicated on being self-sufficient and constrained by the security and resource environment present on the
+server on which it runs.
 
 Caveat Utilizator!

@@ -28,12 +28,16 @@
   adminPath: RequestHandler path to manage cores.  
     If 'null' (or absent), cores will not be manageable via request handler
   -->
+    <shardHandlerFactory name="shardHandlerFactory" class="HttpShardHandlerFactory">
+      <str name="urlScheme">${urlScheme:}</str>
+    </shardHandlerFactory>
   <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:8983}" hostContext="${hostContext:solr}">
-    <core name="pahma-images" instanceDir="pahma/images" />
     <core name="pahma-metadata" instanceDir="pahma/metadata" />
-    <core name="ucjeps-images" instanceDir="ucjeps/images" />
     <core name="ucjeps-metadata" instanceDir="ucjeps/metadata" />
-    <core name="botgarden-images" instanceDir="botgarden/images" />
     <core name="botgarden-metadata" instanceDir="botgarden/metadata" />
+    <core name="botgarden-propagations" instanceDir="botgarden/propagations" />
+    <core name="bampfa-metadata" instanceDir="bampfa/metadata" />
+    <core name="cinefiles-metadata" instanceDir="cinefiles/metadata" />
   </cores>
+        
 </solr>

@@ -14,7 +14,7 @@ timeoutcommand = 'set statement_timeout to 300000'
 
 def getnamesoversixtycharslong(config):
 
-    pahmadb  = pgdb.connect(config.get('connect','connect_string'))
+    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
