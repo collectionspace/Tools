@@ -206,6 +206,7 @@ def getReasons(form, institution):
         <select class="cell" name="reason">
         <options>
         <option value="None" default="yes">(none selected)</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(2015Inventory1422385313472)'2015 Inventory'" selected>2015 Inventory</option>
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason001)'Conservation'">Conservation</option>
 		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(DataCleanUp1416598052252)'Data Clean Up'">Data Clean Up</option>
 		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
