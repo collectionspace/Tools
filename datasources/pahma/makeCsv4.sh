@@ -39,7 +39,7 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g' > 4solr.$HOST.metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$HOST.metadata.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g' > errors.csv
 rm intermediate.csv
 ##############################################################################
@@ -47,13 +47,17 @@ rm intermediate.csv
 ##############################################################################
 time perl mergeObjectsAndMedia.pl 4solr.$HOST.media.csv 4solr.$HOST.metadata.csv > d6.csv
 ##############################################################################
+#  Obfuscate the lat-longs of sensitive sites
+##############################################################################
+time python obfuscateUSArchaeologySites.py d6.csv d7.csv
+##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid d6.csv > header4Solr.csv
+grep csid d7.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab)
 perl -i -pe 's/$/blob_ss/' header4Solr.csv
-grep -v csid d6.csv > d7.csv
-cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
+grep -v csid d7.csv > d8.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
@@ -64,7 +68,7 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
-rm d6.csv d7.csv
+rm d6.csv d7.csv d8.csv
 wc -l *.csv
 ##############################################################################
 # ok, now let's load this into solr...
@@ -80,8 +84,6 @@ time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&he
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
-#
 rm 4solr*.csv.gz
 gzip 4solr.*.csv
-#
 date
