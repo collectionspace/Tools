@@ -646,6 +646,7 @@ def getHeader(updateType, institution):
     <table><tr>
       <th>ID number </th>
       <th>Title</th>
+      <th>Artist</th>
       <th>Found</th>
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
