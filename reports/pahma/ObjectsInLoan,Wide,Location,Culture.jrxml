@@ -70,6 +70,7 @@ left outer join lendergroup lg on (lg.id=hlgl.id)
 
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=co.id and pef.pos=0)
 
+JOIN misc ms ON (co.id=ms.id AND ms.lifecyclestate <> 'deleted')
 WHERE rc1.subjectcsid = $P{csid}
 
 ORDER BY sort]]>

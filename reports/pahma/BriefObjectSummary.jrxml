@@ -64,6 +64,7 @@ left outer join hierarchy h4 on (co.id=h4.parentid and h4.pos=0 and h4.name='col
 left outer join assocpeoplegroup apg on (apg.id=h4.id)
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=co.id and pef.pos=0)
 
+JOIN misc ms ON (co.id=ms.id AND ms.lifecyclestate <> 'deleted')
 WHERE rc1.subjectcsid = $P{csid}
 
 ORDER BY sort,"currentlocation"]]>

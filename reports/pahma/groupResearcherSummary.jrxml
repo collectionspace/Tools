@@ -37,6 +37,7 @@ LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id an
 
 LEFT OUTER JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (co.id=fcp.id AND fcp.pos=0)
 
+JOIN misc ms ON (co.id=ms.id AND ms.lifecyclestate <> 'deleted')
 WHERE rc1.subjectcsid =$P{csid}
 
 ORDER BY cp.sortableobjectnumber]]>
