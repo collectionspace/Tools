@@ -1345,15 +1345,20 @@ def downloadCsv(form, config):
             places = []
 
         #rowcount = len(rows)
+
+        filename = 'packinglist%s.csv' % datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
         print 'Content-type: application/octet-stream; charset=utf-8'
-        print 'Content-Disposition: attachment; filename="packinglist.xls"'
+        print 'Content-Disposition: attachment; filename="%s"' % filename
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
             objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
             for o in objects:
                 if checkObject(places, o):
-                    writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
+                    if institution == 'bampfa':
+                        writer.writerow([o[x] for x in [0, 1, 3, 4, 6, 7, 9]])
+                    else:
+                        writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
     sys.stdout.flush()
     sys.stdout.close()
 
@@ -3177,7 +3182,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggestNV.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
