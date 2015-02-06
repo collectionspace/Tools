@@ -2214,7 +2214,7 @@ def formatRow(result, form, config):
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
