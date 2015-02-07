@@ -82,9 +82,11 @@ utils.findconservecat(tc.refname) as conservecat_ss,
 --lc.loanoutnumber as vouchernumber_s,
 --regexp_replace(lc.borrower, '^.*\)''(.*)''$', '\1') as voucherinstitution_ss,
 
-'yes' as vouchers_s,
+case when (utils.findvoucherinfo(h1.name) is not null)
+     then 'yes' else 'no'
+end as vouchers_s,
 '1' as vouchercount_s,
-'voucher1|voucher2' as voucherlist_ss
+utils.findvoucherinfo(h1.name) voucherlist_ss
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
