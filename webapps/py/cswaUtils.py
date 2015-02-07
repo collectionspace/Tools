@@ -205,7 +205,7 @@ def doComplexSearch(form, config, displaytype):
     #listAuthorities('taxon',     'TaxonTenant35',  form.get("ob.objectnumber"),config, form, displaytype)
     #listAuthorities('concepts',  'TaxonTenant35',  form.get("cx.concept"),     config, form, displaytype)
 
-    getTableFooter(config, displaytype)
+    getTableFooter(config, displaytype, '')
 
 
 def listAuthorities(authority, primarytype, authItem, config, form, displaytype):
@@ -233,9 +233,12 @@ def doLocationSearch(form, config, displaytype):
     except:
         raise
 
-    listSearchResults('locations', config, displaytype, form, rows)
+    hasDups = listSearchResults('locations', config, displaytype, form, rows)
 
-    if len(rows) != 0: getTableFooter(config, displaytype)
+    if hasDups:
+        getTableFooter(config, 'error', 'Please eliminate duplicates and try again!')
+        return
+    if len(rows) != 0: getTableFooter(config, displaytype, '')
 
 
 
@@ -288,7 +291,6 @@ def doProcedureSearch(form, config, displaytype):
             print '<input type="hidden" name="toCrate" value="%s">' % toCrate
             print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
-            #if len(rows) != 0: getTableFooter(config,displaytype)
 
 def doObjectSearch(form, config, displaytype):
     if not validateParameters(form, config): return
@@ -342,7 +344,6 @@ def doObjectSearch(form, config, displaytype):
             print '<input type="hidden" name="toCrate" value="%s">' % toCrate
             print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
-            #if len(rows) != 0: getTableFooter(config,displaytype)
 
 
 def doOjectRangeSearch(form, config, displaytype=''):
@@ -379,6 +380,7 @@ def doOjectRangeSearch(form, config, displaytype=''):
 def listSearchResults(authority, config, displaytype, form, rows):
     updateType = config.get('info', 'updatetype')
     institution = config.get('info','institution')
+    hasDups = False
 
     if not rows: rows = []
     rows.sort()
@@ -427,7 +429,14 @@ def listSearchResults(authority, config, displaytype, form, rows):
     if displaytype == 'list' or displaytype == 'select':
         rowtype = 'location'
         if displaytype == 'select': rowtype = 'select'
+        duplicates = []
         for r in rows:
+            if r[1] in duplicates:
+                hasDups = True
+                r.append('Duplicate!')
+            else:
+                r.append('')
+                duplicates.append(r[1])
             print formatRow({'boxtype': authority, 'rowtype': rowtype, 'data': r}, form, config)
 
     elif displaytype == 'nolist':
@@ -445,12 +454,16 @@ def listSearchResults(authority, config, displaytype, form, rows):
         print "</table>"
         #print """<input type="hidden" name="count" value="%s">""" % rowcount
 
+    return hasDups
 
-def getTableFooter(config, displaytype):
+
+def getTableFooter(config, displaytype, msg):
     updateType = config.get('info', 'updatetype')
 
     print """<table width="100%"><tr><td align="center" colspan="3"><hr></tr>"""
-    if displaytype == 'list':
+    if displaytype == 'error':
+        print """<tr><td align="center"><span style="color:red;"><b>%s</b></span></td></tr>""" % msg
+    elif displaytype == 'list':
         print """<tr><td align="center">"""
         button = 'Enumerate Objects'
         print """<input type="submit" class="save" value="%s" name="action"></td>""" % button
@@ -2167,8 +2180,8 @@ def formatRow(result, form, config):
         #return """<tr><td colspan="4" class="subheader">%s</td><td>%s</td></tr>""" % result['data'][0:1]
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
     elif result['rowtype'] == 'location':
-        return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % (
-            result['data'][0], result['data'][0])
+        return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a> <span style="color:red;">%s</span></td><td/></tr>''' % (
+            result['data'][0], result['data'][0], result['data'][-1])
     elif result['rowtype'] == 'select':
         rr = result['data']
         boxType = result['boxtype']
