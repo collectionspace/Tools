@@ -1107,8 +1107,11 @@ def doUpdateLocations(form, config):
             updateItems['crate'] = ''
             msg = "moved to 'Not Located'."
         try:
-            updateLocations(updateItems, config, form)
-            numUpdated += 1
+            if "not moved" in msg:
+                pass
+            else:
+                updateLocations(updateItems, config, form)
+                numUpdated += 1
         except:
             msg = '<span style="color:red;">problem updating</span>'
         print ('<tr>' + (4 * '<td class="ncell">%s</td>') + '</tr>\n') % (
