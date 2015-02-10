@@ -17,8 +17,9 @@ with open(sys.argv[2], "wb") as out:
                     # obfuscate lat-long
                     latitude = row[latlong_column].split(",")[0]
                     longitude = row[latlong_column].split(",")[1].strip()
-                    lat_offset = int(hashlib.md5(latitude).hexdigest(), 16)
-                    long_offset = int(hashlib.md5(longitude).hexdigest(), 16)
+                    location = row[fieldCollectionTree_column]
+                    lat_offset = int(hashlib.md5(location).hexdigest(), 16)
+                    long_offset = int(hashlib.md5(location).hexdigest(), 16)
                     lat_offset = (lat_offset + 0.0) / int("9" * len(str(lat_offset)))  # Clamp value to 0 to 1
                     latitude = float(latitude) + (lat_offset - 0.5) / 10
                     long_offset = (lat_offset + 0.0) / int("9" * len(str(long_offset)))  # Clamp value to 0 to 1
