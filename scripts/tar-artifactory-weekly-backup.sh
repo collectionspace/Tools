@@ -4,6 +4,8 @@
 # backup of the CollectionSpace project Maven repository
 # (using Artifactory on nightly.collectionspace.org)
 # and then 'tar' up that most recent backup.
+# See http://issues.collectionspace.org/browse/CSPACE-6443
+
 
 # ####################
 # Options
@@ -23,7 +25,6 @@
 # subdirectories within the following directory:
 #
 ARTIFACTORY_WEEKLY_BACKUP_DIR=/var/lib/artifactory/backup/backup-weekly
-MAX_DIRS=2
 
 # ####################
 # Main script
@@ -71,6 +72,7 @@ fi
 # And if sufficient free disk space is present, we might
 # even retain more than one previous weekly backup.
 #
+MAX_DIRS=2
 if [ "$DIRCOUNT" -ge "$MAX_DIRS" ]; then
   echo "More than $MAX_DIRS backup directories were found."
   echo "Not sure how to proceed: no action was taken."
