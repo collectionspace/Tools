@@ -2,11 +2,11 @@ select
     h1.name as CSID,
     co.objectnumber as AccessionNumber,
     case when (tig.taxon is not null and tig.taxon <> '')
-                then regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1')
+                then regexp_replace(regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
     end as Determination,
     tu.taxonmajorgroup as MajorGroup,
     case when (fc.item is not null and fc.item <> '')
-                then regexp_replace(fc.item, '^.*\)''(.*)''$', '\1')
+                then regexp_replace(regexp_replace(fc.item, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
     end as Collector,
     co.fieldcollectionnumber as CollectorNumber,
     sdg.datedisplaydate as CollectionDate,
@@ -36,7 +36,7 @@ select
             'yyyy-mm-dd')
         else null
     end as LateCollectionDate,
-    lg.fieldlocverbatim as Locality,
+    regexp_replace(lg.fieldlocverbatim,E'[\\t\\n\\r]+', ' ', 'g') as Locality,
     lg.fieldloccounty as CollCounty,
     lg.fieldlocstate as CollState,
     lg.fieldloccountry as CollCountry,
@@ -44,7 +44,7 @@ select
     lg.minelevation as MinElevation,
     lg.maxelevation as MaxElevation,
     lg.elevationunit as ElevationUnit,
-    co.fieldcollectionnote as Habitat,
+    regexp_replace(co.fieldcollectionnote,E'[\\t\\n\\r]+', ' ', 'g') as Habitat,
     lg.decimallatitude as DecLatitude,
     lg.decimallongitude as DecLongitude,
     case when lg.vcoordsys like 'Township%'
