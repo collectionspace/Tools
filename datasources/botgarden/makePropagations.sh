@@ -4,10 +4,12 @@ cd /home/developers/botgarden
 HOST=$1
 PASSWORD=$2
 export NUMFIELDS=28
+USERNAME="USERNAME="xxxusernamexxx"
+CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden password=$PASSWORD"
 ##############################################################################
 # extract propagations info from CSpace
 ##############################################################################
-time psql  -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=$PASSWORD" -f botgardenPropagations.sql -o p1.csv
+time psql  -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f botgardenPropagations.sql -o p1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' p1.csv > p2.csv 
 time perl -ne 'print unless /\(\d+ rows\)/' p2.csv > p3.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq $ENV{NUMFIELDS}) { print $x;} '     p3.csv > p4.csv &
