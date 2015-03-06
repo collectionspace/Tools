@@ -1,16 +1,23 @@
 #!/bin/bash -x
 date
 cd /home/developers/ucjeps
-HOST=$1
-# extract metadata and media info from CSpace
-time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f ucjepsMetadataV2.sql -o d1.csv
+HOST=$1.cspace.berkeley.edu
+PASSWORD=$2
+export NUMFIELDS=28
+USERNAME="xxxusernamexxx"
+DATABASE=botgarden_domain_botgarden
+CONNECTSTRING="host=$HOST dbname=$DATABASE password=$PASSWORD"
+##############################################################################
+# extract metadata (dead and alive) info from CSpace
+##############################################################################
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMetadataV2.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 41) { print $x;} '     d3.csv > d4.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 41) { print $x;} ' d3.csv > errors.csv &
 mv d4.csv metadata.csv
-time psql -F $'\t' -R"@@" -A -U reporter -d "host=$HOST.cspace.berkeley.edu dbname=nuxeo password=xxxpasswordxxx" -f ucjepsMediaV1.sql -o m1.csv
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv 
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"-f ucjepsMediaV1.sql -o m1.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv
 rm m1.csv d1.csv d3.csv
 # add the blobcsids to the rest of the data
 time perl mergeObjectsAndMedia.pl > d6.csv
