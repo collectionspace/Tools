@@ -1,12 +1,13 @@
 #!/bin/bash -x
 date
 cd /home/developers/ucjeps
-HOST=$1.cspace.berkeley.edu
+TENANT=$1
+HOSTNAME=$TENANT.cspace.berkeley.edu
 PASSWORD=$2
 export NUMFIELDS=28
-USERNAME="xxxusernamexxx"
-DATABASE=botgarden_domain_botgarden
-CONNECTSTRING="host=$HOST dbname=$DATABASE password=$PASSWORD"
+USERNAME="reporter_ucjeps"
+DATABASE="ucjeps_domain_ucjeps"
+CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
@@ -23,13 +24,13 @@ rm m1.csv d1.csv d3.csv
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv | perl fixdate.pl > d7.csv
-cat metadataHeaderV3.csv d7.csv > 4solr.$HOST.metadata.csv
+cat metadataHeaderV3.csv d7.csv > 4solr.$TENANT.metadata.csv
 rm d6.csv d7.csv m1.csv d1.csv d3.csv
 wc -l *.csv
 # clear out the existing data
-curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=;&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=;&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=;&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+time curl "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=;&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=;&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=;&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 #
 rm 4solr*.csv.gz
 gzip 4solr.*.csv
