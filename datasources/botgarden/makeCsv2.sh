@@ -1,11 +1,12 @@
 #!/bin/bash -x
 date
 cd /home/developers/botgarden
-HOST=$1
+HOST=$1.cspace.berkeley.edu
 PASSWORD=$2
 export NUMFIELDS=28
 USERNAME="xxxusernamexxx"
-CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden password=$PASSWORD"
+DATABASE=botgarden_domain_botgarden
+CONNECTSTRING="host=$HOST dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
