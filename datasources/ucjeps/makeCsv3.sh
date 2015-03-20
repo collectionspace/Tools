@@ -33,13 +33,17 @@ tail -n +2 d6.csv | perl fixdate.pl > d7.csv
 perl -ne '@x=split /\t/;print if abs($x[22])<90 && abs($x[23])<180;' d7.csv > d8.csv
 perl -ne '@x=split /\t/;print if !(abs($x[22])<90 && abs($x[23])<180);' d7.csv > errors_in_latlong.csv
 ##############################################################################
+# snag UCBG accession number and stuff it in the right field
+##############################################################################
+perl -i -ne '@x=split /\t/;$x[49]="";($x[48]=~/U.?C.? Botanical Ga?r?de?n.*(\d\d+\.\d+)|(\d+\.\d+).*U.?C.? Botanical Ga?r?de?n/)&&($x[49]="$1$2");print join "\t",@x;' d7.csv
+##############################################################################
 # recover & use our "special" solr-friendly header, which got buried
 ##############################################################################
 head -1 metadata.csv > header4Solr.csv
 ##############################################################################
-# add the blob field name to the header, name the first column 'id'
+# name the first column 'id'; add the blob field name to the header.
 ##############################################################################
-perl -i -pe 's/$/\tblob_ss/;s/^1\t/id\t/' header4Solr.csv
+perl -i -pe 's/^1\t/id\t/;s/$/\tblob_ss/;' header4Solr.csv
 grep -v csid_s d8.csv > d9.csv
 cat header4Solr.csv d9.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.metadata.csv
 ##############################################################################
