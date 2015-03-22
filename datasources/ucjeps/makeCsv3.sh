@@ -11,10 +11,15 @@ CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 # extract and massage the metadata from CSpace
 ##############################################################################
-time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMetadataV2.sql -o d1.csv
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMetadata.sql -o d1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 49) { print $x;} '     d3.csv > metadata.csv
 time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 49) { print $x;} ' d3.csv > errors_in_field_counts.csv &
+##############################################################################
+# get media
+##############################################################################
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMedia.sql -o media.csv
+time perl -i -pe 's/[\r\n]/ /g;s/\@\@/\n/g' media.csv 
 ##############################################################################
 # make a unique sequence number for id
 ##############################################################################
