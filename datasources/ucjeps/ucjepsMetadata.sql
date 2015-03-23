@@ -10,7 +10,7 @@ select
     tu.taxonmajorgroup as majorgroup_s,
     case when (fc.item is not null and fc.item <> '')
                 then regexp_replace(regexp_replace(fc.item, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
-    end as collector_s,
+    end as collector_ss,
     co.fieldcollectionnumber as collectornumber_s,
     sdg.datedisplaydate as collectiondate_s,
     case
