@@ -125,7 +125,9 @@ select
     CASE WHEN (tig.identby IS NOT NULL AND tig.identby <>'' and tig.identby not like '%unknown%') THEN (getdispl(tig.identby) 
 	||CASE WHEN (tig.institution IS NOT NULL AND tig.institution <>'') THEN ', ' || getdispl(tig.institution) ELSE '' END
 	||CASE WHEN (detdetailssdg.datedisplaydate IS NOT NULL AND detdetailssdg.datedisplaydate <>'' and detdetailssdg.datedisplaydate <>' ') THEN ', ' || detdetailssdg.datedisplaydate ELSE '' END
-	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS determinationdetails_s
+	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS determinationdetails_s,
+  'loanstatus' as loanstatus_s,
+  'loannumber' as loannumber_s
 from collectionobjects_common co
 inner join misc on co.id = misc.id
 inner join hierarchy h1 on co.id = h1.id
