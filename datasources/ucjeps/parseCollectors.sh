@@ -10,7 +10,7 @@ gunzip 4solr.ucjeps.metadata.csv.gz
 # make a list of collector names
 cut -f9 4solr.ucjeps.metadata.csv | sort -u > collectors
 # here's a regex that seems to divide up all the names with vertical bars (these are parsed as separate values by the solr4 loader)
-perl -pe 'chomp;print "\n";print $_; s/,? (and|with|\&) /|/g;s/, /|/g;s/,? ?\[(in company|with) ?(.*?)\]/|\2/;s/\|Jr/, Jr/g;s/\|?et al\.?//;s/\|\|/|/g;print "\t"' collectors > names
+perl -pe 'chomp;print "\n";print $_; unless (/Paccard/ || (!/ [^ ]+ [^ ]+ [^ ]+/ && ! /,.*,/ && ! / (and|with|\&) /)) {s/,? (and|with|\&) /|/g;s/, /|/g;s/,? ?\[(in company|with) ?(.*?)\]/|\2/;s/\|Jr/, Jr/g;s/\|?et al\.?//;s/\|\|/|/g;};s/ \& /|/ if /Paccard/;' collectors > names
 # the 'names' file now has each name, with the "parsed version", separated by a tab
 grep "|" names | grep Jepson | head -30 | tail -20 | expand -40
 expand -50 names | sed -n '1p;0~300p' | grep "|" | head -20
