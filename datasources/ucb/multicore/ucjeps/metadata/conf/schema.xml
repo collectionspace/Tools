@@ -16,10 +16,10 @@
  limitations under the License.
 -->
 
-<!--
+<!--  
  This is the Solr schema file. This file should be named "schema.xml" and
  should be in the conf directory under the solr home
- (i.e. ./solr/conf/schema.xml by default)
+ (i.e. ./solr/conf/schema.xml by default) 
  or located where the classloader for the Solr webapp can find it.
 
  This example schema is the recommended starting point for users.
@@ -47,10 +47,10 @@
 
 <schema name="ucjeps-metadata" version="1.5">
   <!-- attribute "name" is the name of this schema and is only used for display purposes.
-       version="x.y" is Solr's version number for the schema syntax and
+       version="x.y" is Solr's version number for the schema syntax and 
        semantics.  It should not normally be changed by applications.
 
-       1.0: multiValued attribute did not exist, all fields are multiValued
+       1.0: multiValued attribute did not exist, all fields are multiValued 
             by nature
        1.1: multiValued attribute introduced, false by default 
        1.2: omitTermFreqAndPositions attribute introduced, true by default 
@@ -200,48 +200,50 @@
    <!-- Create keyword versions for searching -->
 
 
-
-   <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
-   <copyField source="determination_s" dest="determination_txt"/>
-   <!-- copyField source="termformatteddisplayname_s" dest="termformatteddisplayname_txt"/ -->
-   <copyField source="family_s" dest="family_txt"/>
-   <copyField source="taxonbasionym_s" dest="taxonbasionym_txt"/>
-   <copyField source="majorgroup_s" dest="majorgroup_txt"/>
-   <copyField source="collector_s" dest="collector_txt"/>
-   <copyField source="collectornumber_s" dest="collectornumber_txt"/>
-   <copyField source="collectiondate_s" dest="collectiondate_txt"/>
-   <copyField source="locality_s" dest="locality_txt"/>
-   <copyField source="collcounty_s" dest="collcounty_txt"/>
-   <copyField source="collstate_s" dest="collstate_txt"/>
-   <copyField source="collcountry_s" dest="collcountry_txt"/>
-   <copyField source="elevation_s" dest="elevation_txt"/>
-   <copyField source="minelevation_s" dest="minelevation_txt"/>
-   <copyField source="maxelevation_s" dest="maxelevation_txt"/>
-   <copyField source="elevationunit_s" dest="elevationunit_txt"/>
-   <copyField source="habitat_s" dest="habitat_txt"/>
-   <copyField source="trscoordinates_s" dest="trscoordinates_txt"/>
-   <copyField source="datum_s" dest="datum_txt"/>
-   <copyField source="coordinatesource_s" dest="coordinatesource_txt"/>
-   <copyField source="coordinateuncertaintyunit_s" dest="coordinateuncertaintyunit_txt"/>
-   <copyField source="localitynote_s" dest="localitynote_txt"/>
-   <copyField source="localitysource_s" dest="localitysource_txt"/>
-   <copyField source="localitysourcedetail_s" dest="localitysourcedetail_txt"/>
-   <copyField source="labelheader_s" dest="labelheader_txt"/>
-   <copyField source="labelfooter_s" dest="labelfooter_txt"/>
-   <copyField source="localname_s" dest="localname_txt"/>
-   <copyField source="depth_s" dest="depth_txt"/>
-   <copyField source="mindepth_s" dest="mindepth_txt"/>
-   <copyField source="maxdepth_s" dest="maxdepth_txt"/>
-   <copyField source="depthunit_s" dest="depthunit_txt"/>
-   <copyField source="cultivated_s" dest="cultivated_txt"/>
-   <copyField source="sex_s" dest="sex_txt"/>
-   <copyField source="phase_s" dest="phase_txt"/>
-   <copyField source="ucbgaccessionnumber_s" dest="ucbgaccessionnumber_txt"/>
-   <copyField source="determinationdetails_s" dest="determinationdetails_txt"/>
-   <copyField source="previousdeterminations_ss" dest="previousdeterminations_txt"/>
-   <copyField source="associatedtaxa_ss" dest="associatedtaxa_txt"/>
-   <copyField source="typeassertions_ss" dest="typeassertions_txt"/>
-   <copyField source="othernumber_ss" dest="othernumber_txt"/>
+    <copyField source="briefdescription_txt" dest="briefdescription_s"/>
+    <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
+    <copyField source="determination_s" dest="determination_txt"/>
+    <!-- copyField source="termformatteddisplayname_s" dest="termformatteddisplayname_txt"/ -->
+    <copyField source="family_s" dest="family_txt"/>
+    <copyField source="taxonbasionym_s" dest="taxonbasionym_txt"/>
+    <copyField source="majorgroup_s" dest="majorgroup_txt"/>
+    <copyField source="collectornumber_s" dest="collectornumber_txt"/>
+    <copyField source="collectiondate_s" dest="collectiondate_txt"/>
+    <copyField source="locality_s" dest="locality_txt"/>
+    <copyField source="collcounty_s" dest="collcounty_txt"/>
+    <copyField source="collstate_s" dest="collstate_txt"/>
+    <copyField source="collcountry_s" dest="collcountry_txt"/>
+    <copyField source="elevation_s" dest="elevation_txt"/>
+    <copyField source="minelevation_s" dest="minelevation_txt"/>
+    <copyField source="maxelevation_s" dest="maxelevation_txt"/>
+    <copyField source="elevationunit_s" dest="elevationunit_txt"/>
+    <copyField source="habitat_s" dest="habitat_txt"/>
+    <copyField source="trscoordinates_s" dest="trscoordinates_txt"/>
+    <copyField source="datum_s" dest="datum_txt"/>
+    <copyField source="coordinatesource_s" dest="coordinatesource_txt"/>
+    <copyField source="coordinateuncertaintyunit_s" dest="coordinateuncertaintyunit_txt"/>
+    <copyField source="localitynote_s" dest="localitynote_txt"/>
+    <copyField source="localitysource_s" dest="localitysource_txt"/>
+    <copyField source="localitysourcedetail_s" dest="localitysourcedetail_txt"/>
+    <copyField source="labelheader_s" dest="labelheader_txt"/>
+    <copyField source="labelfooter_s" dest="labelfooter_txt"/>
+    <copyField source="localname_s" dest="localname_txt"/>
+    <copyField source="depth_s" dest="depth_txt"/>
+    <copyField source="mindepth_s" dest="mindepth_txt"/>
+    <copyField source="maxdepth_s" dest="maxdepth_txt"/>
+    <copyField source="depthunit_s" dest="depthunit_txt"/>
+    <copyField source="cultivated_s" dest="cultivated_txt"/>
+    <copyField source="sex_s" dest="sex_txt"/>
+    <copyField source="phase_s" dest="phase_txt"/>
+    <copyField source="ucbgaccessionnumber_s" dest="ucbgaccessionnumber_txt"/>
+    <copyField source="determinationdetails_s" dest="determinationdetails_txt"/>
+    <copyField source="loanstatus_s" dest="loanstatus_txt"/>
+    <copyField source="loannumber_s" dest="loannumber_txt"/>
+    <copyField source="collector_ss" dest="collector_txt"/>
+    <copyField source="previousdeterminations_ss" dest="previousdeterminations_txt"/>
+    <copyField source="associatedtaxa_ss" dest="associatedtaxa_txt"/>
+    <copyField source="typeassertions_ss" dest="typeassertions_txt"/>
+    <copyField source="othernumber_ss" dest="othernumber_txt"/>
 
    <copyField source="*_s" dest="text"/>
    <copyField source="*_ss" dest="text"/>
