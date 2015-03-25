@@ -127,7 +127,10 @@ select
 	||CASE WHEN (detdetailssdg.datedisplaydate IS NOT NULL AND detdetailssdg.datedisplaydate <>'' and detdetailssdg.datedisplaydate <>' ') THEN ', ' || detdetailssdg.datedisplaydate ELSE '' END
 	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS determinationdetails_s,
   'loanstatus' as loanstatus_s,
-  'loannumber' as loannumber_s
+  'loannumber' as loannumber_s,
+    case when (fc.item is not null and fc.item <> '')
+                then regexp_replace(regexp_replace(fc.item, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
+    end as collectorverbatim_s,
 from collectionobjects_common co
 inner join misc on co.id = misc.id
 inner join hierarchy h1 on co.id = h1.id

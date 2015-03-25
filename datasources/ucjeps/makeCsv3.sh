@@ -13,8 +13,8 @@ CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMetadata.sql -o d1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 51) { print $x;} '     d3.csv > metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 51) { print $x;} ' d3.csv > errors_in_field_counts.csv &
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 52) { print $x;} '     d3.csv > metadata.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 52) { print $x;} ' d3.csv > errors_in_field_counts.csv &
 ##############################################################################
 # get media
 ##############################################################################
