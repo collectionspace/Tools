@@ -21,7 +21,7 @@ order by tc.displayname;]]>
 		<band height="84" splitType="Stretch">
 			<image>
 				<reportElement uuid="939a7714-856d-4655-8133-f5f3967e7477" x="0" y="0" width="366" height="61"/>
-				<imageExpression><![CDATA["http://www.collectionspace.org/sites/all/themes/CStheme/images/CSpaceLogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="820db3d9-ac47-4b97-8d72-72ad6a782752" mode="Transparent" x="0" y="64" width="720" height="20" forecolor="#000000"/>

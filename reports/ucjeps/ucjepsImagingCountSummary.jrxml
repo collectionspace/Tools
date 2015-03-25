@@ -27,7 +27,7 @@ from ireport_count_summary_bral_vw;]]>
 		<band height="110" splitType="Stretch">
 			<image>
 				<reportElement uuid="6c0d31e4-7c5e-409d-9234-71734fc3112f" x="0" y="0" width="366" height="61"/>
-				<imageExpression><![CDATA["http://www.collectionspace.org/sites/all/themes/CStheme/images/CSpaceLogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="b855e80f-3aca-482c-9f52-fcfbc9bde351" mode="Transparent" x="0" y="65" width="540" height="20" forecolor="#000000"/>
