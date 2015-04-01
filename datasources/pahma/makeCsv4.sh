@@ -8,15 +8,18 @@
 date
 cd /home/developers/pahma
 TENANT=$1
-USERNAME="xxxusernamexxx"
-CONNECTSTRING="host=$TENANT.cspace.berkeley.edu dbname=pahma_domain_pahma password=xxxpasswordxxx"
+HOSTNAME=$TENANT.cspace.berkeley.edu
+PASSWORD=$2
+export NUMFIELDS=36
+USERNAME="reporter_pahma"
+DATABASE="pahma_domain_pahma"
+CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaApprovedForWeb.sql -o m1.csv
-time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaRestricted.sql -o m2.csv
-time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaCatalogCards.sql -o m3.csv
-
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaRestricted.sql     -o m2.csv
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaCatalogCards.sql   -o m3.csv
 # cleanup newlines and crlf in data, then switch record separator.
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > 4solr.$TENANT.mediaApprovedForWeb.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m2.csv > 4solr.$TENANT.mediaRestricted.csv
