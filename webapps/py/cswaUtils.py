@@ -42,7 +42,6 @@ except ImportError:
 # the only other module: isolate postgres calls and connection
 import cswaDB as cswaDB
 import cswaConstants as cswaConstants
-import cswaGetPlaces as cswaGetPlaces
 import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
@@ -1155,11 +1154,13 @@ def doPackingList(form, config):
     if not validateParameters(form, config): return
 
     place = form.get("cp.place")
-    if place != None:
-        places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+    if place != None and place != '':
+        places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
+        places = [p[0] for p in places]
     else:
         places = []
 
+    [sys.stderr.write('packing list place term: %s' % x) for x in places]
     try:
         locationList = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS,
                                          config)
@@ -1167,6 +1168,8 @@ def doPackingList(form, config):
         raise
 
     rowcount = len(locationList)
+
+    [sys.stderr.write('packing list locations : %s' % x[0]) for x in locationList]
 
     if rowcount == 0:
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -1183,6 +1186,8 @@ def doPackingList(form, config):
         except:
             raise
 
+
+        [sys.stderr.write('packing list objects: %s' % x[0]) for x in objects]
         rowcount = len(objects)
         if rowcount == 0:
             if updateType != 'packinglistbyculture':
@@ -1356,7 +1361,7 @@ def downloadCsv(form, config):
 
         place = form.get("cp.place")
         if place != None:
-            places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+            places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
         else:
             places = []
 
