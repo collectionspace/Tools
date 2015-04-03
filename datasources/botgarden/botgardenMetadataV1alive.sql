@@ -68,18 +68,13 @@ h1.name as csid_s,
 case when (con.rare = 'true') then 'yes' else 'no' end as rare_s,
 case when (cob.deadflag = 'true') then 'yes' else 'no' end as deadflag_s,
 cob.flowercolor as flowercolor_s,
-regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
+'' as determinationNoAuth_s,
+-- regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
 mc.reasonformove as reasonformove_s,
 
 utils.findconserveinfo(tc.refname) as conservationinfo_ss,
 utils.findconserveorg(tc.refname) as conserveorg_ss,
 utils.findconservecat(tc.refname) as conservecat_ss,
-
--- CONCAT(pag.conservationgorganization,': ',pag.conservationcategory) as conservationinfo_s)
--- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationgorganization, '^.*\)''(.*)''$', '\1') as conserveorg_ss
--- STRING_AGG(DISTINCT REGEXP_REPLACE(pag.conservationcategory, '^.*\)''(.*)''$', '\1') as conservecat_ss
---lc.loanoutnumber as vouchernumber_s,
---regexp_replace(lc.borrower, '^.*\)''(.*)''$', '\1') as voucherinstitution_ss,
 
 case when (utils.findvoucherinfo(h1.name) is not null)
      then 'yes' else 'no'
@@ -89,7 +84,7 @@ utils.findvoucherinfo(h1.name) voucherlist_ss
 
 
 from collectionobjects_common co
-inner join misc on co.id = misc.id
+inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
 left outer join collectionobjects_common_fieldCollectors fc
         on (co.id = fc.id
         and fc.pos = 0)
@@ -114,24 +109,14 @@ join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
 join movements_common mc on (mc.id=h2.id)
 join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
 
+-- left outer join hierarchy h1 on co.id=h1.id
+-- left outer join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
+-- left outer join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+-- left outer join movements_common mc on (mc.id=h2.id)
+-- left outer join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
+
 join collectionobjects_naturalhistory con on (co.id = con.id)
-join collectionobjects_botgarden cob on (co.id=cob.id)
-
-left outer join hierarchy htig2
-     on (co.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
-left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
-
-join collectionspace_core core on (core.id=co.id and core.tenantid=35)
-join misc misc2 on (misc2.id = co.id and misc2.lifecyclestate <> 'deleted') -- object not deleted
+join collectionobjects_botgarden cob on (co.id=cob.id and cob.deadflag='false')
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
 left outer join taxon_naturalhistory tn on (tc.id=tn.id)
-
--- join plantattributesgroup pag on (pag.id = xx.id)
-
---join hierarchy h3 on (co.id=h3.id)
---join relations_common r2 on (h3.name=r2.subjectcsid and r2.objectdocumenttype='Loanout')
---join hierarchy h4 on (r2.objectcsid=h4.name)
---join loansout_common lc on (lc.id = h4.id)
---join misc misc3 on (misc3.id = lc.id and misc3.lifecyclestate <> 'deleted') -- voucher not deleted
-

@@ -4,7 +4,7 @@ cd /home/developers/botgarden
 HOST=$1
 PASSWORD=$2
 export NUMFIELDS=28
-USERNAME="USERNAME="xxxusernamexxx"
+USERNAME="reporter_botgarden"
 CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden password=$PASSWORD"
 ##############################################################################
 # extract propagations info from CSpace
@@ -37,8 +37,4 @@ wc -l *.csv
 curl "http://localhost:8983/solr/${HOST}-propagations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
 curl "http://localhost:8983/solr/${HOST}-propagations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl "http://localhost:8983/solr/${HOST}-propagations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\\" --data-binary @4solr.$HOST.propagations.csv -H 'Content-type:text/plain; charset=utf-8'
-#
-rm 4solr*.csv.gz
-gzip 4solr.*.csv
-#
 date
