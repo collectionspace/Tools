@@ -2978,7 +2978,7 @@ def starthtml(form, config):
                                                                          'checked value="groupbyculture"')
 
     elif updateType == 'upload':
-        reasons, selected = cswaConstants.getReasons(form)
+        reasons, selected = cswaConstants.getReasons(form, institution)
         
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
         otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>
