@@ -30,13 +30,14 @@ rm d3.csv
 # make a unique sequence number for id
 ##############################################################################
 perl -i -pe '$i++;print $i . "\t"' metadata.csv
+python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv names.pickle 3
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid metadata.csv | head -1 > h
+grep csid metadata+parsednames.csv | head -1 > h
 perl -pe 's/^1\tid/id\tobjcsid_s/' h > header4Solr.csv
 rm h
-grep -v csid metadata.csv > d7.csv
+grep -v csid metadata+parsednames.csv > d7.csv
 cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.

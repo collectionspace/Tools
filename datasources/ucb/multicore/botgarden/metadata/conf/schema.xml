@@ -195,7 +195,20 @@
 
    <!-- Create keyword versions for searching -->
 
+    <!-- copyField source="objcsid_s" dest="objcsid_txt"/ -->
     <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
+    <copyField source="authorsParsed_s" dest="authorsParsed_txt"/>
+    <copyField source="authorship_s" dest="authorship_txt"/>
+    <copyField source="bracketAuthorship_s" dest="bracketAuthorship_txt"/>
+    <copyField source="canonicalName_s" dest="canonicalName_txt"/>
+    <copyField source="canonicalNameComplete_s" dest="canonicalNameComplete_txt"/>
+    <copyField source="canonicalNameWithMarker_s" dest="canonicalNameWithMarker_txt"/>
+    <copyField source="genusOrAbove_s" dest="genusOrAbove_txt"/>
+    <copyField source="infraSpecificEpithet_s" dest="infraSpecificEpithet_txt"/>
+    <copyField source="rankMarker_s" dest="rankMarker_txt"/>
+    <copyField source="scientificName_s" dest="scientificName_txt"/>
+    <copyField source="specificEpithet_s" dest="specificEpithet_txt"/>
+    <copyField source="type_s" dest="type_txt"/>
     <copyField source="determination_s" dest="determination_txt"/>
     <copyField source="collector_s" dest="collector_txt"/>
     <copyField source="collectornumber_s" dest="collectornumber_txt"/>
@@ -203,7 +216,6 @@
     <copyField source="earlycollectiondate_s" dest="earlycollectiondate_txt"/>
     <copyField source="latecollectiondate_s" dest="latecollectiondate_txt"/>
     <copyField source="fcpverbatim_s" dest="fcpverbatim_txt"/>
-    <copyField source="locality_s" dest="locality_txt"/>
     <copyField source="elevation_s" dest="elevation_txt"/>
     <copyField source="minelevation_s" dest="minelevation_txt"/>
     <copyField source="maxelevation_s" dest="maxelevation_txt"/>
@@ -218,7 +230,7 @@
     <copyField source="gardenlocation_s" dest="gardenlocation_txt"/>
     <copyField source="dataquality_s" dest="dataquality_txt"/>
     <copyField source="locality_s" dest="locality_txt"/>
-    <copyField source="csid_s" dest="csid_txt"/>
+    <!-- copyField source="csid_s" dest="csid_txt"/ -->
     <copyField source="rare_s" dest="rare_txt"/>
     <copyField source="deadflag_s" dest="deadflag_txt"/>
     <copyField source="flowercolor_s" dest="flowercolor_txt"/>

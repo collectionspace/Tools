@@ -66,15 +66,22 @@ def touch(fname, times=None):
 
 
 def main():
-    if len(sys.argv) < 3:
-        print 'usage: %s inputfileofnames.txt outputnameparts.csv picklefile' % sys.argv[0]
+    if len(sys.argv) < 4:
+        print 'usage: %s inputfileofnames.csv outputnameparts.csv picklefile column' % sys.argv[0]
+        sys.exit(1)
+
+    column = 0
+    try:
+        column = int(sys.argv[4])
+    except:
+        print "column is not an integer: %s " % column
         sys.exit(1)
 
     try:
         namepartsfile = sys.argv[2]
-        #namepartsfh = csv.writer(open(namepartsfile, "wb"), delimiter='\t')
+        # namepartsfh = csv.writer(open(namepartsfile, "wb"), delimiter='\t')
         namepartsfh = open(namepartsfile, "wb")
-        namepartsfh.write('\t'.join(nameparts) + '\n')
+        #namepartsfh.write('\t'.join(nameparts) + '\n')
     except:
         print "could not open output file"
         sys.exit(1)
@@ -102,9 +109,11 @@ def main():
         print "could not open input file %s" % sys.argv[1]
         sys.exit(1)
 
-    for line in inputfile.readlines():
+    for line in inputfile:
         count.input += 1
-        name = line.rstrip()
+        inputrow = line
+        cells = inputrow.split('\t')
+        name = cells[column]
         if name in parsednames:
             count.source += 1
             name2use = parsednames[name]
@@ -131,7 +140,11 @@ def main():
             else:
                 row.append('')
 
-        namepartsfh.write('\t'.join(row) + '\n')
+        if count.input == 1:
+            row = [h + '_s' for h in nameparts]
+        cells = [x.encode('utf-8') for x in cells]
+        cells = cells[:column] + row + cells[column:]
+        namepartsfh.write('\t'.join(cells) + '\n')
 
     try:
         pickle.dump(parsednames, open(picklefile, "wb"))
