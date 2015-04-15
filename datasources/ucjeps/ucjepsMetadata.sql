@@ -130,7 +130,16 @@ select
   '' as loannumber_s,
     case when (fc.item is not null and fc.item <> '')
                 then regexp_replace(regexp_replace(fc.item, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
-    end as collectorverbatim_s
+    end as collectorverbatim_s,
+  array_to_string(array
+      (SELECT CASE WHEN (lg2.fieldlocverbatim IS NOT NULL AND lg2.fieldlocverbatim <>'' and lg2.fieldlocverbatim not like '%unknown%') THEN (getdispl(lg2.fieldlocverbatim)) ELSE '' END
+        from collectionobjects_common co5
+	      inner join hierarchy h5int on co5.id = h5int.id
+	      left outer join hierarchy hlg2 on (co5.id = hlg2.parentid and hlg2.pos > 0
+	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
+	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
+        where h5int.name=h1.name order by hlg2.pos), '␥', '') as otherlocalities_ss
+
 from collectionobjects_common co
 inner join misc on co.id = misc.id
 inner join hierarchy h1 on co.id = h1.id
@@ -165,6 +174,7 @@ left outer join collectionobjects_common_briefdescriptions cocbd on (co.id = coc
 where misc.lifecyclestate <> 'deleted'
 -- and h1.name = '3380bad9-5bea-4eed-860e' -- UCcrhtest on ucjeps-dev
 -- and h1.name = '338075de-821c-49b3-8f34-969cc666a61e' -- JEPS46872
+-- and h1.name = '291d85e2-06dc-4fc2-9364' -- UC1300355
 -- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
 -- and h1.name like '3380%'
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS', 'GOD')
