@@ -65,6 +65,8 @@ grep -v csid d7.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.metadata.csv
 # clean up some outstanding sins perpetuated by obfuscateUSArchaeologySites.py
 perl -i -pe 's/\r//g;s/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' 4solr.$TENANT.metadata.csv
+# zap the blob csids for charmstones
+perl -i fixcharms.pl 4solr.$TENANT.metadata.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
