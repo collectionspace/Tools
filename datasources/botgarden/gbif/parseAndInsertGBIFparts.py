@@ -111,7 +111,7 @@ def main():
 
     for line in inputfile:
         count.input += 1
-        inputrow = line
+        inputrow = line.rstrip('\n')
         cells = inputrow.split('\t')
         name = cells[column]
         if name in parsednames:
