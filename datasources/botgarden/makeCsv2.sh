@@ -38,7 +38,8 @@ grep csid metadata+parsednames.csv | head -1 > h
 perl -pe 's/^1\tid/id\tobjcsid_s/' h > header4Solr.csv
 rm h
 grep -v csid metadata+parsednames.csv > d7.csv
-cat header4Solr.csv d7.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
+python fixfruits.py d7.csv > d8.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$HOST.metadata.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################

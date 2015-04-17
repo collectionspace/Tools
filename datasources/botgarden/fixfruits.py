@@ -20,11 +20,7 @@ def rpl(values, trigger):
 if __name__ == "__main__":
 
     for i,line in enumerate(fileinput.input()):
-        if i == 0:
-            print line
-            continue
         datacolumns = line.split('\t')
-        #print len(datacolumns)
         datacolumns[54] = rpl(datacolumns[54],['t',])
         datacolumns[55] = rpl(datacolumns[55],['Some','Many'])
         print '\t'.join(datacolumns)
