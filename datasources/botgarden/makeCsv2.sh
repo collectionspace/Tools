@@ -1,12 +1,12 @@
 #!/bin/bash -x
 date
 cd /home/developers/botgarden
-HOST=$1.cspace.berkeley.edu
+HOST=$1
 PASSWORD=$2
 export NUMFIELDS=28
-USERNAME="xxxusernamexxx"
+USERNAME="reporter_botgarden"
 DATABASE=botgarden_domain_botgarden
-CONNECTSTRING="host=$HOST dbname=$DATABASE password=$PASSWORD"
+CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
@@ -16,8 +16,8 @@ time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f botgardenMetada
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv > d2.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv >> d2.csv
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 38) { print $x;} '     d3.csv > d4.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 38) { print $x;} ' d3.csv > errors.csv &
+time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 42) { print $x;} '     d3.csv > d4.csv
+time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 42) { print $x;} ' d3.csv > errors.csv &
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
@@ -56,7 +56,7 @@ wc -l *.csv
 #
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.collcounty_ss.split=true&f.collcounty_ss.separator=%7C&f.collstate_ss.split=true&f.collstate_ss.separator=%7C&f.collcountry_ss.split=true&f.collcountry_ss.separator=%7C&f.conservationinfo_ss.split=true&f.conservationinfo_ss.separator=%7C&f.conserveorg_ss.split=true&f.conserveorg_ss.separator=%7C&f.conservecat_ss.split=true&f.conservecat_ss.separator=%7C&f.voucherlist_ss.split=true&f.voucherlist_ss.separator=%7C&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%09&f.fruiting_ss.split=true&f.fruiting_ss.separator=%7C&f.flowering_ss.split=true&f.flowering_ss.separator=%7C&f.fruitingverbatim_ss.split=true&f.fruitingverbatim_ss.separator=%7C&f.floweringverbatim_ss.split=true&f.floweringverbatim_ss.separator=%7C&f.collcounty_ss.split=true&f.collcounty_ss.separator=%7C&f.collstate_ss.split=true&f.collstate_ss.separator=%7C&f.collcountry_ss.split=true&f.collcountry_ss.separator=%7C&f.conservationinfo_ss.split=true&f.conservationinfo_ss.separator=%7C&f.conserveorg_ss.split=true&f.conserveorg_ss.separator=%7C&f.conservecat_ss.split=true&f.conservecat_ss.separator=%7C&f.voucherlist_ss.split=true&f.voucherlist_ss.separator=%7C&f.blobs_ss.split=true&f.blobs_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 #
 rm 4solr*.csv.gz
 gzip 4solr.*.csv

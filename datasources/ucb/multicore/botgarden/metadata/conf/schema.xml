@@ -245,6 +245,11 @@
     <copyField source="conserveorg_ss" dest="conserveorg_txt"/>
     <copyField source="conservecat_ss" dest="conservecat_txt"/>
     <copyField source="voucherlist_ss" dest="voucherlist_txt"/>
+    <copyField source="fruitingverbatim_ss" dest="fruitingverbatim_txt"/>
+    <copyField source="floweringverbatim_ss" dest="floweringverbatim_txt"/>
+    <copyField source="fruiting_ss" dest="fruiting_txt"/>
+    <copyField source="flowering_ss" dest="flowering_txt"/>
+
 
    <copyField source="*_s" dest="text"/>
    <copyField source="*_ss" dest="text"/>

@@ -77,7 +77,12 @@ case when (utils.findvoucherinfo(h1.name) is not null)
      then 'yes' else 'no'
 end as vouchers_s,
 '1' as vouchercount_s,
-utils.findvoucherinfo(h1.name) voucherlist_ss
+utils.findvoucherinfo(h1.name) voucherlist_ss,
+concat_ws('|', fruitsjan,fruitsfeb,fruitsmar,fruitsapr,fruitsmay,fruitsjun,fruitsjul,fruitsaug,fruitssep,fruitsoct,fruitsnov,fruitsdec) fruitingverbatim_ss,
+concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun,flowersjul,flowersaug,flowerssep,flowersoct,flowersnov,flowersdec) floweringverbatim_ss,
+
+concat_ws('|', fruitsjan,fruitsfeb,fruitsmar,fruitsapr,fruitsmay,fruitsjun,fruitsjul,fruitsaug,fruitssep,fruitsoct,fruitsnov,fruitsdec) fruiting_ss,
+concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun,flowersjul,flowersaug,flowerssep,flowersoct,flowersnov,flowersdec) flowering_ss
 
 from collectionobjects_common co
 inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
