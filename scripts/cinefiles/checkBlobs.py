@@ -141,8 +141,8 @@ def get_exif(fn):
     return ret
 
 
-def getBlobsFromDB(config, startdate, enddate):
-    dbconn = pgdb.connect(config.get('connect', 'connect_string'))
+def getBlobsFromDB(config, startdate, enddate, binariesrepo):
+    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
 
     # SELECT b.id as blobid, c.id as contentid, b.name as filename,
@@ -176,7 +176,7 @@ def getBlobsFromDB(config, startdate, enddate):
                 tif[dbfield] = r[i]
 
             m = re.search(r'(..)(..)', tif['md5'])
-            tif['fullpathtofile'] = "%s/nuxeo-server/data/cinefiles_domain/data/%s/%s/%s" % (
+            tif['fullpathtofile'] = binariesrepo % (
                 # nb: we are assuming here that this app is running with the CSpace variable set...
                 environ['CATALINA_HOME'], m.group(1), m.group(2), tif['md5'])
 
@@ -288,18 +288,23 @@ def doChecks(args):
             config = getConfig(form)
         except:
             print "could not get configuration from %s.cfg. Does it exist?" % args[2]
-            raise
             sys.exit()
         try:
             connect_str = config.get('connect', 'connect_string')
         except:
             print "%s.cfg does not contain a parameter called 'connect_string'" % args[2]
             sys.exit()
+        try:
+            binariesrepo = config.get('connect', 'binariesrepo')
+        except:
+            print "%s.cfg does not contain a parameter called 'binariesrepo'" % args[2]
+            sys.exit()
+
         startdate = args[3]
         enddate = args[4]
         outputFile = args[5]
 
-        records = getBlobsFromDB(config, startdate, enddate)
+        records = getBlobsFromDB(config, startdate, enddate, binariesrepo)
 
 
     elif args[1] == 'dir':
