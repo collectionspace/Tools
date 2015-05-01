@@ -176,7 +176,7 @@ def getBlobsFromDB(config, startdate, enddate):
                 tif[dbfield] = r[i]
 
             m = re.search(r'(..)(..)', tif['md5'])
-            tif['fullpathtofile'] = "%s/nuxeo-server/data/binaries/data/%s/%s/%s" % (
+            tif['fullpathtofile'] = "%s/nuxeo-server/data/cinefiles_domain/data/%s/%s/%s" % (
                 # nb: we are assuming here that this app is running with the CSpace variable set...
                 environ['CATALINA_HOME'], m.group(1), m.group(2), tif['md5'])
 
@@ -316,8 +316,7 @@ def doChecks(args):
         print 'datasource must either "db" or "dir"'
         sys.exit()
 
-    columns = ('name imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK imagesize' +
-        ' filesize updatedat updatedby format mode palette compression dpi blobcsid fullpathtofile md5').split(' ')
+    columns = 'name imageOK isTiff sizeOK syntaxOK resolutionOK isCompressed depthOK colorOK imagesize filesize updatedat updatedby format mode palette compression dpi blobcsid fullpathtofile'.split(' ')
     outputfh = csv.writer(open(outputFile, 'wb'), delimiter="\t")
     outputfh.writerow(columns)
 
