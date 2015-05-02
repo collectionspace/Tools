@@ -4,7 +4,7 @@ cd /home/developers/bampfa
 HOST=$1
 PASSWORD=$2
 export NUMCOLS=38
-USERNAME="reporter_botgarden"
+USERNAME="reporter_bampfa"
 DATABASE=bampfa_domain_bampfa
 CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD"
 ##############################################################################
