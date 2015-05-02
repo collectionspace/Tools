@@ -18,10 +18,16 @@ time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv >> d2.csv
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
+
+##############################################################################
+# check latlongs
+##############################################################################
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[0])<180);' d4.csv > d5.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[0])<180);' d4.csv > errors_in_latlong.csv
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
-perl fixLocalites.pl d4.csv > metadata.csv
+perl fixLocalites.pl d5.csv > metadata.csv
 cut -f10 metadata.csv | perl -pe 's/\|/\n/g;' | sort | uniq -c | perl -pe 's/^ *(\d+) /\1\t/' > county.csv
 cut -f11 metadata.csv | perl -pe 's/\|/\n/g;' | sort | uniq -c | perl -pe 's/^ *(\d+) /\1\t/' > state.csv
 cut -f12 metadata.csv | perl -pe 's/\|/\n/g;' | sort | uniq -c | perl -pe 's/^ *(\d+) /\1\t/' > country.csv
