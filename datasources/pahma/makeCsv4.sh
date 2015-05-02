@@ -10,7 +10,7 @@ cd /home/developers/pahma
 TENANT=$1
 HOSTNAME=$TENANT.cspace.berkeley.edu
 PASSWORD=$2
-export NUMFIELDS=36
+export NUMCOLS=36
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
@@ -44,8 +44,8 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 36) { print $x;} ' intermediate.csv | perl -pe 's/\\/\//g' > errors.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" intermediate.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.metadata.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" intermediate.csv | perl -pe 's/\\/\//g' > errors.csv &
 rm intermediate.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata

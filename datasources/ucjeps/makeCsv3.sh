@@ -4,7 +4,7 @@ cd /home/developers/ucjeps
 TENANT=$1
 HOSTNAME=$TENANT.cspace.berkeley.edu
 PASSWORD=$2
-export NUMFIELDS=28
+export NUMCOLS=53
 USERNAME="reporter_ucjeps"
 DATABASE="ucjeps_domain_ucjeps"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
@@ -12,9 +12,9 @@ CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
 # extract and massage the metadata from CSpace
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsMetadata.sql -o d1.csv
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 53) { print $x;} '     d3.csv > metadata.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 53) { print $x;} ' d3.csv > errors_in_field_counts.csv &
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > metadata.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
 ##############################################################################
 # get media
 ##############################################################################

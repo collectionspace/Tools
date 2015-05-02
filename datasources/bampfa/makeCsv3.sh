@@ -1,18 +1,23 @@
 #!/bin/bash -x
 date
-#cd /home/developers/
-export NUMCOLS=38
+cd /home/developers/bampfa
 HOST=$1
-USER=xxxuserxxx
-PASSWORD=xxxpasswordxxx
+PASSWORD=$2
+export NUMCOLS=38
+USERNAME="reporter_botgarden"
 DATABASE=bampfa_domain_bampfa
+CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD"
+##############################################################################
 # extract metadata and media info from CSpace
-time psql -R"@@" -A -U $USER -d "host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD" -f metadata.sql -o d1.csv
+##############################################################################
+# NB: unlike the other ETL processes, we're still using the default | delimiter here
+##############################################################################
+time psql -R"@@" -A -U $USER -d "$CONNECTSTRING"  -f metadata.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne " \$x = \$_ ;s/[^\|]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > metadata.csv
 time perl -ne " \$x = \$_ ;s/[^\|]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
-time psql -R"@@" -A -U $USER -d "host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD" -f media.sql -o m1.csv
+time psql -R"@@" -A -U $USER -d "$CONNECTSTRING" -f media.sql -o m1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv 
 # make the header
 head -1 metadata.csv > header4Solr.csv

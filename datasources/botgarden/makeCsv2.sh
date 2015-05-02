@@ -3,7 +3,7 @@ date
 cd /home/developers/botgarden
 HOST=$1
 PASSWORD=$2
-export NUMFIELDS=28
+export NUMCOLS=42
 USERNAME="reporter_botgarden"
 DATABASE=botgarden_domain_botgarden
 CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD"
@@ -16,8 +16,8 @@ time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f botgardenMetada
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv > d2.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv >> d2.csv
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; if (length eq 42) { print $x;} '     d3.csv > d4.csv
-time perl -ne '$x = $_ ;s/[^\t]//g; unless (length eq 42) { print $x;} ' d3.csv > errors.csv &
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
