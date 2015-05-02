@@ -12,7 +12,7 @@ CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWOR
 ##############################################################################
 # NB: unlike the other ETL processes, we're still using the default | delimiter here
 ##############################################################################
-time psql -R"@@" -A -U $USER -d "$CONNECTSTRING"  -f metadata.sql -o d1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne " \$x = \$_ ;s/[^\|]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > metadata.csv
