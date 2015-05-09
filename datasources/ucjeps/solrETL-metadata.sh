@@ -3,11 +3,10 @@ date
 cd /home/developers/ucjeps
 TENANT=$1
 HOSTNAME=$TENANT.cspace.berkeley.edu
-PASSWORD=$2
 export NUMCOLS=53
 USERNAME="reporter_ucjeps"
 DATABASE="ucjeps_domain_ucjeps"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
+CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 ##############################################################################
 # extract and massage the metadata from CSpace
 ##############################################################################

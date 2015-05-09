@@ -9,11 +9,10 @@ date
 cd /home/developers/pahma
 TENANT=$1
 HOSTNAME=$TENANT.cspace.berkeley.edu
-PASSWORD=$2
 export NUMCOLS=36
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=$PASSWORD"
+CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################

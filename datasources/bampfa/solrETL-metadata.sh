@@ -1,12 +1,11 @@
 #!/bin/bash -x
 date
 cd /home/developers/bampfa
-HOST=$1
-PASSWORD=$2
+TENANT=$1
 export NUMCOLS=38
 USERNAME="reporter_bampfa"
 DATABASE=bampfa_domain_bampfa
-CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=$DATABASE password=$PASSWORD"
+CONNECTSTRING="host=$TENANT.cspace.berkeley.edu dbname=$DATABASE"
 ##############################################################################
 # extract metadata and media info from CSpace
 ##############################################################################
@@ -27,13 +26,13 @@ perl -i -pe 's/\|/_s\|/g;s/objectcsid_s/id/;s/$/_s|blob_ss/' header4Solr.csv
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv > d7.csv
-cat header4Solr.csv d7.csv > 4solr.$HOST.metadata.csv
+cat header4Solr.csv d7.csv > 4solr.$TENANT.metadata.csv
 #rm d6.csv d7.csv m1.csv d1.csv d3.csv
 wc -l *.csv
 # clear out the existing data
-curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/${HOST}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${HOST}-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$HOST.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 #
 rm 4solr*.csv.gz
 gzip 4solr.*.csv

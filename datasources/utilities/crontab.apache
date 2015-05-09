@@ -1,0 +1,17 @@
+#[jblowe@pahma-dev ~]$ sudo crontab -u apache -l
+#
+# currently runs under pseudo user apache on pahma-dev
+#
+# 1. generate and email report on BMU progress
+# 2. run the BMU jobs (for PAHMA and BAMPFA, and BAMPFA-DEV)
+#
+10  5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/pahma_upload_cache | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+10  5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/pahma_upload_cache | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
+10  5 * * * perl /usr/local/share/django/bampfa_project/uploadmedia/checkRuns.pl jobs /tmp/bampfa_upload_cache | expand -12 | mail -s "recent BAMPFA BMU jobs " jblowe@berkeley.edu > /dev/null 2>&1
+10  5 * * * perl /usr/local/share/django/bampfa_project/uploadmedia/checkRuns.pl jobs /tmp/bampfa_upload_cache | expand -12 | mail -s "recent BAMPFA BMU jobs " bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+#
+50 18 * * * shopt -s nullglob; for f in /tmp/pahma_upload_cache/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//'); echo  Starting `date` $f >> /tmp/pahma_upload_cache/batches.log ; time /usr/local/share/django/pahma_project/uploadmedia/postblob.sh $f >> /tmp/pahma_upload_cache/batches.log ; echo  Ending `date` $f >> /tmp/pahma_upload_cache/batches.log ; done > /dev/null 2>&1
+#
+38 19 * * * shopt -s nullglob; for f in /tmp/bampfa_upload_cache/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//'); echo  Starting `date` $f >> /tmp/bampfa_upload_cache/batches.log ; time /usr/local/share/django/bampfa_project/uploadmedia/postblob.sh $f >> /tmp/bampfa_upload_cache/batches.log ; echo  Ending `date` $f >> /tmp/bampfa_upload_cache/batches.log ; done > /dev/null 2>&1
+#
+0 */2 * * * shopt -s nullglob; for f in /tmp/bampfa_dev_upload_cache/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//'); echo  Starting `date` $f >> /tmp/bampfa_dev_upload_cache/batches.log ; time /usr/local/share/django/bampfaDev_project/uploadmedia/postblob.sh $f >> /tmp/bampfa_dev_upload_cache/batches.log ; echo  Ending `date` $f >> /tmp/bampfa_dev_upload_cache/batches.log ; done > /dev/null 2>&1

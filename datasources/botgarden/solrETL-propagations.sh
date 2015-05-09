@@ -2,10 +2,9 @@
 date
 cd /home/developers/botgarden
 HOST=$1
-PASSWORD=$2
 export NUMFIELDS=28
 USERNAME="reporter_botgarden"
-CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden password=$PASSWORD"
+CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden"
 ##############################################################################
 # extract propagations info from CSpace
 ##############################################################################
