@@ -16,7 +16,7 @@ time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata.sql -o d1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne " \$x = \$_ ;s/[^\|]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > metadata.csv
 time perl -ne " \$x = \$_ ;s/[^\|]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
-time psql -R"@@" -A -U $USER -d "$CONNECTSTRING" -f media.sql -o m1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media.sql -o m1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv 
 # make the header
 head -1 metadata.csv > header4Solr.csv
@@ -30,8 +30,8 @@ cat header4Solr.csv d7.csv > 4solr.$TENANT.metadata.csv
 #rm d6.csv d7.csv m1.csv d1.csv d3.csv
 wc -l *.csv
 # clear out the existing data
-curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 #
 rm 4solr*.csv.gz

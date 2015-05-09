@@ -33,7 +33,7 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next i
 rm d7.csv
 wc -l *.csv
 #
-curl "http://localhost:8983/solr/${HOST}-propagations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'  
-curl "http://localhost:8983/solr/${HOST}-propagations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\\" --data-binary @4solr.$HOST.propagations.csv -H 'Content-type:text/plain; charset=utf-8'
 date

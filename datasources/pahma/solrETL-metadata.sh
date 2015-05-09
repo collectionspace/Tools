@@ -82,8 +82,8 @@ wc -l *.csv
 # ok, now let's load this into solr...
 # clear out the existing data
 ##############################################################################
-curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ##############################################################################
 # this POSTs the csv to the Solr / update endpoint
 # note, among other things, the overriding of the encapsulator with \
