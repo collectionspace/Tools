@@ -1,10 +1,8 @@
-#[jblowe@pahma-dev ~]$ sudo crontab -u apache -l
+##################################################################################
 #
-# currently runs under pseudo user apache on pahma-dev
+# BMU-related jobs
 #
-# 1. generate and email report on BMU progress
-# 2. run the BMU jobs (for PAHMA and BAMPFA, and BAMPFA-DEV)
-#
+##################################################################################
 10  5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/pahma_upload_cache | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
 10  5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/pahma_upload_cache | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
 10  5 * * * perl /usr/local/share/django/bampfa_project/uploadmedia/checkRuns.pl jobs /tmp/bampfa_upload_cache | expand -12 | mail -s "recent BAMPFA BMU jobs " jblowe@berkeley.edu > /dev/null 2>&1
@@ -15,3 +13,42 @@
 38 19 * * * shopt -s nullglob; for f in /tmp/bampfa_upload_cache/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//'); echo  Starting `date` $f >> /tmp/bampfa_upload_cache/batches.log ; time /usr/local/share/django/bampfa_project/uploadmedia/postblob.sh $f >> /tmp/bampfa_upload_cache/batches.log ; echo  Ending `date` $f >> /tmp/bampfa_upload_cache/batches.log ; done > /dev/null 2>&1
 #
 0 */2 * * * shopt -s nullglob; for f in /tmp/bampfa_dev_upload_cache/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//'); echo  Starting `date` $f >> /tmp/bampfa_dev_upload_cache/batches.log ; time /usr/local/share/django/bampfaDev_project/uploadmedia/postblob.sh $f >> /tmp/bampfa_dev_upload_cache/batches.log ; echo  Ending `date` $f >> /tmp/bampfa_dev_upload_cache/batches.log ; done > /dev/null 2>&1
+##################################################################################
+#
+# run solr ETL (and other webapp and API monitoring)
+#
+# currently runs under pseudo user apache on pahma-dev
+#
+# 1. run the 5 solr4 updates
+# 2. keep for posterity a list of all media uploaded with BMU
+# 3. monitor the PAHMA imageserver caches on this server
+# 4. monitor use of the solr APIs
+# 5. monitor use of the legacy webapps
+#
+##################################################################################
+# maintain current solr4 datastores
+0  2 * * * /home/developers/pahma/solrETL-metadata.sh          pahma      >> /home/developers/pahma/solrExtract.log  2>&1
+0  3 * * * /home/developers/ucjeps/solrETL-metadata.sh         ucjeps     >> /home/developers/ucjeps/solrExtract.log  2>&1
+0  4 * * * /home/developers/botgarden/solrETL-metadata.sh      botgarden  >> /home/developers/botgarden/solrExtract.log  2>&1
+30 4 * * * /home/developers/botgarden/solrETL-propagations.sh  botgarden  >> /home/developers/botgarden/solrExtract.log  2>&1
+50 4 * * * /home/developers/bampfa/solrETL-metadata.sh         bampfa     >> /home/developers/bampfa/solrExtract.log  2>&1
+#
+# keep a copy of the BMU files...
+5 6 * * *  cp -p /tmp/pahma_upload_cache/*.csv  /home/developers/monitor/pahma_upload_cache/  ; cp -p /tmp/pahma_upload_cache/*.trace.log  /home/developers/monitor/pahma_upload_cache/
+5 6 * * *  cp -p /tmp/bampfa_upload_cache/*.csv /home/developers/monitor/bampfa_upload_cache/ ; cp -p /tmp/bampfa_upload_cache/*.trace.log /home/developers/monitor/bampfa_upload_cache/
+#
+# monitor image cache
+0 4 * * * cd /home/developers/monitor ; ./monitorImageCache.sh "/images/cache/"  > report.txt 2>&1 ; cat report.txt | mail -s "pahma cache status" -- jblowe@berkeley.edu
+0 5 * * * cd /home/developers/monitor ; python checkCache.py /images/cache/ >> imagecache.log
+#
+# monitor API use
+30 2 * * * cat /tmp/solr.imageserver.records.txt /tmp/solr.select.records.txt> /home/developers/monitor/currAPIuse.csv ; cat /home/developers/monitor/currAPIuse.csv /home/developers/monitor/allAPIuse.csv | sort -u > /home/developers/monitor/tmp2 ; mv /home/developers/monitor/tmp2 /home/developers/monitor/allAPIuse.csv
+5  1 * * * grep -h imageserver /home/developers/monitor/allAPIuse.csv | grep -v " 302 " | perl -pe 's/^.*?\[(...........).*$/\1/' | sort | uniq -c | sort -k2.4,7 -k2.1,3 > /tmp/solr.images.counts.txt
+5  1 * * * grep -h select /home/developers/monitor/allAPIuse.csv      | perl -pe 's/^.*?\[(...........).*$/\1/' | sort | uniq -c | sort -k2.4,7 -k2.1,3 > /tmp/solr.selects.counts.txt
+30 1 * * * cd /home/developers/monitor ; cat /tmp/solr.images.counts.txt > sep ; echo "Imageserver"  | xargs | cat - sep > sep1 ; cat /tmp/solr.selects.counts.txt > sep ; echo "API"  | xargs | cat - sep > sep2 ; cat sep1 sep2 | mail -s "API and Imageserver Usage" -- jblowe@berkeley.edu
+#
+# monitor webapps
+5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > /home/developers/monitor/currappuse.csv ; cat /home/developers/monitor/currappuse.csv /home/developers/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 /home/developers/monitor/webappuse.csv ; perl /home/developers/monitor/monitorWebapps.pl > /usr/local/share/tomcat/webapps/cspace-ui/defaults/html/webappuse.html
+# monitor magic bus (currently not in use!)
+#@daily perl /home/developers/import/magicbus/reports/monitorBus.pl > /usr/local/share/tomcat/webapps/cspace-ui/defaults/html/magicbus.html
+

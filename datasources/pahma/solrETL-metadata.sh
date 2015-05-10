@@ -55,6 +55,11 @@ time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv 4solr.$TENANT.metadata
 ##############################################################################
 time python obfuscateUSArchaeologySites.py d6.csv d7.csv
 ##############################################################################
+# check latlongs
+##############################################################################
+#perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d7.csv > d8.csv
+#perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d7.csv > errors_in_latlong.csv
+##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid d7.csv > header4Solr.csv

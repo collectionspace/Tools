@@ -20,8 +20,8 @@ time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print
 ##############################################################################
 # check latlongs
 ##############################################################################
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[0])<180);' d4.csv > d5.csv
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[0])<180);' d4.csv > errors_in_latlong.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4.csv > d5.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d4.csv > errors_in_latlong.csv
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
@@ -34,7 +34,7 @@ rm d3.csv
 # make a unique sequence number for id
 ##############################################################################
 perl -i -pe '$i++;print $i . "\t"' metadata.csv
-python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv names.pickle 3
+python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv gbif/names.pickle 3
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
