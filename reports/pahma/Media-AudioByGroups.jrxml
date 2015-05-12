@@ -71,6 +71,7 @@ JOIN relations_common rc ON rc.objectcsid=h.name
 JOIN hierarchy hg ON hg.name=rc.subjectcsid
 JOIN groups_common gc ON gc.id=hg.id
 
+JOIN misc ms ON (co.id=ms.id AND ms.lifecyclestate <> 'deleted')
 WHERE hg.name=$P{groupCSID}
 
 GROUP BY opp.objectproductionperson, cp.sortableobjectnumber, cc.objectnumber, ong.objectname, cp.portfolioseries, h.name, bd.item, dim.value, dim.measurementunit, gc.id, hg.name, opp.objectproductionpersonrole

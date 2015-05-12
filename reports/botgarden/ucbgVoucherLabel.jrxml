@@ -1,116 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ucbgVoucherLabel46" language="groovy" columnCount="2" pageWidth="612" pageHeight="792" columnWidth="270" columnSpacing="36" leftMargin="18" rightMargin="18" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty">
-        <property name="ireport.zoom" value="1.5"/>
-        <property name="ireport.x" value="0"/>
-        <property name="ireport.y" value="0"/>
-        <queryString>
-                <![CDATA[select * from findvoucherlabels()]]>
-        </queryString>
-        <field name="objectnumber" class="java.lang.String"/>
-        <field name="determinationformatted" class="java.lang.String"/>
-        <field name="family" class="java.lang.String"/>
-        <field name="collectioninfo" class="java.lang.String"/>
-        <field name="vouchernumber" class="java.lang.String"/>
-        <field name="numbersheets" class="java.lang.Integer"/>
-        <field name="labelrequested" class="java.lang.String"/>
-        <field name="gardeninfo" class="java.lang.String"/>
-        <field name="vouchertype" class="java.lang.String"/>
-        <field name="fieldcollectionnote" class="java.lang.String"/>
-        <field name="annotation" class="java.lang.String"/>
-        <field name="vouchercollectioninfo" class="java.lang.String"/>
-        <detail>
-                <band height="358" splitType="Prevent">
-                        <line>
-                                <reportElement x="0" y="3" width="267" height="1"/>
-                        </line>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="115" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{collectioninfo}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="49" width="267" height="14" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="196" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{annotation}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="93" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{fieldcollectionnote}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="137" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchertype}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="152" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchercollectioninfo}]]></textFieldExpression>
-                        </textField>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="71" width="267" height="14" isPrintWhenDetailOverflows="true"/>
-                                <textElement markup="html">
-                                        <font fontName="Serif" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{determinationformatted}]]></textFieldExpression>
-                        </textField>
-                        <line>
-                                <reportElement positionType="Float" mode="Transparent" x="0" y="357" width="267" height="1"/>
-                        </line>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="FixRelativeToBottom" x="31" y="273" width="200" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement textAlignment="Center" verticalAlignment="Bottom">
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{vouchernumber}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                                <reportElement x="0" y="10" width="267" height="20"/>
-                                <textElement textAlignment="Center">
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
-                        </textField>
-                        <componentElement>
-                                <reportElement positionType="FixRelativeToBottom" x="75" y="288" width="164" height="50"/>
-                                <jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
-                                        <jr:codeExpression><![CDATA[$F{objectnumber}]]></jr:codeExpression>
-                                </jr:Code39>
-                        </componentElement>
-                        <textField isStretchWithOverflow="true" isBlankWhenNull="true">
-                                <reportElement positionType="Float" x="0" y="174" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
-                                <textElement>
-                                        <font fontName="Arial" pdfFontName="Times-Roman" size="9"/>
-                                        <paragraph spacingBefore="2"/>
-                                </textElement>
-                                <textFieldExpression class="java.lang.String"><![CDATA[$F{gardeninfo}]]></textFieldExpression>
-                        </textField>
-                </band>
-        </detail>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[select * from findvoucherlabels()]]>
+	</queryString>
+	<field name="objectnumber" class="java.lang.String"/>
+	<field name="determinationformatted" class="java.lang.String"/>
+	<field name="family" class="java.lang.String"/>
+	<field name="collectioninfo" class="java.lang.String"/>
+	<field name="vouchernumber" class="java.lang.String"/>
+	<field name="numbersheets" class="java.lang.Integer"/>
+	<field name="labelrequested" class="java.lang.String"/>
+	<field name="gardeninfo" class="java.lang.String"/>
+	<field name="vouchertype" class="java.lang.String"/>
+	<field name="fieldcollectionnote" class="java.lang.String"/>
+	<field name="annotation" class="java.lang.String"/>
+	<field name="vouchercollectioninfo" class="java.lang.String"/>
+	<detail>
+		<band height="358" splitType="Prevent">
+			<line>
+				<reportElement x="0" y="3" width="267" height="1"/>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="115" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{collectioninfo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="49" width="267" height="14" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{family}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="196" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{annotation}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="93" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{fieldcollectionnote}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="137" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchertype}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="152" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchercollectioninfo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="71" width="267" height="14" isPrintWhenDetailOverflows="true"/>
+				<textElement markup="html">
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{determinationformatted}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" mode="Transparent" x="0" y="357" width="267" height="1"/>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="31" y="273" width="200" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{vouchernumber}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="10" width="267" height="20"/>
+				<textElement textAlignment="Center">
+					
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["University of California Botanical Garden at Berkeley"]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement positionType="FixRelativeToBottom" x="75" y="288" width="164" height="50"/>
+				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
+					<jr:codeExpression><![CDATA[$F{objectnumber}]]></jr:codeExpression>
+				</jr:Code39>
+			</componentElement>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="174" width="267" height="14" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					
+					<paragraph spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{gardeninfo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
 </jasperReport>
-

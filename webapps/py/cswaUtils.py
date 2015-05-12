@@ -42,7 +42,6 @@ except ImportError:
 # the only other module: isolate postgres calls and connection
 import cswaDB as cswaDB
 import cswaConstants as cswaConstants
-import cswaGetPlaces as cswaGetPlaces
 import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
@@ -205,7 +204,7 @@ def doComplexSearch(form, config, displaytype):
     #listAuthorities('taxon',     'TaxonTenant35',  form.get("ob.objectnumber"),config, form, displaytype)
     #listAuthorities('concepts',  'TaxonTenant35',  form.get("cx.concept"),     config, form, displaytype)
 
-    getTableFooter(config, displaytype)
+    getTableFooter(config, displaytype, '')
 
 
 def listAuthorities(authority, primarytype, authItem, config, form, displaytype):
@@ -233,9 +232,12 @@ def doLocationSearch(form, config, displaytype):
     except:
         raise
 
-    listSearchResults('locations', config, displaytype, form, rows)
+    hasDups = listSearchResults('locations', config, displaytype, form, rows)
 
-    if len(rows) != 0: getTableFooter(config, displaytype)
+    if hasDups:
+        getTableFooter(config, 'error', 'Please eliminate duplicates and try again!')
+        return
+    if len(rows) != 0: getTableFooter(config, displaytype, '')
 
 
 
@@ -288,7 +290,6 @@ def doProcedureSearch(form, config, displaytype):
             print '<input type="hidden" name="toCrate" value="%s">' % toCrate
             print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
-            #if len(rows) != 0: getTableFooter(config,displaytype)
 
 def doObjectSearch(form, config, displaytype):
     if not validateParameters(form, config): return
@@ -342,7 +343,6 @@ def doObjectSearch(form, config, displaytype):
             print '<input type="hidden" name="toCrate" value="%s">' % toCrate
             print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
-            #if len(rows) != 0: getTableFooter(config,displaytype)
 
 
 def doOjectRangeSearch(form, config, displaytype=''):
@@ -379,6 +379,7 @@ def doOjectRangeSearch(form, config, displaytype=''):
 def listSearchResults(authority, config, displaytype, form, rows):
     updateType = config.get('info', 'updatetype')
     institution = config.get('info','institution')
+    hasDups = False
 
     if not rows: rows = []
     rows.sort()
@@ -427,7 +428,14 @@ def listSearchResults(authority, config, displaytype, form, rows):
     if displaytype == 'list' or displaytype == 'select':
         rowtype = 'location'
         if displaytype == 'select': rowtype = 'select'
+        duplicates = []
         for r in rows:
+            if r[1] in duplicates:
+                hasDups = True
+                r.append('Duplicate!')
+            else:
+                r.append('')
+                duplicates.append(r[1])
             print formatRow({'boxtype': authority, 'rowtype': rowtype, 'data': r}, form, config)
 
     elif displaytype == 'nolist':
@@ -445,12 +453,16 @@ def listSearchResults(authority, config, displaytype, form, rows):
         print "</table>"
         #print """<input type="hidden" name="count" value="%s">""" % rowcount
 
+    return hasDups
 
-def getTableFooter(config, displaytype):
+
+def getTableFooter(config, displaytype, msg):
     updateType = config.get('info', 'updatetype')
 
     print """<table width="100%"><tr><td align="center" colspan="3"><hr></tr>"""
-    if displaytype == 'list':
+    if displaytype == 'error':
+        print """<tr><td align="center"><span style="color:red;"><b>%s</b></span></td></tr>""" % msg
+    elif displaytype == 'list':
         print """<tr><td align="center">"""
         button = 'Enumerate Objects'
         print """<input type="submit" class="save" value="%s" name="action"></td>""" % button
@@ -1107,8 +1119,11 @@ def doUpdateLocations(form, config):
             updateItems['crate'] = ''
             msg = "moved to 'Not Located'."
         try:
-            updateLocations(updateItems, config, form)
-            numUpdated += 1
+            if "not moved" in msg:
+                pass
+            else:
+                updateLocations(updateItems, config, form)
+                numUpdated += 1
         except:
             msg = '<span style="color:red;">problem updating</span>'
         print ('<tr>' + (4 * '<td class="ncell">%s</td>') + '</tr>\n') % (
@@ -1139,11 +1154,13 @@ def doPackingList(form, config):
     if not validateParameters(form, config): return
 
     place = form.get("cp.place")
-    if place != None:
-        places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+    if place != None and place != '':
+        places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
+        places = [p[0] for p in places]
     else:
         places = []
 
+    [sys.stderr.write('packing list place term: %s' % x) for x in places]
     try:
         locationList = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS,
                                          config)
@@ -1151,6 +1168,8 @@ def doPackingList(form, config):
         raise
 
     rowcount = len(locationList)
+
+    [sys.stderr.write('packing list locations : %s' % x[0]) for x in locationList]
 
     if rowcount == 0:
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -1167,6 +1186,8 @@ def doPackingList(form, config):
         except:
             raise
 
+
+        [sys.stderr.write('packing list objects: %s' % x[0]) for x in objects]
         rowcount = len(objects)
         if rowcount == 0:
             if updateType != 'packinglistbyculture':
@@ -1340,20 +1361,25 @@ def downloadCsv(form, config):
 
         place = form.get("cp.place")
         if place != None:
-            places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+            places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
         else:
             places = []
 
         #rowcount = len(rows)
+
+        filename = 'packinglist%s.csv' % datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
         print 'Content-type: application/octet-stream; charset=utf-8'
-        print 'Content-Disposition: attachment; filename="packinglist.xls"'
+        print 'Content-Disposition: attachment; filename="%s"' % filename
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
             objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
             for o in objects:
                 if checkObject(places, o):
-                    writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
+                    if institution == 'bampfa':
+                        writer.writerow([o[x] for x in [0, 1, 3, 4, 6, 7, 9]])
+                    else:
+                        writer.writerow([o[x] for x in [0, 2, 3, 4, 5, 6, 7, 9]])
     sys.stdout.flush()
     sys.stdout.close()
 
@@ -2159,8 +2185,8 @@ def formatRow(result, form, config):
         #return """<tr><td colspan="4" class="subheader">%s</td><td>%s</td></tr>""" % result['data'][0:1]
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
     elif result['rowtype'] == 'location':
-        return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a></td><td/></tr>''' % (
-            result['data'][0], result['data'][0])
+        return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a> <span style="color:red;">%s</span></td><td/></tr>''' % (
+            result['data'][0], result['data'][0], result['data'][-1])
     elif result['rowtype'] == 'select':
         rr = result['data']
         boxType = result['boxtype']
@@ -2196,14 +2222,20 @@ def formatRow(result, form, config):
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+
+        if institution == 'bampfa':
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            link, rr[3], rr[5], rr[16], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
+            rr[3])
+        else:
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'powermove':
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
@@ -2946,7 +2978,7 @@ def starthtml(form, config):
                                                                          'checked value="groupbyculture"')
 
     elif updateType == 'upload':
-        reasons, selected = cswaConstants.getReasons(form)
+        reasons, selected = cswaConstants.getReasons(form, institution)
         
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
         otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>
@@ -3171,7 +3203,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggestNV.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
                     dataType: "json",
                     data: {
                         q : request.term,

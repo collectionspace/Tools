@@ -12,6 +12,7 @@ def openConnection(connect_string):
     try:
         conn = pgdb.connect(database=connect_string)
     except Exception:
+        raise
         print "In openConnection(), unable to open connection"
         sys.exit(1)
 
@@ -47,7 +48,7 @@ def createAuthorityHierarchyTable(authority, primarytype, term):
       JOIN %s_common pc2 ON (pc2.id = h2.id)
     )
     SELECT *
-    INTO authorityname_temp
+    INTO TEMPORARY authorityname_temp
     FROM authorityname_hierarchyquery
     WHERE %s ='%s'
   """
@@ -132,6 +133,8 @@ def getAuthority(authority, primarytype, term, connect_string):
 
     cursor.close()
 
+    dropIfExistsAuthorityHierarchyTable()
+
     conn.commit()
 
     closeConnection()
@@ -172,10 +175,10 @@ def getChildren(authority, primarytype, term, connect_string):
 
 if __name__ == "__main__":
 
+    print 'starting to get some locations from botgarden-dev'
     # get some taxonomic names and locations from botgarden-dev
-    connect_string = 'botgarden-dev.cspace.berkeley.edu:nuxeo:reporter:xxxxx'
-
-    # test getAuthority
+    connect_string    = "host=dba-postgres-dev-32.ist.berkeley.edu port=5113 dbname=botgarden_domain_botgarden user=reporter_botgarden password=xxxinsertpasswordherexxx sslmode=require"
+    # get some locations from botgarden-dev
     primarytype = 'Locationitem'
     authority = 'locations'
     for p in ('1002, Green House 2', 'Californian', 'Damask, Roses', 'Crops of the World'):
@@ -184,10 +187,11 @@ if __name__ == "__main__":
         if len(locations) < 100:
             print locations
 
-    sys.exit(1)
+    #sys.exit(1)
 
+    print 'starting to get some places from pahma-dev'
     # get some places and materials from PAHMA-dev
-    connect_string = 'dev.cspace.berkeley.edu:nuxeo:reporter:xxxxx'
+    connect_string    = "host=dba-postgres-dev-32.ist.berkeley.edu port=5107 dbname=pahma_domain_pahma user=reporter_pahma password=xxxinsertpasswordherexxx sslmode=require"
     primarytype = 'Placeitem'
     authority = 'places'
 
@@ -199,6 +203,7 @@ if __name__ == "__main__":
         if len(places) < 100:
             print places
 
+    print 'starting to get some taxa from botgarden-dev'
     # test getAuthority
     primarytype = 'TaxonTenant35'
     authority = 'taxon'
@@ -208,6 +213,7 @@ if __name__ == "__main__":
         if len(taxa) < 100:
             print taxa
 
+    print 'starting to get some places from botgarden-dev'
     primarytype = 'Placeitem'
     authority = 'places'
     for p in ('Europe', 'North America, The Americas', 'South America, The Americas', 'China, Central Asia, Asia',
@@ -217,6 +223,7 @@ if __name__ == "__main__":
         if len(places) < 100:
             print places
 
+    print 'starting to get children of some taxa from botgarden-dev'
     # test getChildren
     primarytype = 'TaxonTenant35'
     authority = 'taxon'

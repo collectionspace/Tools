@@ -51,6 +51,7 @@ left outer join hierarchy h3 on (c.id=h3.parentid and h3.pos=0 and h3.name='coll
 left outer join assocpeoplegroup apg on (apg.id=h3.id)
 left outer join collectionobjects_pahma_pahmaethnographicfilecodelist pef on (pef.id=c.id and pef.pos=0)
 
+JOIN misc ms ON (co.id=ms.id AND ms.lifecyclestate <> 'deleted')
 WHERE replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') >= replace($P{Start Location}, ' ', '0')
   and replace(regexp_replace(c.computedcurrentlocation, '^.*\)''(.*)''$', '\1'), ' ', '0') <= replace($P{End Location}, ' ', '0')
 order by locationkey, sortableobjectnumber, objectName desc]]>

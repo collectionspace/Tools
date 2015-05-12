@@ -56,7 +56,8 @@ rc.subjectdocumenttype,
 rc.objectdocumenttype,
 cc.objectnumber sortableobjectnumber,
 cb.computedcrate crateRefname,
-regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1') crate
+regexp_replace(cb.computedcrate, '^.*\\)''(.*)''$', '\\1') crate,
+regexp_replace(pg.bampfaobjectproductionperson, '^.*\\)''(.*)''$', '\\1') AS Artist
 
 FROM loctermgroup l
 
@@ -74,6 +75,9 @@ left outer join collectionobjects_bampfa cb on (cb.id=cc.id)
 
 LEFT OUTER JOIN hierarchy h4 ON (h4.parentid = cc.id AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' and h4.pos=0)
 LEFT OUTER JOIN bampfatitlegroup tg ON (h4.id = tg.id)
+
+left outer join hierarchy h5 ON (cc.id = h5.parentid AND h5.name = 'collectionobjects_bampfa:bampfaObjectProductionPersonGroupList' AND (h5.pos = 0 OR h5.pos IS NULL))
+left outer join bampfaobjectproductionpersongroup pg ON (h5.id = pg.id)
 
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 
@@ -178,7 +182,8 @@ join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', 
 %s
 join collectionspace_core core on mc.id=core.id 
 join collectionobjects_botgarden cob on (co1.id=cob.id) 
-join collectionobjects_naturalhistory con on (co1.id = con.id) 
+join collectionobjects_naturalhistory con on (co1.id = con.id)
+
 left outer join locations_common lc on (mc.currentlocation=lc.refname) 
 where %s  %s = '%s'
 ORDER BY to_number(objectnumber,'9999.9999')
@@ -186,20 +191,13 @@ LIMIT 6000"""
             
         if qualifier == 'alive':
             queryPart1 = " mc.reasonformove != 'Dead' and "
-            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            queryPart2 = """join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
+                            join misc ms on (co1.id=ms.id and ms.lifecyclestate <> 'deleted')"""
             return queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
         elif qualifier == 'dead':
             queryPart1 = " mc.reasonformove = 'Dead' and "
             queryPart2 = "inner join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
             return queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
-        elif qualifier == 'dead or alive':
-            queryPart1 = " mc.reasonformove != 'Dead' and "
-            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
-            part1 = queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
-            queryPart1 = " mc.reasonformove = 'Dead' and "
-            queryPart2 = " "
-            part2 = queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
-            return part1 + ' UNION ' + part2
         else:
             raise
             # houston, we got a problem...query not qualified

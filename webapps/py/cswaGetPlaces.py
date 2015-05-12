@@ -47,7 +47,7 @@ def createPlacenameHierarchyTable(place):
       JOIN places_common pc2 ON (pc2.id = h2.id)
     )
     SELECT *
-    INTO placename_temp
+    INTO TEMPORARY placename_temp
     FROM placename_hierarchyquery
     WHERE %s ='%s'
   """
