@@ -13,11 +13,11 @@
 # set -x verbose
 
 # Set a space-separated list of tenant identifiers below:
-TENANTS+=(core lifesci)
+TENANTS+=(core lifesci fcart)
 
 # Set a space-separated list of tenant domain names that correspond,
 # in exact 1:1 order, to the identifiers in the TENANTS list above
-TENANT_DOMAINS+=(core.collectionspace.org lifesci.collectionspace.org)
+TENANT_DOMAINS+=(core.collectionspace.org lifesci.collectionspace.org fcart.collectionspace.org)
 
 # This script assumes that each tenant's default administrator
 # username follows a consistent pattern:
