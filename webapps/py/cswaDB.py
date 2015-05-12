@@ -182,7 +182,8 @@ join loctermgroup lct on (regexp_replace(mc.currentlocation, '^.*\\)''(.*)''$', 
 %s
 join collectionspace_core core on mc.id=core.id 
 join collectionobjects_botgarden cob on (co1.id=cob.id) 
-join collectionobjects_naturalhistory con on (co1.id = con.id) 
+join collectionobjects_naturalhistory con on (co1.id = con.id)
+
 left outer join locations_common lc on (mc.currentlocation=lc.refname) 
 where %s  %s = '%s'
 ORDER BY to_number(objectnumber,'9999.9999')
@@ -190,20 +191,13 @@ LIMIT 6000"""
             
         if qualifier == 'alive':
             queryPart1 = " mc.reasonformove != 'Dead' and "
-            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
+            queryPart2 = """join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
+                            join misc ms on (co1.id=ms.id and ms.lifecyclestate <> 'deleted')"""
             return queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
         elif qualifier == 'dead':
             queryPart1 = " mc.reasonformove = 'Dead' and "
             queryPart2 = "inner join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
             return queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
-        elif qualifier == 'dead or alive':
-            queryPart1 = " mc.reasonformove != 'Dead' and "
-            queryPart2 = "join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted"
-            part1 = queryTemplate % ('', queryPart2, queryPart1, searchkey, location)
-            queryPart1 = " mc.reasonformove = 'Dead' and "
-            queryPart2 = " "
-            part2 = queryTemplate % ('not', queryPart2, queryPart1, searchkey, location)
-            return part1 + ' UNION ' + part2
         else:
             raise
             # houston, we got a problem...query not qualified

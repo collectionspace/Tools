@@ -29,7 +29,7 @@ ORDER BY
 		<band height="84" splitType="Stretch">
 			<image>
 				<reportElement uuid="939a7714-856d-4655-8133-f5f3967e7477" x="0" y="0" width="366" height="61"/>
-				<imageExpression><![CDATA["http://www.collectionspace.org/sites/all/themes/CStheme/images/CSpaceLogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="c19d0d24-a8cc-4043-bdac-fb33c3bc2fed" mode="Transparent" x="0" y="64" width="566" height="20" forecolor="#000000"/>

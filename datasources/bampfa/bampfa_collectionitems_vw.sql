@@ -3,6 +3,7 @@
 -- CRH 10/22/2014
 -- CRH 10/27/2014 Measurements subst hyphen with space. Utils schema.
 -- CRH 11/25/2014 Added artistDisplayOverride
+-- CRH 04/25/2015 Added several fields; see Jira BAMPFA-402
 
 create view utils.bampfa_collectionitems_vw as
 SELECT
@@ -44,14 +45,26 @@ SELECT
    cg.catalogername cataloger,
    cg.catalognote catalognote,
    cg.catalogdate,
-   apg.assocplace site,
+   case when (pp.objectproductionplace is not null and pp.objectproductionplace<>'') then pp.objectproductionplace
+      else null
+   end as site,
    utils.getdispl(st1.item) SubjectOne,
    utils.getdispl(st2.item) SubjectTwo,
    utils.getdispl(st3.item) SubjectThree,
    utils.getdispl(st4.item) SubjectFour,
    utils.getdispl(st5.item) SubjectFive,
    utils.getdispl(co.computedcurrentlocation) currentlocation,
-   utils.getdispl(cb.computedcrate) currentcrate
+   utils.getdispl(cb.computedcrate) currentcrate,
+   utils.getdispl(col1.item) collection1,
+   utils.getdispl(col2.item) collection2,
+   utils.getdispl(col3.item) collection3,
+   utils.getdispl(ps1.item) periodstyle1,
+   utils.getdispl(ps2.item) periodstyle2,
+   utils.getdispl(ps3.item) periodstyle3,
+   utils.getdispl(ps4.item) periodstyle4,
+   utils.getdispl(ps5.item) periodstyle5,
+   utils.getdispl(cb.legalstatus) legalstatus,
+   utils.get_first_blobcsid(h1.name) image1blobcsid
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co
@@ -110,14 +123,23 @@ from
    LEFT OUTER JOIN structuredDateGroup sdgpd ON (h13.id = sdgpd.id)
    LEFT OUTER JOIN persons_bampfa pb on (pc.id=pb.id)
    LEFT OUTER JOIN hierarchy h14
-      ON (h14.parentid = co.id AND h14.name = 'collectionobjects_common:assocPlaceGroupList' and h14.pos=0)
-   LEFT OUTER JOIN assocplacegroup apg
-      ON (h14.id = apg.id)
+      ON (h14.parentid = co.id AND h14.name = 'collectionobjects_common:objectProductionPlaceGroupList' and h14.pos=0)
+   LEFT OUTER JOIN objectproductionplacegroup pp
+      ON (h14.id = pp.id)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st1 ON (st1.id=co.id and st1.pos=0)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st2 ON (st2.id=co.id and st2.pos=1)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st3 ON (st3.id=co.id and st3.pos=2)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st4 ON (st4.id=co.id and st4.pos=3)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st5 ON (st5.id=co.id and st5.pos=4)
+   LEFT OUTER JOIN collectionobjects_bampfa_bampfacollectionlist col1 ON (col1.id=co.id and col1.pos=0)
+   LEFT OUTER JOIN collectionobjects_bampfa_bampfacollectionlist col2 ON (col2.id=co.id and col2.pos=1)
+   LEFT OUTER JOIN collectionobjects_bampfa_bampfacollectionlist col3 ON (col3.id=co.id and col2.pos=2)
+   LEFT OUTER JOIN collectionobjects_common_styles ps1 ON (ps1.id=co.id and ps1.pos=0)
+   LEFT OUTER JOIN collectionobjects_common_styles ps2 ON (ps2.id=co.id and ps2.pos=1)
+   LEFT OUTER JOIN collectionobjects_common_styles ps3 ON (ps3.id=co.id and ps3.pos=2)
+   LEFT OUTER JOIN collectionobjects_common_styles ps4 ON (ps4.id=co.id and ps4.pos=3)
+   LEFT OUTER JOIN collectionobjects_common_styles ps5 ON (ps5.id=co.id and ps5.pos=4)
 order by cb.sortableEffectiveObjectNumber;
 
-grant select on utils.bampfa_collectionitems_vw to group reporters;
+grant select on utils.bampfa_collectionitems_vw to reader_bampfa;
+grant select on utils.bampfa_collectionitems_vw to group reporters_bampfa;

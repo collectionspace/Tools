@@ -10,7 +10,7 @@ rdate=`date --date="last month" +%Y-%m`
 REPORT=image_qc_report-${rdate}
 time python checkBlobs.py db cinefilesProd `date --date="last month" +%Y-%m-01` `date --date="this month" +%Y-%m-01` $REPORT.csv
 perl -ne '@x = split /\t/; print if $x[1] eq "False"; ' $REPORT.csv > bad.temp
-head -1 $REPORT.csv | cat - bad.temp > $REPORT.problems.csv
+head -1 $REPORT.csv | cat - bad.temp | perl -pe 's/\r//g' > $REPORT.problems.csv
 rm bad.temp
 all=`wc -l $REPORT.csv | cut -f1 -d" "`
 bad=`wc -l $REPORT.problems.csv | cut -f1 -d" "`

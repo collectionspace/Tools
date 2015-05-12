@@ -65,7 +65,7 @@
       <briefDescription>{brief_desc}</briefDescription>
     </briefDescriptions>
     <comments>
-      <comment/>
+      <comment>{{comment}}</comment>
     </comments>
 
   </ns2:collectionobjects_common>

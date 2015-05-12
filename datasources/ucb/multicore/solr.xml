@@ -33,10 +33,12 @@
     </shardHandlerFactory>
   <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:8983}" hostContext="${hostContext:solr}">
     <core name="pahma-metadata" instanceDir="pahma/metadata" />
+    <core name="pahma-media" instanceDir="pahma/media" />
     <core name="ucjeps-metadata" instanceDir="ucjeps/metadata" />
     <core name="botgarden-metadata" instanceDir="botgarden/metadata" />
     <core name="botgarden-propagations" instanceDir="botgarden/propagations" />
     <core name="bampfa-metadata" instanceDir="bampfa/metadata" />
+    <core name="bampfa-media" instanceDir="bampfa/media" />
     <core name="cinefiles-metadata" instanceDir="cinefiles/metadata" />
   </cores>
         

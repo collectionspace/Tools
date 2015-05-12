@@ -36,7 +36,7 @@ ORDER BY
 		<band height="104" splitType="Stretch">
 			<image>
 				<reportElement uuid="4dac5156-9fdc-4ff4-9941-133839d3d5c9" x="0" y="0" width="366" height="61"/>
-				<imageExpression><![CDATA["http://www.collectionspace.org/sites/all/themes/CStheme/images/CSpaceLogo.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<subreport>
 				<reportElement uuid="0d3e9ba0-e71e-4be6-bb64-f9967cf55fb5" x="0" y="66" width="720" height="38"/>

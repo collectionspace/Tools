@@ -1,9 +1,28 @@
 import solr
+import sys
 
-# create a connection to a solr server
-s = solr.SolrConnection(url = 'http://localhost:8983/solr/metadata', http_user = 'guest', http_pass = '')
+try:
+    core = sys.argv[1]
+except:
+    print "syntax: python %s solar_core" % sys.argv[0]
+    print "e.g     python %s pahma-metadata" % sys.argv[0]
+    sys.exit(1)
 
-# do a search
-response = s.query('description_txt:arrow', facet='true', facet_field=['medium_s','culture_s'], rows=20, facet_limit=20, facet_mincount=1)
-for hit in response.results:
-    print hit['objectnumber_s']
+try:
+    # create a connection to a solr server
+    s = solr.SolrConnection(url = 'http://localhost:8983/solr/%s' % core, http_user = 'guest', http_pass = '')
+
+    # do a search
+    response = s.query('*:*', rows=20)
+    print '%s, records found: %s' % (core,response._numFound)
+
+    details = False
+
+    if details:
+        for hit in response.results:
+            for h in hit:
+                print hit[h],
+            print
+except:
+    print "could not access %s." % core
+
