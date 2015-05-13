@@ -26,7 +26,7 @@ sub make_release {
 	update_ui_version_numbers($version_number);
 	generate_release_notes($release_branch, $version_number);
 	
-	print "\nUI files have been edited. Use git diff to verify the changes. Commit and tag? (Y/N) ";
+	print "\nUI files have been edited. Use git diff to verify the changes. Commit and tag? (y/N) ";
 	
 	my $continue = <STDIN>;
 	chomp($continue);
@@ -39,7 +39,7 @@ sub make_release {
 	commit_ui_updates($version_number);
 	create_tags($release_branch, $version_number);
 	
-	print "\nChanges have been committed, and the release has been tagged. Push to github? (Y/N) ";
+	print "\nChanges have been committed, and the release has been tagged. Push to github? (y/N) ";
 
 	my $continue = <STDIN>;
 	chomp($continue);
@@ -80,15 +80,18 @@ sub determine_release_branch {
 
 sub determine_version_number {
 	my $branch = shift;
+	my $remote_branch = get_remote_branch($branch);
 	my $last_revision = 0;
 	
 	foreach my $project (@PROJECTS) {
 		chdir_to_project($project);
 			
-		my @tags = `git tag --list $branch-*`;
+		my @tags = `git tag --list $remote_branch-*`;
 
 		foreach my $tag (@tags) {
-			my ($branch, $revision) = split(/-/, $tag);
+			my @parts = split(/-/, $tag);
+			my $revision = pop(@parts);
+			my $branch = join('-', @parts);
 	
 			if ($revision > $last_revision) {
 				$last_revision = $revision;
@@ -99,8 +102,9 @@ sub determine_version_number {
 	chdir $CWD;
 	
 	my $revision = $last_revision + 1;
+	my $remote_branch = get_remote_branch($branch);
 	
-	return "$branch-$revision";
+	return "$remote_branch-$revision";
 }
 
 sub update_ui_version_numbers {
@@ -177,12 +181,14 @@ sub generate_release_notes {
 			my $commit_id = $1;
 			my $timestamp = $2;
 			my $log_message = $3;
-			my $issue_number = '';
+			my $issue_numbers = '';
 		
 			if ($log_message =~ /^(\S+):\s+(.*)$/) {
-				($issue_number, $log_message) = split(/:\s+/, $log_message, 2);
+				($issue_numbers, $log_message) = split(/:\s+/, $log_message, 2);
 			}
 			
+			my ($issue_number) = split(/,/, $issue_numbers);
+
 			if (!$issue_number) {
 				$issue_number = 'NOJIRA';
 			}
@@ -213,13 +219,13 @@ sub generate_release_notes {
 			$issue_summary = 'Other changes';
 		}
 		else {
-			$issue_summary = get_jira_summary($issue_number) || die("failed to get summary for issue $issue_number");
+			$issue_summary = get_jira_summary($issue_number) || warn("failed to get summary for issue $issue_number");
 		}
 		
 		my $html = $issue_summary;
 		
 		if ($issue_number ne 'NOJIRA') {
-			$html .= qq( <span class="issuenumber">(<a href="http://issues.collectionspace.org/browse/$issue_number">$issue_number</a>)</span>);
+			$html .= qq( <span class="issuenumber">(<a href="https://issues.collectionspace.org/browse/$issue_number">$issue_number</a>)</span>);
 		}
 
 		$html .= "\n";
@@ -295,8 +301,8 @@ sub generate_release_notes {
 
 sub get_jira_summary {
 	my $issue_number = shift;
-	my $url = "http://issues.collectionspace.org/rest/api/2/issue/$issue_number?fields=summary";	
-	
+	my $url = "https://issues.collectionspace.org/rest/api/2/issue/$issue_number?fields=summary";	
+	print ("url=", $url, "\n");
 	my $response = decode_json(`curl -s $url`);
 	my $summary = $response->{fields}->{summary};
 	
@@ -363,14 +369,15 @@ sub update_release_notes {
 
 sub push_branches {
 	my $release_branch = shift;
-	my $cspace_version = (split(/_/, $release_branch))[1];
+	my $remote_release_branch = get_remote_branch($release_branch);
+	my $cspace_version = (split(/_/, $remote_release_branch))[1];
 
 	foreach my $project (@PROJECTS) {
 		chdir_to_project($project);
 		
 		system "git push";
-		system "git push cspace-deployment $release_branch";
-		system "git push cspace-deployment cspace-deployment_$cspace_version:refs/heads/v$cspace_version"
+		system "git push cspace-deployment $release_branch:$remote_release_branch";
+		system "git push cspace-deployment cspace-deployment_v$cspace_version:refs/heads/v$cspace_version";
 	}
 
 	chdir $CWD;	
@@ -379,11 +386,12 @@ sub push_branches {
 sub create_tags {
 	my $release_branch = shift;
 	my $version_number = shift;
-	
+	my $remote_release_branch = get_remote_branch($release_branch);
+		
 	foreach my $project (@PROJECTS) {
 		chdir_to_project($project);
 		
-		system "git tag -a $version_number -m 'Release tag of the $release_branch branch.'";
+		system "git tag -a $version_number -m 'Release tag of the $remote_release_branch branch.'";
 	}
 
 	chdir $CWD;	
@@ -413,4 +421,16 @@ sub get_project_dir {
 	my $project = shift;
 	
 	return File::Spec->catdir($CWD, $project);
+}
+
+sub get_remote_branch {
+	my $local_branch = shift;
+	my $remote_branch = $local_branch;
+
+	# My latest convention is to prepend the local branch name with "cspace-deployment_".
+	# Remove that prefix to get the name of the branch on cspace-deployment.
+	
+	$remote_branch =~ s/^cspace-deployment_//;
+
+	return $remote_branch;
 }
