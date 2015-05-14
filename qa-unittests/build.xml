@@ -3,7 +3,7 @@
     <property name="baseurl" value="http://qa.collectionspace.org:8180/collectionspace/ui/core/html/" />
     <property name="browser" value="firefox" />
     
-    <property name="src.dir"     value="test"/>
+    <property name="src.dir"     value="src/test"/>
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="lib.dir"     value="lib"/>
@@ -20,7 +20,7 @@
 
     <target name="primaryTabTests" depends="compile">
         <junit fork="yes" haltonfailure="yes" printsummary="yes">
-            <test name="org.collectionspace.qa.PrimaryRecordTests" />
+            <test name="org.collectionspace.qa.selenium.uitests.PrimaryRecordTests" />
             <formatter type="plain" usefile="false" />
             <classpath refid="test.classpath" />
 
@@ -32,7 +32,7 @@
 
     <target name="secondaryTabTests" depends="compile">
         <junit fork="yes" haltonfailure="yes" printsummary="yes" showoutput="yes">
-            <test name="org.collectionspace.qa.SecondaryTabTests" />
+            <test name="org.collectionspace.qa.selenium.uitests.SecondaryTabTests" />
             <formatter type="plain" usefile="false" />
             <classpath refid="test.classpath" />
 
