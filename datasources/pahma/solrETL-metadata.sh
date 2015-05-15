@@ -81,7 +81,6 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
-rm d6.csv d7.csv d8.csv
 wc -l *.csv
 ##############################################################################
 # ok, now let's load this into solr...
@@ -97,6 +96,9 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
-rm 4solr*.csv.gz
-gzip 4solr.*.csv
+# get rid of intermediate files
+rm d?.csv m?.csv
+rm *.csv.gz
+# zip up .csvs, save a bit of space on backups
+gzip *.csv
 date

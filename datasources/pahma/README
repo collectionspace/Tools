@@ -6,12 +6,12 @@ However, it is currently used to provision the Solr4 datasources used by PAHMA (
 
 To run the ad hoc ETL  used in the pahma solr datasource, do something like the following in this directory:
 
-$ nohup ./makeCsv4.sh pahma &
+$ ./solrETL-metadata.sh pahma
 
-or, via crontab, something like the following:
+or, via crontab, something like the following (assumes the job is running under user apache):
 
-[jblowe@pahma-dev pahma]$ crontab -l
-0 3 * * * /home/developers/pahma/makeCsv4.sh pahma >> /home/developers/pahma/extract.log.txt  2>&1
+[jblowe@ucjeps ~]$ sudo crontab -u apache -l
+0 2 * * * /home/developers/pahma/solrETL-metadata.sh ucjeps >> /home/developers/pahma/solrExtract.log  2>&1
 
 The script does the following:
 
@@ -28,5 +28,7 @@ The script currently take about 20 minutes to run.
 Caveats:
 
 - the query, its results, and the resulting solr datasource are largely unverified. Caveat utilizator.
+- the script assumes that the password for the reader user is in .pgpass; add it to the connect string in
+  the script if it isn't.
 
-(jbl 6/15/2014)
+(jbl 06/15/2014; 05/10/2015)

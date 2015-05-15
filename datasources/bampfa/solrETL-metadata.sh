@@ -27,14 +27,15 @@ time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv > d7.csv
 cat header4Solr.csv d7.csv > 4solr.$TENANT.metadata.csv
-#rm d6.csv d7.csv m1.csv d1.csv d3.csv
 wc -l *.csv
 # clear out the existing data
 curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
-#
-rm 4solr*.csv.gz
-gzip 4solr.*.csv
+# get rid of intermediate files
+rm d?.csv m?.csv
+rm *.csv.gz
+# zip up .csvs, save a bit of space on backups
+gzip *.csv
 #
 date
