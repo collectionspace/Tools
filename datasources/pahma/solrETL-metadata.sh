@@ -6,7 +6,7 @@
 # prep them for load into Solr4 using the "csv datahandler"
 ##############################################################################
 date
-cd /home/app_solr/app_solr/solrdatasources/pahma
+cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
 SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5107"
 USERNAME="reporter_$TENANT"
