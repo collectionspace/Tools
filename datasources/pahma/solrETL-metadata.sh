@@ -6,13 +6,13 @@
 # prep them for load into Solr4 using the "csv datahandler"
 ##############################################################################
 date
-cd /home/developers/pahma
+cd /home/app_solr/datasources/pahma
 TENANT=$1
-HOSTNAME=$TENANT.cspace.berkeley.edu
+SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5107"
+USERNAME="reporter_$TENANT"
+DATABASE="$TENANT_domain_$TENANT"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=36
-USERNAME="reporter_pahma"
-DATABASE="pahma_domain_pahma"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################

@@ -1,12 +1,12 @@
 #!/bin/bash -x
 date
-cd /home/developers/ucjeps
+cd /home/app_solr/datasources/ucjeps
 TENANT=$1
-HOSTNAME=$TENANT.cspace.berkeley.edu
+SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5110"
+USERNAME="reporter_$TENANT"
+DATABASE="$TENANT_domain_$TENANT"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=53
-USERNAME="reporter_ucjeps"
-DATABASE="ucjeps_domain_ucjeps"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 ##############################################################################
 # extract and massage the metadata from CSpace
 ##############################################################################

@@ -1,11 +1,12 @@
 #!/bin/bash -x
 date
-cd /home/developers/botgarden
+cd /home/app_solr/datasources/botgarden
 TENANT=$1
+SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5113"
+USERNAME="reporter_$TENANT"
+DATABASE="$TENANT_domain_$TENANT"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=42
-USERNAME="reporter_botgarden"
-DATABASE=botgarden_domain_botgarden
-CONNECTSTRING="host=$TENANT.cspace.berkeley.edu dbname=$DATABASE"
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################

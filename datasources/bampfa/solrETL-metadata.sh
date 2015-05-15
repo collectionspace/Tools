@@ -1,11 +1,12 @@
 #!/bin/bash -x
 date
-cd /home/developers/bampfa
+cd /home/app_solr/datasources/bampfa
 TENANT=$1
+SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5113"
+USERNAME="reporter_$TENANT"
+DATABASE="$TENANT_domain_$TENANT"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=38
-USERNAME="reporter_bampfa"
-DATABASE=bampfa_domain_bampfa
-CONNECTSTRING="host=$TENANT.cspace.berkeley.edu dbname=$DATABASE"
 ##############################################################################
 # extract metadata and media info from CSpace
 ##############################################################################
