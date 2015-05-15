@@ -1,6 +1,6 @@
 #!/bin/bash -x
 date
-cd /home/app_solr/datasources/bampfa
+cd /home/app_solr/app_solr/solrdatasources/bampfa
 TENANT=$1
 SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5113"
 USERNAME="reporter_$TENANT"

@@ -5,7 +5,7 @@
 # ssh to dev.cspace, where there is a current csv file with all the collectors
 #   ssh dev.cspace...
 # go to the data directory, get the data
-cd /home/app_solr/datasources/ucjeps/
+cd /home/app_solr/app_solr/solrdatasources/ucjeps/
 gunzip 4solr.ucjeps.metadata.csv.gz 
 # make a list of collector names
 cut -f9 4solr.ucjeps.metadata.csv | sort -u > collectors
