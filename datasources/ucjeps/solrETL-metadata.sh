@@ -4,7 +4,7 @@ cd /home/app_solr/app_solr/solrdatasources/ucjeps
 TENANT=$1
 SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5110"
 USERNAME="reporter_$TENANT"
-DATABASE="$TENANT_domain_$TENANT"
+DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=53
 ##############################################################################
