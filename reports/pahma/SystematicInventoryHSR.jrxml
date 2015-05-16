@@ -75,7 +75,7 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 		<band height="53" splitType="Stretch">
 			<image onErrorType="Blank">
 				<reportElement x="303" y="0" width="270" height="51" uuid="3ca0df28-85c7-41bc-bf2c-ff7f74c802c0"/>
-				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement style="Title" x="0" y="0" width="263" height="24" uuid="4101e028-2c15-4e3e-a310-643830492372"/>

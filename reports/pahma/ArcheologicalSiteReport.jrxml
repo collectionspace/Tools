@@ -145,7 +145,7 @@ order by ptg.termname,cop.sortableobjectnumber]]>
 			</staticText>
 			<image>
 				<reportElement x="303" y="0" width="270" height="51"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" x="33" y="60" width="539" height="16"/>
