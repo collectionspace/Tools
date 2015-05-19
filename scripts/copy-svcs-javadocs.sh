@@ -1,11 +1,16 @@
-#!/bin/bash
+#! /bin/bash
+
+# Note: in Bamboo, this script will be run via /bin/sh
 
 ####################################################
 # Script for copying the Services layer Javadoc 
 # documentation, from a Bamboo build directory 
 # to a web-accessible directory: /apidocs/services
 #
-# Must be run as the Bamboo user
+# Intended to be invoked by a Bamboo CI build plan
+# on the "Nightly" CollectionSpace server.
+#
+# Script must be run as the 'bamboo' user.
 ####################################################
 
 ####################################################
@@ -40,45 +45,45 @@ if [ -z "$REQUIRED_USER" ]
 fi
 
 EFFECTIVE_USER=`echo "$(whoami)"`
-if [ $EFFECTIVE_USER != $REQUIRED_USER ]
+if [ "$EFFECTIVE_USER" != "$REQUIRED_USER" ];
   then
     echo "Script must be run as user $REQUIRED_USER"
     exit 1
 fi
 
-if [ -z "$BAMBOO_HOME" ]
+if [ -z "$BAMBOO_HOME" ];
   then
     echo "Environment variable BAMBOO_HOME was empty; it must be set"
     exit 1
 fi
 
-# if [ -z "$JAVA_HOME" ]
+# if [ -z "$JAVA_HOME" ];
 #   then
 #     echo "Environment variable JAVA_HOME was empty; it must be set"
 #     exit 1
 # fi
 
-if [ ! -d $SOURCE_DIR ] 
+if [ ! -d "$SOURCE_DIR" ];
   then
     echo "Source directory $SOURCE_DIR does not exist"
     exit 1
 fi
 
-# if [ ! -f $SOURCE_JAR_FILE ] 
+# if [ ! -f "$SOURCE_JAR_FILE" ];
 #   then
 #     echo "Source JAR file $SOURCE_JAR_FILE does not exist"
 #     exit 1
 # fi
 
-if [ ! -d $WEB_ROOT_DOCS_DIR ] 
+if [ ! -d "$WEB_ROOT_DOCS_DIR" ];
   then
     echo "Web root documents directory $WEB_ROOT_DOCS_DIR does not exist"
     exit 1
 fi
 
-if [ -d $DEST_PARENT_DIR ] 
+if [ -d "$DEST_PARENT_DIR" ];
   then
-    if [ ! -O $DEST_PARENT_DIR ] 
+    if [ ! -O "$DEST_PARENT_DIR" ];
       then
         echo "Destination parent directory $DEST_PARENT_DIR exists, but is not owned by the current effective user"
         exit 1
@@ -90,9 +95,9 @@ if [ -d $DEST_PARENT_DIR ]
         { echo "Creating $DEST_PARENT_DIR failed"; exit 1; } 
 fi
 
-if [ -d $DEST_DIR ] 
+if [ -d "$DEST_DIR" ];
   then
-    if [ ! -O $DEST_DIR ] 
+    if [ ! -O "$DEST_DIR" ];
       then
         echo "Destination directory $DEST_DIR exists, but is not owned by the current effective user"
         exit 1
