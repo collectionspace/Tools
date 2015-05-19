@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 ####################################################
 # Script for rolling up a daily tarball from nightly
@@ -8,13 +8,15 @@
 # Start of variables to set
 ####################################################
 
-# Enable for verbose output - uncomment only while debugging!
+# Enable for verbose output - uncomment while debugging,
+# or when running via automation and thus logging messages
 set -x verbose
 
-# Requires that the $CATALINA_HOME environment variable be set
+# The $CATALINA_HOME environment variable must be set
 # to identify the path to the Tomcat directory
 ARCHIVE_DIR_NAME=`basename "$CATALINA_HOME"`
 
+# Other variables to set; customize these as needed
 TARBALL_NAME=$ARCHIVE_DIR_NAME-`date +%Y-%m-%d`.tar.gz
 DESTINATION_DIR=/var/www/html/builds
 
@@ -44,23 +46,23 @@ CATALINA_LOG_FILE=$CATALINA_LOG_DIR/catalina.out
 # End of variables to set
 ####################################################
 
-DEFAULT_TMP_DIR=/tmp
-TMP_DIR=
-
-if [[ -d $DEFAULT_TMP_DIR && -w $DEFAULT_TMP_DIR ]]
+if [[ -z "$CATALINA_HOME" ]];
   then
-    TMP_DIR=$DEFAULT_TMP_DIR
-elif [[ "x$TMPDIR" != "x"  && -d $TMPDIR && -w $TMPDIR ]]
-  then
-    TMP_DIR=$TMPDIR
-else
-    echo "Could not find a suitable temporary directory"
+    echo "Environment variable CATALINA_HOME was empty; it must be set"
     exit 1
 fi
 
-if [ "x$CATALINA_HOME" == "x" ]
+DEFAULT_TMP_DIR=/tmp
+TMP_DIR=
+
+if [[ ! -z "$TMPDIR" && -d $TMPDIR && -w $TMPDIR ]];
   then
-    echo "Environment variable CATALINA_HOME was empty; it must be set"
+    TMP_DIR=$TMPDIR
+elif [[ -d "$DEFAULT_TMP_DIR" && -w "$DEFAULT_TMP_DIR" ]];
+  then
+    TMP_DIR=$DEFAULT_TMP_DIR
+else
+    echo "Could not find a suitable temporary directory"
     exit 1
 fi
 
@@ -86,7 +88,7 @@ echo "Removing passwords from various config files ..."
 # with a presumed default version of 'sed' under either OS
 SED_CMD=
 # Assumes we're running under Mac OS X, with BSD 'sed'
-if [[ $OSTYPE == darwin* ]]
+if [[ "$OSTYPE" == "darwin*" ]];
   then
     SED_CMD="sed -i .bak"
 # Defaults to assuming we're running under Linux, with GNU 'sed'
@@ -119,20 +121,20 @@ echo "Removing temporary directories ..."
 rm -Rv temp[0-9a-f]*
 
 echo "Creating Nuxeo server bundles directory ..."
-if [ ! -e $NUXEO_SERVER_BUNDLES_DIR ]
+if [[ ! -d "$NUXEO_SERVER_BUNDLES_DIR" ]];
   then
-    mkdir $NUXEO_SERVER_BUNDLES_DIR  || \
+    mkdir -p $NUXEO_SERVER_BUNDLES_DIR  || \
       { echo "Creating $NUXEO_SERVER_BUNDLES_DIR directory failed"; exit 1; }
 fi
 
 echo "Creating Nuxeo server plugins directory ..."
-if [ ! -e $NUXEO_SERVER_PLUGINS_DIR ]
+if [[ ! -d "$NUXEO_SERVER_PLUGINS_DIR" ]];
   then
-    mkdir $NUXEO_SERVER_PLUGINS_DIR  || \
+    mkdir -p $NUXEO_SERVER_PLUGINS_DIR  || \
       { echo "Creating $NUXEO_SERVER_PLUGINS_DIR directory failed"; exit 1; }
 fi
 
-if [ ! -e $CATALINA_LOG_FILE ]
+if [[ ! -e "$CATALINA_LOG_FILE" ]];
   then
     echo "Creating empty Tomcat log file, required by catalina.sh ..."
     touch $CATALINA_LOG_FILE  || \
@@ -168,14 +170,14 @@ cd $TMP_DIR
 tar -zcf $TARBALL_NAME $ARCHIVE_DIR_NAME || \
   { echo "Creating tarball $ARCHIVE_DIR_NAME/$TARBALL_NAME failed"; exit 1; }
 
-if [[ -d $TMP_DIR/$ARCHIVE_DIR_NAME && -w $TMP_DIR/$ARCHIVE_DIR_NAME ]]
+if [[ -d $TMP_DIR/$ARCHIVE_DIR_NAME && -w $TMP_DIR/$ARCHIVE_DIR_NAME ]];
   then
     echo "Removing temporary copy of the Tomcat directory ..."
     rm -R $TMP_DIR/$ARCHIVE_DIR_NAME || \
       { echo "Removing $TMP_DIR/$ARCHIVE_DIR_NAME failed"; } 
 fi
 
-if [[ -d $DESTINATION_DIR && -w $DESTINATION_DIR ]]
+if [[ -d $DESTINATION_DIR && -w $DESTINATION_DIR ]];
   then
     echo "Moving tarball to destination directory ..."
     mv $TARBALL_NAME $DESTINATION_DIR || \
@@ -185,7 +187,7 @@ if [[ -d $DESTINATION_DIR && -w $DESTINATION_DIR ]]
     echo "Tarball copied to $TMP_DIR/$TARBALL_NAME"
 fi
 
-if [ -e $DESTINATION_DIR/$TARBALL_NAME ]
+if [[ -e $DESTINATION_DIR/$TARBALL_NAME && -w $DESTINATION_DIR ]];
   then
     echo "Deleting all similar tarballs in destination directory older than 7 days ..."
     find $DESTINATION_DIR -name "$ARCHIVE_DIR_NAME-*tar.gz" -mtime +7 -delete
