@@ -81,5 +81,5 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit
 rm d?.csv m?.csv
 rm *.csv.gz
 # zip up .csvs, save a bit of space on backups
-gzip *.csv#
+gzip *.csv
 date
