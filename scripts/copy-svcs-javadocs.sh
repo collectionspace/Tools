@@ -21,7 +21,7 @@ SOURCE_DIR_NAME=apidocs
 # SOURCE_JAR_FILENAME=org.collectionspace.services-javadoc.jar
 
 BAMBOO_BUILD_PLAN=COLLECTIONSPACE1-DEF1-JOB1
-BAMBOO_BUILD_DIR=$BAMBOO_HOME/xml-data/build-dir/$BAMBOO_BUILD_PLAN
+BAMBOO_BUILD_DIR=$BAMBOO_HOME/xml-data/build-dir/131073/$BAMBOO_BUILD_PLAN
 SOURCE_DIR=$BAMBOO_BUILD_DIR/services/target/site/$SOURCE_DIR_NAME
 # SOURCE_JAR_FILE=$BAMBOO_BUILD_DIR/services/target/$SOURCE_JAR_FILENAME
 
@@ -33,7 +33,7 @@ DEST_DIR=$DEST_PARENT_DIR/services
 # End of variables to set
 ####################################################
 
-if [ "x$REQUIRED_USER" == "x" ]
+if [ -z "$REQUIRED_USER" ]
   then
     echo "Variable REQUIRED_USER was empty; it must be set"
     exit 1
@@ -46,13 +46,13 @@ if [ $EFFECTIVE_USER != $REQUIRED_USER ]
     exit 1
 fi
 
-if [ "x$BAMBOO_HOME" == "x" ]
+if [ -z "$BAMBOO_HOME" ]
   then
     echo "Environment variable BAMBOO_HOME was empty; it must be set"
     exit 1
 fi
 
-# if [ "x$JAVA_HOME" == "x" ]
+# if [ -z "$JAVA_HOME" ]
 #   then
 #     echo "Environment variable JAVA_HOME was empty; it must be set"
 #     exit 1
