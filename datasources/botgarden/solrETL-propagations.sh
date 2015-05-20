@@ -40,5 +40,5 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update/csv?co
 rm d?.csv m?.csv p?.csv
 rm 4solr.$TENANT.propagations.csv.gz header4Solr.csv.gz
 # zip up .csvs, save a bit of space on backups
-gzip *.csv
+gzip -f *.csv
 date

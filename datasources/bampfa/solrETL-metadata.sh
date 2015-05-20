@@ -34,9 +34,9 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delet
 curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
-rm d?.csv m?.csv
-rm *.csv.gz
+rm d?.csv m?.csv media.csv metadata.csv
+rm 4solr.*.csv.gz
 # zip up .csvs, save a bit of space on backups
-gzip *.csv
+gzip -f *.csv
 #
 date

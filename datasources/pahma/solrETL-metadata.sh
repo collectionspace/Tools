@@ -8,10 +8,11 @@
 date
 cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
-SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5107"
+# nb: using prod db for now...
+SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
-CONNECTSTRING="host=$SERVER dbname=$DATABASE"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE password=xxxxxx"
 export NUMCOLS=36
 ##############################################################################
 # extract media info from CSpace
@@ -97,8 +98,8 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
 # get rid of intermediate files
-rm d?.csv m?.csv
-rm *.csv.gz
+rm d?.csv m?.csv part*.csv basic.csv
+rm 4solr.*.csv.gz
 # zip up .csvs, save a bit of space on backups
-gzip *.csv
+gzip -f *.csv
 date
