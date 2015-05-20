@@ -1160,7 +1160,7 @@ def doPackingList(form, config):
     else:
         places = []
 
-    [sys.stderr.write('packing list place term: %s' % x) for x in places]
+    #[sys.stderr.write('packing list place term: %s\n' % x) for x in places]
     try:
         locationList = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS,
                                          config)
@@ -1169,7 +1169,7 @@ def doPackingList(form, config):
 
     rowcount = len(locationList)
 
-    [sys.stderr.write('packing list locations : %s' % x[0]) for x in locationList]
+    #[sys.stderr.write('packing list locations : %s\n' % x[0]) for x in locationList]
 
     if rowcount == 0:
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -1187,7 +1187,7 @@ def doPackingList(form, config):
             raise
 
 
-        [sys.stderr.write('packing list objects: %s' % x[0]) for x in objects]
+        #[sys.stderr.write('packing list objects: %s\n' % x[3]) for x in objects]
         rowcount = len(objects)
         if rowcount == 0:
             if updateType != 'packinglistbyculture':
@@ -1360,7 +1360,7 @@ def downloadCsv(form, config):
             raise
 
         place = form.get("cp.place")
-        if place != None:
+        if place != None and place != '':
             places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
         else:
             places = []
@@ -1373,7 +1373,8 @@ def downloadCsv(form, config):
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
-            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
+            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo', institution)
+            #[sys.stderr.write('packing list csv objects: %s\n' % x[3]) for x in objects]
             for o in objects:
                 if checkObject(places, o):
                     if institution == 'bampfa':
