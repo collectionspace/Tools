@@ -40,6 +40,14 @@ do
  time python join.py intermediate.csv part$i.csv > temp.csv
  cp temp.csv intermediate.csv
 done
+# these queries for for the internal datastore
+cp intermediate.csv internal.csv
+for i in {18..19}
+do
+ time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
+ time python join.py internal.csv part$i.csv > temp.csv
+ cp temp.csv internal.csv
+done
 rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
