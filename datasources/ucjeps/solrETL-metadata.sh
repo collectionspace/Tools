@@ -2,7 +2,7 @@
 date
 cd /home/app_solr/solrdatasources/ucjeps
 TENANT=$1
-SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5110"
+SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5110 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"

@@ -9,10 +9,10 @@ date
 cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
 # nb: using prod db for now...
-SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307"
+SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
-CONNECTSTRING="host=$SERVER dbname=$DATABASE password=xxxxxx"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=36
 ##############################################################################
 # extract media info from CSpace
