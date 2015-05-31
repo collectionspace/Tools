@@ -44,6 +44,8 @@ count.output = 0
 count.newnames = 0
 count.source = 0
 count.datasource = 0
+count.cultivars = 0
+count.cultivarsinoriginal = 0
 
 parts = {}
 
@@ -72,6 +74,9 @@ cultivarpattern = re.compile("(.*)('.*')")
 def check4cultivars(name):
     if not 'cv.' in name:
         name = cultivarpattern.sub(r'\1 cv. \2', name)
+    else:
+        count.cultivarsinoriginal += 1
+    if 'cv.' in name: count.cultivars += 1
     return name
 
 
@@ -171,6 +176,8 @@ def main():
     print "%s parsenames output." % count.output
     print "%s new names found." % count.newnames
     print "%s names now in datasource." % count.datasource
+    print "%s cultivars indicated already (i.e 'cv.' in original)." % count.cultivarsinoriginal
+    print "%s total cultivars identified." % count.cultivars
 
     print
     print 'name parts:'
