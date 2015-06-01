@@ -6,7 +6,7 @@ SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export NUMCOLS=42
+export NUMCOLS=43
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
