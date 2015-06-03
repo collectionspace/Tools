@@ -67,8 +67,8 @@ def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
 
-# look for cultivars, e.g. "Ceanothus 'Berkeley Skies'", make it Ceanothus cv. 'Berkeley Skies' for GBIF parsing"
-cultivarpattern = re.compile("(.*)('.*')")
+# look for cultivars, e.g. "Ceanothus 'Berkeley Skies'", make it Ceanothus cv. Berkeley Skies for GBIF parsing"
+cultivarpattern = re.compile("(.*)'(.*)'")
 
 
 def check4cultivars(name):
