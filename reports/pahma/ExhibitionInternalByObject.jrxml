@@ -2,7 +2,10 @@
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
 <!-- 2015-06-11T11:51:56 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Exhibition internal by object test 2" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e6a0d5db-41ed-493b-a2f7-79182fa5f6c5">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Tunnel to CSpace Prod"/>
+        <parameter name="csid" class="java.lang.String">
+                <defaultValueExpression><![CDATA["bd0c5831-06fa-458f-b686"]]></defaultValueExpression>
+        </parameter>
+
 	<queryString>
 		<![CDATA[SELECT ec.exhibitionnumber AS "Exh. number", ec.title AS "Exhibit title", cc.objectnumber AS "Mus. number", cp.sortableobjectnumber,  
 eog.exhibitionobjectsection AS "Section",
@@ -104,7 +107,7 @@ LEFT OUTER JOIN objectproductionplacegroup oppl ON (hpp.id=oppl.id)
 LEFT OUTER JOIN exhibitionobjectgroup eog ON (eog.exhibitionobjectnumber=cc.objectnumber)
 JOIN hierarchy h3 ON (h3.id=eog.id AND h3.parentid=ec.id)
 
-WHERE h2.name = 'bd0c5831-06fa-458f-b686'
+WHERE h2.name = $P{csid}
 
 GROUP BY ec.exhibitionnumber, ec.title, 
 eog.exhibitionobjectsection,
@@ -169,7 +172,7 @@ ORDER BY cp.sortableobjectnumber]]>
 				<reportElement x="350" y="0" width="270" height="51" uuid="96862a8b-b8b2-442f-a8ac-4957b8e199f7">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
-				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
