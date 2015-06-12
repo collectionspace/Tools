@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
-<!-- 2015-06-12T14:27:16 -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Exhibition internal by object test 2" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e6a0d5db-41ed-493b-a2f7-79182fa5f6c5">
+<!-- 2015-06-12T14:27:44 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Exhibition internal by location test 2" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c92583ed-bfaa-44a1-b442-613e3f12ce25">
 	<parameter name="csid" class="java.lang.String">
 		<defaultValueExpression><![CDATA["bd0c5831-06fa-458f-b686"]]></defaultValueExpression>
 	</parameter>
@@ -117,7 +117,7 @@ cc.objectnumber, ong.objectname,
 opp.objectproductionperson, oppl.objectproductionplace, spd.datedisplaydate, scd.datedisplaydate, 
 fcp.item, cc.computedcurrentlocation, ca.computedcrate, com.item, cp.sortableobjectnumber, h1.name
 
-ORDER BY cp.sortableobjectnumber]]>
+ORDER BY cc.computedcurrentlocation, ca.computedcrate, cp.sortableobjectnumber]]>
 	</queryString>
 	<field name="Exh. number" class="java.lang.String"/>
 	<field name="Exhibit title" class="java.lang.String"/>
@@ -146,29 +146,42 @@ ORDER BY cp.sortableobjectnumber]]>
 	<field name="Latest condition" class="java.lang.String"/>
 	<field name="Latest condition note" class="java.lang.String"/>
 	<field name="imagefilepath" class="java.lang.String"/>
-	<background>
-		<band splitType="Stretch"/>
-	</background>
+	<group name="Full location" minHeightToStartNewPage="100">
+		<groupExpression><![CDATA[$F{Full location}]]></groupExpression>
+		<groupHeader>
+			<band height="18">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="3" width="570" height="15" forecolor="#FFFFFF" backcolor="#660000" uuid="02c4b5a6-1d79-43d4-a05d-32f154f3d2c1">
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Full location}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
 	<title>
 		<band height="52" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="450" height="22" uuid="c8c763e5-b158-44f6-b7d9-eadbbee82504">
+				<reportElement x="0" y="0" width="450" height="22" uuid="d6b22b28-4f6d-4adc-b7f7-3cdeb8f43f3a">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Exhibition object list, by Mus. no.]]></text>
+				<text><![CDATA[Exhibition object list, by location]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="0" y="29" width="450" height="23" uuid="2de61d9f-4e4c-45f2-99f9-39a8ae29b573"/>
+				<reportElement x="0" y="29" width="450" height="23" uuid="e930f11c-0497-438a-86f6-05fcab763f79"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Exhibit title}]]></textFieldExpression>
 			</textField>
 			<image onErrorType="Icon">
-				<reportElement stretchType="RelativeToTallestObject" x="350" y="0" width="270" height="51" uuid="96862a8b-b8b2-442f-a8ac-4957b8e199f7">
+				<reportElement x="350" y="0" width="270" height="51" uuid="663cf49a-b0a7-4bfc-a472-0a31926253ec">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
 				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
@@ -176,10 +189,19 @@ ORDER BY cp.sortableobjectnumber]]>
 		</band>
 	</title>
 	<detail>
-		<band height="119">
+		<band height="103" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement x="-10" y="5" width="92" height="12" uuid="89295736-957a-4a69-a5c8-04661b915dd1">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Museum number:]]></text>
+			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="85" y="5" width="340" height="12" uuid="22ffeac5-419c-4490-9800-09f49df7308d">
+				<reportElement x="85" y="5" width="340" height="12" uuid="81957103-1698-4553-97cc-672e5fbcf10d">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
@@ -188,26 +210,16 @@ ORDER BY cp.sortableobjectnumber]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Mus. number}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="85" y="22" width="340" height="12" uuid="165f3e9a-6413-42cd-959d-fa1fc18ad6a0">
+			<line>
+				<reportElement positionType="Float" x="0" y="2" width="570" height="1" uuid="8a59fff1-c57e-4b22-bb12-8c80eda4a70c">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Name}]]></textFieldExpression>
-			</textField>
+			</line>
 			<staticText>
-				<reportElement x="-10" y="5" width="92" height="12" uuid="7a77b821-1518-4780-93aa-ed504ddab28b">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Museum number:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="-10" y="22" width="92" height="12" uuid="e2c731b9-ee28-4854-b021-06b6f43ae69f">
+				<reportElement x="-10" y="22" width="92" height="12" uuid="455caee8-2fc0-4acd-99ec-2f42e5d2de4d">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -216,7 +228,25 @@ ORDER BY cp.sortableobjectnumber]]>
 				<text><![CDATA[Object name:]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="85" y="39" width="340" height="12" uuid="e9a948d3-6585-4c56-a809-ea2bf14e16a9">
+				<reportElement x="85" y="22" width="340" height="12" uuid="e4370898-7e19-4670-a7b7-d844ed958fcc">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="-10" y="39" width="92" height="12" uuid="4018e12c-9a71-4e36-970b-d08b3168b05f">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Culture:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="85" y="39" width="340" height="12" uuid="71542894-7946-4e0d-af78-bfb497f418ed">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
@@ -225,51 +255,7 @@ ORDER BY cp.sortableobjectnumber]]>
 				<textFieldExpression><![CDATA[$F{Culture}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="-10" y="39" width="92" height="12" uuid="8ba5425b-b804-47e9-af60-824f31e9fd1b">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Culture:]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="85" y="104" width="340" height="12" uuid="23879165-6ea2-4e9f-ae35-fd40cff5c1c3">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Material(s)}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="-10" y="71" width="92" height="12" uuid="e6364e6f-9d31-4e72-babd-4a9468beb21e">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Storage location:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement stretchType="RelativeToTallestObject" x="-10" y="104" width="92" height="12" uuid="93a496b0-1134-43d4-b78f-478e056f8f9f">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Material(s):]]></text>
-			</staticText>
-			<line>
-				<reportElement positionType="Float" x="0" y="2" width="570" height="1" uuid="d6cf9862-55aa-46a7-a6a3-2b0774deda59">
-					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-				</reportElement>
-			</line>
-			<staticText>
-				<reportElement x="-10" y="55" width="92" height="12" uuid="fc25adc3-0d4a-4349-a44d-eeb5da1e774b">
+				<reportElement x="-10" y="55" width="92" height="12" uuid="88d16c66-9e3f-4481-bcca-e8a50a6be92c">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -277,8 +263,17 @@ ORDER BY cp.sortableobjectnumber]]>
 				</textElement>
 				<text><![CDATA[Acc. number:]]></text>
 			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="85" y="55" width="340" height="12" uuid="12d33408-4301-4c3d-8780-63b4a2f9e3c3">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Acc. No.}]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="-10" y="87" width="92" height="12" uuid="c9a5dcc3-ebab-4272-a11c-a2a0f9117b25">
+				<reportElement x="-10" y="71" width="92" height="12" uuid="2534dfd7-90c2-487d-ac4c-b32a9d5dbd00">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -287,33 +282,32 @@ ORDER BY cp.sortableobjectnumber]]>
 				<text><![CDATA[Condition:]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="85" y="87" width="340" height="12" uuid="1ba3cdf6-7b95-4d0d-9bf3-c8bf425634d8"/>
+				<reportElement x="85" y="71" width="340" height="12" uuid="c5c3ce8c-e1d0-426d-88cd-950652ba7145"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Latest condition}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement stretchType="RelativeToTallestObject" x="-10" y="88" width="92" height="12" uuid="289a8ac8-042c-42dd-9758-8823b754eab6">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Material(s):]]></text>
+			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="85" y="55" width="340" height="12" uuid="213659d0-3e50-4841-bdc8-e32bab099bbc">
+				<reportElement stretchType="RelativeToTallestObject" x="85" y="88" width="340" height="12" uuid="89aa3e35-9622-480a-858b-a3551d3c119d">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{Acc. No.}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="85" y="71" width="340" height="12" uuid="528f169e-a027-4c5f-83e3-2cd6ffb731fd">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Full location}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Material(s)}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement positionType="Float" x="457" y="5" width="110" height="114" uuid="173acc9d-aac6-4b69-ba25-decd5a05adfb">
+				<reportElement positionType="Float" x="457" y="5" width="110" height="95" uuid="e5e2c9c6-18c6-426c-bee3-2fb3fbbf36a3">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
@@ -321,8 +315,18 @@ ORDER BY cp.sortableobjectnumber]]>
 			</image>
 		</band>
 		<band height="16">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement positionType="Float" x="-10" y="1" width="92" height="12" uuid="5b8092f6-0c9f-49cb-9191-9c75843265fd">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dimension(s):]]></text>
+			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="85" y="1" width="340" height="12" uuid="d3867349-48d4-49c5-be9b-532e297f792e">
+				<reportElement positionType="Float" x="85" y="1" width="340" height="12" uuid="a350d1c4-afbd-45e3-bee3-9db719de2684">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
@@ -331,19 +335,11 @@ ORDER BY cp.sortableobjectnumber]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Dimension(s)}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement positionType="Float" x="-10" y="1" width="92" height="12" uuid="1c6021eb-e38f-470c-8fee-900d321f75b9">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Dimension(s):]]></text>
-			</staticText>
 		</band>
 		<band height="16">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
-				<reportElement positionType="Float" x="-10" y="1" width="92" height="12" uuid="e537fc46-e4ed-4eeb-9b33-65198a5218c4">
+				<reportElement positionType="Float" x="-10" y="1" width="92" height="12" uuid="fa800d5c-cd55-4fc6-99ae-50ef2078cfce">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -352,7 +348,7 @@ ORDER BY cp.sortableobjectnumber]]>
 				<text><![CDATA[Condition note:]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement positionType="Float" x="85" y="1" width="454" height="12" uuid="98b54b34-e86f-42d4-b7b9-6193a33e489c"/>
+				<reportElement positionType="Float" x="85" y="1" width="454" height="12" uuid="ec85b01a-3a84-4e5e-9c70-44ebd4e49a15"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
@@ -363,7 +359,7 @@ ORDER BY cp.sortableobjectnumber]]>
 	<pageFooter>
 		<band height="17" splitType="Stretch">
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="0" y="1" width="197" height="16" uuid="f7bb6b9c-611a-40dc-803f-0a72343dcb24">
+				<reportElement x="0" y="1" width="197" height="16" uuid="59d7783f-6784-4257-aee9-561283d6ce25">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 				</reportElement>
 				<textElement>
@@ -372,14 +368,14 @@ ORDER BY cp.sortableobjectnumber]]>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="450" y="1" width="80" height="16" uuid="03cbfa35-57e5-4818-b4c4-9a4ac4359d3a"/>
+				<reportElement x="450" y="1" width="80" height="16" uuid="1af4b193-749d-4612-a6ef-9ad24671533e"/>
 				<textElement textAlignment="Right">
 					<font fontName="SansSerif" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="531" y="1" width="40" height="16" uuid="27f9f594-e396-48a5-a63b-7c89c74dd8bb">
+				<reportElement x="531" y="1" width="40" height="16" uuid="233316d0-c59a-4ebd-81bb-8c6ba8ab2671">
 					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 				</reportElement>
