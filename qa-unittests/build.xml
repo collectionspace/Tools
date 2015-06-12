@@ -3,7 +3,7 @@
     <property name="baseurl" value="http://localhost:8180/collectionspace/ui/core/html/" />
     <property name="browser" value="firefox" />
     
-    <property name="src.dir"     value="test"/>
+    <property name="src.dir"     value="src/test"/>
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="target/test-classes"/>
     <property name="lib.dir"     value="lib"/>
