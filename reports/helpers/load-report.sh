@@ -1,7 +1,12 @@
 #!/bin/bash
 #
-# "install" report (i.e. create a record in cspace for the report.
-# don't forget to put the report .jrxml in the cspace reports directory!
+# "install" report (i.e. create a record in cspace for the report.)
+# don't forget to put the report .jrxml in the cspace reports directory on the target server!
+#
+# Absolute path to this script. /home/user/bin/foo.sh
+SCRIPT=$(stat -f $0)
+# Absolute path this script is in. /home/user/bin
+SCRIPTPATH=`dirname $SCRIPT`
 
 SERVICE="cspace-services/reports"
 CONTENT_TYPE="Content-Type: application/xml"
@@ -20,7 +25,7 @@ fi
 if [ -r $1.jrxml ];
 then
   #sudo cp $1.jrxml /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
-  perl -pe 's/#name#/'"$2"'/g;s/#jrxml#/'$1'/g;s/#notes#/'"$4"'/g;s/#doctype#/'"$3"'/g' < reporttemplate.xml  > tempreportpayload.xml
+  perl -pe 's/#name#/'"$2"'/g;s/#jrxml#/'$1'/g;s/#notes#/'"$4"'/g;s/#doctype#/'"$3"'/g' < $SCRIPTPATH/reporttemplate.xml  > tempreportpayload.xml
 
   #echo curl -X POST $REPORTURL/$SERVICE -i -u "$REPORTUSER" -H "$CONTENT_TYPE" -T tempreportpayload.xml
   curl -X POST $REPORTURL/$SERVICE -i -u "$REPORTUSER" -H "$CONTENT_TYPE" -T tempreportpayload.xml
