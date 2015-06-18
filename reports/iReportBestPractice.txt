@@ -90,7 +90,8 @@ The steps are basically as follows:
     i. sudo into the webapps server: sudo su - app_webapps
     j. copy the new file(s) from temp to this directory: cp /tmp/reports/*/*.jrxml jrxml/
 
-14. if this report will display in a Django web app, also put the jrxml file in the /usr/local/share/django/jrxml directory on dev.cspace that is accessible to Django (see PAHMA-823 for details of why you have to do this.)
+14. if this report will display in a Django web app, also put the jrxml file in the app_[institution]/jrxml directory that is accessible to Django (see PAHMA-823 for details of why you have to do this.)
+15. if all you are doing is updating an existing report, then you are done. Otherwise, read further below about making a "report record" in CSpace using the helper scripts.
 15. test to see the reports work on Prod and Dev. In the case of Prod reports, some of them can be (and should be) tested via the ireports webapp, e.g., https://dev.cspace.berkeley.edu/botgarden_project/ireports/
 16. resolve JIRA(s)
 17. notify customer of fix
