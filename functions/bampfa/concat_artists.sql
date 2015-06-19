@@ -1,5 +1,6 @@
 -- DROP FUNCTION utils.concat_artists (csid VARCHAR);
 
+--Concatenates names of artists associated with a collection item in the standard 'lastnam, first middle' format.
  CREATE OR REPLACE FUNCTION utils.concat_artists(csid character varying)
   RETURNS character varying
   LANGUAGE plpgsql
@@ -52,4 +53,12 @@ where coc.objectnumber in (
     '1995.46.432.6',
     '2005.14.81',
     '1994.13.3');
+ 2005.14.81    | T.R. Uthco; Hall, Doug; Hall, Diane Andrews; Procter, Jody; Ant Farm; Lord, Chip; M
+ichels, Doug; Schreier, Curtis
+ 1995.46.432.6 | ALPERT, Richard
+ 1994.13.3     | Alvarez, D-L; Black, Joan Jett; Blake, Nayland; Courtney, Erin; Ewert, Mary; Fectea
+u, Vincent; Gonzales, Mark; Han, Donna; Hengst, Cliff; Horvitz, Philip; Johnson, David E.; Killian, 
+Kevin; Lindell, John; Little, Connell Ray; Mayerson, Keith; Rollman, Michelle; Smith, Wayne; Winters
+, Jim
+ EL.2.00.3     | Galle, Philip; Bruegel, Pieter, I (After)
 */
