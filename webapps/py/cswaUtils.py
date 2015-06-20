@@ -2056,7 +2056,8 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         if relationType in ['assocPeople', 'objectName', 'pahmaAltNum']:
             #group = metadata.findall('.//'+relationType+'Group')
             #sys.stderr.write('  updateItem: ' + relationType + ':: ' + updateItems[relationType] + '\n' )
-            if not alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
+            Entries = metadata.findall('.//' + relationType)
+            if not alreadyExists(updateItems[relationType], Entries):
                 newElement = etree.Element(relationType + 'Group')
                 leafElement = etree.Element(relationType)
                 leafElement.text = updateItems[relationType]
@@ -2066,7 +2067,11 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                     apgType.text = updateItems[relationType + 'Type'].lower() if relationType == 'pahmaAltNum' else 'made by'
                     #sys.stderr.write(relationType + 'Type:' + updateItems[relationType + 'Type'])
                     newElement.append(apgType)
-                metadata.insert(0, newElement)
+                if len(Entries) == 1 and Entries[0].text is None:
+                    metadata.remove(Entries[0])
+                    metadata.insert(0,new_element)
+                else:
+                    metadata.insert(0,new_element)
             else:
                 # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
                 if relationType == 'pahmaAltNum':
@@ -2085,7 +2090,14 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                 continue
             new_element = etree.Element(relationType)
             new_element.text = updateItems[relationType]
-            metadata.insert(0,new_element)
+            # check if the existing element is empty; if so, use it, don't add a new element
+            if len(Entries) == 1 and Entries[0].text is None:
+                # sys.stderr.write('reusing empty element: %s\n' % relationType)
+                # sys.stderr.write('ents : %s\n' % Entries[0].text)
+                metadata.remove(Entries[0])
+                metadata.insert(0,new_element)
+            else:
+                metadata.insert(0,new_element)
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
