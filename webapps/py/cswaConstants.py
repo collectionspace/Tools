@@ -646,7 +646,7 @@ def getHeader(updateType, institution):
         if institution == 'bampfa':
             return """
     <table><tr>
-      <th>ID number </th>
+      <th>ID number</th>
       <th>Title</th>
       <th>Artist</th>
       <th>Found</th>
@@ -662,15 +662,49 @@ def getHeader(updateType, institution):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'movecrate' or updateType == 'powermove':
-        return """
+    elif updateType == 'movecrate':
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>ID number</th>
+      <th>Title</th>
+      <th>Artist</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move" checked/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move"/></th>
+      <th>Notes</th>
+    </tr>"""
+        else:
+            return """
     <table><tr>
       <th>Museum #</th>
       <th>Object name</th>
-      <th>Move</th>
-      <th style="width:60px; text-align:center;">Don't Move</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move" checked/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move"/></th>
       <th>Notes</th>
     </tr>"""
+
+    elif updateType == 'powermove':
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>ID number</th>
+      <th>Title</th>
+      <th>Artist</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move"/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move" checked/></th>
+     <th>Notes</th>
+    </tr>"""
+        else:
+            return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move"/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move" checked/></th>
+     <th>Notes</th>
+    </tr>"""
+
+
     elif updateType == 'packinglist':
 
         if institution == 'bampfa':
