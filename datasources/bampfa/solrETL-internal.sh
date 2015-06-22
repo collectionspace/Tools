@@ -27,12 +27,12 @@ perl -i -pe 's/\|/_s\|/g;s/objectcsid_s/id/;s/$/_s|blob_ss/' header4Solr.csv
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv > d7.csv
-cat header4Solr.csv d7.csv > 4solr.$TENANT.metadata.csv
+cat header4Solr.csv d7.csv > 4solr.$TENANT.internal.csv
 wc -l *.csv
 # clear out the existing data
 curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.internal.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm d?.csv m?.csv media.csv metadata.csv
 rm 4solr.*.csv.gz
