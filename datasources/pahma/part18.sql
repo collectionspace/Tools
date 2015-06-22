@@ -1,14 +1,9 @@
-SELECT
+SELECT DISTINCT
   cc.id,
-  ec.exhibitionnumber AS exhibitionnumber_s,
-  ec.title            AS exhibitiontitle_s
-
-FROM exhibitions_common ec
-
-  JOIN hierarchy h1 ON (ec.id = h1.id)
-  JOIN relations_common rc ON (h1.name = rc.objectcsid)
-  JOIN hierarchy h2 ON (rc.subjectcsid = h2.name)
-  JOIN collectionobjects_common cc ON (h2.id = cc.id)
-
-  JOIN hierarchy h3 ON (h3.parentid = ec.id)
-  JOIN exhibitionobjectgroup eog ON (eog.id = h3.id)
+  STRING_AGG(ec.exhibitionnumber, '␥') AS "exhibitionnumber_ss",
+  STRING_AGG(ec.exhibitiontitle, '␥')  AS "exhibitiontitle_ss"
+FROM collectionobjects_common cc
+  JOIN hierarchy hti ON (hti.parentid = cc.id AND hti.primarytype = 'exhibitionGroup')
+  JOIN exhibitionobjectgroup eog ON (eog.id = hti.id)
+WHERE ec.exhibitionnumber IS NOT NULL
+GROUP BY cc.id

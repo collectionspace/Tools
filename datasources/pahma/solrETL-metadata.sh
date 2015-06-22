@@ -27,21 +27,25 @@ time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m3.csv > 4solr.$TENANT.mediaCatalogCard
 rm m1.csv m2.csv m3.csv
 cat 4solr.$TENANT.mediaApprovedForWeb.csv 4solr.$TENANT.mediaRestricted.csv > 4solr.$TENANT.media.csv
 ##############################################################################
-# start the stitching process: extract the "basic" data
+# start the stitching process: extract the "basic" data (both restricted and unrestricted)
 ##############################################################################
-time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f basic.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > basic.csv
-cp basic.csv intermediate.csv
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f basic_restricted.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > basic_restricted.csv
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f basic_all.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > basic_all.csv
 ##############################################################################
 # stitch this together with the results of the rest of the "subqueries"
 ##############################################################################
+cp basic_restricted.csv restricted.csv
+cp basic_all.csv all.csv
 for i in {1..17}
 do
  time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
- time python join.py intermediate.csv part$i.csv > temp.csv
- cp temp.csv intermediate.csv
+ time python join.py restricted.csv part$i.csv > temp.csv
+ cp temp.csv restricted.csv
+ time python join.py all.csv part$i.csv > temp.csv
+ cp temp.csv all.csv
 done
 # these queries for for the internal datastore
-cp intermediate.csv internal.csv
+mv all.csv internal.csv
 for i in {18..19}
 do
  time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
@@ -68,6 +72,13 @@ time python obfuscateUSArchaeologySites.py d6.csv d7.csv
 ##############################################################################
 #perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d7.csv > d8.csv
 #perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d7.csv > errors_in_latlong.csv
+##############################################################################
+# we want to recover and use our "special" solr-friendly header, which got buried
+##############################################################################
+grep csid internal.csv > header4Solr.csv
+# add the blob field name to the header (the header already ends with a tab)
+grep -v csid d7.csv > d8.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > internal.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
