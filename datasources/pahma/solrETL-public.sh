@@ -13,7 +13,9 @@ SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export NUMCOLS=36
+export PUBLICCOLS=36
+# the internal dataset has 6 more columns than the public one
+export INTERNALCOLS=42
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
@@ -56,13 +58,19 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" intermediate.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.metadata.csv
-time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" intermediate.csv | perl -pe 's/\\/\//g' > errors.csv &
-rm intermediate.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{PUBLICCOLS}) { print \$x;}" restricted.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.public.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{PUBLICCOLS}) { print \$x;}" restricted.csv | perl -pe 's/\\/\//g' > errors.public.csv &
+rm restricted.csv
+##############################################################################
+# check to see that each row has the right number of columns (solr4 will barf)
+##############################################################################
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.baseinternal.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g' > errors.internal.csv &
+rm internal.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata
 ##############################################################################
-time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv 4solr.$TENANT.metadata.csv > d6.csv
+time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv 4solr.$TENANT.public.csv > d6.csv
 ##############################################################################
 #  Obfuscate the lat-longs of sensitive sites
 ##############################################################################
@@ -86,11 +94,11 @@ grep csid d7.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab)
 perl -i -pe 's/$/blob_ss/' header4Solr.csv
 grep -v csid d7.csv > d8.csv
-cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.metadata.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.public.csv
 # clean up some outstanding sins perpetuated by obfuscateUSArchaeologySites.py
-perl -i -pe 's/\r//g;s/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' 4solr.$TENANT.metadata.csv
+perl -i -pe 's/\r//g;s/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' 4solr.$TENANT.public.csv
 # zap the blob csids for charmstones
-perl -i fixcharms.pl 4solr.$TENANT.metadata.csv
+perl -i fixcharms.pl 4solr.$TENANT.public.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
@@ -106,13 +114,13 @@ wc -l *.csv
 # ok, now let's load this into solr...
 # clear out the existing data
 ##############################################################################
-curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ##############################################################################
 # this POSTs the csv to the Solr / update endpoint
 # note, among other things, the overriding of the encapsulator with \
 ##############################################################################
-time curl -S -s "http://localhost:8983/solr/${TENANT}-metadata/update/csv?commit=true&header=true&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.metadata.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################

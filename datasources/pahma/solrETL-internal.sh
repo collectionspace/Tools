@@ -30,9 +30,9 @@ time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaAllImages.
 # cleanup newlines and crlf in data, then switch record separator.
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' i4.csv > 4solr.$TENANT.allmedia.csv
 ##############################################################################
-# gunzip the internal metadata, prepared by the solrETL-metadata.sh
+# gunzip the internal metadata, prepared by the solrETL-internal.sh
 ##############################################################################
-gunzip internal.csv.gz
+gunzip 4solr.$TENANT.baseinternal.csv.gz
 ##############################################################################
 # add the blob csids to the rest of the internal
 ##############################################################################

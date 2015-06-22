@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # this file shows how the 'collector name parser' works and how it operates.
 # it can be used to refine the parser...it extracts the name, runs the parser, outputs a few lines of the result...
-# it is NOT the parser, which is a one liner in the middle of the solrETL-metadata.sh ETL script
+# it is NOT the parser, which is a one liner in the middle of the solrETL-public.sh ETL script
 #
 # ssh to the CSpace Dev server, where there is a current csv file with all the collectors
 # go to the data directory, get the data
