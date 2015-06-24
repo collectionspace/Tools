@@ -125,7 +125,7 @@ public class SecondaryTabTests {
      *
      * @throws Exception
      */
-    @Test
+    //@Test
     public void tabTestCancel() throws Exception {
         System.out.println("* Starting test: tabTestCancel");
         //create record and fill out all fields
@@ -159,7 +159,7 @@ public class SecondaryTabTests {
      *
      * @throws Exception
      */
-    @Test
+    //@Test
     public void testSecondarySave() throws Exception {
         System.out.println("* Starting test: testSecondarySave");
         //create record and fill out all fields
@@ -207,7 +207,7 @@ public class SecondaryTabTests {
      *
      * @throws Exception
      */
-    @Test
+    //@Test
     public void testRemovingValues() throws Exception {
         System.out.println("* Starting test: testRemovingValues");
         //generate a record of secondary type
@@ -290,7 +290,7 @@ public class SecondaryTabTests {
      * 9) Search for the record that was previously displayed in the secondary tab
      * X) Expect the record to be found.
      */
-    @Test
+    //@Test
     public void testSecondaryListDelete() throws Exception {
         System.out.println("* Starting test: tabSecondaryListDelete");
         //create record and fill out all fields
@@ -385,7 +385,7 @@ public class SecondaryTabTests {
      * 9) Search for the record that was previously displayed in the secondary tab
      * X) Expect the record to be found.
      */
-    @Test
+    //@Test
     public void testSecondaryDeleteRelation() throws Exception {
         System.out.println("* Starting test: tabSecondaryDeleteRelation");
         //create record and fill out all fields
@@ -440,7 +440,7 @@ public class SecondaryTabTests {
      * 5) Click the "GO To Record" link above the form
      * X) Expect the record to be loaded in primary tab
      */
-    @Test
+    //@Test
     public void testGoToRecordButton() throws Exception {
         System.out.println("* Starting test: testGoToRecordButton");
         //create record and fill out all fields
