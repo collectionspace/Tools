@@ -1,7 +1,7 @@
 SELECT
   cc.id,
-  STRING_AGG(ec.exhibitionnumber, '␥') AS "exhibitionnumber_ss",
-  STRING_AGG(ec.title, '␥')  AS "exhibitiontitle_ss"
+  STRING_AGG(DISTINCT ec.exhibitionnumber, '␥') AS "exhibitionnumber_ss",
+  STRING_AGG(DISTINCT ec.title, '␥')  AS "exhibitiontitle_ss"
 FROM collectionobjects_common cc
   JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
   JOIN collectionobjects_anthropology ca ON (cc.id = ca.id)

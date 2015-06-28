@@ -1,6 +1,6 @@
 SELECT
   cc.id,
-  STRING_AGG(gc.title, '␥') AS "grouptitle_ss"
+  STRING_AGG(DISTINCT gc.title, '␥') AS "grouptitle_ss"
 FROM collectionobjects_common cc
 
   JOIN hierarchy h1 ON (cc.id = h1.id)
