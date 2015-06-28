@@ -6,7 +6,7 @@
 # prep them for load into Solr4 using the "csv datahandler"
 ##############################################################################
 date
-#cd /home/developers/pahma
+cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
 HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 export NUMCOLS=36

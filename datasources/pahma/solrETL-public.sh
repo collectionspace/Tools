@@ -3,19 +3,19 @@
 ##############################################################################
 # shell script to extract multiple tabular data files from CSpace,
 # "stitch" them together (see join.py)
-# prep them for load into Solr4 using the "csv datahandler"
+# prep them for load into Solr4 using the "csv data import handler"
 ##############################################################################
 date
 cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
-# nb: using prod db for now...
+# nb: using prod db for now... dev is too slow
 SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export PUBLICCOLS=36
 # the internal dataset has 7 more columns than the public one
-export INTERNALCOLS=44
+export INTERNALCOLS=43
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
@@ -82,7 +82,14 @@ rm restricted.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.baseinternal.csv &
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g' > errors.internal.csv &
 wait
-rm internal.csv
+rm internal.csv all.csv
+##############################################################################
+# we want to recover and use our "special" solr-friendly header, which got buried
+##############################################################################
+grep csid 4solr.$TENANT.baseinternal.csv > header4Solr.csv
+# add the blob field name to the header (the header already ends with a tab)
+grep -v csid 4solr.$TENANT.baseinternal.csv > d8.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.baseinternal.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata
 ##############################################################################
@@ -91,13 +98,6 @@ time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv 4solr.$TENANT.public.c
 #  Obfuscate the lat-longs of sensitive sites
 ##############################################################################
 time python obfuscateUSArchaeologySites.py d6.csv d7.csv
-##############################################################################
-# we want to recover and use our "special" solr-friendly header, which got buried
-##############################################################################
-grep csid 4solr.$TENANT.baseinternal.csv > header4Solr.csv
-# add the blob field name to the header (the header already ends with a tab)
-grep -v csid d6.csv > d8.csv
-cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.baseinternal.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################

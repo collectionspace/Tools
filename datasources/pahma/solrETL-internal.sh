@@ -29,6 +29,7 @@ CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f mediaAllImages.sql   -o i4.csv
 # cleanup newlines and crlf in data, then switch record separator.
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' i4.csv > 4solr.$TENANT.allmedia.csv
+rm i4.csv
 ##############################################################################
 # gunzip the internal metadata, prepared by the solrETL-internal.sh
 ##############################################################################
