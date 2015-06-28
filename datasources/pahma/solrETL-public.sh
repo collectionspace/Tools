@@ -58,14 +58,16 @@ rm temp.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{PUBLICCOLS}) { print \$x;}" restricted.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.public.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{PUBLICCOLS}) { print \$x;}" restricted.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.public.csv &
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{PUBLICCOLS}) { print \$x;}" restricted.csv | perl -pe 's/\\/\//g' > errors.public.csv &
+wait
 rm restricted.csv
 ##############################################################################
 # check to see that each row has the right number of columns (solr4 will barf)
 ##############################################################################
-time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.baseinternal.csv
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.baseinternal.csv &
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{INTERNALCOLS}) { print \$x;}" internal.csv | perl -pe 's/\\/\//g' > errors.internal.csv &
+wait
 rm internal.csv
 ##############################################################################
 # add the blob csids to the rest of the metadata
@@ -83,10 +85,10 @@ time python obfuscateUSArchaeologySites.py d6.csv d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid internal.csv > header4Solr.csv
+grep csid 4solr.$TENANT.baseinternal.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab)
 grep -v csid d7.csv > d8.csv
-cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > internal.csv
+cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.baseinternal.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
