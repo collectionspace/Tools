@@ -14,8 +14,8 @@ USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export PUBLICCOLS=36
-# the internal dataset has 6 more columns than the public one
-export INTERNALCOLS=42
+# the internal dataset has 7 more columns than the public one
+export INTERNALCOLS=44
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
@@ -46,9 +46,23 @@ do
  time python join.py all.csv part$i.csv > temp.csv
  cp temp.csv all.csv
 done
-# these queries for for the internal datastore
-mv all.csv internal.csv
-for i in {18..19}
+##############################################################################
+# check latlongs for restricted (i.e. public) datastore
+##############################################################################
+perl -ne '@y=split /\t/;@x=split ",",$y[34];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' restricted.csv > d6.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[34];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' restricted.csv > errors_in_latlong.csv
+mv d6.csv restricted.csv
+##############################################################################
+# check latlongs for internal datastore
+##############################################################################
+perl -ne '@y=split /\t/;@x=split ",",$y[34];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' all.csv > d6.csv
+# nb: we don't have to save the errors in this datastore, they will be the same as the restricted one.
+# perl -ne '@y=split /\t/;@x=split ",",$y[34];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' all.csv > errors_in_latlong.csv
+##############################################################################
+# these queries are for the internal datastore
+##############################################################################
+mv d6.csv internal.csv
+for i in {18..20}
 do
  time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
  time python join.py internal.csv part$i.csv > temp.csv
@@ -78,16 +92,11 @@ time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv 4solr.$TENANT.public.c
 ##############################################################################
 time python obfuscateUSArchaeologySites.py d6.csv d7.csv
 ##############################################################################
-# check latlongs
-##############################################################################
-#perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d7.csv > d8.csv
-#perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d7.csv > errors_in_latlong.csv
-##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid 4solr.$TENANT.baseinternal.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab)
-grep -v csid d7.csv > d8.csv
+grep -v csid d6.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.baseinternal.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried

@@ -192,16 +192,15 @@
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.
     -->
-
-    <copyField source="objdept_txt" dest="objdept_s"/>
-    <copyField source="objcount_txt" dest="objcount_s"/>
-    <copyField source="objcountnote_txt" dest="objcountnote_s"/>
-    <copyField source="objfcpverbatim_txt" dest="objfcpverbatim_s"/>
     <copyField source="objdescr_txt" dest="objdescr_s"/>
+    <copyField source="csid_s" dest="csid_txt"/>
     <copyField source="objsortnum_s" dest="objsortnum_txt"/>
     <copyField source="objmusno_s" dest="objmusno_txt"/>
+    <copyField source="objdept_s" dest="objdept_txt"/>
     <copyField source="objtype_s" dest="objtype_txt"/>
+    <copyField source="objcountnote_s" dest="objcountnote_txt"/>
     <copyField source="objkeelingser_s" dest="objkeelingser_txt"/>
+    <copyField source="objfcpverbatim_s" dest="objfcpverbatim_txt"/>
     <copyField source="objname_s" dest="objname_txt"/>
     <copyField source="objinventory_s" dest="objinventory_txt"/>
     <copyField source="objcontextuse_s" dest="objcontextuse_txt"/>
@@ -212,6 +211,10 @@
     <copyField source="objfcp_s" dest="objfcp_txt"/>
     <copyField source="objfcpelevation_s" dest="objfcpelevation_txt"/>
     <copyField source="objfcptree_s" dest="objfcptree_txt"/>
+    <copyField source="currentlocation_s" dest="currentlocation_txt"/>
+    <copyField source="computedcrate_s" dest="computedcrate_txt"/>
+    <copyField source="donor_s" dest="donor_txt"/>
+    <copyField source="condition_s" dest="condition_txt"/>
     <copyField source="objaltnum_ss" dest="objaltnum_txt"/>
     <copyField source="objfilecode_ss" dest="objfilecode_txt"/>
     <copyField source="objdimensions_ss" dest="objdimensions_txt"/>
@@ -223,6 +226,9 @@
     <copyField source="objacqdate_ss" dest="objacqdate_txt"/>
     <copyField source="objassoccult_ss" dest="objassoccult_txt"/>
     <copyField source="objculturetree_ss" dest="objculturetree_txt"/>
+    <copyField source="exhibitionnumber_ss" dest="exhibitionnumber_txt"/>
+    <copyField source="exhibitiontitle_ss" dest="exhibitiontitle_txt"/>
+    <copyField source="grouptitle_ss" dest="grouptitle_txt"/>
 
     <copyField source="*_s" dest="text"/>
     <copyField source="*_ss" dest="text"/>
