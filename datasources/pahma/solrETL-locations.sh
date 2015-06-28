@@ -40,5 +40,15 @@ grep -v csid m4.csv > m5.csv
 cat header4Solr.csv m5.csv > m4.csv
 rm m5.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if (length eq 8) { print \$x;}" m4.csv > 4solr.${TENANT}.locations.csv
+# ok, now let's load this into solr...
+# clear out the existing data
+##############################################################################
+curl -S -s "http://localhost:8983/solr/${TENANT}-locations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-locations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+##############################################################################
+# this POSTs the csv to the Solr / update endpoint
+# note, among other things, the overriding of the encapsulator with \
+##############################################################################
+time curl -s -S 'http://localhost:8983/solr/pahma-locations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\' --data-binary @4solr.pahma.locations.csv -H 'Content-type:text/plain; charset=utf-8'
 rm m4.csv
 date
