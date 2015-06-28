@@ -16,7 +16,7 @@
 #
 ##############################################################################
 date
-#cd /home/developers/pahma
+cd /home/app_solr/solrdatasources/pahma
 TENANT=$1
 HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 export NUMCOLS=38
@@ -36,7 +36,7 @@ gunzip 4solr.$TENANT.baseinternal.csv.gz
 ##############################################################################
 # add the blob csids to the rest of the internal
 ##############################################################################
-time perl mergeObjectsAndMedia.pl 4solr.$TENANT.allmedia.csv internal.csv > d7.csv
+time perl mergeObjectsAndMedia.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv > d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
