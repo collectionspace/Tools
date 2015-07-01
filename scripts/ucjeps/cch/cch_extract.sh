@@ -11,7 +11,7 @@ mkdir $CCH_DIR
 
 date >> $CCH_LOG
 
-psql -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $CCH_LOG
+psql -h dba-postgres-prod-32.ist.berkeley.edu -p 5310 -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $CCH_LOG
 
 create temp table tmp_cch_accessions as
 select
@@ -61,8 +61,11 @@ select
 	lg.decimallatitude as DecLatitude,
 	lg.decimallongitude as DecLongitude,
 	case
-		when lg.vcoordsys like 'Township%'
-		then lg.vcoordinates
+		when lg.vcoordinates like '%; Meridian%'
+		then regexp_replace(lg.vcoordinates, '^(TRS: )(.*)(; Meridian.*)$', '\2')
+		when lg.vcoordinates like 'TRS: %' 
+		then regexp_replace(lg.vcoordinates, '^(TRS: )(.*)$', '\2')
+		else lg.vcoordinates
 	end as TRSCoordinates,
 	lg.geodeticdatum as Datum,
 	lg.localitysource as CoordinateSource,

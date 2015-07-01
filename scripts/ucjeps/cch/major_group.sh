@@ -7,7 +7,8 @@ MG_FILE=/home/ucjeps/major_group/major_group_$YYMMDD.txt
 
 echo 'query START time: ' `date` >> $MG_LOG
 
-psql -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
+#psql -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
+psql -h dba-postgres-prod-32.ist.berkeley.edu -p 5310 -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
 
 create temp table tmp_major_group_accn as
 select

@@ -107,7 +107,7 @@ These helper scripts need environment variables containing the hostnames, logins
 
 The two variables used are:
 
-REPORTURL="http://hostname:8180"
+REPORTURL="http://hostname"
 REPORTUSER="user@target.cspace.berkeley.edu:password"
 
 They mainly serve as example code for how to do things with reports, and you should plan to make further modifications to suit your own ends.
@@ -121,7 +121,7 @@ $ ./delete-report.sh reports <CSID>
 Deletes the report identified by CSID from the CSpace configuration; does *NOT* delete the .jasper file.
 
 Note: You can also delete individual reports using the Firefox plugin, Poster.  The URL will be the full URL for the report service on the host followed by the CSID of the report to delete, e.g., 
-  http://botgarden.cspace.berkeley.edu:8180/cspace-services/reports/b3743540-8c99-412f-b851
+  http://botgarden.cspace.berkeley.edu/cspace-services/reports/b3743540-8c99-412f-b851
 Enter the credentials; select Delete from the dropdown of Actions; and click the green circular "go" button.
 
 $ list-reports.sh
@@ -129,7 +129,7 @@ $ list-reports.sh
 prints the CSID and report names of the reports installed on the target system.
 
 Note: You can also get a list of reports by making a call directly to the report service API, e.g., 
-  http://botgarden.cspace.berkeley.edu:8180/cspace-services/reports/
+  http://botgarden.cspace.berkeley.edu/cspace-services/reports/
 
 
 MANUAL RECIPE FOR UPDATING AN iREPORT
