@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
-<!-- 2015-06-16T12:21:03 -->
+<!-- 2015-07-01T09:22:36 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="HGB_HSR_test3" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cf7826cb-1ed3-4ff4-b238-a42a1b0d4272">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="223"/>
@@ -148,7 +148,9 @@ ORDER BY locationkey, sortableobjectnumber, objectName DESC]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement style="Column header" x="19" y="1" width="70" height="15" uuid="0047f7ec-c461-41ec-a697-3617d703b27d"/>
+				<reportElement style="Column header" x="19" y="1" width="70" height="15" uuid="0047f7ec-c461-41ec-a697-3617d703b27d">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
@@ -162,14 +164,17 @@ ORDER BY locationkey, sortableobjectnumber, objectName DESC]]>
 				<text><![CDATA[Object name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="357" y="1" width="210" height="15" uuid="17a9f924-edc3-4b9f-b52c-14c8ed0358e1"/>
+				<reportElement style="Column header" x="350" y="1" width="222" height="15" uuid="17a9f924-edc3-4b9f-b52c-14c8ed0358e1">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
 				<text><![CDATA[Field collection place]]></text>
 			</staticText>
 			<staticText>
-				<reportElement style="Column header" x="322" y="1" width="28" height="15" uuid="532c8391-225b-4f3f-8061-cccdd53b4dfd">
+				<reportElement style="Column header" x="321" y="1" width="28" height="15" uuid="532c8391-225b-4f3f-8061-cccdd53b4dfd">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -189,14 +194,17 @@ ORDER BY locationkey, sortableobjectnumber, objectName DESC]]>
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField isBlankWhenNull="true">
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="19" y="2" width="70" height="16" backcolor="#FFFFFF" uuid="d3d389c9-257e-444d-82d0-c8f9ce206dd8"/>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="19" y="3" width="70" height="14" backcolor="#FFFFFF" uuid="d3d389c9-257e-444d-82d0-c8f9ce206dd8">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
 				<textElement verticalAlignment="Top">
-					<font fontName="SansSerif" size="11" isBold="false"/>
+					<font fontName="SansSerif" size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="322" y="3" width="28" height="14" uuid="4db8037c-9da1-4b4c-8ede-fe183b7bde88"/>
+				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="321" y="3" width="28" height="14" uuid="4db8037c-9da1-4b4c-8ede-fe183b7bde88"/>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
@@ -213,7 +221,7 @@ ORDER BY locationkey, sortableobjectnumber, objectName DESC]]>
 				<textFieldExpression><![CDATA[$F{briefdescription}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="352" y="3" width="216" height="14" uuid="ae28346c-84b6-43ab-a454-d9a52991b916"/>
+				<reportElement style="Detail" stretchType="RelativeToTallestObject" mode="Opaque" x="350" y="3" width="222" height="14" uuid="ae28346c-84b6-43ab-a454-d9a52991b916"/>
 				<textElement verticalAlignment="Top">
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
