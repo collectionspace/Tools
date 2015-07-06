@@ -39,6 +39,10 @@
     <core name="pahma-locations" instanceDir="pahma/locations" />
 
     <core name="ucjeps-public" instanceDir="ucjeps/public" />
+    <core name="ucjeps-internal" instanceDir="ucjeps/internal" />
+    <core name="ucjeps-media" instanceDir="ucjeps/media" />
+
+    <core name="botgarden-public" instanceDir="botgarden/public" />
     <core name="botgarden-internal" instanceDir="botgarden/internal" />
     <core name="botgarden-media" instanceDir="botgarden/media" />
 
