@@ -2068,16 +2068,36 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                     #sys.stderr.write(relationType + 'Type:' + updateItems[relationType + 'Type'])
                     newElement.append(apgType)
                 if len(Entries) == 1 and Entries[0].text is None:
-                    metadata.remove(Entries[0])
-                    metadata.insert(0,new_element)
+                    #sys.stderr.write('reusing empty element: %s\n' % Entries[0].tag)
+                    #sys.stderr.write('ents : %s\n' % Entries[0].text)
+                    #print '<br>before',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
+                    for child in metadata:
+                        #print '<br>tag: ', child.tag
+                        if child.tag == relationType + 'Group':
+                            #print '<br> found it! ',child.tag
+                            metadata.remove(child)
+                    metadata.insert(0,newElement)
+                    #print '<br>after',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
                 else:
-                    metadata.insert(0,new_element)
+                    metadata.insert(0,newElement)
             else:
-                # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
-                if relationType == 'pahmaAltNum':
-                    apgType = metadata.find('.//' + relationType + 'Type')
-                    apgType.text = updateItems[relationType + 'Type']
-                    #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
+                if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
+                    continue
+                else:
+                    # exists, but not preferred. make it the preferred: remove it from where it is, insert it as 1st
+                    for child in metadata:
+                        if child.tag == relationType + 'Group':
+                            checkval = child.find('.//' + relationType)
+                            if checkval.text == updateItems[relationType]:
+                                savechild = child
+                                metadata.remove(child)
+                    metadata.insert(0,savechild)
+                pass
+            # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
+            if relationType == 'pahmaAltNum':
+                apgType = metadata.find('.//' + relationType + 'Type')
+                apgType.text = updateItems[relationType + 'Type']
+                #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
@@ -2092,8 +2112,6 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             new_element.text = updateItems[relationType]
             # check if the existing element is empty; if so, use it, don't add a new element
             if len(Entries) == 1 and Entries[0].text is None:
-                # sys.stderr.write('reusing empty element: %s\n' % relationType)
-                # sys.stderr.write('ents : %s\n' % Entries[0].text)
                 metadata.remove(Entries[0])
                 metadata.insert(0,new_element)
             else:
