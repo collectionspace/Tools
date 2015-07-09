@@ -169,17 +169,21 @@ def getHandlers(form, institution):
         handlerlist = [
             ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
             ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
+            ("Iris Close", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(IrisClose1351199196181)'Iris Close'"),
             ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
             ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
             ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
+            ("Chelsea Hernandez-Garcia", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ChelseaHernandezGarcia1436388486316)'Chelsea Hernandez-Garcia'"),
             ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
             ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
+            ("Dani Knapp", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(DaniKnapp1436386634306)'Dani Knapp'"),
             ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
             ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
             ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
             ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
             ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
-            ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
+            ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'"),
+            ("Heather Van Zankwyk", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HeatherVanZankwyk1436386602136)'Heather Van Zankwyk'")
         ]
 
     handlers = '''
