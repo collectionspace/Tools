@@ -977,6 +977,8 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['briefDescription'] = form.get('bdx.' + index)
         elif fieldset == 'objtypecm':
+            if form.get('ocn.' + index) != '':
+                updateItems['objectCount'] = form.get('ocn.' + index)
             updateItems['collection'] = form.get('ot.' + index)
             updateItems['responsibleDepartment'] = form.get('cm.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
