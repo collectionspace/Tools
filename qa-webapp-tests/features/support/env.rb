@@ -8,6 +8,11 @@ require 'capybara-screenshot/cucumber'
 require File.expand_path('../custom_config', __FILE__)
 include CustomConfig
 Capybara.default_driver = :selenium
+Capybara.register_driver :chrome do |app|
+  Capybara::Selenium::Driver.new(app, :browser => :chrome)
+end
+
+Capybara.javascript_driver = :chrome
 # password = env_config['password']
 # login = env_config['login']
 

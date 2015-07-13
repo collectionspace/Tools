@@ -8,6 +8,6 @@ Scenario: Search for the website
     When I click on museum number "1-13841"
     Then I see a page with these headers "Results, Facets, Maps, Statistics"
     Then I click the button "download selected as csv" and download the csv file
-    When I click the Facets tab
+    When I click the "Facets" tab
     Then I see a table with 6 headers "Object Name, Object Type, Collection Place, Ethnographic File Code, Culture, Materials, Collection Date" and 2 cols "Value, F" 
     Then sign out
