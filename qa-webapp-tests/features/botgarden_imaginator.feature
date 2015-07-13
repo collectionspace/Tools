@@ -1,4 +1,4 @@
-Feature: Test the Imaginator app by checking queries made with "Search the Metadata" and "Search for Images" in the Botgarden dev server.
+Feature: Test the Botgarden Imaginator app by checking queries made with "Search the Metadata" and "Search for Images".
 
 Scenario: Search for the website        
     Given I am on the "botgarden" homepage for "-dev"

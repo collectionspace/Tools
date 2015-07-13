@@ -1,4 +1,4 @@
-Feature: Find if navigating to the ireports and signing out breaks anything.
+Feature: Navigate the PAHMA ireports feature, select a report, enter a query, and check the report, reset, and back buttons.
 
 Scenario: Search for the website
     Given I am on the "pahma" homepage for "-dev"

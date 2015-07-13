@@ -1,21 +1,14 @@
-When(/^I enter "([^"]*)" in Culture field$/) do |query|
-    fill_in "culturetree", :with => query
+When(/^I enter "([^"]*)" in the "([^"]*)" field$/) do |query, field|
+    fill_in field, :with => query
 end
 
-Then(/^I should find Chinese in the dropdown menu\.$/) do
-  within("ul#ui-id-4") do 
-      page.find('li', :text => 'Chinese')
-    end
-end
-
-When(/^I click on "([^"]*)" and search$/) do |query|
-  within("ul#ui-id-4") do 
-      page.find('li', :text => 'Chinese').click
-    end
+Then(/^I click on "([^"]*)" in the dropdown menu and search$/) do |query|
+    page.find('li', :text => query).click
+  
     click_button "Search"
 end
 
-Then(/^I should find "([^"]*)" in Culture field$/) do |query|
+Then(/^I find "([^"]*)" in "([^"]*)" field$/) do |query, field|
   page.should have_table('resultsListing')
   @table = page.all('#resultsListing tr')
   index = 0
