@@ -6,7 +6,7 @@ end
 Then(/^the results displayed include "([^"]*)"$/) do |info|
     info_list = info.split(", ")
     info_list.each do |arg| 
-        page.should have_content(arg)
+        page.has_content?(arg)
     end
 end
 
@@ -14,14 +14,9 @@ Then(/^I see the three rows "([^"]*)"$/) do |rows|
     index = 0
     row_lst = rows.split(', ')
     while index < 3
-        page.should have_content(row_lst[index])
+        page.has_content?(row_lst[index])
         index += 1
     end
-end
-
-Then(/^I should see page only listing images and museum number and object name\.$/) do
-    # Screenshot appears; please verify information displayed.
-    screenshot_and_open_image
 end
 
 Then(/^I will click on "([^"]*)" and redirect to the homepage to see "([^"]*)"$/) do |eloanNum, apps|

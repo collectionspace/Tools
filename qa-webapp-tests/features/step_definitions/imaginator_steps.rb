@@ -21,5 +21,6 @@ Then(/^I see page only listing images$/) do
     screenshot_and_open_image
 end
 
-
-
+When(/^I click an image with "([^"]*)"$/) do |id|
+    visit 'https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution + "/imaginator?maxresults=1&displayType=full&" + id
+end

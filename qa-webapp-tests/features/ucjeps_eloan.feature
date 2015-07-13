@@ -6,5 +6,4 @@ Scenario: Search for the website
     Then I will enter "UCE258" in the Search field
     Then the results displayed include "LatLong, Determination Details, Previous Determinations, Locality, Local Name, Collector, Collection Number, Locality, LatLong, Collection Date, Description, Phase, Last updated at"
     Then I see the three rows "E-loan No.:, Borrower:, E-loan Date"
-    Then I will click on "UC215724" and redirect to the homepage to see "eloan, publicsearch"
-    Then sign out
+    

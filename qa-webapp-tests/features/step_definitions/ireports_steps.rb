@@ -5,10 +5,11 @@ end
 Then(/^I will see the correct report in pdf format$/) do 
     # Screenshot appears; please verify the results of the Search for Images.
     screenshot_and_open_image
+    page.evaluate_script('window.history.back()')
 end
 
 When(/^I click "([^"]*)"$/) do |button|
-    click_button(button)
+    find(:link_or_button, button).click
 end
 
 Then(/^I will see a list of reports as follows "([^"]*)" and files "([^"]*)"$/) do |reports, files|
