@@ -39,9 +39,13 @@ gem install rspec
 gem install selenium-webdriver
 ```
 
-4) Fork and clone this repository in your local directory.
+4) Fork and clone the Tools repository to your local directory
 
-To run the scripts from your terminal, make sure you're in the home directory and enter:
+
+5) Run the tests
+
+* Add the login credentials to Tools/qa-webapp-tests/config/environments.yml
+* From the qa-webapp-tests directory, run 
 
 ```ruby
 cucumber features/[featurename].feature

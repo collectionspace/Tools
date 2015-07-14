@@ -24,7 +24,6 @@ end
 
 Then(/^sign out$/) do
     click_link("logout")
-    #problem with logging out, some institutions redirect to landing, some just to institution
+    # Problem with logging out, some institutions redirect to landing, some just to institution
     current_url.should have_content('https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution)
 end
-

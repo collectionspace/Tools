@@ -1,9 +1,8 @@
-require 'csv'
+require 'rubygems'
 require 'capybara'
 require 'capybara/cucumber'
+require 'selenium-webdriver'
 require 'capybara-screenshot/cucumber'
-# require 'dotenv'
-# Dotenv.load
 
 require File.expand_path('../custom_config', __FILE__)
 include CustomConfig
@@ -12,11 +11,7 @@ Capybara.register_driver :chrome do |app|
   Capybara::Selenium::Driver.new(app, :browser => :chrome)
 end
 
-Capybara.javascript_driver = :chrome
-# password = env_config['password']
-# login = env_config['login']
-
-Capybara.default_wait_time = 20
+Capybara.default_wait_time = 10
 
 # For headless testing, uncomment the line below:
 # Capybara.javascript_driver = :webkit

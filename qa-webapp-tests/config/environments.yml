@@ -1,4 +1,4 @@
 reader:
 # If you have user credentials, add them below: 
- login: # login here 
- password: # password here
+ login: reader # login here
+ password: Reader2015 # password here
