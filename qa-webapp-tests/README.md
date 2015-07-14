@@ -41,10 +41,9 @@ gem install selenium-webdriver
 
 4) Fork and clone the Tools repository to your local directory
 
-
 5) Run the tests
 
-* Add the login credentials to Tools/qa-webapp-tests/config/environments.yml
+* Add the login credentials (e.g. reader or admin; omitting the @xxx) to Tools/qa-webapp-tests/config/environments.yml
 * From the qa-webapp-tests directory, run 
 
 ```ruby
