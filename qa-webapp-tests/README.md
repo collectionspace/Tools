@@ -3,15 +3,14 @@
 This repository is for automated files written in Gherkin and Ruby with the Cucumber tool, Capybara library, Selenium driver, and other gems (e.g. rspec, capybara-screenshot).
 
 ## I. Setting Up
-
 To get started, install the latest versions of Ruby:
 
-1. Install Ruby using the [Ruby Version Manager](https://rvm.io/rvm/install)
+1) Install Ruby using the [Ruby Version Manager](https://rvm.io/rvm/install)
 ```ruby
 \curl -L https://get.rvm.io | bash -s stable --ruby
 ```
 
-2. Install Cucumber and Capybara
+2) Install Cucumber and Capybara
 ```ruby
 gem install cucumber
 ```
@@ -21,7 +20,9 @@ gem install capybara
 ```
 (Source: Tools and Setting Up sections from http://www.gamesparks.com/blog/automated-testing-with-cucumber-and-capybara/)
 
-Next, install the gem [capybara-screenshot](https://github.com/mattheworiordan/capybara-screenshot), which is used with Capybara and Cucumber to capture screen shots for every test failure. 
+3) Install the gem following gems:
+
+* [capybara-screenshot](https://github.com/mattheworiordan/capybara-screenshot), which is used with Capybara and Cucumber to capture screen shots for every test failure. 
 
 ```ruby
 gem install capybara-screenshot
@@ -29,9 +30,21 @@ gem install capybara-screenshot
 
 (Source: https://github.com/mattheworiordan/capybara-screenshot)
 
-Finally, fork and clone this repository in your local directory.
+* [rspec](https://github.com/rspec/rspec), the behavior-driven development framework for Ruby
+```ruby
+gem install rspec
+```
+* [Selenium WebDriver](https://rubygems.org/gems/selenium-webdriver/versions/2.46.2), for automating browsers
+```ruby
+gem install selenium-webdriver
+```
 
-To run the scripts from your terminal, make sure you're in the home directory and enter:
+4) Fork and clone the Tools repository to your local directory
+
+5) Run the tests
+
+* Add the login credentials (e.g. reader or admin; omitting the @xxx) to Tools/qa-webapp-tests/config/environments.yml
+* From the qa-webapp-tests directory, run 
 
 ```ruby
 cucumber features/[featurename].feature

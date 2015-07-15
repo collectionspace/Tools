@@ -14,7 +14,7 @@ Scenario: Search for the website
     Then I will click on the "Maps" tab and see two buttons
     When I click the "map selected with Google staticmaps API" button
     Then I find the content "0 points plotted. all 4 selected objects in result set examined."
-    When I click the "map selected with Berkeley Mapper" button
+    When I click the "map-bmapper" button
     Then the url contains "http://berkeleymapper.berkeley.edu"
     When I click the "Statistics" tab
     Then I will select "Specimen ID" under Select field to summarize on
