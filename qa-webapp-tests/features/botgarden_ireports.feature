@@ -1,7 +1,7 @@
 Feature: Navigate the Botgarden ireports feature, select a report, enter a query, and check the report, reset, and back buttons.
 
 Scenario: Search for the website
-    Given I am on the "botgarden" homepage for "-dev"
+    Given I am on the "botgarden" homepage for ""
     Then I will click the "ireports" feature
     Then I select a report called "Rare Status (Family)"
     When I enter "%RUBIACEAE%" in the Keyword "family" and click "report"

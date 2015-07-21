@@ -1,7 +1,7 @@
 Feature: Navigate the BAMPFA ireports feature, select a report, enter a query, and check the report, reset, and back buttons.
 
 Scenario: Search for the website
-    Given I am on the "bampfa" homepage for "-dev"
+    Given I am on the "bampfa" homepage for ""
     Then I will click the "ireports" feature
     Then I select a report called "Image Metadata"
     When I enter "1995.46.257.a-d" in the Keyword "idNumber" and click "report"

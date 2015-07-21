@@ -24,3 +24,9 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # Capybara::Screenshot.prune_strategy = { keep: 20 }
 
 World(Capybara)
+
+Capybara.register_driver :chrome do |app|
+  Capybara::Selenium::Driver.new(app, :browser => :chrome)
+end
+
+Capybara.javascript_driver = :chrome

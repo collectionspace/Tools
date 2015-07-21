@@ -1,7 +1,7 @@
 Feature: Find and use the imagebrowser feature of the PAHMA development server.
 
 Scenario: Search for the website        
-    Given I am on the "pahma" homepage for "-dev"
+    Given I am on the "pahma" homepage for ""
     Then I will click the "imagebrowser" feature
     When I search for "textile" and enter "20"
     Then I see "24" images displayed

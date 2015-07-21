@@ -1,7 +1,7 @@
 Feature: Find and use the keyword search feature of the Botgarden development server.
 
 Scenario: Search for the website        
-    Given I am on the "botgarden" homepage for "-dev"
+    Given I am on the "botgarden" homepage for ""
     Then I will click the "search" feature
     When I enter "arabica" in the Keyword "text" and click "Search"
     Then I see a table with 10 headers "Accession Number, Scientific Name, Collector, Collector Number, Country, Family, Garden Location, Rare?, Dead?, Flower Color" and 7 rows "2001.0086, 2012.0151, 2012.0719, 67.0394, 67.0394, 76.0795, 87.0915" 
