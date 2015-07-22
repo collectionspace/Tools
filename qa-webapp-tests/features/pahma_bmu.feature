@@ -3,10 +3,6 @@ Feature: Test image uploading functionalities in PAHMA's uploadmedia with both U
 Scenario: Search for the website        
     Given I am on the "pahma" homepage for "-dev"
     Then I will click the "uploadmedia" feature
-    Then I will select a file "test.jpg" to upload
-    Then I will click the 1 "createmedia"
-    Then I see a table with 7 headers "File Name, Object Number, File Size, Date Created, Creator, Contributor, Rights Holder" and 1 rows "test.jpg"
-    Then I will select a file "test2.jpg" to upload
-    Then I will click the 2 "uploadmedia"
-    Then I see a table with 7 headers "File Name, Object Number, File Size, Date Created, Creator, Contributor, Rights Holder" and 1 rows "test2.jpg"
+    Then I will click the "View the Job Queue" button
+    Then I will see a table with the headers "Job Number, Job Summary, Job Errors, Job Flag, Download Job Files" 
     Then sign out

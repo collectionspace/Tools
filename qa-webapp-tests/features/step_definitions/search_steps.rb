@@ -101,7 +101,7 @@ end
     
 Then(/^the url contains "([^"]*)"$/) do |url|
     # switch_to_new_pop_up  
-    new_window=page.driver.browser.window_handles.last 
+    new_window = page.driver.browser.window_handles.last 
     page.within_window new_window do
         actual = URI.parse(current_url).path
         actual.include?("berkeleymapper.berkeley.edu/")
@@ -114,7 +114,7 @@ end
 Then(/^I will select "([^"]*)" under Select field to summarize on$/) do |field|
     select(field, :from => 'summarizeon')
     click_button("Display Summary")
-    page.should have_table('statsresults')
+    page.should have_table('statsListing')
 end
 
 Then(/^I will see a table with the headers "([^"]*)"$/) do |headers|
