@@ -5,6 +5,7 @@ Scenario: Search for the website
     Then I will click the "search" feature
     When I enter "cubensis" in the Keyword "keyword" and click "Search"
     Then I see a table with 9 headers "Specimen ID, Scientific Name, Collector(s) (verbatim), Collection Number, Date Collected, Locality, County, State, Country" and 4 rows "UC153077, UC1624977, UC1624978, UC1624979" 
+    Then I will click the arrows to toggle between pages
     Then I will click the up and down arrows beside the headers
     Then I click the button "download selected as csv" and download the csv file
     When I click the "Facets" tab
@@ -22,6 +23,7 @@ Scenario: Search for the website
     Then I click the button "downloadstats" and download the csv file
     Then I will click "Reset" and the "keyword" field should have ""
     When I enter "UC1624979" in the Keyword "accession" and click "Full"
+    Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     Then I verify the contents of the page
     Then sign out

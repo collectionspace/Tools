@@ -4,8 +4,9 @@
 # 08/01/2013 include other numbers in annovoucher query.
 
 YYMMDD=`date +%y%m%d`
-CCH_DIR=/home/ucjeps/cch/cch_$YYMMDD
-CCH_LOG=/home/ucjeps/cch/cch_extract.log
+HOMEDIR=/home/app_webapps/extracts
+CCH_DIR=$HOMEDIR/cch/cch_$YYMMDD
+CCH_LOG=$HOMEDIR/cch/cch_extract.log
 
 mkdir $CCH_DIR
 
@@ -100,7 +101,7 @@ where misc.lifecyclestate <> 'deleted'
 --and lg.fieldlocstate = 'CA'
 --and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS');
 
-\copy (select * from tmp_cch_accessions order by AccessionNumber) to '$CCH_DIR/cch_accessions.txt' with null as '';
+\copy (select * from tmp_cch_accessions order by AccessionNumber) to '$CCH_DIR/cch_accessions.txt' with null as ''
 
 create temp table tmp_cch_determinations as
 select
@@ -134,7 +135,7 @@ where misc.lifecyclestate <> 'deleted'
 --and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
 and regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1') != 'no name';
 
-\copy (select * from tmp_cch_determinations order by AccessionNumber, Position) to '$CCH_DIR/cch_determinations.txt' with null as '';
+\copy (select * from tmp_cch_determinations order by AccessionNumber, Position) to '$CCH_DIR/cch_determinations.txt' with null as ''
 
 create temp table tmp_cch_typespecimens as
 select distinct
@@ -160,7 +161,7 @@ and lg.fieldlocstate = 'CA'
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
 and tsg.typespecimenkind is not null;
 
-\copy (select * from tmp_cch_typespecimens order by AccessionNumber, TypeKind) to '$CCH_DIR/cch_typespecimens.txt' with null as '';
+\copy (select * from tmp_cch_typespecimens order by AccessionNumber, TypeKind) to '$CCH_DIR/cch_typespecimens.txt' with null as ''
 
 
 create temp table tmp_cch_annovouchers as
@@ -208,7 +209,7 @@ and o.numbervalue is not null
 and o.numbervalue != ''
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS');
 
-\copy (select * from tmp_cch_annovouchers order by AccessionNumber, VoucherKind) to '$CCH_DIR/cch_annovouchers.txt' with null as '';
+\copy (select * from tmp_cch_annovouchers order by AccessionNumber, VoucherKind) to '$CCH_DIR/cch_annovouchers.txt' with null as ''
 
 create temp table tmp_cch_othervouchers as
 select
@@ -262,7 +263,7 @@ and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
 and fieldcollectionnote <> ''
 and fieldcollectionnote is not null;
 
-\copy (select * from tmp_cch_othervouchers order by AccessionNumber, NoteType) to '$CCH_DIR/cch_othervouchers.txt' with null as '';
+\copy (select * from tmp_cch_othervouchers order by AccessionNumber, NoteType) to '$CCH_DIR/cch_othervouchers.txt' with null as ''
 
 create temp table tmp_cch_hybridparents as
 select
@@ -278,7 +279,7 @@ inner join hierarchy hcoc on (co.id = hcoc.id)
 where hybridparent is not null and hybridparent <> '';
 and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
 
-\copy (select * from tmp_cch_hybridparents order by AccessionNumber, Position) to '$CCH_DIR/cch_hybridparents.txt' with null as '';
+\copy (select * from tmp_cch_hybridparents order by AccessionNumber, Position) to '$CCH_DIR/cch_hybridparents.txt' with null as ''
 HP_END
 
 ls -l $CCH_DIR >> $CCH_LOG
