@@ -31,23 +31,30 @@ Then(/^I see a table with (\d+) headers "(.*?)" and (\d+) rows "(.*?)"$/) do |nu
     headers_lst = headers.split(', ')
     index = 0
     while index < numheaders do
-        @table[0].has_text?(headers_lst[index])
+        @table[0].has_content?(headers_lst[index])
         index += 1
     end 
 
     index = 0
     row_lst = rows.split(', ')
     while index < numrows
-        @table[index + 1].has_text?(row_lst[index])
+        @table[index + 1].has_content?(row_lst[index])
         index += 1
     end
 end
 
-# Problem: desn't seem to actually identify and click the up and down arrows
+# Problem: doesn't seem to actually identify and click the up and down arrows
 Then(/^I will click the up and down arrows beside the headers$/) do
     page.all("tablesorter-headerRow").each do |arrow|
         arrow.click
+    end
+end
+
+Then(/^I will click the arrows to toggle between pages$/) do
+    within("div#searchfieldsTarget") do
+        find_link('next').click
         screenshot_and_open_image
+        find_link('prev').click
     end
 end
 
@@ -107,7 +114,7 @@ end
 Then(/^I will select "([^"]*)" under Select field to summarize on$/) do |field|
     select(field, :from => 'summarizeon')
     click_button("Display Summary")
-    page.should have_table('statsListing')
+    page.should have_table('statsresults')
 end
 
 Then(/^I will see a table with the headers "([^"]*)"$/) do |headers|

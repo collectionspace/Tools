@@ -4,7 +4,6 @@ When(/^I search for "([^"]*)" and enter "([^"]*)"$/) do |query1, query2|
     click_button "Search"
 end
 
-
 Then(/^I see "([^"]*)" images displayed$/) do |arg1|
     page.has_content?(arg1.to_s + " images displayed for 20 objects")
 end
