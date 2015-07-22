@@ -4,7 +4,6 @@ Then(/^I will click Grid and see a page of images\.$/) do
 end
 
 Then(/^I will click an image with id "(.*?)" and observe url contains imageserver$/) do |id|
-    # Directly visiting image link for now since there is no 
     visit 'https://webapps' + $gserver +'.cspace.berkeley.edu/' + $ginstitution + '/imageserver/blobs/' + id
     current_url.should have_content('https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution + '/imageserver/')
     screenshot_and_open_image
