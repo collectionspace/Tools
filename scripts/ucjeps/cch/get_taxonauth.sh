@@ -31,7 +31,8 @@ elif [[ "$1" != "taxon" && "$1" != "unverified" && "$1" != "common" ]]; then
 fi
 
 YYMMDD=`date +%y%m%d`
-AUTH_DIR=/home/ucjeps/taxonauth
+HOMEDIR=/home/app_webapps/extracts
+AUTH_DIR=$HOMEDIR/taxonauth
 AUTH_FILE=$AUTH_DIR/$1_auth_$YYMMDD.txt
 AUTH_LOG=$AUTH_DIR/taxonauth_export.log
 
@@ -76,7 +77,7 @@ left outer join taxonomyauthority_common tac on (htac.id = tac.id)
 where tac.shortidentifier = '$1'
 ;
 
-\copy (select * from tmp_taxon_auth order by line, displayname) to '$AUTH_FILE.tmp' with null as '';
+\copy (select * from tmp_taxon_auth order by line, displayname) to '$AUTH_FILE.tmp' with null as ''
 
 HP_END
 
