@@ -26,25 +26,27 @@ Transform /^(-?\d+)$/ do |number| # transforms string to int, source: https://gi
 end
 
 Then(/^I see a table with (\d+) headers "(.*?)" and (\d+) rows "(.*?)"$/) do |numheaders, headers, numrows, rows| 
-    page.has_css?('resultsListing')
-    @table = page.all('#resultsListing tr')
-    headers_lst = headers.split(', ')
-    index = 0
-    while index < numheaders do
-        @table[0].has_content?(headers_lst[index])
-        index += 1
-    end 
+    within('div#results') do
+        has_css?('resultsListing')
+        @table = all('#resultsListing tr')
+        headers_lst = headers.split(', ')
+        index = 0
+        while index < numheaders do
+            @table[0].has_content?(headers_lst[index])
+            index += 1
+        end 
 
-    index = 0
-    row_lst = rows.split(', ')
-    while index < numrows
-        @table[index + 1].has_content?(row_lst[index])
-        index += 1
+        index = 0
+        row_lst = rows.split(', ')
+        while index < numrows
+            @table[index + 1].has_content?(row_lst[index])
+            index += 1
+        end
     end
 end
 
 # Problem: doesn't seem to actually identify and click the up and down arrows
-Then(/^I will click the up and down arrows beside the headers$/) do
+Then(/^I will click the up and down arrows beside the headers$/)  do
     page.all("tablesorter-headerRow").each do |arrow|
         arrow.click
     end
@@ -67,10 +69,12 @@ When(/^I click the "(.*?)" tab$/) do |tab|
 end
 
 Then(/^I see the headers "([^"]*)"$/) do |headers| 
-    headers = headers.split(', ')
-    for h in headers
-        find('th', text: h).has_content?(h)
-    end 
+    within("div#facets") do
+        headers = headers.split(', ')
+        for h in headers
+            find('th', text: h).has_content?(h)
+        end 
+    end
 end
 
 Then(/^I will click the up and down arrows beside the headers without knowing table name$/) do
@@ -96,7 +100,9 @@ When(/^I click the "(.*?)" button$/) do |button|
 end
     
 Then(/^I find the content "(.*?)"$/) do |content|
-    page.has_content?(content)
+    within(first("div#maps")) do
+        has_content?(content)
+    end
 end
     
 Then(/^the url contains "([^"]*)"$/) do |url|

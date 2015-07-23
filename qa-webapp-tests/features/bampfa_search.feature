@@ -1,7 +1,7 @@
 Feature: Find and use the keyword search feature of the BAMPFA development server.
 
 Scenario: Search for the website        
-    Given I am on the "bampfa" homepage for "-dev"
+    Given I am on the "bampfa" homepage for ""
     Then I will click the "search" feature
     When I enter "dynasty" in the Keyword "text" and click "Search"
     Then I see a table with 5 headers "ID Number, Item class, Artist, Title, Measurement" and 5 rows "1999.24, 2000.55.6, 2002.43.68, 2002.43.69, 2002.43.70" 

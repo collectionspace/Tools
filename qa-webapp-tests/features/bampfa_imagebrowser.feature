@@ -1,7 +1,7 @@
 Feature: Find and use the imagebrowser feature of the BAMPFA development server.
 
 Scenario: Search for the website        
-    Given I am on the "bampfa" homepage for "-dev"
+    Given I am on the "bampfa" homepage for ""
     Then I will click the "imagebrowser" feature
     When I search for "wolf" and enter "20"
     Then I see "8" images displayed
