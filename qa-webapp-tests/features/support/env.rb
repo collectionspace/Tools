@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'headless'
+#require 'headless'
 require 'selenium-webdriver'
 require 'capybara'
 require 'capybara/cucumber'
@@ -13,7 +13,7 @@ Capybara.register_driver :chrome do |app|
 end
 
 Capybara.default_driver = :selenium
-Capybara.default_wait_time = 10
+Capybara.default_wait_time = 15
 
 # To override default settings in the capybara-screenshot gem: ###
 Capybara.save_and_open_page_path = "tmp/capybara"
@@ -38,8 +38,11 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 
 World(Capybara)
 
-Capybara.register_driver :chrome do |app|
-  Capybara::Selenium::Driver.new(app, :browser => :chrome)
-end
+##################################################################
+# Uncomment the code below to run tests on chrome. Read README.md
+##################################################################
+# Capybara.register_driver :chrome do |app|
+#   Capybara::Selenium::Driver.new(app, :browser => :chrome)
+# end
 
-Capybara.javascript_driver = :chrome
+# Capybara.javascript_driver = :chrome
