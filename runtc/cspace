@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# cspace   Startup script for starting and stoping CollectionSpace
+#
+# chkconfig: - 86 16
+# description: CollectionSpace is a web appliction running in tomcat
+#
+# processname: java
+# config: $CATALINA_HOME/bin/setenv.sh
+# pidfile: $CATALINA_HOME/bin/tomcat.pid
+
+export CATALINA_HOME=/usr/local/share/tomcat
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+
+## See how we were called.
+if [[ -t 0 ]]
+then
+   STATUS=interactive
+   CMDOUT=""
+else
+   STATUS=not_interactive
+   CMDOUT=" > /dev/null"
+fi
+
+function msg
+{
+   if [ "$STATUS" = "interactive" ]
+   then
+      echo "$1"
+   fi
+}
+
+CMD=`echo $1 | tr [A-Z] [a-z]`
+
+RETVAL=0
+case "$CMD" in
+  start|stop|restart|status)
+      $CATALINA_HOME/bin/runtc $CMD $CMDOUT
+      ;;
+   *)
+	msg 'Usage: tomcat {start|stop|restart|status}' 
+	RETVAL=2
+esac
+
+exit $RETVAL

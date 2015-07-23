@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="collectionobjects">
+  <ns2:collectionobjects_naturalhistory xmlns:ns2="http://collectionspace.org/services/collectionobject/domain/naturalhistory" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <labelHeader>{label_header}</labelHeader>
+    <labelFooter>{label_footer}</labelFooter>
+
+    <taxonomicIdentGroupList>
+      <taxonomicIdentGroup>
+        <taxon>{scientificname}</taxon>
+        <qualifier/>
+        <identBy>{determinedby}</identBy>
+        <identDateGroup>
+          <dateDisplayDate>{det_year}-{det_month}-{det_day}</dateDisplayDate>
+          <dateEarliestSingleDay>{det_day}</dateEarliestSingleDay>
+          <dateEarliestSingleMonth>{det_month}</dateEarliestSingleMonth>
+          <dateEarliestSingleYear>{det_year}</dateEarliestSingleYear>
+          <dateEarliestScalarValue>{det_year}-{det_month}-{det_day}T00:00:00Z</dateEarliestScalarValue>
+        </identDateGroup>
+        <notes/>
+      </taxonomicIdentGroup>
+    </taxonomicIdentGroupList>
+
+    <localityGroupList>
+      <localityGroup>
+        <fieldLocVerbatim>{locality}</fieldLocVerbatim>
+        <fieldLocCountry>{country}</fieldLocCountry>
+        <fieldLocState>{stateprovince}</fieldLocState>
+        <fieldLocCounty>{county}</fieldLocCounty>
+        <minElevation>{elevation}</minElevation>
+        <elevationUnit>{elevation_units}</elevationUnit>
+        <decimalLatitude>{latitude}</decimalLatitude>
+        <decimalLongitude>{longitude}</decimalLongitude>
+        <geoRefRemarks>{coordinate_source}</geoRefRemarks>
+      </localityGroup>
+    </localityGroupList>
+
+  </ns2:collectionobjects_naturalhistory>
+  <ns2:collectionobjects_common xmlns:ns2="http://collectionspace.org/services/collectionobject" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <otherNumberList>
+      <otherNumber>
+        <numberValue>{bcid}</numberValue>
+        <numberType>FIMS Identifier</numberType>
+      </otherNumber>
+    </otherNumberList>
+
+    <objectNumber>{barcodenumber}</objectNumber>
+    <fieldCollectionNumberAssignor>{main_collector}</fieldCollectionNumberAssignor>
+    <fieldCollectors>
+      <fieldCollector>{all_collectors}</fieldCollector>
+    </fieldCollectors>
+    <fieldCollectionNumber>{coll_num}</fieldCollectionNumber>
+
+    <fieldCollectionDateGroup>
+      <dateDisplayDate>{coll_year}-{coll_month}-{coll_day}</dateDisplayDate>
+      <dateEarliestSingleDay>{coll_day}</dateEarliestSingleDay>
+      <dateEarliestSingleMonth>{coll_month}</dateEarliestSingleMonth>
+      <dateEarliestSingleYear>{coll_year}</dateEarliestSingleYear>
+      <dateEarliestScalarValue>{coll_year}-{coll_month}-{coll_day}T00:00:00Z</dateEarliestScalarValue>
+    </fieldCollectionDateGroup>
+
+    <fieldCollectionNote>{habitat}</fieldCollectionNote>
+    <briefDescriptions>
+      <briefDescription>{brief_desc}</briefDescription>
+    </briefDescriptions>
+    <comments>
+      <comment>{{comment}}</comment>
+    </comments>
+
+  </ns2:collectionobjects_common>
+</document>

@@ -1,0 +1,45 @@
+# FIMS to Cspace field name mapping			
+# being a specification of how to match FIMS fields to UCJEPS Cspace fields			
+# first column is FIMS field name, second is Cspace collectionobject tag			
+# 			
+# v0.9 jbl 2/20/15			
+			
+# FIMS field name	Cspace collectionobject tag	context tag	data type
+# identifying details	##################################		
+barcodenumber	objectNumber		literal
+	numberValue	otherNumber	literal
+	numberType	otherNumber	literal
+scientificname	taxon		refname
+main_collector	fieldCollector		refname
+all_collectors	fieldCollector		refname
+coll_num			literal
+# textual info	##################################		
+brief_desc	briefDescription		literal
+comments	comment		
+# place info	##################################		
+locality	fieldLocVerbatim		literal
+habitat	fieldCollectionNote		literal
+elevation	vElevation		integer
+elevation_units	elevationUnit		
+latitude	decimalLatitude		float
+longitude	decimalLongitude		float
+coordinate_source	localitySource		literal
+# label info	##################################		
+label_header			refname
+label_footer			refname
+# dates	##################################		
+coll_date	dateDisplayDate	fieldCollectionDateGroup	literal
+coll_day	dateLatestDay	fieldCollectionDateGroup	day
+coll_month	dateLatestMonth	fieldCollectionDateGroup	month
+coll_year	dateLatestYear	fieldCollectionDateGroup	year
+	dateDisplayDate	identDateGroup	literal
+# location info	##################################		
+stateprovince	fieldLocState		literal
+country	fieldLocCountry		literal
+county	fieldLocCounty		literal
+# determination info	##################################		
+determinedby	identBy		refname
+det_day	dateLatestDay	identDateGroup	day
+det_month	dateLatestMonth	identDateGroup	month
+det_year	dateLatestYear	identDateGroup	year
+	dateDisplayDate	identDateGroup	literal
