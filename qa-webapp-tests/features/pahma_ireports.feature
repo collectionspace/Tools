@@ -1,7 +1,7 @@
 Feature: Navigate the PAHMA ireports feature, select a report, enter a query, and check the report, reset, and back buttons.
 
 Scenario: Search for the website
-    Given I am on the "pahma" homepage for "-dev"
+    Given I am on the "pahma" homepage for ""
     Then I will click the "ireports" feature
     Then I select a report called "HSR Phase I Inventory"
     When I enter "Kroeber, 20A, AA  1,  9" in the Keyword "Start Location" and click "report"

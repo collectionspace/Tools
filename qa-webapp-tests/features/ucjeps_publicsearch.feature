@@ -1,7 +1,7 @@
 Feature: Find and use the keyword search feature of the UCJEPS dev server.
 
 Scenario: Search for the website        
-    Given I am on the "ucjeps" homepage for "-dev"
+    Given I am on the "ucjeps" homepage for ""
     Then I will click the "publicsearch" feature
     When I enter "mint" in the Keyword "keyword" and click "Search"
     Then I see a table with 9 headers "Specimen ID, Scientific Name, Collector, Collection Date, Collection No., County/Prov, State, Country, Locality" and 4 rows "JEPS17761, UC284735, UC284978, UC741160" 

@@ -1,4 +1,0 @@
-reader:
-# If you have user credentials, add them below: 
- login:  # login here, omitting the @xxx (e.g. admin) 
- password:   # password here

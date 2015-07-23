@@ -1,7 +1,7 @@
 Feature: Find and use the keyword search feature of the PAHMA development server.
 
 Scenario: Search for the website        
-    Given I am on the "pahma" homepage for "-dev"
+    Given I am on the "pahma" homepage for ""
     Then I will click the "search" feature
     When I enter "taiwan puppet" in the Keyword "text" and click "Search"
     Then I see a table with 6 headers "Museum Number, Object Name, Ethnographic File Code, Culture, Collector, Collection Date" and 4 rows "9-5793a, 9-5794a 9-5795a 9-5796a" 

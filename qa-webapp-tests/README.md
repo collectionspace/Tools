@@ -20,7 +20,7 @@ gem install capybara
 ```
 (Source: Tools and Setting Up sections from http://www.gamesparks.com/blog/automated-testing-with-cucumber-and-capybara/)
 
-3) Install the gem following gems:
+3) Install the following gems and other software:
 
 * [capybara-screenshot](https://github.com/mattheworiordan/capybara-screenshot), which is used with Capybara and Cucumber to capture screen shots for every test failure. 
 
@@ -38,6 +38,8 @@ gem install rspec
 ```ruby
 gem install selenium-webdriver
 ```
+
+* [Firefox](https://www.mozilla.org/en-US/firefox/new/), is the web browser used to run the tests.
 
 3.5) To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
 
@@ -109,3 +111,19 @@ Step definitions describe the user actions for each step. Multiple step definiti
 [Cucumber](http://cukes.info) is a tool that supports Behavior Driven Development and software testing. It uses the language, Gherkin, to understand user-readable files (features) and parse them into scenarios. These scenarios contain steps that are then matched to the step definitions written in Ruby. 
 
 (Source: https://girliemangalo.wordpress.com/2012/10/29/introduction-to-cucumber/)
+
+## IV. Using Chrome instead of Firefox
+
+To change the default browser selenium runs from Firefox to Chrome, first download chromedriver using either homebrew 
+```ruby
+brew install chromedriver
+```
+or through their [website](https://sites.google.com/a/chromium.org/chromedriver/).
+
+Then, for the feature you want to run with chrome, add a @javascript tag in the line before Scenario. For example, if we want to use chrome for features/pahma_search.feature, inside we add:
+```ruby
+Feature: Find and use the keyword search feature of the PAHMA development server.
+
+@javascript
+Scenario: Search for the website    
+```
