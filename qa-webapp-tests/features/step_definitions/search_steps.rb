@@ -55,6 +55,7 @@ end
 Then(/^I will click the arrows to toggle between pages$/) do
     within("div#searchfieldsTarget") do
         find_link('next').click
+        sleep(1)
         screenshot_and_open_image
         find_link('prev').click
     end
