@@ -106,7 +106,6 @@ Then(/^I find the content "(.*?)"$/) do |content|
     end
 end
 
-#bmapper test does not work, please do it manually for now.
 Then(/^the url contains "([^"]*)"$/) do |url|
     # switch_to_new_pop_up  
     click_button("map-bmapper")
