@@ -1,7 +1,7 @@
 Feature: Test the behavior of the PAHMA internal portal 
 
 Scenario: Search for the website        
-    Given I am on the "pahma" homepage for ""
+    Given I am on the "pahma" homepage for "-dev"
     Then I will click the "internal" feature
     When I enter "Regatta, A150, Media Freezer 03" in the Keyword "location" and click "Search"
     Then I will click the up and down arrows beside the headers

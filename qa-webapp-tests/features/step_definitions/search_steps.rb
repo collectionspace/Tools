@@ -55,7 +55,7 @@ end
 Then(/^I will click the arrows to toggle between pages$/) do
     within("div#searchfieldsTarget") do
         find_link('next').click
-        sleep(1)
+        sleep(5)
         screenshot_and_open_image
         find_link('prev').click
     end
@@ -105,14 +105,20 @@ Then(/^I find the content "(.*?)"$/) do |content|
         has_content?(content)
     end
 end
-    
+
+#bmapper test does not work, please do it manually for now.
 Then(/^the url contains "([^"]*)"$/) do |url|
     # switch_to_new_pop_up  
+    click_button("map-bmapper")
+    sleep(5)
     new_window = page.driver.browser.window_handles.last 
-    page.within_window new_window do
+    print page.driver.browser.window_handles[1]
+    within_window(new_window) do
         actual = URI.parse(current_url).path
+        print URI.parse(current_url)
         actual.include?("berkeleymapper.berkeley.edu/")
         page.has_content?("pointDisplayValue")  
+        page.should have_content("Click on MarkerClusters or draw a polygon to query points") 
         screenshot_and_open_image
     end
     page.driver.browser.switch_to.window(page.driver.browser.window_handles[0])
