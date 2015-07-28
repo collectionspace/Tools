@@ -41,22 +41,6 @@ gem install selenium-webdriver
 
 * [Firefox](https://www.mozilla.org/en-US/firefox/new/), is the web browser used to run the tests.
 
-3.5) To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
-
-If on Linux platforms, set up a virtual X server (required by capybara-webkit) by either using the xvfb-run utility:
-```ruby
-xvfb-run -a bundle exec spec
-```
-Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb 
-
-
-Then download the capybara-webkit gem 
-```ruby
-sudo gem install capybara-webkit
-```
-
-Finally, uncomment lines 32 - 43 in features/support/env.rb to run cucumber headless.
-
 4) Fork and clone the Tools repository to your local directory
 
 5) Run the tests
@@ -79,6 +63,27 @@ The results are in this format:
 > 10 steps (10 passed)
 
 > 0m7.492s
+
+6) To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
+
+If on Linux platforms, set up a virtual X server (required by capybara-webkit) by either using the xvfb-run utility:
+```ruby
+xvfb-run -a bundle exec spec
+```
+Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb / QI
+
+
+Then download the capybara-webkit gem 
+```ruby
+sudo gem install capybara-webkit
+```
+
+And download the headless gem
+```ruby
+sudo gem install headless
+```
+
+Finally, uncomment lines 32 - 43 in features/support/env.rb to run cucumber headless.
 
 
 ## II. Repo Structure
