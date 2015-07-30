@@ -1,5 +1,5 @@
 require 'rubygems'
-#require 'headless'
+# require 'headless'
 require 'selenium-webdriver'
 require 'capybara'
 require 'capybara/cucumber'
@@ -20,15 +20,9 @@ Capybara.save_and_open_page_path = "tmp/capybara"
 # Keep only the screenshots generated from the last failing test suite
 Capybara::Screenshot.prune_strategy = :keep_last_run
 
-##################################################################
-# Uncomment the code below to run tests without a browser window #
-##################################################################
-# Headless.ly do
-#   driver = Selenium::WebDriver.for :firefox
-#   driver.navigate.to 'http://google.com'
-#   puts driver.title 
-# end
-
+# ##########################################################################################
+# Uncomment the code below to run tests without a browser window and the require 'headless' #
+# ##########################################################################################
 # if Capybara.current_driver == :selenium
 #   require 'headless'
 
@@ -36,7 +30,7 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 #   headless.start
 # end
 
-World(Capybara)
+# World(Capybara)
 
 ##################################################################
 # Uncomment the code below to run tests on chrome. Read README.md

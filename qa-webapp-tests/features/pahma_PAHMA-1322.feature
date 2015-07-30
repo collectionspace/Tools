@@ -2,8 +2,9 @@ Feature: Test whether paging through the back and next buttons work
 
 @javascript
 Scenario: Search for the website        
-    Given I am on the "pahma" homepage for "-dev"
+    Given I am on the "pahma" homepage for ""
     Then I will click the "search" feature
-    When I enter "taiwan puppet" in the Keyword "text" and click "Grid"
+    When I enter "mask" in the Keyword "text" and click "Grid"
+    Then I click the button "download selected as csv" and download the csv file
     Then I will click the arrows to toggle between pages
     Then sign out
