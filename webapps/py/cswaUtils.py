@@ -1662,15 +1662,17 @@ def doHierarchyView(form, config):
 
 
 def doListGovHoldings(form, config):
-    query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+    query = cswaDB.getDisplayName(config, form.get('agency'))
+    if query is None:
+        print '<h3>Please Select An Agency: "%s" not found.</h><hr>' % form.get('agency')
+        return
+    else:
+        query = query[0]
     hostname = config.get('connect', 'hostname')
     institution = config.get('info', 'institution')
     protocol = 'https'
     port = ''
     link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/place.html?csid='
-    if query == "None":
-        print '<h3>Please Select An Agency</h><hr>'
-        return
     sites = cswaDB.getSitesByOwner(config, form.get('agency'))
     print '<table width="100%">'
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query

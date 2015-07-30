@@ -1007,15 +1007,15 @@ def getSitesByOwner(config, owner):
     objects.execute(timeoutcommand)
 
     query = """SELECT DISTINCT REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
-    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
-    pog.ownershipnote AS "ownership note",
+    REGEXP_REPLACE(pog.anthropologyplaceowner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.anthropologyplaceownershipnote AS "ownership note",
     pc.placenote AS "place note"
 FROM collectionobjects_pahma_pahmafieldcollectionplacelist fcp 
 JOIN places_common pc ON (pc.refname = fcp.item)
 JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
-JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
-JOIN placeownergroup pog ON (pog.id = h1.id)
-WHERE pog.owner LIKE '%%""" + owner + """%%'
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_anthropology:anthropologyPlaceOwnerGroupList')
+JOIN anthropologyplaceownergroup pog ON (pog.id = h1.id)
+WHERE pog.anthropologyplaceowner LIKE '%%""" + owner + """%%'
 ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
     objects.execute(query)
     return objects.fetchall()
@@ -1025,9 +1025,9 @@ def getDisplayName(config, refname):
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
-    query = """SELECT REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1')
-FROM placeownergroup pog
-WHERE pog.owner LIKE '""" + refname + "%'"
+    query = """SELECT REGEXP_REPLACE(pog.anthropologyplaceowner, '^.*\)''(.*)''$', '\\1')
+FROM anthropologyplaceownergroup pog
+WHERE pog.anthropologyplaceowner LIKE '""" + refname + "%'"
     
     objects.execute(query)
     return objects.fetchone()
@@ -1044,15 +1044,15 @@ def getObjDetailsByOwner(config, owner):
     fcd.datedisplaydate AS "collection date",
     STRING_AGG(DISTINCT(ac.acquisitionreferencenumber), ', ') AS "Acc. No.",
     REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1') AS "site",
-    REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') AS "site owner",
-    pog.ownershipnote AS "ownership note", pc.placenote AS "place note"
+    REGEXP_REPLACE(pog.anthropologyplaceowner, '^.*\)''(.*)''$', '\\1') AS "site owner",
+    pog.anthropologyplaceownershipnote AS "ownership note", pc.placenote AS "place note"
 FROM collectionobjects_common cc
 JOIN collectionobjects_pahma cp ON (cc.id = cp.id)
 JOIN collectionobjects_pahma_pahmafieldcollectionplacelist fcp ON (fcp.id = cc.id)
 JOIN misc ms ON (ms.id = cc.id AND ms.lifecyclestate <> 'deleted')
 JOIN places_common pc ON (pc.refname = fcp.item)
-JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_common:placeOwnerGroupList')
-JOIN placeownergroup pog ON (pog.id = h1.id)
+JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_anthropology:anthropologyPlaceOwnerGroupList')
+JOIN anthropologyplaceownergroup pog ON (pog.id = h1.id)
 FULL OUTER JOIN hierarchy h2 ON (h2.parentid = cc.id AND h2.name = 'collectionobjects_common:objectNameList' AND h2.pos = 0)
 FULL OUTER JOIN objectnamegroup ong ON (ong.id = h2.id)
 FULL OUTER JOIN hierarchy h3 ON (h3.id = cc.id)
@@ -1061,10 +1061,11 @@ FULL OUTER JOIN hierarchy h4 ON (h4.name = rc.objectcsid)
 FULL OUTER JOIN acquisitions_common ac ON (ac.id = h4.id)
 FULL OUTER JOIN hierarchy h5 ON (h5.parentid = cc.id AND h5.pos = 0 AND h5.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
 FULL OUTER JOIN structureddategroup fcd ON (fcd.id = h5.id)
-WHERE REGEXP_REPLACE(pog.owner, '^.*\)''(.*)''$', '\\1') ILIKE '%""" + owner + """%'
-OR (pog.owner IS NULL AND pog.ownershipnote ILIKE '%""" + owner + """%')
-GROUP BY cc.objectnumber, cp.sortableobjectnumber, cc.numberofobjects, ong.objectname, fcd.datedisplaydate, fcp.item, pog.owner, pog.ownershipnote, pc.placenote
-ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1'), pog.ownershipnote, cp.sortableobjectnumber"""
+WHERE REGEXP_REPLACE(pog.anthropologyplaceowner, '^.*\)''(.*)''$', '\\1') ILIKE '%""" + owner + """%'
+OR (pog.anthropologyplaceowner IS NULL AND pog.anthropologyplaceownershipnote ILIKE '%""" + owner + """%')
+GROUP BY cc.objectnumber, cp.sortableobjectnumber, cc.numberofobjects, ong.objectname, fcd.datedisplaydate, fcp.item, pog.anthropologyplaceowner, pog.anthropologyplaceownershipnote, pc.placenote
+ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1'), pog.anthropologyplaceownershipnote, cp.sortableobjectnumber
+"""
 
     objects.execute(query)
     return objects.fetchall()
