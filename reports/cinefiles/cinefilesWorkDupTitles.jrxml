@@ -4,36 +4,14 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<queryString>
-		<![CDATA[select count(*) as dup_count, x.title as film_title, x.doc_id as film_ids
-from (
-select
-        replace(wc.shortidentifier, 'pfafilm', '') as doc_id,
-        wtg.termdisplayname as title
-from works_common wc
-inner join hierarchy hwtg on (wc.id = hwtg.parentid and primarytype = 'workTermGroup')
-inner join worktermgroup wtg on (hwtg.id = wtg.id)
-) x
-group by x.doc_id, x.title
-having count(*) > 1
-UNION
-select y.c as dup_count, y.title as film_title, concat_docids(y.title) as film_ids
-from (
-select count(*) as c, x.title from (
-        select distinct
-                replace(wc.shortidentifier, 'pfafilm', '') as doc_id,
-                wtg.termdisplayname as title
-        from works_common wc
-        inner join hierarchy hwtg on (wc.id = hwtg.parentid and primarytype = 'workTermGroup')
-        inner join worktermgroup wtg on (hwtg.id = wtg.id)
-        ) x
-        group by x.title
-        having count(*) > 1
-) y
-order by film_title]]>
+		<![CDATA[select
+   count(*), filmtitle||', '||director||', '||cast(filmyear as varchar) string1 from cinefiles_denorm.filmlist_view
+group by string1
+having count(*)>1
+order by string1]]>
 	</queryString>
-	<field name="dup_count" class="java.lang.Long"/>
-	<field name="film_title" class="java.lang.String"/>
-	<field name="film_ids" class="java.lang.String"/>
+	<field name="count" class="java.lang.Long"/>
+	<field name="string1" class="java.lang.String"/>
 	<title>
 		<band height="84" splitType="Stretch">
 			<image>
@@ -45,7 +23,7 @@ order by film_title]]>
 				<textElement textAlignment="Center" markup="none">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[CineFiles: Works with Duplicate Film Titles]]></text>
+				<text><![CDATA[CineFiles: Works with Duplicate Film Titles, Directors, and Years]]></text>
 			</staticText>
 		</band>
 	</title>
@@ -74,39 +52,23 @@ order by film_title]]>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Title]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="2b6673cc-d34e-4c18-b004-b6756f375177" x="310" y="0" width="260" height="16"/>
-				<textElement>
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Film ID List]]></text>
+				<text><![CDATA[Title, Director, Year]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="14" splitType="Stretch">
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="ccd172fa-2de0-42fa-8bdb-c5373d5b7a03" stretchType="RelativeToBandHeight" x="40" y="0" width="265" height="12"/>
-				<textElement>
-					<font fontName="Times New Roman"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{film_title}]]></textFieldExpression>
-			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="7a215486-c7dd-4a46-a785-adda78b80f9f" x="0" y="0" width="40" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{dup_count}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{count}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="ed80a646-fa4d-4257-8278-01fbde34c71c" stretchType="RelativeToBandHeight" x="310" y="0" width="260" height="12"/>
-				<textElement>
-					<font fontName="Times New Roman"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{film_ids}]]></textFieldExpression>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a9b1733a-8ca4-4cfe-8425-32b4b707ce9f" x="40" y="0" width="326" height="12"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{string1}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
