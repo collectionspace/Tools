@@ -4,6 +4,7 @@
 -- CRH 10/27/2014 Measurements subst hyphen with space. Utils schema.
 -- CRH 11/25/2014 Added artistDisplayOverride
 -- CRH 04/25/2015 Added several fields; see Jira BAMPFA-402
+-- CRH 7/30/2015 Added Acquisition Method BAMPFA-446
 
 create view utils.bampfa_collectionitems_vw as
 SELECT
@@ -64,7 +65,8 @@ SELECT
    utils.getdispl(ps4.item) periodstyle4,
    utils.getdispl(ps5.item) periodstyle5,
    utils.getdispl(cb.legalstatus) legalstatus,
-   utils.get_first_blobcsid(h1.name) image1blobcsid
+   utils.get_first_blobcsid(h1.name) image1blobcsid,
+   utils.getdispl(cb.acquisitionmethod) acquisitionmethod
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co
