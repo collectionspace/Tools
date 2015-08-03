@@ -49,6 +49,7 @@ gem install selenium-webdriver
 	- Set the 'server' variable to "" for prod or "-dev" for dev
 
 6) Run the tests
+
 From the qa-webapp-tests directory, run 
 
 ```ruby
@@ -67,7 +68,7 @@ The results are in this format:
 
 > 0m7.492s
 
-6) To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
+7) Optional: To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
 
 If on Linux platforms, set up a virtual X server (required by capybara-webkit) by either using the xvfb-run utility:
 ```ruby
