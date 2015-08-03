@@ -1,14 +1,14 @@
-Given(/^I am on the "(.*?)" homepage for "(.*?)"$/) do |institution, server|
+Given(/^I am on the "(.*?)" homepage$/) do |institution|
     $ginstitution = institution
-    $gserver = server
-    visit 'https://webapps' + server + '.cspace.berkeley.edu/' + institution
+    visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + institution
     click_link('login') 
-
     fill_in "Username", :with => env_config['login'] + "@" + $ginstitution + ".cspace.berkeley.edu"
     fill_in "Password", :with => env_config['password']
-
     click_button "Sign In"
-    visit 'https://webapps' + server + '.cspace.berkeley.edu/' + institution
+end
+
+Then(/^I check for the user icon$/) do
+    expect(page).to have_css("img[src*='usericon.jpg']")
 end
 
 Then(/^I will click the "(.*?)" feature$/) do |feature|
@@ -19,6 +19,25 @@ end
 When(/^I enter "(.*?)" in the Keyword "(.*?)" and click "(.*?)"$/) do |query, field, button|
     fill_in field, :with => query
     click_button button
+end
+
+Then(/^I check if the elapsed time is under (\d+) seconds$/) do |time|
+    $t = @driver.find_element(:id, "resultsPanel").text()
+    t = t.split.first.to_i
+    if $t < time    
+        puts $t
+      
+    end
+end
+
+
+Then(/^I verify the search fields "(.*?)" in "(.*?)"$/) do |field, range|
+    fields = field.split(', ')
+    within(range) do
+        for i in fields
+            find('label', text: i).has_content? i
+        end
+    end
 end
 
 Transform /^(-?\d+)$/ do |number| # transforms string to int, source: https://github.com/cucumber/cucumber/wiki/Step-Argument-Transforms
@@ -90,28 +109,28 @@ Then(/^I will click on a value "([^"]*)" and see it appear in the field "([^"]*)
     find_field(field).value.should eq val
 end
 
-Then(/^I will click on the "([^"]*)" tab and see two buttons$/) do |arg1|
-    click_link arg1
-    page.should have_selector(:link_or_button, 'map selected with Berkeley Mapper')
-    page.should have_selector(:link_or_button, 'map selected with Google staticmaps API')
+Then(/^I see two buttons$/) do
+    page.should have_selector(:link_or_button, 'map-bmapper' || 'map selected with Berkeley Mapper')
+    page.should have_selector(:link_or_button, 'map-google' || 'map selected with Google staticmaps API')
 end
 
 When(/^I click the "(.*?)" button$/) do |button|
-    find(:link_or_button, button).click
+    click_button(button)
 end
     
-Then(/^I find the content "(.*?)"$/) do |content|
-    within(first("div#maps")) do
-        has_content?(content)
+Then(/^I find the content "(.*?)" in "(.*?)"$/) do |content, section|
+    within(first(section)) do
+        page.has_content?(content)
     end
 end
 
+Then(/^I find the image "(.*?)" in "(.*?)"$/) do |src, div|
+    expect(page).to have_css("img//a[src*=src]")
+end
+
 Then(/^the url contains "([^"]*)"$/) do |url|
-    # switch_to_new_pop_up  
-    click_button("map-bmapper")
     sleep(5)
     new_window = page.driver.browser.window_handles.last 
-    print page.driver.browser.window_handles[1]
     within_window(new_window) do
         actual = URI.parse(current_url).path
         print URI.parse(current_url)
@@ -124,6 +143,7 @@ Then(/^the url contains "([^"]*)"$/) do |url|
 end 
 
 Then(/^I will select "([^"]*)" under Select field to summarize on$/) do |field|
+    click_link('Statistics')
     select(field, :from => 'summarizeon')
     click_button("Display Summary")
     page.should have_table('statsListing')
@@ -141,12 +161,7 @@ Then(/^I will click "(.*?)" and the "([^"]*)" field should have "([^"]*)"$/) do 
     page.has_field?(field, :with => result)
 end
 
-Then(/^I verify the contents of the page$/) do 
+And(/^I verify the contents of the page$/) do 
     # Screenshot appears; please verify the results are in Full display
     screenshot_and_open_image
-end
-
-Then(/^I will click the publicsearch feature$/) do
-  #click_link('publicsearch')
-  visit 'https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution + "/publicsearch/publicsearch"
 end

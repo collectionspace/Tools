@@ -3,5 +3,9 @@
 
 reader:
 # If you have user credentials, add them below: 
- login: xxxx # login here, omitting the @xxx (e.g. admin) 
- password: xxxx # password here
+ login:  # login here, omitting the @xxx (e.g. admin) 
+ password:  # password here
+
+# On which server are you running these tests? 
+# Use "" for prod or "-dev" for dev
+ server: "-dev"

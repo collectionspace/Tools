@@ -1,10 +1,10 @@
-Feature: Test autocomplete functionalities when making a query in the PAHMA Search app
+Feature: The PAHMA Portal
 
-Scenario: Search for the Website
-    Given I am on the "pahma" homepage for ""
+Scenario: Test autocomplete functionalities when making a query in the Portal (Search)
+    Given I am on the "pahma" homepage 
     Then I will click the "search" feature
     When I enter "Ch" in the "culturetree" field
     Then I click on "Chinese" in the dropdown menu and search
     Then I find "Chinese" in "Culture" field
-    Then sign out
+    Then I sign out
     

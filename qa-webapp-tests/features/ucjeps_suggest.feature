@@ -1,11 +1,10 @@
-Feature: Test autocomplete functionalities when making a query in the UCJEPS Search app
+Feature: The UCJEPS Portal
 
-
-Scenario: Search for the Website
-    Given I am on the "ucjeps" homepage for ""
+Scenario: Test autocomplete functionalities when making a query in the Portal (Search)
+    Given I am on the "ucjeps" homepage 
     Then I will click the "search" feature
     When I enter "Arc" in the "locality" field
     Then I click on "Arch Beach" in the dropdown menu and search
     Then I find "Arch Beach" in "Locality" field
-    Then sign out
+    Then I sign out
     

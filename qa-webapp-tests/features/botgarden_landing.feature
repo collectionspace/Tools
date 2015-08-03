@@ -1,7 +1,7 @@
-Feature: Checks that Botgarden's dev server's landing page has the correct apps displayed when User signs in and signs out
+Feature: Botgarden landing page
 
-Scenario: Search for the website
-    Given I am on the "botgarden" homepage for ""
+Scenario: Checks that the landing page has the correct apps displayed when User signs in and signs out
+    Given I am on the "botgarden" homepage 
     Then I will see all available webapps "imaginator, ireports, search"
-    Then sign out
+    Then I sign out
     Then I see No apps 
