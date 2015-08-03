@@ -180,6 +180,7 @@ def getHandlers(form, institution):
             ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
             ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
             ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
+            ("Susannah Starr","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SusannahStarr1438363401681)'Susannah Starr'"),
             ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
             ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'"),
             ("Heather Van Zankwyk", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HeatherVanZankwyk1436386602136)'Heather Van Zankwyk'")
