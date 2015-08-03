@@ -43,10 +43,13 @@ gem install selenium-webdriver
 
 4) Fork and clone the Tools repository to your local directory
 
-5) Run the tests
+5) Initialize the environment variables
+* In Tools/qa-webapp-tests/config/sample_environments.yml:
+	- Set 'login' and 'password' to your user credentials but omitting the @xxx.xxx for 'login' (e.g. if the login is sample@cspace.berkeley.edu, set 'login': sample)
+	- Set the 'server' variable to "" for prod or "-dev" for dev
 
-* Add the login credentials (e.g. reader or admin; omitting the @xxx) to Tools/qa-webapp-tests/config/environments.yml
-* From the qa-webapp-tests directory, run 
+6) Run the tests
+From the qa-webapp-tests directory, run 
 
 ```ruby
 cucumber features/[featurename].feature
@@ -70,21 +73,16 @@ If on Linux platforms, set up a virtual X server (required by capybara-webkit) b
 ```ruby
 xvfb-run -a bundle exec spec
 ```
-Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb / QI
+Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb / QI (** for Linux platforms only)
 
-
-Then download the capybara-webkit gem 
+The capybara-webkit gem 
 ```ruby
 sudo gem install capybara-webkit
 ```
 
-And download the headless gem
-```ruby
-sudo gem install headless
-```
-
 Finally, uncomment lines 32 - 43 in features/support/env.rb to run cucumber headless.
 
+NB: Running OS X headless has not been successfully tested; for more information, refer to [this](http://afitnerd.com/2011/09/06/headless-browser-testing-on-mac/).
 
 ## II. Repo Structure
 Here is a brief overview of the repository structure:

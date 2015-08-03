@@ -1,7 +1,7 @@
-Feature: Find and use the keyword search feature of the PAHMA development server to test imageserver.
+Feature: The PAHMA imageserver application.
 
-Scenario: Search for the website        
-    Given I am on the "pahma" homepage for ""
+Scenario: Find and use the keyword search feature to test the imageserver application.             
+    Given I am on the "pahma" homepage 
     Then I will click the "search" feature
     When I enter "taiwan doll" in the Keyword "text" and click "Search"
     Then I see a table with 6 headers "Museum Number, Object Name, Ethnographic File Code, Culture, Collector, Collection Date" and 4 rows "9-13106, 9-13107, 9-13108, 9-13109, 9-13110" 

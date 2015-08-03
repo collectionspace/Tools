@@ -1,7 +1,7 @@
-Feature: Find and use the imagebrowser feature of the BAMPFA development server.
+Feature: The BAMPFA imagebrowser
 
-Scenario: Search for the website        
-    Given I am on the "bampfa" homepage for ""
+Scenario: Find and use the imagebrowser feature, including making searches, verifying headers, downloading .csv files, and clicking tabs.
+    Given I am on the "bampfa" homepage 
     Then I will click the "imagebrowser" feature
     When I search for "wolf" and enter "20"
     Then I see "8" images displayed
@@ -10,4 +10,4 @@ Scenario: Search for the website
     Then I click the button "download selected as csv" and download the csv file
     When I click the "Facets" tab
     Then I see a table with 6 headers "Item class, Artist, Measurement, Materials, Cataloger" and 2 cols "Value, F" 
-    Then sign out
+    Then I sign out

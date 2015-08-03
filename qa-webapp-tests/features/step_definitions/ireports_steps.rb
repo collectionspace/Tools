@@ -22,7 +22,7 @@ Then(/^I will see a list of reports as follows "([^"]*)" and files "([^"]*)"$/) 
     end
 end
 
-Then(/^sign out$/) do
-    click_link("logout")
-    current_url.should have_content('https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution)
+Then(/^I sign out$/) do
+    find(:link_or_button, "logout").click
+    current_url.should have_content('https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution)
 end

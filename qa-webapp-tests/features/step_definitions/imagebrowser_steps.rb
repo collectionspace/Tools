@@ -10,7 +10,7 @@ end
 
 When(/^I click on museum number "([^"]*)"$/) do |arg1|
     #click_link(arg1) does not work due to another page opening
-    visit 'https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution + '/search/search/?displayType=full&maxresults=1&resultsOnly=True&text=%22'+ arg1.to_s + '%22'
+    visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution + '/search/search/?displayType=full&maxresults=1&resultsOnly=True&text=%22'+ arg1.to_s + '%22'
 end
 
 Then(/^I see a page with these headers "([^"]*)"$/) do |headers|

@@ -16,11 +16,11 @@ When(/^I enter "([^"]*)" in the Search for Images$/) do |query|
     click_button "Search for Images"
 end
 
-Then(/^I see page only listing images$/) do
+Then(/^I verify a page only listing images$/) do
     # Screenshot appears; please verify the results of the Search for Images.
     screenshot_and_open_image
 end
 
 When(/^I click an image with "([^"]*)"$/) do |id|
-    visit 'https://webapps' + $gserver + '.cspace.berkeley.edu/' + $ginstitution + "/imaginator?maxresults=1&displayType=full&" + id
+    visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution + "/imaginator?maxresults=1&displayType=full&" + id
 end

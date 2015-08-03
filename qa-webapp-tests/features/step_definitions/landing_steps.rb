@@ -1,11 +1,8 @@
 Then(/^I will sign in$/) do
     click_link('login') 
-    
-    # If you have user credentials, replace env_config['login'] and env_config['password'] with them 
     fill_in "Username", :with => env_config['login'] + "@" + $ginstitution + ".cspace.berkeley.edu"
     fill_in "Password", :with => env_config['password']
     click_button "Sign In"
-    visit 'https://webapps' + $server + '.cspace.berkeley.edu/' + $institution
 end
 
 Then(/^I will see all available webapps "(.*?)"$/) do |apps|
