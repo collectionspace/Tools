@@ -44,9 +44,11 @@ gem install selenium-webdriver
 4) Fork and clone the Tools repository to your local directory
 
 5) Initialize the environment variables
-* In Tools/qa-webapp-tests/config/sample_environments.yml:
+* In Tools/qa-webapp-tests/config create an environments.yml file in format of sample_environments.yml.
+* In Tools/qa-webapp-tests/config/environments.yml:
 	- Set 'login' and 'password' to your user credentials but omitting the @xxx.xxx for 'login' (e.g. if the login is sample@cspace.berkeley.edu, set 'login': sample)
 	- Set the 'server' variable to "" for prod or "-dev" for dev
+	- The sample_environments.yml file is just an example page of how the environments.yml would work. You will need to create the environments.yml in the same format but with credentials filled out
 
 6) Run the tests
 From the qa-webapp-tests directory, run 
