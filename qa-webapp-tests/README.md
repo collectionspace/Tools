@@ -121,7 +121,7 @@ Or following [these instructions](https://github.com/leonid-shevtsov/headless) t
 Finally, uncomment lines 23 - 27 in features/support/env.rb to run cucumber headless.
 
 Poltergeist with PhantomJS (Fastest Performance, OS X and Linux):
-First install phantomjs through their [website](https://code.google.com/p/phantomjs/downloads/list). Look for the macosx.zip and download and extract.
+First install phantomjs through their [website](https://code.google.com/p/phantomjs/downloads/list). Look for the macosx.zip (Linux zip if using Linux) and download and extract.
 
 Alternatively you can use homebrew:
 ```ruby
