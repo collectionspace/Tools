@@ -138,6 +138,8 @@ sudo gem install poltergeist
 ```
 Finally uncomment lines 34-39 in features/support/env.rb to run cucumber headless.
 
+NB: There is a problem with the suggest tests failing on headless for Macs because phantomjs uses poltergeist instead of selenium. Also, it may have problems later on with other interactive javascript features that we have not tested yet. 
+
 ## V. Using Chrome instead of Firefox
 
 To change the default browser selenium runs from Firefox to Chrome, first download chromedriver using either homebrew 
