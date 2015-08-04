@@ -132,7 +132,7 @@ However it may take a long time as it will download the Qt library. It may be be
 brew install qt
 ```
 
-Then install poltergeist using ruby:
+Then install the [poltergeist](https://github.com/teampoltergeist/poltergeist) gem using ruby:
 ```ruby
 sudo gem install poltergeist
 ```
