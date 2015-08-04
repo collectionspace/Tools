@@ -16,6 +16,7 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 
 #########################################################################################
 # Uncomment the code below to run tests without a browser window. 
+# This uses the selenium webdriver with headless gem
 # Note that this only works for Linux machines due to X graphics.
 # More info at README.md 
 #########################################################################################
@@ -28,7 +29,8 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 
 #########################################################################################
 # Uncomment the code below to run tests without a browser window.
-# This works on OS X and is untested on Linux.
+# This uses the poltergeist webdriver
+# This works on OS X and on Linux.
 # More info at README.md 
 #########################################################################################
 # require 'capybara/poltergeist'
@@ -37,6 +39,22 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # end
 
 # Capybara.default_driver = :poltergeist
+
+
+#########################################################################################
+# Uncomment the code below to run tests without a browser window. 
+# This uses the capybara-webkit. It requires changing some of the test
+# suites. Only use this if you cannot run either headless or 
+# poltergeist and wish to run tests without browser window.
+# This works on OS X and on Linux.
+# More info at README.md 
+#########################################################################################  
+# require 'capybara-webkit'
+# Capybara::Webkit.configure do |config|
+# 	config.allow_unknown_urls
+# 	config.timeout = 45
+# end
+# Capybara.default_driver = :webkit
 
 
 ##########################################################################
