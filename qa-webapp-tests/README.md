@@ -69,22 +69,6 @@ The results are in this format:
 
 > 0m7.492s
 
-6) To avoid using a browser window (aka headless testing), download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
-
-If on Linux platforms, set up a virtual X server (required by capybara-webkit) by either using the xvfb-run utility:
-```ruby
-xvfb-run -a bundle exec spec
-```
-Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb / QI (** for Linux platforms only)
-
-The capybara-webkit gem 
-```ruby
-sudo gem install capybara-webkit
-```
-
-Finally, uncomment lines 32 - 43 in features/support/env.rb to run cucumber headless.
-
-NB: Running OS X headless has not been successfully tested; for more information, refer to [this](http://afitnerd.com/2011/09/06/headless-browser-testing-on-mac/).
 
 ## II. Repo Structure
 Here is a brief overview of the repository structure:
@@ -117,7 +101,57 @@ Step definitions describe the user actions for each step. Multiple step definiti
 
 (Source: https://girliemangalo.wordpress.com/2012/10/29/introduction-to-cucumber/)
 
-## IV. Using Chrome instead of Firefox
+## IV. Running Tests Headless (Without Browser window opening)
+
+There are currently three options for headless testing (no browser opening), and it depends on which web driver you wish to use to test.
+
+Selenium with headless (Best option, Robust, Linux Only):
+Install Xvfb and headless gem
+```ruby
+sudo apt-get install xvfb
+sudo gem install headless
+```
+
+Set up a virtual X server by either using the xvfb-run utility:
+```ruby
+xvfb-run -a bundle exec spec
+```
+Or following [these instructions](https://github.com/leonid-shevtsov/headless) to set up Xvfb / QI (** for Linux platforms only)
+
+Finally, uncomment lines 23 - 27 in features/support/env.rb to run cucumber headless.
+
+Poltergeist with PhantomJS (Fastest Performance, OS X and Linux):
+First install phantomjs through their [website](https://code.google.com/p/phantomjs/downloads/list). Look for the macosx.zip (Linux zip if using Linux) and download and extract.
+
+Alternatively you can use homebrew:
+```ruby
+brew install phantomjs
+```
+However it may take a long time as it will download the Qt library. It may be best to download qt beforehand using homebrew:
+```ruby
+brew install qt
+```
+
+Then install the [poltergeist](https://github.com/teampoltergeist/poltergeist) gem using ruby:
+```ruby
+sudo gem install poltergeist
+```
+Finally uncomment lines 36-41 in features/support/env.rb to run cucumber headless.
+
+Capybara Web-kit (OS X and Linux):
+NB: Use this only if you want to run headless testing and can't get the above two options working. Requires you to modify test suites to use.
+
+Download the [capybara-webkit](https://github.com/thoughtbot/capybara-webkit) gem.
+
+The capybara-webkit gem 
+```ruby
+sudo gem install capybara-webkit
+```
+Finally, uncomment lines 52 - 57 in features/support/env.rb to run cucumber headless with capybara web-kit.
+
+NB: There is a problem with the suggest tests failing on headless for Macs on both poltergeist and capybara-webkit. Also, it may have problems later on with other interactive javascript features that we have not tested yet. 
+
+## V. Using Chrome instead of Firefox
 
 To change the default browser selenium runs from Firefox to Chrome, first download chromedriver using either homebrew 
 ```ruby
