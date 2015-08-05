@@ -11,11 +11,8 @@ Then(/^the results displayed include "([^"]*)"$/) do |info|
 end
 
 Then(/^I see the three rows "([^"]*)"$/) do |rows|
-    index = 0
-    row_lst = rows.split(', ')
-    while index < 3
-        page.has_content?(row_lst[index])
-        index += 1
+    for row in rows.split(', ')
+        page.has_content?(row)
     end
 end
 

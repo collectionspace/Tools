@@ -1,21 +1,18 @@
+def fill_in_autocomplete(selector, value)
+  page.execute_script "$('input##{selector}').focus().val('#{value}').keydown()"
+end
+
+def choose_autocomplete(text)
+    expect(find('ul.ui-autocomplete')).to have_content(text)
+    page.execute_script("$('.ui-menu-item:contains(\"#{text}\")').find('a').trigger('mouseenter').click()")
+end
+
 When(/^I enter "([^"]*)" in the "([^"]*)" field$/) do |query, field|
-    fill_in field, :with => query
+    fill_in_autocomplete(field, query)
 end
 
-Then(/^I click on "([^"]*)" in the dropdown menu and search$/) do |query|
-    sleep(5)
-    page.find('li', :text => query).click
-  
+Then(/^I click on "([^"]*)" in the dropdown menu and search$/) do |text|
+    choose_autocomplete(text)
     click_button "Search"
-end
-
-Then(/^I find "([^"]*)" in "([^"]*)" field$/) do |query, field|
-  page.should have_table('resultsListing')
-  @table = page.all('#resultsListing tr')
-  index = 0
-    @table.each do |tr|
-      next unless index != 0
-    tr.should have_text(query)
-    index += 1
-  end
+    sleep(5)
 end

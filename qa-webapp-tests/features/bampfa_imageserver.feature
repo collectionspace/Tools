@@ -1,7 +1,9 @@
 Feature: The BAMPFA imageserver application.
 
 Scenario: Find and use the keyword search feature to test the imageserver application.      
-    Given I am on the "bampfa" homepage 
+    Given I am on the "bampfa" homepage
+    When I click "login"
+    Then I will sign in 
     Then I will click the "search" feature
     When I enter "glass" in the Keyword "materials" and click "Search"
     Then I see a table with 5 headers "ID Number, Item class, Artist, Title, Measurement" and 4 rows "1965.31, 1966.15, 1970.83, 1971.55" 
