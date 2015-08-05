@@ -125,7 +125,7 @@ Finally, uncomment lines 23 - 27 in features/support/env.rb to run cucumber head
 
 First install phantomjs through the [website](https://code.google.com/p/phantomjs/downloads/list). Then download and extract.
 
-Alternatively, if OS X:
+Alternatively, **if OS X**:
 ```ruby
 brew install phantomjs
 ```
@@ -133,11 +133,11 @@ However it may take a long time as it will download the Qt library. It may be be
 ```ruby
 brew install qt
 ```
------------------------------------------------------------------------------------------	
-If Linux:
+**If Linux**:
 ```ruby
 sudo apt-get install phantomjs
 ```
+-----------------------------------------------------------------------------------------	
 
 Then install the [poltergeist](https://github.com/teampoltergeist/poltergeist) gem using ruby:
 ```ruby
