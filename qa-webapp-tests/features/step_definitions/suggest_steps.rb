@@ -3,6 +3,7 @@ When(/^I enter "([^"]*)" in the "([^"]*)" field$/) do |query, field|
 end
 
 Then(/^I click on "([^"]*)" in the dropdown menu and search$/) do |query|
+    sleep(5)
     page.find('li', :text => query).click
   
     click_button "Search"
