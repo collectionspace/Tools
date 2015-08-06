@@ -1,5 +1,5 @@
 def fill_in_autocomplete(selector, value)
-  page.execute_script "$('input##{selector}').focus().val('#{value}').keydown()"
+    page.execute_script "$('input##{selector}').focus().val('#{value}').keydown()"
 end
 
 def choose_autocomplete(text)

@@ -4,7 +4,7 @@ Scenario: Find and use the publicsearch feature, including making queries, verif
     Given I am on the "ucjeps" homepage 
     When I click "login"
     Then I will sign in 
-    Then I check for the user icon
+    Then I check for "usericon.jpg"
     Then I will click the "publicsearch" feature
     When I enter "mint" in the Keyword "keyword" and click "Search"
     Then I find the content "Searching..." in "div#waitingImage"

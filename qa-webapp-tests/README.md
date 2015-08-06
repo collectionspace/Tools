@@ -46,9 +46,9 @@ gem install selenium-webdriver
 5) Initialize the environment variables
 * In Tools/qa-webapp-tests/config create an environments.yml file in format of sample_environments.yml.
 * In Tools/qa-webapp-tests/config/environments.yml:
-	- Set 'login' and 'password' to your user credentials but omitting the @xxx.xxx for 'login' (e.g. if the login is sample@cspace.berkeley.edu, set 'login': sample)
-	- Set the 'server' variable to "" for prod or "-dev" for dev
-	- The sample_environments.yml file is just an example page of how the environments.yml would work. You will need to create the environments.yml in the same format but with credentials filled out
+    - Set 'login' and 'password' to your user credentials but omitting the @xxx.xxx for 'login' (e.g. if the login is sample@cspace.berkeley.edu, set 'login': sample)
+    - Set the 'server' variable to "" for prod or "-dev" for dev
+    - The sample_environments.yml file is just an example page of how the environments.yml would work. You will need to create the environments.yml in the same format but with credentials filled out
 
 6) Run the tests
 From the qa-webapp-tests directory, run 
@@ -57,7 +57,7 @@ From the qa-webapp-tests directory, run
 cucumber features/[featurename].feature
 ```
 To run all test cases:
-```ruby	
+```ruby 
 cucumber features/
 ```
 
@@ -76,18 +76,18 @@ Here is a brief overview of the repository structure:
 ```ruby
 qa-webapp-tests
 
-	>> features
-	
-		*location of all feature files*
-		
-	 	>> step_definitions
-	 	
-			*location of all step definition Ruby files*
+    >> features
+    
+        *location of all feature files*
+        
+        >> step_definitions
+        
+            *location of all step definition Ruby files*
 
-		>> support
-		
-			*location of configuration files, e.g. env.rb*
-```		
+        >> support
+        
+            *location of configuration files, e.g. env.rb*
+```     
 
 Features describe the frontend components that users interact with. 
 Step definitions describe the user actions for each step. Multiple step definitions make up a feature.
@@ -137,7 +137,7 @@ brew install qt
 ```ruby
 sudo apt-get install phantomjs
 ```
------------------------------------------------------------------------------------------	
+------------------------------------------------------  
 
 Then install the [poltergeist](https://github.com/teampoltergeist/poltergeist) gem using ruby:
 ```ruby
@@ -156,8 +156,6 @@ The capybara-webkit gem
 sudo gem install capybara-webkit
 ```
 Finally, uncomment lines 52 - 57 in features/support/env.rb to run cucumber headless with capybara web-kit.
-
-NB: There is a problem with the suggest tests failing on headless for Macs on both poltergeist and capybara-webkit. Also, it may have problems later on with other interactive javascript features that we have not tested yet. 
 
 ## V. Using Chrome instead of Firefox
 

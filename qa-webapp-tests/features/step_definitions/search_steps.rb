@@ -3,8 +3,8 @@ Given(/^I am on the "(.*?)" homepage$/) do |institution|
     visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + institution
 end
 
-Then(/^I check for the user icon$/) do
-    expect(page).to have_css("img[src*='usericon.jpg']")
+Then(/^I check for "(.*?)"$/) do |arg1|
+    expect(page).to have_css("img[src*='" + arg1 + "']")
 end
 
 Then(/^I will click the "(.*?)" feature$/) do |feature|
@@ -97,10 +97,6 @@ Then(/^I find the content "(.*?)" in "(.*?)"$/) do |content, section|
     within(first(section)) do
         page.has_content?(content)
     end
-end
-
-Then(/^I find the image "(.*?)" in "(.*?)"$/) do |src, div|
-    expect(page).to have_css("img//a[src*=src]")
 end
 
 Then(/^the url contains "([^"]*)"$/) do |url|
