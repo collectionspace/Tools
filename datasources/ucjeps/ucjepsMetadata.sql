@@ -69,7 +69,7 @@ select
         else conh.labelfooter
     end as labelfooter_s,
     array_to_string(array
-      (SELECT CASE WHEN (tig2.taxon IS NOT NULL AND tig2.taxon <>'' and tig2.taxon not like '%no name%') THEN (getdispl(tig2.taxon) 
+      (SELECT CASE WHEN (tig2.taxon IS NOT NULL AND tig2.taxon <>'' and tig2.taxon not like '%no name%') THEN (getdispl(tig2.taxon)
 	||CASE WHEN (tig2.identby IS NOT NULL AND tig2.identby <>'' and tig2.identby not like '%unknown%') THEN ', by ' || getdispl(tig2.identby) ELSE '' END
 	||CASE WHEN (tig2.institution IS NOT NULL AND tig2.institution <>'') THEN ', ' || getdispl(tig2.institution) ELSE '' END
 	||CASE WHEN (prevdetsdg.datedisplaydate IS NOT NULL AND prevdetsdg.datedisplaydate <>'' and prevdetsdg.datedisplaydate <>' ') THEN ', ' || prevdetsdg.datedisplaydate ELSE '' END
@@ -89,11 +89,11 @@ select
     lg.maxdepth as maxdepth_s,
     lg.depthunit as depthUnit_s,
     array_to_string(array
-      (SELECT CASE WHEN (atg.associatedtaxon IS NOT NULL AND atg.associatedtaxon<>'') THEN (getdispl(atg.associatedtaxon) 
+      (SELECT CASE WHEN (atg.associatedtaxon IS NOT NULL AND atg.associatedtaxon<>'') THEN (getdispl(atg.associatedtaxon)
 	||CASE WHEN (atg.interaction IS NOT NULL AND atg.interaction<>'') THEN ' (' || atg.interaction||')' ELSE '' END) ELSE '' END
       from collectionobjects_common co4
       inner join hierarchy h4int on co4.id = h4int.id
-      left outer join hierarchy hatg on (co4.id = hatg.parentid 
+      left outer join hierarchy hatg on (co4.id = hatg.parentid
         and hatg.name = 'collectionobjects_naturalhistory:associatedTaxaGroupList')
       left outer join associatedtaxagroup atg on (hatg.id = atg.id)
       where h4int.name = h1.name
@@ -103,7 +103,7 @@ select
 	||CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN ' (' || getdispl(tsg.typespecimenbasionym)||')' ELSE '' END) ELSE '' END
        from collectionobjects_common co2
        inner join hierarchy h2int on co2.id = h2int.id
-       left outer join hierarchy htsg on (co2.id = htsg.parentid 
+       left outer join hierarchy htsg on (co2.id = htsg.parentid
         and htsg.name = 'collectionobjects_naturalhistory:typeSpecimenGroupList')
        left outer join typespecimengroup tsg on (tsg.id = htsg.id)
        where h2int.name = h1.name
@@ -112,17 +112,17 @@ select
     case when co.sex is null or co.sex = '' then null else co.sex end as sex_s,
     co.phase as phase_s,
     array_to_string(array
-      (SELECT CASE WHEN (ong.numbervalue IS NOT NULL AND ong.numbervalue<>'') THEN (ong.numbervalue 
+      (SELECT CASE WHEN (ong.numbervalue IS NOT NULL AND ong.numbervalue<>'') THEN (ong.numbervalue
 	||CASE WHEN (ong.numbertype IS NOT NULL AND ong.numbertype <>'') THEN ' (' || ong.numbertype||')' ELSE '' END) ELSE '' END
        from collectionobjects_common co3
        inner join hierarchy h3int on co3.id = h3int.id
-       left outer join hierarchy hong on (co3.id = hong.parentid 
+       left outer join hierarchy hong on (co3.id = hong.parentid
          and hong.name = 'collectionobjects_common:otherNumberList')
        left outer join othernumber ong on (ong.id = hong.id)
        where h3int.name = h1.name
        order by hong.pos), '␥', '') as othernumber_ss,
     'ucbgacccession' as ucbgaccessionnumber_s,
-    CASE WHEN (tig.identby IS NOT NULL AND tig.identby <>'' and tig.identby not like '%unknown%') THEN (getdispl(tig.identby) 
+    CASE WHEN (tig.identby IS NOT NULL AND tig.identby <>'' and tig.identby not like '%unknown%') THEN (getdispl(tig.identby)
 	||CASE WHEN (tig.institution IS NOT NULL AND tig.institution <>'') THEN ', ' || getdispl(tig.institution) ELSE '' END
 	||CASE WHEN (detdetailssdg.datedisplaydate IS NOT NULL AND detdetailssdg.datedisplaydate <>'' and detdetailssdg.datedisplaydate <>' ') THEN ', ' || detdetailssdg.datedisplaydate ELSE '' END
 	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS determinationdetails_s,
@@ -139,7 +139,7 @@ select
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as otherlocalities_ss,
-  CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'Yes' ELSE 'No' END AS hastypeassertions_s
+  CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeasserstions_s
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
@@ -164,6 +164,11 @@ left outer join hierarchy httg on (
     tc.id = httg.parentid
     and httg.name = 'taxon_common:taxonTermGroupList'
     and httg.pos = 0)
+
+inner join hierarchy h2int on co.id = h2int.id and h2int.name = h1.name
+left outer join hierarchy htsg on (co.id = htsg.parentid and htsg.name = 'collectionobjects_naturalhistory:typeSpecimenGroupList')
+left outer join typespecimengroup tsg on (tsg.id = htsg.id)
+
 left outer join taxontermgroup ttg on (ttg.id = httg.id)
 left outer join taxon_ucjeps tu on (tu.id = tc.id)
 left outer join taxon_naturalhistory tnh on (tnh.id = tc.id)
