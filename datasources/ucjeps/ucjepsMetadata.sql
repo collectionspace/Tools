@@ -99,7 +99,7 @@ select
       where h4int.name = h1.name
       order by hatg.pos), '␥', '') as associatedtaxa_ss,
     array_to_string(array
-      (SELECT CASE WHEN (tsg.typespecimenkind IS NOT NULL AND tsg.typespecimenkind <>'') THEN (tsg.typespecimenkind 
+      (SELECT CASE WHEN (tsg.typespecimenkind IS NOT NULL AND tsg.typespecimenkind <>'') THEN (tsg.typespecimenkind
 	||CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN ' (' || getdispl(tsg.typespecimenbasionym)||')' ELSE '' END) ELSE '' END
        from collectionobjects_common co2
        inner join hierarchy h2int on co2.id = h2int.id
@@ -138,7 +138,8 @@ select
 	      left outer join hierarchy hlg2 on (co5.id = hlg2.parentid and hlg2.pos > 0
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
-        where h5int.name=h1.name order by hlg2.pos), '␥', '') as otherlocalities_ss
+        where h5int.name=h1.name order by hlg2.pos), '␥', '') as otherlocalities_ss,
+  CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'Yes' ELSE 'No' END AS hastypeassertions_s
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
