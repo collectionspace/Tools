@@ -6,7 +6,7 @@ SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export NUMCOLS=43
+export NUMCOLS=44
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
@@ -66,5 +66,6 @@ rm d?.csv d??.csv m?.csv metadata*.csv
 rm 4solr.*.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f 4solr.*.csv
-#
+# put them in tmp so they can be gotten at by others
+cp 4solr.*.tgz /tmp
 date

@@ -41,4 +41,6 @@ rm p?.csv header4Solr.csv*
 rm 4solr.$TENANT.propagations.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f 4solr.*.csv
+# put them in tmp so they can be gotten at by others
+cp 4solr.*.tgz /tmp
 date

@@ -86,7 +86,8 @@ concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun
 
 concat_ws('|', fruitsjan,fruitsfeb,fruitsmar,fruitsapr,fruitsmay,fruitsjun,fruitsjul,fruitsaug,fruitssep,fruitsoct,fruitsnov,fruitsdec) fruiting_ss,
 concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun,flowersjul,flowersaug,flowerssep,flowersoct,flowersnov,flowersdec) flowering_ss,
-con.provenancetype as provenancetype_s
+con.provenancetype as provenancetype_s,
+tn.accessrestrictions as accessrestrictions_s
 
 from collectionobjects_common co
 inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
