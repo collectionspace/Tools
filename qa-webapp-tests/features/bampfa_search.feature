@@ -2,6 +2,8 @@ Feature: the BAMPFA Portal (Search) application
 
 Scenario: Find and use the keyword search feature 
     Given I am on the "bampfa" homepage 
+    When I click "login"
+    Then I will sign in     
     Then I will click the "search" feature
     Then I verify the search fields "ID Number, Other Number, Item class, Artist birth Date, Artist death Date, Artist origin, Title, Keyword, Credit line, Permission to reproduce, Copyright credit, Photo credit, Date Made, Measurement, Materials, Date Acquired, Provenance, Cataloger" in "div#searchfieldsTarget"
     When I enter "dynasty" in the Keyword "text" and click "Search"
@@ -9,13 +11,13 @@ Scenario: Find and use the keyword search feature
     Then I will click the arrows to toggle between pages
     Then I will click the up and down arrows beside the headers
     Then I click the button "download selected as csv" and download the csv file
-    When I click the "Maps" tab 
+    When I click "Maps"
     Then I see two buttons
-    When I click the "Statistics" tab
+    When I click "Statistics"
     Then I will select "ID Number" under Select field to summarize on
     Then I will see a table with the headers "ID Number, Count"
     Then I click the button "downloadstats" and download the csv file
-    When I click the "Facets" tab
+    When I click "Facets"
     Then I see the headers "Item class, Artist, Measurement, Materials, Cataloger"
     Then I will click the up and down arrows beside the headers without knowing table name
     Then I will click on a value "Jade seal" and see it appear in the field "materials"    
@@ -24,4 +26,5 @@ Scenario: Find and use the keyword search feature
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     And I verify the contents of the page
-    Then I sign out
+    When I click "logout"
+    Then I find the content "No Apps" in "div#content"
