@@ -12,17 +12,8 @@ When(/^I click "([^"]*)"$/) do |button|
     find(:link_or_button, button).click
 end
 
-Then(/^I will see a list of reports as follows "([^"]*)" and files "([^"]*)"$/) do |reports, files|
-    for report in reports.split(", ")
-      find_link(report).visible?
-    end
-
-    for file in files.split(", ")
-      page.has_content?(file)
-    end
-end
-
 Then(/^I sign out$/) do
     find(:link_or_button, "logout").click
-    current_url.should have_content('https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution)
+    url = 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution
+    expect(current_url).to have_content(url)
 end

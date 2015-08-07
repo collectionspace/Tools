@@ -4,8 +4,8 @@ When(/^I search for "([^"]*)" and enter "([^"]*)"$/) do |query1, query2|
     click_button "Search"
 end
 
-Then(/^I see "([^"]*)" images displayed$/) do |arg1|
-    page.has_content?(arg1.to_s + " images displayed for 20 objects")
+Then(/^I see "([^"]*)" images displayed$/) do |img|
+    page.has_content?(img.to_s + " images displayed for 20 objects")
 end
 
 When(/^I click on museum number "([^"]*)"$/) do |arg1|
@@ -14,19 +14,16 @@ When(/^I click on museum number "([^"]*)"$/) do |arg1|
 end
 
 Then(/^I see a page with these headers "([^"]*)"$/) do |headers|
-    header_lst = headers.split(', ')
-    header_lst.each do |header|
+    headers.split(', ').each do |header|
         page.has_content?(header)
     end
 end
 
 Then(/^I see a table with (\d+) headers "([^"]*)" and (\d+) cols "([^"]*)"$/) do |numHeaders, headers, numCols, cols|
-    headers_list = headers.split(', ')
-    for h in headers_list
-        find('tr', text: h).should have_content(h)
+    for header in headers.split(', ')
+        find('tr', text: header).should have_content(header)
     end 
-    col_lst = cols.split(', ')
-    for c in col_lst
-        all('tr', text: c, :between => 3..10)[0].should have_content(c)
+    for col in cols.split(', ')
+        all('tr', text: col, :between => 3..10)[0].should have_content(col)
     end 
 end
