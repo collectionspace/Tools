@@ -39,4 +39,6 @@ rm 4solr.*.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
 #
+# put them in tmp so they can be gotten at by others
+cp 4solr.*.tgz /tmp
 date

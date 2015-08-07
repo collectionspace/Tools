@@ -76,4 +76,6 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit
 ##############################################################################
 rm 4solr.$TENANT.allmedia.csv.gz 4solr.$TENANT.internal.csv.gz
 gzip 4solr.*.csv
+# put them in tmp so they can be gotten at by others
+cp 4solr.*.tgz /tmp
 date
