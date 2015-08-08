@@ -4,5 +4,5 @@ It does the following:
 
 * Extracts metadata and media CSIDs from CSpace
 * Massages the extract to make sure it will load into solr4
-* Loads it into the BAMPFA-metadata solr4 core, which is assumed to be up and available on localhost.
+* Loads it into the BAMPFA-public solr4 core, which is assumed to be up and available on localhost.
 

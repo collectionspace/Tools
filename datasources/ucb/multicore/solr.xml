@@ -32,14 +32,29 @@
       <str name="urlScheme">${urlScheme:}</str>
     </shardHandlerFactory>
   <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:8983}" hostContext="${hostContext:solr}">
-    <core name="pahma-metadata" instanceDir="pahma/metadata" />
+    <core name="pahma-public" instanceDir="pahma/public" />
+    <core name="pahma-internal" instanceDir="pahma/internal" />
     <core name="pahma-media" instanceDir="pahma/media" />
-    <core name="ucjeps-metadata" instanceDir="ucjeps/metadata" />
-    <core name="botgarden-metadata" instanceDir="botgarden/metadata" />
+
+    <core name="pahma-locations" instanceDir="pahma/locations" />
+
+    <core name="ucjeps-public" instanceDir="ucjeps/public" />
+    <core name="ucjeps-internal" instanceDir="ucjeps/internal" />
+    <core name="ucjeps-media" instanceDir="ucjeps/media" />
+
+    <core name="botgarden-public" instanceDir="botgarden/public" />
+    <core name="botgarden-internal" instanceDir="botgarden/internal" />
+    <core name="botgarden-media" instanceDir="botgarden/media" />
+
     <core name="botgarden-propagations" instanceDir="botgarden/propagations" />
-    <core name="bampfa-metadata" instanceDir="bampfa/metadata" />
+
+    <core name="bampfa-public" instanceDir="bampfa/public" />
+    <core name="bampfa-internal" instanceDir="bampfa/internal" />
     <core name="bampfa-media" instanceDir="bampfa/media" />
-    <core name="cinefiles-metadata" instanceDir="cinefiles/metadata" />
+
+    <core name="cinefiles-public" instanceDir="cinefiles/public" />
+    <core name="cinefiles-internal" instanceDir="cinefiles/internal" />
+    <core name="cinefiles-media" instanceDir="cinefiles/media" />
   </cores>
         
 </solr>

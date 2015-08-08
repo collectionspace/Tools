@@ -1,13 +1,18 @@
 #!/bin/sh
 
 YYMMDD=`date +%y%m%d`
-MG_DIR=/home/ucjeps/major_group
-MG_LOG=/home/ucjeps/major_group/major_group.log
-MG_FILE=/home/ucjeps/major_group/major_group_$YYMMDD.txt
+HOMEDIR=/home/app_webapps/extracts
+MG_DIR=$HOMEDIR/major_group
+MG_LOG=$HOMEDIR/major_group/major_group.log
+MG_FILE=$HOMEDIR/major_group/major_group.txt
+
+# remove previous file, if any
+rm $MG_FILE
 
 echo 'query START time: ' `date` >> $MG_LOG
 
-psql -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
+#psql -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
+psql -h dba-postgres-prod-32.ist.berkeley.edu -p 5310 -d ucjeps_domain_ucjeps -U reporter_ucjeps << HP_END >> $MG_LOG
 
 create temp table tmp_major_group_accn as
 select
@@ -29,7 +34,7 @@ join misc m on (m.id = co.id and m.lifecyclestate != 'deleted')
 where co.objectnumber not like '%test%'
 order by objectnumber;
 
-\copy (select * from tmp_major_group_accn order by accession_num) to '$MG_FILE' with null as '';
+\copy (select * from tmp_major_group_accn order by accession_num) to '$MG_FILE' with null as ''
 
 HP_END
 

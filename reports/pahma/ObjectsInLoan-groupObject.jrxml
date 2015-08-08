@@ -69,7 +69,7 @@ order by cp.sortableobjectnumber, objectname desc]]>
 		<band height="97" splitType="Stretch">
 			<image>
 				<reportElement uuid="425ab285-5106-4534-944a-896137217875" x="300" y="0" width="270" height="51"/>
-				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="9e3edb8c-c915-44c5-aef2-d2451b62f26e" x="0" y="0" width="263" height="30"/>
@@ -211,7 +211,7 @@ order by cp.sortableobjectnumber, objectname desc]]>
 			</textField>
 			<image>
 				<reportElement uuid="44c4bdb0-9df3-4c99-bfd3-c0994fa5fe8d" x="450" y="0" width="120" height="20"/>
-				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="0074b0c4-86b0-4c0e-b613-1fa1230b0fcd" x="371" y="1" width="70" height="17"/>
@@ -254,7 +254,7 @@ order by cp.sortableobjectnumber, objectname desc]]>
 			</textField>
 			<image>
 				<reportElement uuid="20a7701e-defe-4c7b-bef9-999bcbc9fe13" x="450" y="0" width="120" height="20"/>
-				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="775624fe-8bb6-4605-b9c7-ba7274e0332c" x="371" y="1" width="70" height="17"/>

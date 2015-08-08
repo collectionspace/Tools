@@ -1,10 +1,12 @@
 #!/bin/bash -x
 date
-cd /home/developers/botgarden
-HOST=$1
+cd /home/app_solr/solrdatasources/botgarden
+TENANT=$1
+SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
+USERNAME="reporter_$TENANT"
+DATABASE="${TENANT}_domain_${TENANT}"
+CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMFIELDS=28
-USERNAME="reporter_botgarden"
-CONNECTSTRING="host=$HOST.cspace.berkeley.edu dbname=botgarden_domain_botgarden"
 ##############################################################################
 # extract propagations info from CSpace
 ##############################################################################
@@ -19,7 +21,7 @@ perl -pe "s/urn:cspace:.*?.cspace.berkeley.edu:.*?:name(.*?):item:name(.*?)'(.*?
 head -1 p5.csv | perl -pe 's/\t/_s\t/g;s/_s//;s/$/_s/;' > header4Solr.csv
 #tail -n +2 p5.csv | perl fixdate.pl > p7.csv
 tail -n +2 p5.csv > p6.csv
-cat header4Solr.csv p6.csv > 4solr.$HOST.propagations.csv
+cat header4Solr.csv p6.csv > 4solr.$TENANT.propagations.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
@@ -29,11 +31,16 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_s/; s/_s$//
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
-
-rm d7.csv
 wc -l *.csv
 #
-curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${HOST}-propagations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\\" --data-binary @4solr.$HOST.propagations.csv -H 'Content-type:text/plain; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\\" --data-binary @4solr.$TENANT.propagations.csv -H 'Content-type:text/plain; charset=utf-8'
+# get rid of intermediate files
+rm p?.csv header4Solr.csv*
+rm 4solr.$TENANT.propagations.csv.gz
+# zip up .csvs, save a bit of space on backups
+gzip -f 4solr.*.csv
+# put them in tmp so they can be gotten at by others
+cp 4solr.*.tgz /tmp
 date

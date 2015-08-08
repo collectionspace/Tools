@@ -68,7 +68,7 @@ order by objectnumber]]>
 			</staticText>
 			<image>
 				<reportElement x="282" y="0" width="270" height="51"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement style="Title" x="8" y="4" width="263" height="33"/>

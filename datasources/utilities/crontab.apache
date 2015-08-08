@@ -27,11 +27,11 @@
 #
 ##################################################################################
 # maintain current solr4 datastores
-0  2 * * * /home/developers/pahma/solrETL-metadata.sh          pahma      >> /home/developers/pahma/solrExtract.log  2>&1
-0  3 * * * /home/developers/ucjeps/solrETL-metadata.sh         ucjeps     >> /home/developers/ucjeps/solrExtract.log  2>&1
-0  4 * * * /home/developers/botgarden/solrETL-metadata.sh      botgarden  >> /home/developers/botgarden/solrExtract.log  2>&1
+0  2 * * * /home/developers/pahma/solrETL-public.sh          pahma      >> /home/developers/pahma/solrExtract.log  2>&1
+0  3 * * * /home/developers/ucjeps/solrETL-public.sh         ucjeps     >> /home/developers/ucjeps/solrExtract.log  2>&1
+0  4 * * * /home/developers/botgarden/solrETL-public.sh      botgarden  >> /home/developers/botgarden/solrExtract.log  2>&1
 30 4 * * * /home/developers/botgarden/solrETL-propagations.sh  botgarden  >> /home/developers/botgarden/solrExtract.log  2>&1
-50 4 * * * /home/developers/bampfa/solrETL-metadata.sh         bampfa     >> /home/developers/bampfa/solrExtract.log  2>&1
+50 4 * * * /home/developers/bampfa/solrETL-public.sh         bampfa     >> /home/developers/bampfa/solrExtract.log  2>&1
 #
 # keep a copy of the BMU files...
 5 6 * * *  cp -p /tmp/pahma_upload_cache/*.csv  /home/developers/monitor/pahma_upload_cache/  ; cp -p /tmp/pahma_upload_cache/*.trace.log  /home/developers/monitor/pahma_upload_cache/

@@ -1,7 +1,7 @@
 import csv
 import sys
 import codecs
-import pgdb
+import psycopg2
 import re
 
 from PIL import Image
@@ -142,7 +142,7 @@ def get_exif(fn):
 
 
 def getBlobsFromDB(config, startdate, enddate, binariesrepo):
-    dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
+    dbconn = psycopg2.connect(config.get('connect', 'connect_string'))
     objects = dbconn.cursor()
 
     # SELECT b.id as blobid, c.id as contentid, b.name as filename,
@@ -183,7 +183,7 @@ def getBlobsFromDB(config, startdate, enddate, binariesrepo):
             records.append(tif)
         return records
 
-    except pgdb.DatabaseError, e:
+    except psycopg2.DatabaseError, e:
         sys.stderr.write('getBlobsFromDB error: %s\n' % e)
         sys.exit()
     except:

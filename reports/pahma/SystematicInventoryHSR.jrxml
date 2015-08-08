@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
+<!-- 2015-06-29T15:08:53 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inventory" language="groovy" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="baa3a829-2cdf-4505-b140-15d9282910ca">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="223"/>
 	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Tunnel to CSpace Prod"/>
 	<style name="Title" fontName="SansSerif" fontSize="26" isBold="true" pdfFontName="Helvetica"/>
 	<style name="SubTitle" forecolor="#666666" fontName="SansSerif" fontSize="18"/>
 	<style name="Column header" forecolor="#666666" fontName="SansSerif" fontSize="12" isBold="true"/>
@@ -80,7 +83,7 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 			<staticText>
 				<reportElement style="Title" x="0" y="0" width="263" height="24" uuid="4101e028-2c15-4e3e-a310-643830492372"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="SansSerif" size="18"/>
+					<font fontName="SansSerif" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Systematic Inventory]]></text>
 			</staticText>
@@ -180,7 +183,7 @@ order by locationkey, sortableobjectnumber, objectName desc]]>
 			<textField isBlankWhenNull="true">
 				<reportElement style="Detail" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="2" y="1" width="84" height="16" backcolor="#FFFFFF" uuid="d3d389c9-257e-444d-82d0-c8f9ce206dd8"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="SansSerif" size="11" isBold="false"/>
+					<font fontName="SansSerif" size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{objectnumber}]]></textFieldExpression>
 			</textField>

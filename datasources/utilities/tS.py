@@ -5,7 +5,7 @@ try:
     core = sys.argv[1]
 except:
     print "syntax: python %s solar_core" % sys.argv[0]
-    print "e.g     python %s pahma-metadata" % sys.argv[0]
+    print "e.g     python %s pahma-public" % sys.argv[0]
     sys.exit(1)
 
 try:

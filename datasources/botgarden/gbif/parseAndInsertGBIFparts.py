@@ -26,6 +26,7 @@ caches the results, etc. etc.
 import fileinput
 import pickle
 import requests
+import re
 import sys
 import json
 import time
@@ -43,6 +44,8 @@ count.output = 0
 count.newnames = 0
 count.source = 0
 count.datasource = 0
+count.cultivars = 0
+count.cultivarsinoriginal = 0
 
 parts = {}
 
@@ -64,17 +67,29 @@ def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
 
+# look for cultivars, e.g. "Ceanothus 'Berkeley Skies'", make it Ceanothus cv. Berkeley Skies for GBIF parsing"
+cultivarpattern = re.compile("(.*)'(.*)'")
+
+
+def check4cultivars(name):
+    if not 'cv.' in name:
+        name = cultivarpattern.sub(r'\1 cv. \2', name)
+    else:
+        count.cultivarsinoriginal += 1
+    if 'cv.' in name: count.cultivars += 1
+    return name
+
 
 def main():
     if len(sys.argv) < 4:
         print 'usage: %s inputfileofnames.csv outputnameparts.csv picklefile column' % sys.argv[0]
         sys.exit(1)
 
-    column = 0
+    namecolumn = 0
     try:
-        column = int(sys.argv[4])
+        namecolumn = int(sys.argv[4])
     except:
-        print "column is not an integer: %s " % column
+        print "column is not an integer: %s " % sys.argv[4]
         sys.exit(1)
 
     try:
@@ -91,7 +106,10 @@ def main():
         picklefh = open(picklefile, "rb")
     except:
         print "could not open pickle file, will try to create"
-        pickle.dump({}, open(picklefile, "wb"))
+        picklefh = open(picklefile, "wb")
+        pickle.dump({}, picklefh)
+        picklefh.close()
+        picklefh = open(picklefile, "rb")
 
     try:
         parsednames = pickle.load(picklefh)
@@ -113,11 +131,12 @@ def main():
         count.input += 1
         inputrow = line.rstrip('\n')
         cells = inputrow.split('\t')
-        name = cells[column]
+        name = cells[namecolumn]
+        # handle cultivars without 'cv.'...
+        name = check4cultivars(name)
         if name in parsednames:
             count.source += 1
             name2use = parsednames[name]
-            pass
         else:
             time.sleep(1)  # delays for 1 second
             response = requests.get('http://api.gbif.org/v1/parser/name', params={'name': name})
@@ -143,7 +162,7 @@ def main():
         if count.input == 1:
             row = [h + '_s' for h in nameparts]
         cells = [x.encode('utf-8') for x in cells]
-        cells = cells[:column] + row + cells[column:]
+        cells = cells[:namecolumn] + row + cells[namecolumn:]
         namepartsfh.write('\t'.join(cells) + '\n')
 
     try:
@@ -157,6 +176,8 @@ def main():
     print "%s parsenames output." % count.output
     print "%s new names found." % count.newnames
     print "%s names now in datasource." % count.datasource
+    print "%s cultivars indicated already (i.e 'cv.' in original)." % count.cultivarsinoriginal
+    print "%s total cultivars identified." % count.cultivars
 
     print
     print 'name parts:'

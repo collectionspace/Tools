@@ -977,6 +977,8 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['briefDescription'] = form.get('bdx.' + index)
         elif fieldset == 'objtypecm':
+            if form.get('ocn.' + index) != '':
+                updateItems['objectCount'] = form.get('ocn.' + index)
             updateItems['collection'] = form.get('ot.' + index)
             updateItems['responsibleDepartment'] = form.get('cm.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
@@ -1160,7 +1162,7 @@ def doPackingList(form, config):
     else:
         places = []
 
-    [sys.stderr.write('packing list place term: %s' % x) for x in places]
+    #[sys.stderr.write('packing list place term: %s\n' % x) for x in places]
     try:
         locationList = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS,
                                          config)
@@ -1169,7 +1171,7 @@ def doPackingList(form, config):
 
     rowcount = len(locationList)
 
-    [sys.stderr.write('packing list locations : %s' % x[0]) for x in locationList]
+    #[sys.stderr.write('packing list locations : %s\n' % x[0]) for x in locationList]
 
     if rowcount == 0:
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -1187,7 +1189,7 @@ def doPackingList(form, config):
             raise
 
 
-        [sys.stderr.write('packing list objects: %s' % x[0]) for x in objects]
+        #[sys.stderr.write('packing list objects: %s\n' % x[3]) for x in objects]
         rowcount = len(objects)
         if rowcount == 0:
             if updateType != 'packinglistbyculture':
@@ -1360,7 +1362,7 @@ def downloadCsv(form, config):
             raise
 
         place = form.get("cp.place")
-        if place != None:
+        if place != None and place != '':
             places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
         else:
             places = []
@@ -1373,7 +1375,8 @@ def downloadCsv(form, config):
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
-            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
+            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo', institution)
+            #[sys.stderr.write('packing list csv objects: %s\n' % x[3]) for x in objects]
             for o in objects:
                 if checkObject(places, o):
                     if institution == 'bampfa':
@@ -1659,15 +1662,17 @@ def doHierarchyView(form, config):
 
 
 def doListGovHoldings(form, config):
-    query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+    query = cswaDB.getDisplayName(config, form.get('agency'))
+    if query is None:
+        print '<h3>Please Select An Agency: "%s" not found.</h><hr>' % form.get('agency')
+        return
+    else:
+        query = query[0]
     hostname = config.get('connect', 'hostname')
     institution = config.get('info', 'institution')
     protocol = 'https'
     port = ''
     link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/place.html?csid='
-    if query == "None":
-        print '<h3>Please Select An Agency</h><hr>'
-        return
     sites = cswaDB.getSitesByOwner(config, form.get('agency'))
     print '<table width="100%">'
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
@@ -2055,7 +2060,8 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         if relationType in ['assocPeople', 'objectName', 'pahmaAltNum']:
             #group = metadata.findall('.//'+relationType+'Group')
             #sys.stderr.write('  updateItem: ' + relationType + ':: ' + updateItems[relationType] + '\n' )
-            if not alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
+            Entries = metadata.findall('.//' + relationType)
+            if not alreadyExists(updateItems[relationType], Entries):
                 newElement = etree.Element(relationType + 'Group')
                 leafElement = etree.Element(relationType)
                 leafElement.text = updateItems[relationType]
@@ -2065,13 +2071,37 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                     apgType.text = updateItems[relationType + 'Type'].lower() if relationType == 'pahmaAltNum' else 'made by'
                     #sys.stderr.write(relationType + 'Type:' + updateItems[relationType + 'Type'])
                     newElement.append(apgType)
-                metadata.insert(0, newElement)
+                if len(Entries) == 1 and Entries[0].text is None:
+                    #sys.stderr.write('reusing empty element: %s\n' % Entries[0].tag)
+                    #sys.stderr.write('ents : %s\n' % Entries[0].text)
+                    #print '<br>before',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
+                    for child in metadata:
+                        #print '<br>tag: ', child.tag
+                        if child.tag == relationType + 'Group':
+                            #print '<br> found it! ',child.tag
+                            metadata.remove(child)
+                    metadata.insert(0,newElement)
+                    #print '<br>after',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
+                else:
+                    metadata.insert(0,newElement)
             else:
-                # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
-                if relationType == 'pahmaAltNum':
-                    apgType = metadata.find('.//' + relationType + 'Type')
-                    apgType.text = updateItems[relationType + 'Type']
-                    #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
+                if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
+                    continue
+                else:
+                    # exists, but not preferred. make it the preferred: remove it from where it is, insert it as 1st
+                    for child in metadata:
+                        if child.tag == relationType + 'Group':
+                            checkval = child.find('.//' + relationType)
+                            if checkval.text == updateItems[relationType]:
+                                savechild = child
+                                metadata.remove(child)
+                    metadata.insert(0,savechild)
+                pass
+            # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
+            if relationType == 'pahmaAltNum':
+                apgType = metadata.find('.//' + relationType + 'Type')
+                apgType.text = updateItems[relationType + 'Type']
+                #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
@@ -2084,7 +2114,12 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                 continue
             new_element = etree.Element(relationType)
             new_element.text = updateItems[relationType]
-            metadata.insert(0,new_element)
+            # check if the existing element is empty; if so, use it, don't add a new element
+            if len(Entries) == 1 and Entries[0].text is None:
+                metadata.remove(Entries[0])
+                metadata.insert(0,new_element)
+            else:
+                metadata.insert(0,new_element)
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
@@ -2222,20 +2257,23 @@ def formatRow(result, form, config):
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-
         if institution == 'bampfa':
-            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="not found|%s|%s|%s|%s|%s"/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[16], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
         else:
-            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="not found|%s|%s|%s|%s|%s"/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'powermove':
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+        if institution == 'bampfa':
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            link, rr[3], rr[5], rr[16], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
+            rr[3])
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
@@ -3184,6 +3222,15 @@ $(function () {
            $("[name^=" + mySet + "]").each(function () { this.checked = selected; });
        });
     });
+
+$(document).on('click', '#check-move', function() {
+    if ($('#check-move').is(':checked')) {
+        $('input[id="sel-move"]').each(function () { this.checked = true; });
+    } else {
+        $('input[id="sel-nomove"]').each(function () { this.checked = true; });
+    }
+});
+
 
 $(document).ready(function () {
 
