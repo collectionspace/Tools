@@ -2,11 +2,11 @@
 
 Node.js scripts for UC Berkeley CollectionSpace deployments. These scripts use the [collectionspace.js](https://github.com/ray-lee/collectionspace.js) library to perform operations on CollectionSpace records.
 
-# Installation
+## Installation
 
 Install [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/). 
 
-Clone the [cspace-deployment/Tools](https://github.com/cspace-deployment/Tools) repository. In this example, the Tools repository will be placed in a directory named `CollectionSpace`.
+Clone the [cspace-deployment/Tools](https://github.com/cspace-deployment/Tools) repository. In this example, the everything will be done in a directory named `CollectionSpace`.
 
 ```
 cd CollectionSpace
@@ -36,11 +36,12 @@ Optional, but helpful: Install the [Bunyan](https://github.com/trentm/node-bunya
 ```
 sudo npm install -g bunyan
 ```
-# Executing a Script
+## Executing a Script
 
-Scripts reside under the scripts directory. Execute a script using the Node.js executable, for example:
+Scripts reside under the `node-cspace-scripts/scripts` directory in the Tools repository. Execute a script using the Node.js executable, for example:
 
 ```
+cd Tools/node-cspace-scripts
 node scripts/PAHMA-1353/createComponents.js
 ```
 
