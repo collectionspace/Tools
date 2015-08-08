@@ -5,10 +5,8 @@
 
 YYMMDD=`date +%y%m%d`
 HOMEDIR=/home/app_webapps/extracts
-CCH_DIR=$HOMEDIR/cch/cch_$YYMMDD
+CCH_DIR=$HOMEDIR/cch/current
 CCH_LOG=$HOMEDIR/cch/cch_extract.log
-
-mkdir $CCH_DIR
 
 date >> $CCH_LOG
 

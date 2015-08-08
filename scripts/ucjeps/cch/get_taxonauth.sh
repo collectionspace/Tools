@@ -33,7 +33,7 @@ fi
 YYMMDD=`date +%y%m%d`
 HOMEDIR=/home/app_webapps/extracts
 AUTH_DIR=$HOMEDIR/taxonauth
-AUTH_FILE=$AUTH_DIR/$1_auth_$YYMMDD.txt
+AUTH_FILE=$AUTH_DIR/$1_auth.txt
 AUTH_LOG=$AUTH_DIR/taxonauth_export.log
 
 if [ ! -d "$AUTH_DIR" ]; then

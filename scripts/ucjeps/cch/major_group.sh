@@ -4,7 +4,10 @@ YYMMDD=`date +%y%m%d`
 HOMEDIR=/home/app_webapps/extracts
 MG_DIR=$HOMEDIR/major_group
 MG_LOG=$HOMEDIR/major_group/major_group.log
-MG_FILE=$HOMEDIR/major_group/major_group_$YYMMDD.txt
+MG_FILE=$HOMEDIR/major_group/major_group.txt
+
+# remove previous file, if any
+rm $MG_FILE
 
 echo 'query START time: ' `date` >> $MG_LOG
 
