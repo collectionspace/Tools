@@ -139,3 +139,14 @@ And(/^I verify the contents of the page$/) do
     # Screenshot appears; please verify the results are in Full display
     screenshot_and_open_image
 end
+
+Then(/^I mark the checkboxes "(.*?)"$/) do |boxes|
+    for box in boxes.split(', ')
+        page.check(box)
+        page.uncheck(box) 
+    end
+end
+
+When(/^I go back$/) do 
+    page.evaluate_script('window.history.back()')
+end 

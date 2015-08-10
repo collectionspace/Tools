@@ -8,12 +8,6 @@ Then(/^I will see the correct report in pdf format$/) do
     page.evaluate_script('window.history.back()')
 end
 
-When(/^I click "([^"]*)"$/) do |button|
+Then(/^I click "([^"]*)"$/) do |button|
     find(:link_or_button, button).click
-end
-
-Then(/^I sign out$/) do
-    find(:link_or_button, "logout").click
-    url = 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution
-    expect(current_url).to have_content(url)
 end
