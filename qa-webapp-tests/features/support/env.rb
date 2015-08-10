@@ -28,11 +28,11 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # Uncomment below to use the Poltergeist webdriver. 
 # Tested successfully on OS X and Linux.
 #########################################################################################
-require 'capybara/poltergeist'
-Capybara.register_driver :poltergeist do |app|
-  Capybara::Poltergeist::Driver.new(app, :timeout => 45)
-end
-Capybara.default_driver = :poltergeist
+# require 'capybara/poltergeist'
+# Capybara.register_driver :poltergeist do |app|
+#   Capybara::Poltergeist::Driver.new(app, :timeout => 45)
+# end
+# Capybara.default_driver = :poltergeist
 
 #########################################################################################
 # Uncomment below to use the capybara-webkit webdriver.
