@@ -18,11 +18,11 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # Uncomment below to use the Selenium webdriver with 'headless'
 # Note that this only works for Linux machines due to X graphics.
 #########################################################################################
-if Capybara.current_driver == :selenium
-  require 'headless'
-  headless = Headless.new
-  headless.start
-end
+# if Capybara.current_driver == :selenium
+#   require 'headless'
+#   headless = Headless.new
+#   headless.start
+# end
 
 #########################################################################################
 # Uncomment below to use the Poltergeist webdriver. 
