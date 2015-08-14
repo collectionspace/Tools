@@ -12,6 +12,7 @@ Scenario: Search for the website
     Then I see a table with 6 headers "Museum Number, Object Name, Ethnographic File Code, Culture, Collector, Collection Date" and 4 rows "15-10731, 15-10732, 15-10733, 15-10734" 
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
+    Then I mark the checkboxes "pixonly, locsonly"
     When I click "Maps" 
     Then I see two buttons
     When I click "map-google"
@@ -31,5 +32,6 @@ Scenario: Search for the website
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     Then I verify the contents of the page
+    Then I find the content "Current time:" in "div#container"
     When I click "logout"    
     Then I see "imaginator, search" 

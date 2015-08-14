@@ -11,6 +11,7 @@ Scenario: Find and use the keyword search feature
     Then I will click the arrows to toggle between pages
     Then I will click the up and down arrows beside the headers
     Then I click the button "download selected as csv" and download the csv file
+    Then I mark the checkboxes "pixonly, locsonly"
     When I click "Maps"
     Then I see two buttons
     When I click "Statistics"
@@ -26,5 +27,6 @@ Scenario: Find and use the keyword search feature
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     And I verify the contents of the page
+    Then I find the content "Current time:" in "div#container"
     When I click "logout"
     Then I find the content "No Apps" in "div#content"

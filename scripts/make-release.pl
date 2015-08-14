@@ -302,7 +302,7 @@ sub generate_release_notes {
 sub get_jira_summary {
 	my $issue_number = shift;
 	my $url = "https://issues.collectionspace.org/rest/api/2/issue/$issue_number?fields=summary";	
-	print ("url=", $url, "\n");
+	
 	my $response = decode_json(`curl -s $url`);
 	my $summary = $response->{fields}->{summary};
 	
