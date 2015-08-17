@@ -40,5 +40,5 @@ rm 4solr.*.csv.gz
 gzip -f *.csv
 #
 # put them in tmp so they can be gotten at by others
-cp 4solr.*.tgz /tmp
+cp 4solr.*.csv.gz /tmp
 date
