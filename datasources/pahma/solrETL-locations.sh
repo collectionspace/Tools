@@ -52,5 +52,5 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-locations/update" --data '<comm
 time curl -s -S 'http://localhost:8983/solr/pahma-locations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\' --data-binary @4solr.pahma.locations.csv -H 'Content-type:text/plain; charset=utf-8'
 rm m4.csv
 # put them in tmp so they can be gotten at by others
-cp 4solr.*.tgz /tmp
+cp 4solr.*.csv.gz /tmp
 date
