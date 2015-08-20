@@ -14,7 +14,7 @@ $$
        JOIN utils.placename_hierarchy p
          ON( o.placecsid = p.placecsid )
        JOIN utils.current_location_temp l
-         ON( o.collectionobjectcsid = l.collectionobjectcsid );
+         ON( o.id = l.collectionobjectcsid );
 
   CREATE INDEX opn_id_ndx
             ON utils.object_place_location( id );
