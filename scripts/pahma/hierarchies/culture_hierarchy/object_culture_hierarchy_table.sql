@@ -1,6 +1,8 @@
+DROP TABLE IF EXISTS utils.object_culture_hierarchy;
+
 select opl.id, opl.collectionobjectcsid,
        ch.culture,
-       ch.culturecsid
+       ch.culturecsid,
        ch.csid_hierarchy as culture_csid_hierarchy
 into utils.object_culture_hierarchy
 from
@@ -11,7 +13,7 @@ from
       on (h1.id = h2.parentid
           and
           h2.name = 'collectionobjects_common:assocCulturalContextGroupList')
-   join assocculturalcontextgroup acg,
+   join assocculturalcontextgroup acg
       on (h2.id = acg.id)
    join concepts_common cnc
       on (acg.assocculturalcontext = cnc.refname)
