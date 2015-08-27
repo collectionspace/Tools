@@ -26,7 +26,7 @@ time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print
 # obfuscate locations of sensitive accesssions
 ##############################################################################
 #perl -i -ne '@x = split /\t/;@x[37] = "Location Restricted" if ($x[15] =~ /Lophophora/ && $x[15]); print join "\t",@x;' d4.csv
-perl -i -ne '@x = split /\t/;if ($x[57] =~ /Restricted/) {@x[37] = "Location Restricted" if  $x[37] ne "" ; @x[21]="Undisclosed"  if  $x[21] ne ""}; print join "\t",@x;' d4.csv
+perl -i -ne '@x = split /\t/;if ($x[44] =~ /Restricted/) {@x[25] = "Location Restricted" if  $x[25] ne "" ; @x[8]="Undisclosed"  if  $x[8] ne ""}; print join "\t",@x;' d4.csv
 ##############################################################################
 # check latlongs
 ##############################################################################
