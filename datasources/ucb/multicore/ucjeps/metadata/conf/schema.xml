@@ -243,6 +243,7 @@
     <copyField source="previousdeterminations_ss" dest="previousdeterminations_txt"/>
     <copyField source="associatedtaxa_ss" dest="associatedtaxa_txt"/>
     <copyField source="typeassertions_ss" dest="typeassertions_txt"/>
+    <copyField source="alllocalitites_ss" dest="alllocalitites_txt"/>
     <copyField source="othernumber_ss" dest="othernumber_txt"/>
 
    <copyField source="*_s" dest="text"/>

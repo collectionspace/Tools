@@ -139,6 +139,14 @@ select
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as otherlocalities_ss,
+  array_to_string(array
+      (SELECT CASE WHEN (lg2.fieldlocverbatim IS NOT NULL AND lg2.fieldlocverbatim <>'' and lg2.fieldlocverbatim not like '%unknown%') THEN (getdispl(lg2.fieldlocverbatim)) ELSE '' END
+        from collectionobjects_common co5
+	      inner join hierarchy h5int on co5.id = h5int.id
+	      left outer join hierarchy hlg2 on (co5.id = hlg2.parentid
+	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
+	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
+        where h5int.name=h1.name order by hlg2.pos), '␥', '') as alllocalities_ss,
   CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s
 
 from collectionobjects_common co
