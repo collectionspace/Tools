@@ -199,7 +199,6 @@
 
    <!-- Create keyword versions for searching -->
 
-
     <copyField source="briefdescription_txt" dest="briefdescription_s"/>
     <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
     <copyField source="determination_s" dest="determination_txt"/>
@@ -239,11 +238,15 @@
     <copyField source="determinationdetails_s" dest="determinationdetails_txt"/>
     <copyField source="loanstatus_s" dest="loanstatus_txt"/>
     <copyField source="loannumber_s" dest="loannumber_txt"/>
+    <copyField source="collectorverbatim_s" dest="collectorverbatim_txt"/>
+    <copyField source="hastypeassertions_s" dest="hastypeassertions_txt"/>
     <copyField source="collector_ss" dest="collector_txt"/>
     <copyField source="previousdeterminations_ss" dest="previousdeterminations_txt"/>
     <copyField source="associatedtaxa_ss" dest="associatedtaxa_txt"/>
     <copyField source="typeassertions_ss" dest="typeassertions_txt"/>
     <copyField source="othernumber_ss" dest="othernumber_txt"/>
+    <copyField source="otherlocalities_ss" dest="otherlocalities_txt"/>
+    <copyField source="alllocalities_ss" dest="alllocalities_txt"/>
 
    <copyField source="*_s" dest="text"/>
    <copyField source="*_ss" dest="text"/>
