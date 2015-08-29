@@ -54,6 +54,8 @@ head -1 metadata.csv > header4Solr.csv
 perl -i -pe 's/^1\t/id\t/;s/$/\tblob_ss/;' header4Solr.csv
 grep -v csid_s d8.csv > d9.csv
 cat header4Solr.csv d9.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.public.csv
+# clean up some stray quotes. Really this should get fixed properly someday!
+perl -i -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' 4solr.$TENANT.public.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
