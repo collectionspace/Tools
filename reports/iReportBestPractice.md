@@ -66,13 +66,13 @@ The steps are basically as follows:
 2. read code, determine what to do to implement fix...
 3. create clone or fork of Tools repo on your machine ... or just cd to it if you already have one
 4. make sure your local repo is up-to-date
-5. modify file(s) using your favorite IDE or source code editor
-6. test fix on your local machine (using ireport client)
+5. modify file(s) using JasperSoft Studio, or, if you are a wizard, edit the XML directly with your favorite IDE or source code editor
+6. test fix on your local machine (using JasperSoft Studio); yes, you'll need to set up database connections, usuall with an SSH tunnel involved.
 7. check your edits using 'git diff'
 8. add file(s) to commit
 9. make commit (referring to relevant JIRAs)
 10. push code up to production repo (cspace-deployment) only if you have the necessary write privileges to do so.
-11. it is also prudent to update your own fork at this point, if you have one. If you do not have write privileges to push code up to prod repo, make a pull request.
+11. Otherwise, update your own fork and make a pull request.
 12. double check that commit "took" on GitHub. e.g. https://github.com/cspace-deployment/Tools/commit/....
 13. update the desired server (dev or prod) with the new .jrxml file   
     a. sign into the desired server: ssh cspace-dev.cspace.berkeley.edu (or own local dev server)
@@ -83,12 +83,12 @@ The steps are basically as follows:
     f. copy the files from to this server: cp /tmp/reports/[institution]/*.jrxml tomcat6-[institution]/cspace/reports/
     g. remove the old .jasper file: rm tomcat6-[institution]/cspace/reports/*.jasper 
     h. logout: exit
+    if this report will display in a Django web app (see PAHMA-823 for details of why you have to do this.) also do the following:
     i. sudo into the webapps server: sudo su - app_webapps
     j. copy the new file(s) from temp to this directory: cp /tmp/reports/*/*.jrxml jrxml/
     k. Remove the /tmp/reports directory after finishing: rm -rf /tmp/reports
 
-14. if this report will display in a Django web app, also put the jrxml file in the /home/app_[institution]/jrxml directory that is accessible to Django (see PAHMA-823 for details of why you have to do this.)
-15. if all you are doing is updating an existing report, then you are done. Otherwise, read further below about making a "report record" in CSpace using the helper scripts.
+14. if all you are doing is updating an existing report, then you are done. Otherwise, read further below about making a "report record" in CSpace using the helper scripts.
 15. test to see the reports work on Prod and Dev. In the case of Prod reports, some of them can be (and should be) tested via the ireports webapp, e.g., https://dev.cspace.berkeley.edu/botgarden_project/ireports/
 16. resolve JIRA(s)
 17. notify customer of fix
@@ -96,8 +96,16 @@ The steps are basically as follows:
 Note that this workflow presumes you use git from the command line. If you are using an IDE to do your editing and communicate with GitHub, steps 3-11 of this workflow will differ for you. Adjust accordingly.
 
 USEFUL HELPER SCRIPTS
+=====================
 
 These helper scripts need environment variables containing the hostnames, logins, and passwords for the target system.  There is a script called set-config.sh which sets these values, and the other scripts check to see that they are set.  Therefore, it is only necessary to modify (and call) the set-config.sh script once for all the other scripts.  You may want to put either an invocation of this script or set the variables in your own login profile.
+
+```
+cp set-config.sh set-tenant-config.sh
+vi set-tenant-config.sh
+# update credentials and save
+source set-tenant-config.sh
+```
 
 (See https://github.com/cspace-deployment/Tools/reports/helpers/README for details.)
 
@@ -114,7 +122,7 @@ They mainly serve as example code for how to do things with reports, and you sho
 $ ./load-report.sh reportname  "report name" "doctype"
 ```
 
-This script assumes a file reportname.jasper exists and copies it to the tomcat directory, it then configures an XML payload and calls the REST API to install the report. "report name" is the value that will appear in the UI, and "doctype" is the value of <forDocType>, which specifies the context for the report.
+This script checks that a file reportname.jrxml exists, then configures an XML payload and calls the REST API to install the report. "report name" is the value that will appear in the UI, and "doctype" is the value of <forDocType>, which specifies the context for the report.
 
 ```bash
 $ ./delete-report.sh reports <CSID>
