@@ -1,8 +1,10 @@
 Managing iReports
+================
 
-11/27/2013
+11/27/2013, updated 08/31/2015
 
 OVERVIEW
+=======
 
 Each CSpace deployment includes several customized reports created using iReport.  Some of these reports are intended to be generated from within CSpace and so need to be installed as documented in the wiki.  Others are run "standalone", meaning that they are executed on a user's local system and access the CSpace database via a JDBC Postgres connector.
 
@@ -11,6 +13,7 @@ Those that are installed in CSpace need to be maintained alongside the CSpace in
 This document documents the best practice for developing, installing, and maintaining iReports for use with CSpace.
 
 IREPORT DEVELOPMENT
+===================
 
 Reports are designed and developed in collaboration with museum staff.  Typically, museum staff provide printed and/or digital versions of existing "legacy" reports, or mockups or other specifications for new reports.  The iReport developer then creates a report using the iReport application.  NB: care must be taken to ensure that the iReport version used is compatible with the JasperSoft runtime installed in CSpace, and that fonts, images, and other dependencies in the report exist on the system used to generate the report.
 
@@ -28,8 +31,9 @@ Developing iReports requires:
 * issuing a pull request (e.g "PAHMA-1311: adding jrxml file")
 
 IREPORT DEPLOYMENT: STANDALONE
+==============================
 
-For standalone iReports, no defined procedure is necessary: it is the user's responsibility to ensure that the system is suitably configured for the reports needed.  Configuration required includes
+For standalone iReports (i.e. using JasperSoft studio on your own computer), no defined procedure is necessary: it is the user's responsibility to ensure that the system is suitably configured for the reports needed.  Configuration required includes
 
 * Sufficient RAM and CPU resources for the version of iReport being run.
 * Suitable OS versions
@@ -41,24 +45,16 @@ For standalone iReports, no defined procedure is necessary: it is the user's res
 The user then downloads the desired iReport .jrxml files, either via git on the command line or by browsing the git repository via a web browser.
 
 IREPORT DEPLOYMENT: IN CSPACE
+=============================
 
-Deploying iReports within CSpace requires:
-* checking out the desired .jrxml file(s) from git to a system with iReport installed
-* compiling the .jrxml file(s) (usually individually, by hand) into .jasper files
-* moving the .jrxml files to the appropriate tomcat directory on the target system.  While this can be accomplished in one step if one has write access to the target directory, it is usually necessary to first stage the file(s) to one's local directory on the target system, ssh in, then sudo cp the files to their final destination. (Note: CSpace will compile the .jrxml file when it is first called into a .jasper file)
-* instructing CSpace about the name and context for the report. This involves a call to the REST API with an XML payload containing this information.  Scripts for "loading" iReports (and performing other maintenance) are provided in the git repository. Note that these need to be configured for each target system.
-
-Note: These instructions are a bit out of date.  As of CSpace 3, one only needs to copy in the .jrxml file to the target directory.  However, the older .jasper file may need to be removed.  The XML payload can also be posted to the report service in a separate step via a curl command.  
-
-    local $ cd git/Tools/reports/mymuseum
-    local $ git update
-    local $ # compile … compile … compile
-    local $ scp *.jasper target.cspace.berkeley.edu:
-    local $ ssh target.cspace.berkeley.edu
-    target $ sudo cp myireport.jasper /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
-    target $ ./load-report.sh myireport  "my Super iReport" ""
+Deploying iReports within CSpace requires (in broad strokes):
+* checking out the desired .jrxml file(s) from git
+* moving the .jrxml files to the appropriate tomcat directory on the target system.  While this can be accomplished in one step if one has write access to the target directory, it is usually necessary to first stage the file(s) to one's local clone of the Tools repo on the target system, then cp or sudo cp the files to their final destination. (Note: CSpace will compile the .jrxml file when it is first called into a .jasper file)
+* If you are replacing an existing report, you'll want to get rid of the existing compiled (.jasper) file: otherwise CSpace will not recompile your new one!
+* instructing CSpace about the name and context for the report. This involves a call to the REST API with an XML payload containing this information.  Scripts for "loading" iReports (and performing other maintenance) are provided in the git repository. Note that these need to be configured for each target system. See below for details.
 
 IREPORT ONGOING MAINTENANCE
+===========================
 
 No specific practices have yet been developed to aid in ongoing maintenance of iReports.  This would be helpful! Having a suite of test cases to use in debugging and QA would help prevent regressions and ensure that the correct results are produced.
 
@@ -107,16 +103,22 @@ These helper scripts need environment variables containing the hostnames, logins
 
 The two variables used are:
 
+```
 REPORTURL="http://hostname"
 REPORTUSER="user@target.cspace.berkeley.edu:password"
+```
 
 They mainly serve as example code for how to do things with reports, and you should plan to make further modifications to suit your own ends.
 
+```bash
 $ ./load-report.sh reportname  "report name" "doctype"
+```
 
 This script assumes a file reportname.jasper exists and copies it to the tomcat directory, it then configures an XML payload and calls the REST API to install the report. "report name" is the value that will appear in the UI, and "doctype" is the value of <forDocType>, which specifies the context for the report.
 
+```bash
 $ ./delete-report.sh reports <CSID>
+```
 
 Deletes the report identified by CSID from the CSpace configuration; does *NOT* delete the .jasper file.
 
@@ -124,7 +126,9 @@ Note: You can also delete individual reports using the Firefox plugin, Poster.  
   http://botgarden.cspace.berkeley.edu/cspace-services/reports/b3743540-8c99-412f-b851
 Enter the credentials; select Delete from the dropdown of Actions; and click the green circular "go" button.
 
+```bash
 $ list-reports.sh
+```
 
 prints the CSID and report names of the reports installed on the target system.
 
@@ -133,8 +137,9 @@ Note: You can also get a list of reports by making a call directly to the report
 
 
 MANUAL RECIPE FOR UPDATING AN iREPORT
+=====================================
 
-This recipe reinforces the instructions above. The steps are done by hand, at the command line, rather than by script.
+Here's how to do this stuff by hand, at the command line, rather than using the scripts above. These instructions reference the "legacy" operating environment for CSpace at UCB. They should be viewed as "obsolete, for exemplification only."
 
 EXAMPLE: Revising the UCJEPS Collector Label (Word) report for Groups on the ucjeps-dev server.
 ENVIRONMENT: ucjeps-dev is running CollectionSpace 3.3, iReport version __, postgres v. __ on a Red Hat 6(?) Linux VM.
@@ -148,9 +153,19 @@ WHAT TO LOOK FOR / WHERE TO LOOK
     From the nuxeo prompt, run: nuxeo=> select * from reports_common;
 
 TASK SUMMARY
-To replace an existing report with a new version, you must delete the existing report from the database and from the file system, then upload a new .jrxml file and install (compile/initialize) the new report.
 
-STEPS
+Several tasks are described. 
+
+• If you are updating an existing report, all you need to do is move and delete two files (.jrxml and .jasper. YOU DO NOT NEED TO DELETE THE REPORT'S RECORD IN CSPACE UNLESS YOU NEED TO CHANGE SOMETHING ABOUT THE CONTEXT OF THE REPORT AS USED IN CSPACE -- e.g. which record type it appears with.)
+
+• If you are adding a new report, you'll need to move a file AND create a report record for it.
+
+* If you need to delete a report, technically all you need to do is delete the report record, but cleaning up the files is of course good practices.
+
+
+
+Deleting a report:
+
 1. Determine the CSID of the report that you want to replace.
      • https://ucjeps.cspace.berkeley.edu/cspace-services/reports/ (login with ucjeps-dev credentials).
      • Find report by name and copy its CSID
@@ -163,31 +178,32 @@ STEPS
      • cd /usr/local/share/tomcat/cspace/reports
      • sudo rm {filename} -- once for each file, or use * at end of partial file name, being sure that the wildcard doesn't match any unintended files. (Use sudo rm ucjepsCollectorLabel_group.j* for removing both the .jrmxl and .jasper files, without touching the files for the _concat version of the report.)
 
-4. Securely copy the new .jrxml file to server.
+Installing a new report:
+
+1. Securely copy the new .jrxml file to server.
      • from the local machine:
        scp /Users/rjaffe/Desktop/ucjepsCollectorLabel_group.jrxml ucjeps-dev.cspace.berkeley.edu:/usr/local/share/tomcat/cspace/reports/ucjepsCollectorLabel_group.jrxml
      •  In this case, the file I want to copy sits on my desktop.
 
-5. Change ownership of .jrxml file:
+2. Change ownership of .jrxml file (may or may not be necessary for your deployment):
      • sudo chown tomcat:tomcat ucjepsCollectorLabel_group.jrxml 
 
-6. Change mod of .jrxml file (although this seemed to happen automatically if I chown after initializing and running the report):
+3. Change mod of .jrxml file (although this seemed to happen automatically if I chown after initializing and running the report):
      • sudo chmod u-x ucjepsCollectorLabel_group.jrxml
      • sudo chmod g-x ucjepsCollectorLabel_group.jrxml
      • sudo chmod o-x ucjepsCollectorLabel_group.jrxml
 
-7. "Initialize" or "register" this report, i.e. send a request to cspace-services with an .xml payload that provides the name and context for the report and instantiates the report so that CSpace assigns it a CSID.
+4. "Initialize" or "register" this report, i.e. send a request to cspace-services with an .xml payload that provides the name and context for the report and instantiates the report so that CSpace assigns it a CSID.
 
      • curl -i -u admin@ucjeps.cspace.berkeley.edu -X POST -H "Content-Type: application/xml" https://ucjeps-dev.cspace.berkeley.edu/cspace-services/reports -T /Users/rjaffe/Desktop/ucjepsCollectorLabel_group.xml  
 (Note that .xml file is sent from my desktop.)
      • Report should appear in the database.
 
-8. Clear browser cache and run the report from the CSpace UI. 
+5. Clear browser cache and run the report from the CSpace UI. 
      • Report should be created and either appear in the browser or be downloaded per browser settings to your local machine.
      • The compiled .jasper file is created automatically.
+     
+Updating a report:
 
-
-
-
-
+1. Follow steps 1-3 of Installing a report. The report record as "registered" in CSpace need not change.
 
