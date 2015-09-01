@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
-<!-- 2015-06-12T14:28:05 -->
+<!-- 2015-08-31T12:41:32 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Tombstone Plus test 3" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="faebc082-c7be-4fed-8b9b-a911e377d5a5">
 	<parameter name="csid" class="java.lang.String">
 		<defaultValueExpression><![CDATA["bd0c5831-06fa-458f-b686"]]></defaultValueExpression>
@@ -60,7 +60,7 @@ com.item AS "Label text",
         WHERE h1.name=rcc.subjectcsid AND rcc.objectdocumenttype='Conditioncheck' AND misc.lifecyclestate<>'deleted'
         ORDER BY ccc.conditioncheckassessmentdate DESC
         LIMIT 1) AS "Latest condition note",
-(SELECT 'https://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/'||mc.blobcsid||'/derivatives/Medium/content' 
+(SELECT 'https://webapps.cspace.berkeley.edu/pahma/imageserver/blobs/'||mc.blobcsid||'/derivatives/Medium/content' 
         FROM relations_common rcm
         LEFT OUTER JOIN hierarchy hmd ON (hmd.name=rcm.objectcsid)
         LEFT OUTER JOIN media_pahma mp ON (hmd.id=mp.id AND mp.primarydisplay='true')
