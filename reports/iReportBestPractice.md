@@ -62,6 +62,7 @@ When problems are identified or enhancements made:
 
 The steps are basically as follows:
 
+```
 1. create JIRA for this work
 2. read code, determine what to do to implement fix...
 3. create clone or fork of Tools repo on your machine ... or just cd to it if you already have one
@@ -92,6 +93,7 @@ The steps are basically as follows:
 15. test to see the reports work on Prod and Dev. In the case of Prod reports, some of them can be (and should be) tested via the ireports webapp, e.g., https://dev.cspace.berkeley.edu/botgarden_project/ireports/
 16. resolve JIRA(s)
 17. notify customer of fix
+```
 
 Note that this workflow presumes you use git from the command line. If you are using an IDE to do your editing and communicate with GitHub, steps 3-11 of this workflow will differ for you. Adjust accordingly.
 
