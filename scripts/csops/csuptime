@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Print the time elapsed since the CollectionSpace tomcat service was last started.
+
+SERVICE_NAME=`csname`
+PID=`pgrep -fn -u $USER "java .* -Dcatalina.base=/home/$USER/$SERVICE_NAME "`
+
+if [ -n "$PID" ]; then
+	ps -q $PID -o etime=
+fi

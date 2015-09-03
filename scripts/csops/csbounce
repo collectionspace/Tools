@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Restart CollectionSpace
+
+if ! csdown $@; then
+	exit 1;
+fi
+
+csup

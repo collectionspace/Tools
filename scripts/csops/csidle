@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Print the amount of time elapsed since the last access to CollectionSpace.
+
+NAGIOS_IP=107.170.234.29
+ACCESS_PATTERN="^(.*?) - - \\[(.*?)\\] \"(GET|POST|PUT|DELETE)\ /(collectionspace|cspace-services)/"
+TIMESTAMP_PATTERN="^([0-9]+)/([A-Za-z]+)/([0-9]+):(.*?) (.*?)$"
+LAST_ACCESS_TIMESTAMP=''
+
+cd ~/`csname`/logs
+
+for logfile in `ls -1r localhost_access_log.*.txt`
+do
+	IFS=$'\n'
+
+	for line in `tac $logfile`
+	do
+		if [[ $line =~ $ACCESS_PATTERN ]]; then
+			ip=${BASH_REMATCH[1]}
+
+			if [[ $ip != $NAGIOS_IP ]]; then
+				LAST_ACCESS_TIMESTAMP=${BASH_REMATCH[2]}
+				break
+			fi
+		fi 
+	done
+
+	unset IFS
+
+	if [ -n "$LAST_ACCESS_TIMESTAMP" ]; then
+		break
+	fi
+done
+
+if [[ $LAST_ACCESS_TIMESTAMP =~ $TIMESTAMP_PATTERN ]]; then
+	d=${BASH_REMATCH[1]}
+	m=${BASH_REMATCH[2]}
+	y=${BASH_REMATCH[3]}
+	t=${BASH_REMATCH[4]}
+	tz=${BASH_REMATCH[5]}
+
+	last_access_utime=`date '+%s' -d "$m $d $y $t $tz"`
+	now_utime=`date '+%s'`
+
+	seconds_elapsed=`expr $now_utime - $last_access_utime`
+
+	echo $seconds_elapsed
+fi
