@@ -128,6 +128,13 @@ def infoHeaders(fieldSet):
       <th>Field Collection Place</th>
       <th>P?</th>
     </tr>"""
+    elif fieldSet == 'collection':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Collection</th>
+    </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
 
@@ -168,21 +175,36 @@ def getHandlers(form, institution):
 
         handlerlist = [
             ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
+            ("Sofia Cano", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SofiaCano1441412806257)'Sofia Cano'"),
             ("Iris Close", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(IrisClose1351199196181)'Iris Close'"),
+            ("Barrett Dryden", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BarrettDryden1441411842447)'Barrett Dryden'"),
             ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
             ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
             ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
+            ("Haley Goren", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HaleyGoren1441412331902)'Haley Goren'"),
+            ("Samuel Hemsley", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SamuelHemsley1441412367955)'Samuel Hemsley'"),
             ("Chelsea Hernandez-Garcia", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ChelseaHernandezGarcia1436388486316)'Chelsea Hernandez-Garcia'"),
+            ("Alexandra Idso", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(AlexandraIdso1441412402823)'Alexandra Idso'"),
             ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
             ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
             ("Dani Knapp", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(DaniKnapp1436386634306)'Dani Knapp'"),
             ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
             ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
             ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
+            ("Katrina Oshima", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KatrinaOshima1441412692846)'Katrina Oshima'"),
+            ("Nathaniel Rigler", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(NathanielRigler1441412770505)'Nathaniel Rigler'"),
+            ("Adrian Rios", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(AdrianRios1441412383598)'Adrian Rios'"),
+            ("Barbara Rocha", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BarbaraRocha1441413033713)'Barbara Rocha'"),
+            ("Rubi Ruopp", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RubiRuopp1441412850032)'Rubi Ruopp'"),
+            ("Emily Sandoval", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(EmilySandoval1441412274520)'Emily Sandoval'"),
+            ("Holly Seyler", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HollySeyler1351291017723)'Holly Seyler'"),
             ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
+            ("Kaci Spooner", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KaciSpooner1441412653643)'Kaci Spooner'"),
             ("Susannah Starr","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SusannahStarr1438363401681)'Susannah Starr'"),
             ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
+            ("Leah Weaver", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LeahWeaver1441412347620)'Leah Weaver'"),
             ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'"),
+            ("Madlyne Woodward", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(MadlyneWoodward1441412735172)'Madlyne Woodward'"),
             ("Heather Van Zankwyk", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HeatherVanZankwyk1436386602136)'Heather Van Zankwyk'")
         ]
 
@@ -430,16 +452,21 @@ def getPrinters(form):
     return printers, selected, printerlist
 
 
-def getFieldset(form):
+def getFieldset(form, institution):
     selected = form.get('fieldset')
 
-    fields = [
-        ("Key Info", "keyinfo"),
-        ("Name & Desc.", "namedesc"),
-        ("Registration", "registration"),
-        ("HSR Info", "hsrinfo"),
-        ("Object Type/CM", "objtypecm"),
-    ]
+    if institution == 'bampfa':
+        fields = [
+            ("Collection", "collection"),
+        ]
+    else:
+        fields = [
+            ("Key Info", "keyinfo"),
+            ("Name & Desc.", "namedesc"),
+            ("Registration", "registration"),
+            ("HSR Info", "hsrinfo"),
+            ("Object Type/CM", "objtypecm"),
+        ]
 
     fieldset = '''
           <select class="cell" name="fieldset">'''
@@ -1067,7 +1094,8 @@ if __name__ == '__main__':
     result += handleResult(getReasons(form,'bampfa'),'getReasons:bampfa')
     result += handleResult(getReasons(form,''),'getReasons')
     result += handleResult(getPrinters(form),'getPrinters')
-    result += handleResult(getFieldset(form),'getFieldset')
+    result += handleResult(getFieldset(form,'pahma'),'getFieldset')
+    result += handleResult(getFieldset(form,'bampfa'),'getFieldset')
     result += handleResult(getHierarchies(form),'getHierarchies')
     result += handleResult(getAgencies(form),'getAgencies')
     result += '</table>'
