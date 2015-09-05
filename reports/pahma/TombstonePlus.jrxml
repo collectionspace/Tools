@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
-<!-- 2015-08-31T12:41:32 -->
+<!-- 2015-09-04T20:09:13 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Tombstone Plus test 3" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="faebc082-c7be-4fed-8b9b-a911e377d5a5">
 	<parameter name="csid" class="java.lang.String">
 		<defaultValueExpression><![CDATA["bd0c5831-06fa-458f-b686"]]></defaultValueExpression>
@@ -208,12 +208,15 @@ ORDER BY eog.exhibitionobjectsection, eog.exhibitionobjectcase, eog.exhibitionob
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
-					<font size="18"/>
+					<font size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Tombstone information]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="0" y="29" width="279" height="23" uuid="2fae7f61-6890-4eff-ad11-526f893ce55f"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{Exhibit title}]]></textFieldExpression>
 			</textField>
 			<image onErrorType="Icon">
