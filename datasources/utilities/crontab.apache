@@ -72,6 +72,14 @@
 ##################################################################################
 0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "$t cache status" -- jblowe@berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
+# run the UCJEPS jobs weekly
+##################################################################################
+00 5 * * 5 /home/app_webapps/bin/major_group.sh
+00 6 * * 5 /home/app_webapps/bin/cch_extract.sh
+00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
+00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
+30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
+##################################################################################
 # the following will not run on the managed servers under app_webapps
 # (they need access to the Apache logs... and a cron job that preps those logs)
 ##################################################################################

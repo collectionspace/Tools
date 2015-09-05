@@ -1,0 +1,16 @@
+cp bampfa.internal.schema.xml ~/solr4/ucb/multicore/bampfa/internal/conf/schema.xml
+cp bampfa.media.schema.xml ~/solr4/ucb/multicore/bampfa/media/conf/schema.xml
+cp bampfa.public.schema.xml ~/solr4/ucb/multicore/bampfa/public/conf/schema.xml
+cp botgarden.internal.schema.xml ~/solr4/ucb/multicore/botgarden/internal/conf/schema.xml
+cp botgarden.media.schema.xml ~/solr4/ucb/multicore/botgarden/media/conf/schema.xml
+cp botgarden.propagations.schema.xml ~/solr4/ucb/multicore/botgarden/propagations/conf/schema.xml
+cp botgarden.public.schema.xml ~/solr4/ucb/multicore/botgarden/public/conf/schema.xml
+cp cinefiles.internal.schema.xml ~/solr4/ucb/multicore/cinefiles/internal/conf/schema.xml
+cp cinefiles.media.schema.xml ~/solr4/ucb/multicore/cinefiles/media/conf/schema.xml
+cp cinefiles.public.schema.xml ~/solr4/ucb/multicore/cinefiles/public/conf/schema.xml
+cp pahma.internal.schema.xml ~/solr4/ucb/multicore/pahma/internal/conf/schema.xml
+cp pahma.locations.schema.xml ~/solr4/ucb/multicore/pahma/locations/conf/schema.xml
+cp pahma.media.schema.xml ~/solr4/ucb/multicore/pahma/media/conf/schema.xml
+cp pahma.public.schema.xml ~/solr4/ucb/multicore/pahma/public/conf/schema.xml
+cp ucjeps.internal.schema.xml ~/solr4/ucb/multicore/ucjeps/internal/conf/schema.xml
+cp ucjeps.public.schema.xml ~/solr4/ucb/multicore/ucjeps/public/conf/schema.xml
