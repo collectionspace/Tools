@@ -66,7 +66,7 @@
 ##################################################################################
 # monitor imageserver caches
 ##################################################################################
-0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "$t cache status" -- jblowe@berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
+0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "$t cache status" -- jblowe@berkeley.edu ; rm report.txt ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
 # run the UCJEPS CCH extract jobs weekly
 ##################################################################################
