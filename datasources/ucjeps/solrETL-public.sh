@@ -2,11 +2,11 @@
 date
 cd /home/app_solr/solrdatasources/ucjeps
 TENANT=$1
-SERVER="dba-postgres-dev-32.ist.berkeley.edu port=5110 sslmode=prefer"
+SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5310 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export NUMCOLS=54
+export NUMCOLS=55
 ##############################################################################
 # extract and massage the metadata from CSpace
 ##############################################################################
@@ -54,6 +54,8 @@ head -1 metadata.csv > header4Solr.csv
 perl -i -pe 's/^1\t/id\t/;s/$/\tblob_ss/;' header4Solr.csv
 grep -v csid_s d8.csv > d9.csv
 cat header4Solr.csv d9.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.public.csv
+# clean up some stray quotes. Really this should get fixed properly someday!
+perl -i -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' 4solr.$TENANT.public.csv
 ##############################################################################
 # here are the schema changes needed: copy all the _s and _ss to _txt, and vv.
 ##############################################################################
@@ -76,7 +78,7 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<delete>
 # load the csv file into Solr using the csv DIH
 ##############################################################################
 curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&trim=true&separator=%09&f.collector_ss.split=true&f.collector_ss.separator=%7C&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=%7C&f.otherlocalities_ss.split=true&f.otherlocalities_ss.separator=%7C&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=%7C&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=%7C&f.othernumber_ss.split=true&f.othernumber_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&trim=true&separator=%09&f.collector_ss.split=true&f.collector_ss.separator=%7C&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=%7C&f.otherlocalities_ss.split=true&f.otherlocalities_ss.separator=%7C&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=%7C&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=%7C&f.alllocalities_ss.split=true&f.alllocalities_ss.separator=%7C&f.othernumber_ss.split=true&f.othernumber_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm d?.csv m?.csv metadata.csv media.csv
 rm 4solr.*.csv.gz

@@ -5,7 +5,7 @@ SELECT
    REGEXP_REPLACE(ca.computedcrate, '^.*\)''(.*)''$', '\1') AS computedcrate_s,
    co.objectnumber AS objectumber_s,
    cp.sortableobjectnumber as sortableobjectnumber_s,
-   co.numberofobjects AS "objectCount",
+   co.numberofobjects AS "objectcount_s",
    ong.objectName AS objectname_s, 
    cp.inventorycount as count_s
 FROM collectionobjects_common co

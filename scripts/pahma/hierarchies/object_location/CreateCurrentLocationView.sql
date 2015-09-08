@@ -1,7 +1,8 @@
 --
 --
 --
-
+-- this function is defunct: changes made to CreateCurrentLocationTable.sql
+-- obviate the need for a view.  jbl Aug 21 2015
 CREATE OR REPLACE FUNCTION utils.createCurrentlocationView() RETURNS VOID AS
 $$
     CREATE OR REPLACE VIEW utils.current_location_view AS

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS utils.object_material_hierarchy;
+
  select opl.id, opl.collectionobjectcsid,
        mh.material,
        mh.materialcsid,

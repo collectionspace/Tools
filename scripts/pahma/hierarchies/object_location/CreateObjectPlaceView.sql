@@ -20,7 +20,7 @@ $$
       JOIN places_common pc ON( pc.refname = pl.item )
       JOIN hierarchy h2 ON( h2.id = pc.id )
       JOIN utils.placename_hierarchy pn
-        ON( h2.primarytype = 'Placeitem'
+        ON( h2.primarytype = 'PlaceitemTenant15'
             AND pn.placecsid = h2.name )
 $$
 LANGUAGE SQL

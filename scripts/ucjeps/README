@@ -20,9 +20,15 @@ The results look like:
 2015-02-24 05:00:01 files 50088, dirs 36137, size 42848851839
 2015-02-25 05:00:01 files 50100, dirs 36142, size 42858752500
 2015-02-26 05:00:01 files 50206, dirs 36185, size 42894830120
-2015-02-27 05:00:01 files 50398, dirs 36276, size 42899618986
-2015-02-28 05:00:01 files 50840, dirs 36464, size 42904108385
-2015-03-01 05:00:01 files 51124, dirs 36592, size 42908617371
-2015-03-02 05:00:01 files 51124, dirs 36592, size 42908617371
-2015-03-03 05:00:01 files 51124, dirs 36592, size 42908617371
-2015-03-04 05:00:01 files 55002, dirs 38255, size 43025160293
+
+To set up on a managed serveri (very schematic instructions follow!):
+
+# make a directory for monitoring code
+mkdir ~/monitor
+cd monitor
+# copy the scripts (stored in the ucjeps directory at the moment)
+cp ~/Tools/scripts/ucjeps/* .
+# make some directories for logs, etc.
+./mkdir
+# set up cron jobs -- see examples above
+crontab -e

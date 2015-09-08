@@ -19,6 +19,14 @@ time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
 ##############################################################################
+# eliminate restricted items from public dataset
+##############################################################################
+#perl -i -ne '@x = split /\t/;print unless $x[57] =~ /Restricted/' d4.csv
+##############################################################################
+# obfuscate locations of sensitive accesssions
+##############################################################################
+perl -i -ne '@x = split /\t/;if ($x[44] =~ /Restricted/) {@x[24] = "Location Restricted" if  @x[24] ne "" ; @x[8]="Undisclosed"  if  @x[8] ne ""}; print join "\t",@x;' d4.csv
+##############################################################################
 # check latlongs
 ##############################################################################
 perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4.csv > d5.csv
