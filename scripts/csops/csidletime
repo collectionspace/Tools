@@ -7,7 +7,7 @@ ACCESS_PATTERN="^(.*?) - - \\[(.*?)\\] \"(GET|POST|PUT|DELETE)\ /(collectionspac
 TIMESTAMP_PATTERN="^([0-9]+)/([A-Za-z]+)/([0-9]+):(.*?) (.*?)$"
 LAST_ACCESS_TIMESTAMP=''
 
-cd ~/`csname`/logs
+cd ~/`csservname`/logs
 
 for logfile in `ls -1r localhost_access_log.*.txt`
 do

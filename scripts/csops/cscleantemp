@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TEMP_DIR=~/`csname`/temp
+TEMP_DIR=~/`csservname`/temp
 MMIN=60
 COUNT=0
 

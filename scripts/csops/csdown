@@ -20,7 +20,7 @@ done
 if [[ $FORCE == true ]]; then
 	IDLE_CHECK=true
 else
-	idle_time=`csidle`
+	idle_time=`csidletime`
 
 	if [[ -z idle_time ]]; then
 		IDLE_CHECK=true	
@@ -33,7 +33,7 @@ fi
 
 if [[ $IDLE_CHECK == true ]]; then
 	echo 'Stopping CollectionSpace...'
-	sudo service `csname` stop
+	sudo service `csservname` stop
 else
 	echo "ERROR: CollectionSpace user activity detected. Use -f to force."
 	exit 1

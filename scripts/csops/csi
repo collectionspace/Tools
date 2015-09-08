@@ -5,8 +5,8 @@
 MIN_IDLE_TIME=900 # 15 minutes - time required since last activity to stop tomcat.
 SOURCE_DIR=~/src/cspace-deployment
 REPOSITORIES=(services application ui)
-DEPLOYMENT_NAME=${USER#app_}
-TOMCAT_DIR=~/`csname`
+DEPLOYMENT_NAME=`csname`
+TOMCAT_DIR=~/`csservname`
 TAG=$1
 
 # Update the source code from git.

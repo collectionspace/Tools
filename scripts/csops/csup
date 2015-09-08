@@ -7,4 +7,4 @@ fi
 
 echo 'Starting CollectionSpace...'
 
-sudo service `csname` start
+sudo service `csservname` start
