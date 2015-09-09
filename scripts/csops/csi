@@ -2,12 +2,29 @@
 
 # Install UCB CollectionSpace.
 
-MIN_IDLE_TIME=900 # 15 minutes - time required since last activity to stop tomcat.
 SOURCE_DIR=~/src/cspace-deployment
 REPOSITORIES=(services application ui)
 DEPLOYMENT_NAME=`csname`
 TOMCAT_DIR=~/`csservname`
+OPTIND=1
+FORCE=false
+
+while getopts "f?" flag; do
+	case $flag in
+	f) FORCE=true
+	   ;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
 TAG=$1
+
+if [[ $FORCE == true ]]; then
+	CSDOWN="csdown -f"
+else
+	CSDOWN="csdown"
+fi
 
 # Update the source code from git.
 
@@ -17,7 +34,7 @@ for repo in ${REPOSITORIES[@]}; do
 		cd $SOURCE_DIR/$repo
 
 		if ! git fetch --tags; then
-			echo "ERROR: Failed to fetch ${repo}"
+			echo "ERROR: Failed to fetch $repo"
 			exit 1
 		fi
 	else
@@ -25,10 +42,10 @@ for repo in ${REPOSITORIES[@]}; do
 		cd $SOURCE_DIR
 
 		if ! git clone https://github.com/cspace-deployment/${repo}.git; then
-			echo "ERROR: Failed to clone ${repo}"
+			echo "ERROR: Failed to clone $repo"
 			exit 1
 		fi
-	fi	
+	fi
 done
 
 # Find the latest tag, if necessary.
@@ -48,9 +65,9 @@ if [[ -z $TAG ]]; then
 	num_possible_tags=${#possible_tags[@]};
 
 	if (( num_possible_tags == 0 )); then
-		echo "ERROR: No tags found."
+		echo "ERROR: No tags found"
 	elif (( num_possible_tags > 1 )); then
-		echo "ERROR: Multiple possible tags found."
+		echo "ERROR: Multiple possible tags found"
 	else
 		TAG=${possible_tags[0]}
 	fi
@@ -61,30 +78,30 @@ if [[ -z $TAG ]]; then
 	exit 1
 fi
 
-echo "Installing from tag ${TAG}"
+echo "Installing from tag $TAG"
 
 # Check out the desired tag.
 
 declare -A rebuild_needed
 
-PREVIOUS_VERSION=`csver`
+INSTALLED_VERSION=`csver`
 
-echo "Installed version is $PREVIOUS_VERSION"
+echo "Installed version is $INSTALLED_VERSION"
 
 for repo in ${REPOSITORIES[@]}; do
-	echo "Checking out ${TAG} in ${repo}"
+	echo "Checking out $TAG in $repo"
 	cd $SOURCE_DIR/$repo
 	
-	previous_commit=`git rev-list --max-count=1 $PREVIOUS_VERSION`
+	installed_commit=`git rev-list --max-count=1 $INSTALLED_VERSION`
 
 	if ! git checkout $TAG; then
-		echo "ERROR: Failed to check out ${TAG} in ${repo}"
+		echo "ERROR: Failed to check out $TAG in $repo"
 		exit 1
 	fi
 
 	current_commit=`git rev-parse HEAD`
 
-	if [[ $previous_commit != $current_commit ]]; then
+	if [[ $installed_commit != $current_commit ]]; then
 		rebuild_needed[$repo]=true
 	else
 		rebuild_needed[$repo]=false
@@ -113,7 +130,7 @@ fi
 if [[ ${rebuild_needed[application]} == true ]]; then
 	echo "Building and deploying application..."
 
-	if ! csdown; then
+	if ! $CSDOWN; then
 		echo "ERROR: Failed to stop CollectionSpace"
 		exit 1	
 	fi
@@ -131,7 +148,7 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 
 	rm -r $TOMCAT_DIR/webapps/collectionspace
 
-	# If the services layer isn't going to be redeployed, just deploy services artifacts.
+	# If the services layer isn't going to be fully built and redeployed, just deploy services artifacts.
 
 	if [[ ${rebuild_needed[services]} == false ]]; then
 		echo "Deploying services artifacts..."
@@ -139,7 +156,7 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 		cd $SOURCE_DIR/services/services/JaxRsServiceProvider
 
 		if ! ant deploy_services_artifacts; then
-			echo "ERROR: Faild to deploy services artifacts"
+			echo "ERROR: Failed to deploy services artifacts"
 			exit 1
 		fi
 
@@ -176,19 +193,19 @@ fi
 # Deploy the services layer, if necessary. Tomcat should be stopped.
 
 if [[ ${rebuild_needed[services]} == true ]]; then
-        echo "Deploying services..."
+	echo "Deploying services..."
 
-	if ! csdown; then
+	if ! $CSDOWN; then
 		echo "ERROR: Failed to stop CollectionSpace"
 		exit 1
 	fi
 
-        cd $SOURCE_DIR/services
+	cd $SOURCE_DIR/services
 
-        if ! ant undeploy deploy; then
-                echo "ERROR: Failed to deploy services"
-                exit 1
-        fi
+	if ! ant undeploy deploy; then
+		echo "ERROR: Failed to deploy services"
+		exit 1
+	fi
 
 	rm /tmp/*.properties
 	rm /tmp/*.xml
