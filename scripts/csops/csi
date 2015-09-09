@@ -156,19 +156,19 @@ fi
 # Deploy the services layer, if necessary. Tomcat should be stopped.
 
 if [[ ${rebuild_needed[services]} == true ]]; then
-        echo "Deploying services..."
+	echo "Deploying services..."
 
 	if ! csdown; then
 		echo "ERROR: Failed to stop CollectionSpace"
 		exit 1;	
 	fi
 
-        cd $SOURCE_DIR/services
+  cd $SOURCE_DIR/services
 
-        if ! ant undeploy deploy; then
-                echo "ERROR: Failed to deploy services"
-                exit 1;
-        fi
+	if ! ant undeploy deploy; then
+		echo "ERROR: Failed to deploy services"
+		exit 1;
+	fi
 
 	rm /tmp/*.properties
 	rm /tmp/*.xml

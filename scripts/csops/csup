@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [[ -n `csuptime` ]]; then
-        echo "CollectionSpace is already running"
-        exit 0
+	echo "CollectionSpace is already running"
+	exit 0
 fi
 
 echo 'Starting CollectionSpace...'
