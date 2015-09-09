@@ -67,12 +67,16 @@ echo "Installing from tag ${TAG}"
 
 declare -A rebuild_needed
 
+PREVIOUS_VERSION=`csver`
+
+echo "Installed version is $PREVIOUS_VERSION"
+
 for repo in ${REPOSITORIES[@]}; do
 	echo "Checking out ${TAG} in ${repo}"
 	cd $SOURCE_DIR/$repo
 	
-	previous_commit=`git rev-parse HEAD`
-	
+	previous_commit=`git rev-list --max-count=1 $PREVIOUS_VERSION`
+
 	if ! git checkout $TAG; then
 		echo "ERROR: Failed to check out ${TAG} in ${repo}"
 		exit 1
@@ -98,7 +102,7 @@ if [[ ${rebuild_needed[services]} == true ]]; then
 	
 	if ! mvn clean install -DskipTests; then
 		echo "ERROR: Failed to build services"
-		exit 1;
+		exit 1
 	fi
 else
 	echo "No change in services, skipping build"
@@ -111,14 +115,14 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 
 	if ! csdown; then
 		echo "ERROR: Failed to stop CollectionSpace"
-		exit 1;	
+		exit 1	
 	fi
 
 	cd $SOURCE_DIR/application
 
 	if ! mvn clean install -DskipTests; then
 		echo "ERROR: Failed to build application"
-		exit 1;
+		exit 1
 	fi
 
 	rm /tmp/collectionspace.war
@@ -126,6 +130,22 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 	# Delete the old exploded war.
 
 	rm -r $TOMCAT_DIR/webapps/collectionspace
+
+	# If the services layer isn't going to be redeployed, just deploy services artifacts.
+
+	if [[ ${rebuild_needed[services]} == false ]]; then
+		echo "Deploying services artifacts..."
+
+		cd $SOURCE_DIR/services/services/JaxRsServiceProvider
+
+		if ! ant deploy_services_artifacts; then
+			echo "ERROR: Faild to deploy services artifacts"
+			exit 1
+		fi
+
+		rm /tmp/*.properties
+		rm /tmp/*.xml
+	fi
 else
 	echo "No change in application, skipping build"
 fi
@@ -139,7 +159,7 @@ if [[ ${rebuild_needed[ui]} == true ]]; then
 
 	if ! mvn clean install -DskipTests; then
 		echo "ERROR: Failed to build ui"
-		exit 1;
+		exit 1
 	fi 
 
 	rm /tmp/cspace-ui.war
@@ -156,19 +176,19 @@ fi
 # Deploy the services layer, if necessary. Tomcat should be stopped.
 
 if [[ ${rebuild_needed[services]} == true ]]; then
-	echo "Deploying services..."
+        echo "Deploying services..."
 
 	if ! csdown; then
 		echo "ERROR: Failed to stop CollectionSpace"
-		exit 1;	
+		exit 1
 	fi
 
-  cd $SOURCE_DIR/services
+        cd $SOURCE_DIR/services
 
-	if ! ant undeploy deploy; then
-		echo "ERROR: Failed to deploy services"
-		exit 1;
-	fi
+        if ! ant undeploy deploy; then
+                echo "ERROR: Failed to deploy services"
+                exit 1
+        fi
 
 	rm /tmp/*.properties
 	rm /tmp/*.xml
@@ -178,7 +198,7 @@ fi
 
 if ! csup; then
 	echo "ERROR: Failed to start CollectionSpace"
-	exit 1;
+	exit 1
 fi
 
 echo "CollectionSpace successfully installed from $TAG"
