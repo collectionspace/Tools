@@ -1,0 +1,40 @@
+#!/bin/bash
+
+MIN_IDLE_TIME=600 # Seconds of inactivity required
+FORCE=false
+IDLE_CHECK=false
+OPTIND=1
+
+if [[ -z `csuptime` ]]; then
+	echo "CollectionSpace is not running"
+	exit 0
+fi
+
+while getopts "f?" opt; do
+	case "$opt" in
+	f) FORCE=true
+	   ;;
+	esac
+done
+
+if [[ $FORCE == true ]]; then
+	IDLE_CHECK=true
+else
+	idle_time=`csidletime`
+
+	if [[ -z idle_time ]]; then
+		IDLE_CHECK=true	
+	else
+		if (( idle_time > MIN_IDLE_TIME )); then
+			IDLE_CHECK=true
+		fi
+	fi
+fi
+
+if [[ $IDLE_CHECK == true ]]; then
+	echo 'Stopping CollectionSpace...'
+	sudo service `csservname` stop
+else
+	echo "ERROR: CollectionSpace user activity detected. Use -f to force."
+	exit 1
+fi

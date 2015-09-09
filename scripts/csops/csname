@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Print the name of the CollectionSpace deployment for the current user.
+
+DEPLOYMENT_NAME=${USER#app_}
+
+echo $DEPLOYMENT_NAME

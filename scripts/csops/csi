@@ -1,0 +1,221 @@
+#!/bin/bash
+
+# Install UCB CollectionSpace.
+
+SOURCE_DIR=~/src/cspace-deployment
+REPOSITORIES=(services application ui)
+DEPLOYMENT_NAME=`csname`
+TOMCAT_DIR=~/`csservname`
+OPTIND=1
+FORCE=false
+
+while getopts "f?" flag; do
+	case $flag in
+	f) FORCE=true
+	   ;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+TAG=$1
+
+if [[ $FORCE == true ]]; then
+	CSDOWN="csdown -f"
+else
+	CSDOWN="csdown"
+fi
+
+# Update the source code from git.
+
+for repo in ${REPOSITORIES[@]}; do
+	if [[ -d $SOURCE_DIR/$repo ]]; then
+		echo "Fetching ${repo}..."
+		cd $SOURCE_DIR/$repo
+
+		if ! git fetch --tags; then
+			echo "ERROR: Failed to fetch $repo"
+			exit 1
+		fi
+	else
+		echo "Cloning ${repo}..."
+		cd $SOURCE_DIR
+
+		if ! git clone https://github.com/cspace-deployment/${repo}.git; then
+			echo "ERROR: Failed to clone $repo"
+			exit 1
+		fi
+	fi
+done
+
+# Find the latest tag, if necessary.
+
+if [[ -z $TAG ]]; then
+	echo "Determining tag..."
+	declare -A latest_tags
+
+	for repo in ${REPOSITORIES[@]}; do
+		cd $SOURCE_DIR/$repo
+
+		latest_tag=`git for-each-ref --sort=-taggerdate --format '%(refname:short)' --count=1 refs/tags/${DEPLOYMENT_NAME}_*`
+		latest_tags[$latest_tag]=1
+	done
+	
+	possible_tags=${!latest_tags[@]}
+	num_possible_tags=${#possible_tags[@]};
+
+	if (( num_possible_tags == 0 )); then
+		echo "ERROR: No tags found"
+	elif (( num_possible_tags > 1 )); then
+		echo "ERROR: Multiple possible tags found"
+	else
+		TAG=${possible_tags[0]}
+	fi
+fi
+
+if [[ -z $TAG ]]; then
+	echo "ERROR: Unable to determine a tag to use. Try specifiying a tag as an argument."
+	exit 1
+fi
+
+echo "Installing from tag $TAG"
+
+# Check out the desired tag.
+
+declare -A rebuild_needed
+
+INSTALLED_VERSION=`csver`
+
+echo "Installed version is $INSTALLED_VERSION"
+
+for repo in ${REPOSITORIES[@]}; do
+	echo "Checking out $TAG in $repo"
+	cd $SOURCE_DIR/$repo
+	
+	installed_commit=`git rev-list --max-count=1 $INSTALLED_VERSION`
+
+	if ! git checkout $TAG; then
+		echo "ERROR: Failed to check out $TAG in $repo"
+		exit 1
+	fi
+
+	current_commit=`git rev-parse HEAD`
+
+	if [[ $installed_commit != $current_commit ]]; then
+		rebuild_needed[$repo]=true
+	else
+		rebuild_needed[$repo]=false
+	fi
+done
+
+# Build and deploy.
+
+# First build the services layer, if necessary.
+
+if [[ ${rebuild_needed[services]} == true ]]; then
+	echo "Building services..."
+
+	cd $SOURCE_DIR/services
+	
+	if ! mvn clean install -DskipTests; then
+		echo "ERROR: Failed to build services"
+		exit 1
+	fi
+else
+	echo "No change in services, skipping build"
+fi
+
+# Build/deploy the application layer, if necessary. Tomcat should be stopped.
+
+if [[ ${rebuild_needed[application]} == true ]]; then
+	echo "Building and deploying application..."
+
+	if ! $CSDOWN; then
+		echo "ERROR: Failed to stop CollectionSpace"
+		exit 1	
+	fi
+
+	cd $SOURCE_DIR/application
+
+	if ! mvn clean install -DskipTests; then
+		echo "ERROR: Failed to build application"
+		exit 1
+	fi
+
+	rm /tmp/collectionspace.war
+
+	# Delete the old exploded war.
+
+	rm -r $TOMCAT_DIR/webapps/collectionspace
+
+	# If the services layer isn't going to be fully built and redeployed, just deploy services artifacts.
+
+	if [[ ${rebuild_needed[services]} == false ]]; then
+		echo "Deploying services artifacts..."
+
+		cd $SOURCE_DIR/services/services/JaxRsServiceProvider
+
+		if ! ant deploy_services_artifacts; then
+			echo "ERROR: Failed to deploy services artifacts"
+			exit 1
+		fi
+
+		rm /tmp/*.properties
+		rm /tmp/*.xml
+	fi
+else
+	echo "No change in application, skipping build"
+fi
+
+# Build/deploy the UI layer, if necessary.
+
+if [[ ${rebuild_needed[ui]} == true ]]; then
+	echo "Building and deploying ui..."
+
+	cd $SOURCE_DIR/ui
+
+	if ! mvn clean install -DskipTests; then
+		echo "ERROR: Failed to build ui"
+		exit 1
+	fi 
+
+	rm /tmp/cspace-ui.war
+
+	# If tomcat is not running, delete the old exploded war.
+
+	if [[ -z `csuptime` ]]; then
+		rm -r $TOMCAT_DIR/webapps/cspace-ui
+	fi
+else 
+	echo "No change in ui, skipping build"
+fi
+
+# Deploy the services layer, if necessary. Tomcat should be stopped.
+
+if [[ ${rebuild_needed[services]} == true ]]; then
+	echo "Deploying services..."
+
+	if ! $CSDOWN; then
+		echo "ERROR: Failed to stop CollectionSpace"
+		exit 1
+	fi
+
+	cd $SOURCE_DIR/services
+
+	if ! ant undeploy deploy; then
+		echo "ERROR: Failed to deploy services"
+		exit 1
+	fi
+
+	rm /tmp/*.properties
+	rm /tmp/*.xml
+fi
+
+# Start tomcat
+
+if ! csup; then
+	echo "ERROR: Failed to start CollectionSpace"
+	exit 1
+fi
+
+echo "CollectionSpace successfully installed from $TAG"
