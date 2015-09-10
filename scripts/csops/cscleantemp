@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# Clean old files out of the CollectionSpace temp directory.
+
+if [[ -z $CS_TEMP_MMIN ]]; then
+	CS_TEMP_MMIN=60 # Minimum minutes since last modification required for a file to be deleted
+fi
+
 TEMP_DIR=~/`csservname`/temp
-MMIN=60
+CS_TEMP_MMIN=60
 COUNT=0
 
 cd "$TEMP_DIR"
@@ -19,6 +25,6 @@ do
 	else
 		COUNT=$((COUNT+1))
 	fi
-done < <(find . -maxdepth 1 -type d -name '*-*-*-*-*' -mmin +${MMIN})
+done < <(find . -maxdepth 1 -type d -name '*-*-*-*-*' -mmin +${CS_TEMP_MMIN})
 
 echo "Removed $COUNT directories from `pwd`"

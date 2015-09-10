@@ -1,6 +1,9 @@
 #!/bin/bash
 
-MIN_IDLE_TIME=600 # Seconds of inactivity required
+if [[ -z $CS_MIN_IDLE_TIME ]]; then
+	CS_MIN_IDLE_TIME=600 # Seconds of inactivity required
+fi
+
 FORCE=false
 IDLE_CHECK=false
 OPTIND=1
@@ -25,7 +28,7 @@ else
 	if [[ -z idle_time ]]; then
 		IDLE_CHECK=true	
 	else
-		if (( idle_time > MIN_IDLE_TIME )); then
+		if (( idle_time > CS_MIN_IDLE_TIME )); then
 			IDLE_CHECK=true
 		fi
 	fi

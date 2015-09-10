@@ -1,4 +1,4 @@
-# csops: UC Berkeley CollectionSpace operations scripts
+# csops - operations scripts for UCB-CSpace
 
 This is a suite of scripts for operating CollectionSpace on UC Berkeley's managed RHEL server environment.
 
@@ -20,3 +20,34 @@ cd ~/bin
 ln -s ~/src/cspace-deployment/Tools/scripts/csops/cs* .
 ```
 
+## Usage
+
+### csup - start CollectionSpace
+TK
+
+### csdown - stop CollectionSpace
+TK
+
+### csbounce - restart CollectionSpace
+TK
+
+### csuptime - show how long CollectionSpace has been running
+TK
+
+### csidletime - show how long CollectionSpace has been idle
+TK
+
+### csver - show the installed CollectionSpace version number
+TK
+
+### csname - show the name of the CollectionSpace deployment
+TK
+
+### csservname - show the name of the CollectionSpace service
+TK
+
+### csi - install CollectionSpace
+TK
+
+### cscleantemp - remove old files from the CollectionSpace server's temporary file directory
+TK
