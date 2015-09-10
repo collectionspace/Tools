@@ -6,7 +6,7 @@ if [[ -z $CS_TEMP_MMIN ]]; then
 	CS_TEMP_MMIN=60 # Minimum minutes since last modification required for a file to be deleted
 fi
 
-TEMP_DIR=~/`csservname`/temp
+TEMP_DIR=~/`~/bin/csservname`/temp
 CS_TEMP_MMIN=60
 COUNT=0
 
