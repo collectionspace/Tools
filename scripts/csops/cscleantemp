@@ -12,7 +12,7 @@ COUNT=0
 
 cd "$TEMP_DIR"
 
-echo "Cleaning `pwd`"
+echo "`date`: Cleaning `pwd`"
 
 while read dir
 do
