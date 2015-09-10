@@ -217,7 +217,7 @@ regexp_replace(pg.bampfaobjectproductionperson, '^.*\\)''(.*)''$', '\\1') AS Art
 regexp_replace(pg.bampfaobjectproductionpersonrole, '^.*\\)''(.*)''$', '\\1') AS ArtistRole,
 cc.physicalDescription AS Medium,
 mp.dimensionsummary AS measurement,
-cc.collection AS Collection,
+regexp_replace(bcl.item, '^.*\\)''(.*)''$', '\\1') AS Collection,
 cb.creditline AS CreditLine,
 cb.legalstatus AS LegalStatus,
 'dd MM YYYY' AS AcqDate,
@@ -230,7 +230,8 @@ cb.accNumberPart3,
 cb.accNumberPart4 ,
 cb.accNumberPart5 ,
 pg.bampfaobjectproductionperson AS Artistrefname,
-pg.bampfaobjectproductionpersonrole AS ArtistRolerefname
+pg.bampfaobjectproductionpersonrole AS ArtistRolerefname,
+bcl.item
 
 FROM loctermgroup l
 
@@ -246,6 +247,7 @@ join hierarchy h3 on rc.subjectcsid = h3.name
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 join collectionobjects_bampfa cb on (cb.id=cc.id)
+join collectionobjects_bampfa_bampfacollectionlist bcl on (bcl.id=cb.id)
 
 LEFT OUTER JOIN hierarchy h4 ON (h4.parentid = cc.id AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' and h4.pos=0)
 LEFT OUTER JOIN bampfatitlegroup tg ON (h4.id = tg.id)

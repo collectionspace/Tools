@@ -2031,6 +2031,8 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         fieldList = ('objectName', 'pahmaFieldCollectionPlace', 'briefDescription')
     elif fieldset == 'objtypecm':
         fieldList = ('objectName', 'collection', 'responsibleDepartment', 'pahmaFieldCollectionPlace')
+    elif fieldset == 'collection':
+        fieldList = ('objectName', 'collection')
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -2284,8 +2286,12 @@ def formatRow(result, form, config):
         return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="zcell">%s</td><td class="zcell">%s</td></tr>""" % (
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
-        link2 = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/acquisition.html?csid=%s' % rr[24]
+        if institution == 'bampfa':
+            link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[2]
+            link2 = ''
+        else:
+            link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
+            link2 = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return formatInfoReviewRow(form, link, rr, link2)
@@ -2418,6 +2424,17 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
                   rr[8], rr[8], objtypes, collmans, rr[8], cgi.escape(rr[6], True))
+    elif fieldSet == 'collection':
+                return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input type="hidden" name="onm.%s" value="">
+%s
+</td>
+<input type="hidden" name="clnx.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<td><input class="xspan" type="text" size="40" name="cln.%s" value="%s"></td>
+</tr>""" % (link, cgi.escape(rr[1], True), rr[2], cgi.escape(rr[3], True), rr[2], rr[22], rr[2], rr[2], rr[2], cgi.escape(rr[8], True))
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
@@ -2457,6 +2474,10 @@ def formatInfoReviewForm(form):
 </tr><tr><th>Collection Manager</th><td class="zcell">%s</td>
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
 </tr>""" % (objtypes, collmans)
+    elif fieldSet == 'collection':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr><tr><th>Collection</th><td><input class="xspan" type="text" size="60" name="cn.user"></td>
+</tr>"""
 
 
 def formatError(cspaceObject):
@@ -2827,7 +2848,7 @@ def starthtml(form, config):
     elif updateType == 'keyinfo':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
         location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
-        fieldset, selected = cswaConstants.getFieldset(form)
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
 
         otherfields = '''
 	    <tr><th><span class="cell">start location:</span></th>
@@ -2842,7 +2863,7 @@ def starthtml(form, config):
     elif updateType == 'bulkedit' or updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
-        fieldset, selected = cswaConstants.getFieldset(form)
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
 
         otherfields = '''
         <tr><th><span class="cell">start object no:</span></th>
