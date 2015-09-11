@@ -7,7 +7,6 @@ if [[ -z $CS_TEMP_MMIN ]]; then
 fi
 
 TEMP_DIR=~/`~/bin/csservname`/temp
-CS_TEMP_MMIN=60
 COUNT=0
 
 cd "$TEMP_DIR"
