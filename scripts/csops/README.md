@@ -74,7 +74,7 @@ Shows the amount of time elapsed since the last user activity in CollectionSpace
 csver
 ````
 ##### Description
-Shows the version number of the installed version of CollectionSpace. This corresponds to a tag in git. The version number is printed to standard output. This program assumes that CollectionSpace releases are created using the `make-release` program, and may not work correctly if that program's conventions are not followed.
+Shows the version number of the installed version of CollectionSpace. This corresponds to a tag in git. The version number is printed to standard output. This program assumes that CollectionSpace releases are created using the [`make-release`](../make-release) program, and may not work correctly if that program's conventions are not followed.
 
 ### csname - show the name of the CollectionSpace deployment
 ##### Synopsis
