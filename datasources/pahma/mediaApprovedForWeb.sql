@@ -22,7 +22,8 @@ OR mc.description ILIKE 'Bulk entry catalog card%'
 OR mc.description ILIKE 'Problematic catalog card%'
 OR mc.description ILIKE 'Recataloged objects catalog card%'
 OR mc.description ILIKE 'Revised catalog card%'
-OR mc.description ILIKE 'Index%')
+OR mc.description ILIKE 'Index%'
+OR mc.description LIKE 'HSR datasheet%')
 AND mp.approvedforweb = 'true'
 AND h2.name NOT IN (SELECT h.name AS "objectcsid"
 
