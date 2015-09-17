@@ -22,7 +22,8 @@ WHERE mc.id NOT IN (    SELECT mc.id
                         OR mc.description ILIKE 'Problematic catalog card%'
                         OR mc.description ILIKE 'Recataloged objects catalog card%'
                         OR mc.description ILIKE 'Revised catalog card%'
-                        OR mc.description ILIKE 'Index%')
+                        OR mc.description ILIKE 'Index%'
+                        OR mc.description LIKE 'HSR datasheet%')
 
 AND (h2.name IN (       SELECT h.name AS "objectcsid"
                         FROM collectionobjects_common cc
