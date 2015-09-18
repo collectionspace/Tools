@@ -95,7 +95,7 @@ left outer join hierarchy hlg
 left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 and lg.fieldlocstate = 'CA'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS');
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 
 \copy (select * from tmp_cch_accessions order by AccessionNumber) to '$CCH_DIR/cch_accessions.txt' with null as ''
 
@@ -128,7 +128,7 @@ left outer join hierarchy hlg
 left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 and lg.fieldlocstate = 'CA'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1') != 'no name';
 
 \copy (select * from tmp_cch_determinations order by AccessionNumber, Position) to '$CCH_DIR/cch_determinations.txt' with null as ''
@@ -154,7 +154,7 @@ inner join hierarchy hlg
 inner join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 and lg.fieldlocstate = 'CA'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and tsg.typespecimenkind is not null;
 
 \copy (select * from tmp_cch_typespecimens order by AccessionNumber, TypeKind) to '$CCH_DIR/cch_typespecimens.txt' with null as ''
@@ -180,7 +180,7 @@ inner join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
 and lg.fieldlocstate = 'CA'
 and (ag.annotationtype is not null or ag.annotationnote is not null)
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 union
 select distinct
 	co.objectnumber as AccessionNumber,
@@ -202,7 +202,7 @@ where misc.lifecyclestate <> 'deleted'
 and lg.fieldlocstate = 'CA'
 and o.numbervalue is not null
 and o.numbervalue != ''
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS');
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 
 \copy (select * from tmp_cch_annovouchers order by AccessionNumber, VoucherKind) to '$CCH_DIR/cch_annovouchers.txt' with null as ''
 
@@ -221,7 +221,7 @@ inner join hierarchy hlg
 inner join localitygroup lg on lg.id = hlg.id
 inner join collectionobjects_common_comments cc on cc.id = co.id
 where lg.fieldlocstate = 'CA'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and item <> '' and item is not null
 union
 select
@@ -238,7 +238,7 @@ inner join hierarchy hlg
 inner join localitygroup lg on lg.id = hlg.id
 inner join collectionobjects_common_briefdescriptions cb on cb.id = co.id
 where lg.fieldlocstate = 'CA'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and item <> '' and item is not null
 union
 select
