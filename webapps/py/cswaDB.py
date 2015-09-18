@@ -246,8 +246,8 @@ join hierarchy h3 on rc.subjectcsid = h3.name
 
 join collectionobjects_common cc on (h3.id = cc.id and cc.computedcurrentlocation = lc.refname)
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
-join collectionobjects_bampfa cb on (cb.id=cc.id)
-join collectionobjects_bampfa_bampfacollectionlist bcl on (bcl.id=cb.id)
+left outer join collectionobjects_bampfa cb on (cb.id=cc.id)
+left outer join collectionobjects_bampfa_bampfacollectionlist bcl on (bcl.id=cb.id)
 
 LEFT OUTER JOIN hierarchy h4 ON (h4.parentid = cc.id AND h4.name = 'collectionobjects_bampfa:bampfaTitleGroupList' and h4.pos=0)
 LEFT OUTER JOIN bampfatitlegroup tg ON (h4.id = tg.id)
