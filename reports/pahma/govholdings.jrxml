@@ -71,7 +71,7 @@ ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\1'), pog.ownershipnote, cp
 		<band height="53" splitType="Stretch">
 			<image onErrorType="Blank">
 				<reportElement uuid="0c9f3310-abb5-40de-8163-7cc689c93991" x="482" y="0" width="270" height="51"/>
-				<imageExpression><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="410b3498-4f4c-430b-be5d-36b49ac965a9" style="Title" x="0" y="0" width="263" height="24"/>
