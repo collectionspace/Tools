@@ -221,8 +221,6 @@ if [[ ${rebuild_needed[services]} == true ]]; then
 
 	rm /tmp/*.properties
 	rm /tmp/*.xml
-	
-	rm -r ~/data
 fi
 
 # Start tomcat
