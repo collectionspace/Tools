@@ -121,7 +121,7 @@ ORDER BY sort]]>
 			</staticText>
 			<image>
 				<reportElement uuid="4fa3545f-7e8c-4a64-a7bb-02fe5fced05b" x="480" y="3" width="270" height="51"/>
-				<imageExpression><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

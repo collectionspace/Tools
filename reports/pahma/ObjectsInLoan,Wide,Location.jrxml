@@ -78,7 +78,7 @@ ORDER BY sort]]>
 			</staticText>
 			<image>
 				<reportElement uuid="8a524ecd-083c-4aa6-81e0-42de58a13cb3" x="481" y="2" width="270" height="51"/>
-				<imageExpression><![CDATA["https://dev.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="f4f4984e-b763-432d-b9c8-a36b08a8c9c7" x="273" y="68" width="299" height="24"/>

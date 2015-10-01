@@ -191,5 +191,5 @@ where misc.lifecyclestate <> 'deleted'
 -- and h1.name = '291d85e2-06dc-4fc2-9364' -- UC1300355
 -- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
 -- and h1.name like '3380%'
-and substring(co.objectnumber from '^[A-Z]*') in ('UC', 'UCLA', 'JEPS', 'GOD')
+and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'UCSB', 'UCSC')
 order by co.objectnumber
