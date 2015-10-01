@@ -108,6 +108,15 @@ for repo in ${REPOSITORIES[@]}; do
 	fi
 done
 
+# Some services layer changes require rebuilding the app layer, since
+# the app layer has dependencies on certain modules in the services layer.
+# It's hard to detect this, so just always rebuild the app layer
+# whenever the services layer has changed.
+
+if [[ ${rebuild_needed[services]} == true ]]; then
+	rebuild_needed[application]=true
+fi
+
 # Build and deploy.
 
 # First build the services layer, if necessary.
@@ -148,7 +157,10 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 
 	rm -r $TOMCAT_DIR/webapps/collectionspace
 
-	# If the services layer isn't going to be fully built and redeployed, just deploy services artifacts.
+	# Some app layer changes require redeploying services artifacts. Since it's hard to detect when it's
+	# needed, just always deploy services artifacts whenever the app layer has changed.
+	# If the services layer is going to be fully built and redeployed, redeploying services artifacts
+	# will happen as part of that. Otherwise, just deploy services artifacts.
 
 	if [[ ${rebuild_needed[services]} == false ]]; then
 		echo "Deploying services artifacts..."
@@ -209,6 +221,8 @@ if [[ ${rebuild_needed[services]} == true ]]; then
 
 	rm /tmp/*.properties
 	rm /tmp/*.xml
+	
+	rm -r ~/data
 fi
 
 # Start tomcat
