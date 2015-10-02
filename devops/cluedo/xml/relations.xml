@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="relations">
+  <ns2:relations_common xmlns:ns2="http://collectionspace.org/services/relation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <subjectCsid>4d2b1f6d-cb6d-4cb1-9410</subjectCsid>
+    <relationshipType>hasBroader</relationshipType>
+    <predicate>hasBroader</predicate>
+    <objectCsid>7e48d257-8c8f-4e43-ace2</objectCsid>
+    <subject>
+      <csid>4d2b1f6d-cb6d-4cb1-9410</csid>
+      <documentType>LocationitemTenant15</documentType>
+    </subject>
+    <object>
+      <csid>7e48d257-8c8f-4e43-ace2</csid>
+      <documentType>LocationitemTenant15</documentType>
+    </object>
+  </ns2:relations_common>
+</document>
