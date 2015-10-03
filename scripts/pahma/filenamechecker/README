@@ -2,13 +2,13 @@ This "suite" checks image filenames, as follows:
 
 * The input (first command line argument) is a .csv file, separated by commas (optionally encapsulated)
 * The second column contains a filename
-* The second argument is the name of a config file.
+* The second argument is the name of a config file (see example checkfilenamesProd.cfg).
 * The third argument is the name of an output file.
 * The forth column is the column in the input file that contains the image filename (starts at 0)
 
 e.g.
 
-   $ python checkFilenames.py test.csv batchmediauploadDev output.csv 0
+   $ python checkFilenames.py test.csv checkfilenamesProd output.csv 0
 
 The script uses the BMU's "object name extraction pattern" for PAHMA, namely:
 
@@ -16,7 +16,7 @@ The script uses the BMU's "object name extraction pattern" for PAHMA, namely:
 
 to extract an objectnumber. (The BAMPFA algorithm is considerably more complicated.)
 
-It then takes this value and searches for the objects CSID against the server configure in batchmediauploadDev.cfg.
+It then takes this value and searches for the objects CSID against the server configured in checkfilenamesProd.cfg.
 
 It assumes the system you are running this on can connect to the database, perhaps via a tunnel. Checkout the config file.
 

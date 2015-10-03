@@ -22,7 +22,14 @@ def getCSID(argType, arg, config):
     objects = dbconn.cursor()
     objects.execute(timeoutcommand)
 
-    if argType == 'objectnumber':
+    # this first case if special, can return more than one object
+    if argType == 'approxobjectnumbers':
+        query = """SELECT h.name,objectnumber from collectionobjects_common cc
+JOIN hierarchy h on h.id=cc.id
+WHERE objectnumber ILIKE '%s%%' LIMIT 1000""" % arg
+        objects.execute(query)
+        return objects.fetchall()
+    elif argType == 'objectnumber':
         query = """SELECT h.name from collectionobjects_common cc
 JOIN hierarchy h on h.id=cc.id
 WHERE objectnumber = '%s'""" % arg
