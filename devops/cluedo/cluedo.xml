@@ -1,42 +1,103 @@
 <?xml version='1.0'?>
 <Cluedo>
-<graphic url="http://en.wikipedia.org/wiki/File:Cluedo_1956_Small_Red_Box_Edition.jpg"/><note>Cluedo 1956 UK Edition depicting a Sherlock Holmes type character.</note>
-<Suspects>
-<note>Depending on edition, the playing pieces are typically made of coloured plastic, shaped like chess pawns, or character figurines. Occasionally they are made from wood or pewter. The standard edition of Cluedo comes with six basic tokens representing the following original characters:</note>
-<suspect>Miss Scarlett</suspect><note>(spelt <suspect>Miss Scarlet</suspect> in North American versions after 1963 – a red piece)</note>
-<suspect>Colonel Mustard</suspect><note>(a yellow piece)</note>
-<suspect>Mrs. White</suspect><note>(a white piece)</note>
-<suspect>Reverend Green</suspect><note>(named <suspect>Mr. Green</suspect> in pre-2002 North American versions – a green piece)</note>
-<suspect>Mrs. Peacock</suspect><note>(a blue piece)</note>
-<suspect>Professor Plum</suspect><note>(a purple piece)</note>
-</Suspects>
-<Victims>
-<victim>Dr. Black</victim><note>in the UK version</note>
-<victim>Mr. Boddy</victim><note>in North American versions</note>
-</Victims>
-<Weapons>
-<note>The current standard set of North American &amp; UK miniature weapons tokens </note>
-<note>The traditional UK 2nd edition gold-tone miniature weapons tokens (note the gun is an updated Walther PP)
-The playing tokens are typically made out of unfinished pewter, with the exception of the Rope, which may also come in plastic or string depending on edition. Special editions have included gold plated, brass finished and Sterling silver versions, which have appeared in a variety of designs. </note>
-<weapon>Candlestick</weapon>
-<weapon>Dagger</weapon><note>(A <weapon>Knife</weapon> in North American editions, each represented by a respective depiction)</note>
-<weapon>Lead Pipe</weapon><note>(called Lead Piping in earlier UK editions, the early tokens were made out of actual lead and therefore pose a risk of lead poisoning)</note>
-<weapon>Revolver</weapon><note>(first depicted in the UK as a Dreyse M1907 semi-automatic pistol,[7] and in North America as a Colt M1911 pistol. All current editions typically represent an Allan &amp; Thurber Pepper-box revolver first depicted in the 1972 Clue edition)</note>
-<weapon>Rope</weapon><note>(originally represented by a natural fibre coiled piece of string, the standard edition now consists of molded plastic or metal)</note>
-<weapon>Spanner</weapon><note>(called <weapon>Wrench</weapon> in North American editions and depicted as a Monkey wrench, it may also be shown as an Open-ended spanner in some traditional UK versions)</note>
-</Weapons>
-<Rooms>
-There are nine rooms in the mansion where the murder can take place, laid out in a circular fashion on the game board, separated by pathways overlaid by playing spaces. Each of the four corner rooms contains a secret passage that leads to the room on the opposite diagonal corner of the map. The center room (often referred to as the Cellar, or <room>Stairs</room>) is inaccessible to the players, but contains the solution envelope, and is not otherwise used during game play. Coloured "start" spaces encircle the outer perimeter which correspond to each player's suspect token. Each character starts at the corresponding colored space.
-<room>Ballroom</room>
-<room>Kitchen</room>
-<room>Conservatory</room>
-<room>Dining Room</room>
-<room>Cellar</room><note>with envelope</note>
-<room>Billiard Room</room>	
-<room>Library</room>
-<room>Hall</room>		
-<room>Lounge</room>
-<room>Study</room>
-<note>there are secret passages to opposite corner</note>
-</Rooms>
+    <graphic url="http://en.wikipedia.org/wiki/File:Cluedo_1956_Small_Red_Box_Edition.jpg"/>
+    <note>Cluedo 1956 UK Edition depicting a Sherlock Holmes type character.</note>
+    <note>Depending on edition, the playing pieces are typically made of coloured plastic, shaped
+        like chess pawns, or character figurines. Occasionally they are made from wood or pewter.
+        The standard edition of Cluedo comes with six basic tokens representing the following
+        original characters:</note>
+    <Suspects>
+        <suspect>
+            <person>Miss Scarlett</person>
+            <note>(spelt <alias>Miss Scarlet</alias> in North American versions after 1963 – a red
+                piece)</note>
+        </suspect>
+        <suspect>
+            <person>Colonel Mustard</person>
+            <note>(a yellow piece)</note>
+        </suspect>
+        <suspect>
+            <person>Mrs. White</person>
+            <note>(a white piece)</note>
+        </suspect>
+        <suspect>
+            <person>Reverend Green</person>
+            <note>(named <alias>Mr. Green</alias> in pre-2002 North American versions – a green
+                piece)</note>
+        </suspect>
+        <suspect>
+            <person>Mrs. Peacock</person>
+            <note>(a blue piece)</note>
+        </suspect>
+        <suspect>
+            <person>Professor Plum</person>
+            <note>(a purple piece)</note>
+        </suspect>
+    </Suspects>
+    <Victims>
+        <victim>
+            <note>in North American versions</note>
+            <person>Dr. Black</person>, <note>in the UK version</note>
+            <alias>Mr. Boddy</alias>
+        </victim>
+    </Victims>
+    <Weapons>
+        <note>The current standard set of North American &amp; UK miniature weapons tokens </note>
+        <note>The traditional UK 2nd edition gold-tone miniature weapons tokens (note the gun is an
+            updated Walther PP) The playing tokens are typically made out of unfinished pewter, with
+            the exception of the Rope, which may also come in plastic or string depending on
+            edition. Special editions have included gold plated, brass finished and Sterling silver
+            versions, which have appeared in a variety of designs. </note>
+        <weapon>
+            <object>Candlestick</object>
+        </weapon>
+        <weapon>
+            <object>Dagger</object>
+            <note>(A <weapon><object>Knife</object></weapon> in North American editions, each
+                represented by a respective depiction)</note>
+        </weapon>
+        <weapon>
+            <object>Lead Pipe</object>
+            <note>(called Lead Piping in earlier UK editions, the early tokens were made out of
+                actual lead and therefore pose a risk of lead poisoning)</note>
+        </weapon>
+        <weapon>
+            <object>Revolver</object>
+        </weapon>
+        <note>(first depicted in the UK as a Dreyse M1907 semi-automatic pistol,[7] and in North
+            America as a Colt M1911 pistol. All current editions typically represent an Allan &amp;
+            Thurber Pepper-box revolver first depicted in the 1972 Clue edition)</note>
+        <weapon>
+            <object>Rope</object>
+            <note>(originally represented by a natural fibre coiled piece of string, the standard
+                edition now consists of molded plastic or metal)</note>
+        </weapon>
+        <weapon>
+            <object>Spanner</object>
+            <note>(called <weapon><object>Wrench</object></weapon> in North American editions and
+                depicted as a Monkey wrench, it may also be shown as an Open-ended spanner in some
+                traditional UK versions)</note>
+        </weapon>
+    </Weapons>
+    <Rooms>
+        <note>There are nine rooms in the mansion where the murder can take place, laid out in a
+            circular fashion on the game board, separated by pathways overlaid by playing spaces.
+            Each of the four corner rooms contains a secret passage that leads to the room on the
+            opposite diagonal corner of the map. The center room (often referred to as the
+                <room>Cellar</room>, or <room>Stairs</room>) is inaccessible to the players, but
+            contains the <mcguffin>solution envelope</mcguffin>, and is not otherwise used during
+            game play. Coloured "start" spaces encircle the outer perimeter which correspond to each
+            player's person token. Each character starts at the corresponding colored space.</note>
+        <room>Ballroom</room>
+        <room>Kitchen</room>
+        <room>Conservatory</room>
+        <room>Dining Room</room>
+        <room>Cellar</room>
+        <room>Billiard Room</room>
+        <room>Library</room>
+        <room>Hall</room>
+        <room>Lounge</room>
+        <room>Study</room>
+        <note>there are secret passages to opposite corners.</note>
+    </Rooms>
 </Cluedo>

@@ -84,7 +84,9 @@ concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun
 concat_ws('|', fruitsjan,fruitsfeb,fruitsmar,fruitsapr,fruitsmay,fruitsjun,fruitsjul,fruitsaug,fruitssep,fruitsoct,fruitsnov,fruitsdec) fruiting_ss,
 concat_ws('|', flowersjan,flowersfeb,flowersmar,flowersapr,flowersmay,flowersjun,flowersjul,flowersaug,flowerssep,flowersoct,flowersnov,flowersdec) flowering_ss,
 con.provenancetype as provenancetype_s,
-tn.accessrestrictions as accessrestrictions_s
+tn.accessrestrictions as accessrestrictions_s,
+coc.item as accessionnotes_s,
+findcommonname(tig.taxon) as commonname_s
 
 from collectionobjects_common co
 inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
@@ -113,6 +115,7 @@ join hierarchy h1 on co.id=h1.id
 
 join collectionobjects_naturalhistory con on (co.id = con.id)
 join collectionobjects_botgarden cob on (co.id=cob.id)
+join collectionobjects_common_comments coc  on (co.id = coc.id and coc.pos = 0)
 
 -- left outer join hierarchy htig2 -- incorrect for Bot Garden
 --      on (co.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
