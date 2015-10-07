@@ -111,9 +111,9 @@ left outer join hierarchy hlg
         and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 
-join hierarchy h1 on co.id=h1.id
+left outer join hierarchy h1 on co.id=h1.id
 join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
-join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
+left outer join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
 join movements_common mc on (mc.id=h2.id)
 join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- movement not deleted
 
@@ -125,7 +125,7 @@ join misc misc1 on (misc1.id = mc.id and misc1.lifecyclestate <> 'deleted') -- m
 
 join collectionobjects_naturalhistory con on (co.id = con.id)
 join collectionobjects_botgarden cob on (co.id=cob.id and cob.deadflag='false')
-join collectionobjects_common_comments coc  on (co.id = coc.id and coc.pos = 0)
+left outer join collectionobjects_common_comments coc  on (co.id = coc.id and coc.pos = 0)
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
 left outer join taxon_naturalhistory tn on (tc.id=tn.id)
