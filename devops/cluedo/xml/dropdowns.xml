@@ -1,0 +1,229 @@
+<instances>
+	<instance id="vocab-collection">
+		<web-url>collection</web-url>
+		<title-ref>collection</title-ref>
+		<title>Collection</title>
+		<options>
+			<option id="C0001">Asian Collection</option>
+			<option id="C0002">Cha Collection</option>
+			<option id="C0003">Cahill Collection</option>
+			<option id="C0004">Japanese Print Collection</option>
+			<option id="C0005">Marshall Collection</option>
+			<option id="C0006">Callaghan photography collection</option>
+			<option id="C0007" desc="Collection of 113 Japanese, Chinese, Tibetan, and Thai seals, 2nd to 20th centuries">Edward Gans Collection</option>
+			<option id="C0009" desc="Gifts from the Andy Warhol Foundation for the Visual Arts">Andy Warhol Photographic Legacy Project</option>
+			<option id="C0010" desc="49 Chinese ceramic pieces, Han dynasty through Ming dynasty (2nd - 15th century CE)">Fong Ceramics</option>
+			<option id="C0011" desc="12 audio tapes and 62 books for Conceptual Art Study Center">James Melchert Collection</option>
+			<option id="C0012" desc="Buddhist materials">Louise Gund Collection</option>
+			<option id="C0013">Bernard-Murray</option>
+			<option id="C0014" desc="extended loan of prints and drawings">Emily and Lisa Honig Collection</option>
+			<option id="C0015" desc="extended loan of Chinese ceramics">Warren King Collection</option>
+			<option id="C0016" desc="63 etchings and lithographs">Simpson Whistler gift</option>
+			<option id="C0017" desc="37 posters by David Lance Goines">Weininger Bequest</option>
+			<option id="C0019" desc="photographs by Pirkle Jones and Ruth-Marion Baruch, gift of the Pirkle Jones Foundation">Pirkle Jones Foundation</option>
+			<option id="C0020">Ant Farm Archive</option>
+			<option id="C0021" desc="Museum of Conceptual Art, Tom Marioni, San Francisco">MOCA Archive</option>
+			<option id="C0022">James Lee Byars Archive</option>
+			<option id="C0023">Alice Hutchins Friends of Fluxus</option>
+			<option id="C0024">Stuart Pitesky Memorial Library</option>
+			<option id="C0025">Konzeption Conception</option>
+			<option id="C0026" desc="19th and 20th century photographs; donors Jan Leonard and Jerrold Peil">Peil Collection</option>
+			<option id="C0027">William Dallam Armes Collection</option>
+			<!-- <option id="C0028"></option> -->
+		</options>
+	</instance>
+	
+	<instance id="vocab-periodorstyle">
+		<web-url>periodorstyle</web-url>
+		<title-ref>periodorstyle</title-ref>
+		<title>Period or Style</title>
+		<options>	
+			<option id="periodorstyle001">Abstract Expressionism</option>
+			<option id="periodorstyle002">Abstraction</option>
+			<option id="periodorstyle003">Ancient </option>
+			<option id="periodorstyle004">Art and Technology</option>
+			<option id="periodorstyle005">Art Nouveau</option>
+			<option id="periodorstyle006">Ashcan</option>
+			<option id="periodorstyle007">Barbizon</option>
+			<option id="periodorstyle008">Baroque</option>
+			<option id="periodorstyle009">Bay Area</option>
+			<option id="periodorstyle010">Beat</option>
+			<option id="periodorstyle011">California</option>
+			<option id="periodorstyle012">Classical</option>
+			<option id="periodorstyle013">CoBrA</option>
+			<option id="periodorstyle014">Color Field</option>
+			<option id="periodorstyle015">Conceptual</option>
+			<option id="periodorstyle016">Conceptual Art</option>
+			<option id="periodorstyle017">Concrete Poetry/Visual Poetry</option>
+			<option id="periodorstyle018">Contructivism</option>
+			<option id="periodorstyle019">Cubism</option>
+			<option id="periodorstyle020">Dadaism</option>
+			<option id="periodorstyle021">Decorative</option>
+			<option id="periodorstyle022">Early American</option>
+			<option id="periodorstyle023">Earth Art</option>
+			<option id="periodorstyle024">Earth Art/Environmental Artl/Land Art</option>
+			<option id="periodorstyle025">Environment</option>
+			<option id="periodorstyle026">Expressionism</option>
+			<option id="periodorstyle027">Fauvism</option>
+			<option id="periodorstyle028">Fluxus</option>
+			<option id="periodorstyle029">Funk</option>
+			<option id="periodorstyle030">Futurism</option>
+			<option id="periodorstyle031">Genetics-related</option>
+			<option id="periodorstyle032">Happenings</option>
+			<option id="periodorstyle033">Impressionism</option>
+			<option id="periodorstyle034">Medieval </option>
+			<option id="periodorstyle035">Minimalism</option>
+			<option id="periodorstyle036">Modernism</option>
+			<option id="periodorstyle037">Museum of Conceptual Art</option>
+			<option id="periodorstyle038">Naïve Art</option>
+			<option id="periodorstyle039">Neoclassicism</option>
+			<option id="periodorstyle040">Nineteenth-century American Landscape</option>
+			<option id="periodorstyle041">Photojournalism</option>
+			<option id="periodorstyle042">Photorealism</option>
+			<option id="periodorstyle043">Pop Art</option>
+			<option id="periodorstyle044">Post-Impressionism</option>
+			<option id="periodorstyle045">Pre-Raphaelite</option>
+			<option id="periodorstyle046">Prehistoric</option>
+			<option id="periodorstyle047">Process</option>
+			<option id="periodorstyle048">Realism</option>
+			<option id="periodorstyle049">Renaissance</option>
+			<option id="periodorstyle050">Romanticism</option>
+			<option id="periodorstyle051">Self-taught/Outsider</option>
+			<option id="periodorstyle052">Social Realism</option>
+			<option id="periodorstyle053">Sound/Acoustic Art</option>
+			<option id="periodorstyle054">Surrealism</option>
+			<option id="periodorstyle055">UC Berkeley</option>
+			<option id="periodorstyle056">Utilitarian</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-itemclass">
+		<web-url>itemclass</web-url>
+		<title-ref>itemclass</title-ref>
+		<title>Item Class</title>
+		<options>	
+			<option id="itemclass001">Artifact</option>
+			<option id="itemclass002">Artist's book</option>
+			<option id="itemclass003">Audio</option>
+			<option id="itemclass004">Ceramic</option>
+			<option id="itemclass005">Decorative Arts</option>
+			<option id="itemclass006">Documentation</option>
+			<option id="itemclass007">Drawing</option>
+			<option id="itemclass008">Ephemera</option>
+			<option id="itemclass009">Film</option>
+			<option id="itemclass010">Furniture</option>
+			<option id="itemclass011">Installation</option>
+			<option id="itemclass012">Mixed media</option>
+			<option id="itemclass013">Multi-Media</option>
+			<option id="itemclass014">Multiple</option>
+			<option id="itemclass015">Painting</option>
+			<option id="itemclass016">Photograph</option>
+			<option id="itemclass017">Print</option>
+			<option id="itemclass018">Sculpture</option>
+			<option id="itemclass019">Textile</option>
+			<option id="itemclass020">Video</option>
+			<option id="itemclass021">Work on paper</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-productionpersonrole">
+		<web-url>productionpersonrole</web-url>
+		<title-ref>productionpersonrole</title-ref>
+		<title>Production Person Role</title>
+		<options>
+			<option id="productionpersonrole001">Artist</option>
+			<option id="productionpersonrole002">Engraver</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-productionpersonqualifier">
+		<web-url>productionpersonqualifier</web-url>
+		<title-ref>productionpersonqualifier</title-ref>
+		<title>Production Person Qualifier</title>
+		<options>
+			<option id="productionpersonqualifier001">After</option>
+			<option id="productionpersonqualifier002">Assistant to</option>
+			<option id="productionpersonqualifier003">Associate of</option>
+			<option id="productionpersonqualifier004">Atelier of</option>
+			<option id="productionpersonqualifier005">Attributed to</option>
+			<option id="productionpersonqualifier006">Circle of</option>
+			<option id="productionpersonqualifier007">Copyist of</option>
+			<option id="productionpersonqualifier008">Follower of</option>
+			<option id="productionpersonqualifier009">Manner of</option>
+			<option id="productionpersonqualifier010">Manufactory of</option>
+			<option id="productionpersonqualifier011">Office of</option>
+			<option id="productionpersonqualifier012">Pupil of</option>
+			<option id="productionpersonqualifier013">School of</option>
+			<option id="productionpersonqualifier014">Student of</option>
+			<option id="productionpersonqualifier015">Studio of</option>
+			<option id="productionpersonqualifier016">Style of</option>
+			<option id="productionpersonqualifier017">Workshop of</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-acquisitionmethod">
+		<web-url>acquisitionmethod</web-url>
+		<title-ref>acquisitionmethod</title-ref>
+		<title>Acquisition Method</title>
+		<options>
+			<option id="acquisitionmethod001">bequest</option>
+			<option id="acquisitionmethod002">commission</option>
+			<option id="acquisitionmethod003">found in collection</option>
+			<option id="acquisitionmethod004">gift</option>
+			<option id="acquisitionmethod005">loan</option>
+			<option id="acquisitionmethod006">purchase</option>
+			<option id="acquisitionmethod007">purchase with Donation</option>
+			<option id="acquisitionmethod008">purchase with Grant</option>
+			<option id="acquisitionmethod009">trade</option>
+			<option id="acquisitionmethod010">transfer</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-acquisitionreason">
+		<web-url>acquisitionreason</web-url>
+		<title-ref>acquisitionreason</title-ref>
+		<title>Acquisition Reason</title>
+		<options>
+			<option id="acquisitionreason001">BAM/PFA Gala auction</option>
+			<option id="acquisitionreason002">bequest</option>
+			<option id="acquisitionreason003">Collector's Circle purchase</option>
+			<option id="acquisitionreason004">director's discretionary purchase</option>
+			<option id="acquisitionreason005">discretionary purchase</option>
+			<option id="acquisitionreason006">exchange with 1959.7</option>
+			<option id="acquisitionreason007">exhibition</option>
+			<option id="acquisitionreason008">extended loan</option>
+			<option id="acquisitionreason009">gift consideration</option>
+			<option id="acquisitionreason010">gift offer</option>
+			<option id="acquisitionreason011">gift offer and exhibition</option>
+			<option id="acquisitionreason012">gift offer, exhibition</option>
+			<option id="acquisitionreason013">loan</option>
+			<option id="acquisitionreason014">MATRIX 249</option>
+			<option id="acquisitionreason015">MATRIX 250 exhibition</option>
+			<option id="acquisitionreason016">presentation copy for Acquisitions Committee</option>
+			<option id="acquisitionreason017">promised gift</option>
+			<option id="acquisitionreason018">purchase</option>
+			<option id="acquisitionreason019">purchase (discretionary)</option>
+			<option id="acquisitionreason020">Purchase acquisition</option>
+			<option id="acquisitionreason021">purchase consideration</option>
+			<option id="acquisitionreason022">return to extended loan</option>
+			<option id="acquisitionreason023">Yang Fudong exhibition</option>
+			<option id="acquisitionreason024">year end gift</option>
+			<option id="acquisitionreason025">year end gift offer</option>
+			<option id="acquisitionreason026">year-end gift</option>
+			<option id="acquisitionreason027">Year-end gift offer</option>
+		</options>
+	</instance>
+	
+	<instance id="vocab-legalstatus">
+		<web-url>legalstatus</web-url>
+		<title-ref>legalstatus</title-ref>
+		<title>Legal Status</title>
+		<options>
+			<option id="legalstatus001">deaccessioned</option>
+			<option id="legalstatus002">extended loan</option>
+			<option id="legalstatus003">permanent collection</option>
+			<option id="legalstatus004">study collection</option>
+			<option id="legalstatus005">UCBerkeley dispersed</option>
+		</options>
+	</instance>
+</instances>

@@ -249,6 +249,8 @@
     <copyField source="floweringverbatim_ss" dest="floweringverbatim_txt"/>
     <copyField source="fruiting_ss" dest="fruiting_txt"/>
     <copyField source="flowering_ss" dest="flowering_txt"/>
+    <copyField source="accessionnotes_s" dest="accessionnotes_txt"/>
+    <copyField source="commonname_s" dest="commonname_txt"/>
 
 
    <copyField source="*_s" dest="text"/>

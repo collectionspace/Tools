@@ -6,15 +6,16 @@ SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export NUMCOLS=44
+export NUMCOLS=46
 ##############################################################################
 # extract metadata (dead and alive) info from CSpace
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f botgardenMetadataV1alive.sql -o d1a.csv
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f botgardenMetadataV1dead.sql -o d1b.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv > d2.csv
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv >> d2.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1b.csv > d2b.csv
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1a.csv > d2a.csv
+cat d2b.csv d2a.csv > d2.csv
 time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &

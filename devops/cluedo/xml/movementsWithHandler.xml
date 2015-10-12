@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="movements">
+  <ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <normalLocation>#normalLocation#</normalLocation>
+    <movementReferenceNumber>#movementReferenceNumber#</movementReferenceNumber>
+    <removalDate>#removalDate#</removalDate>
+    <locationDate>#locationDate#</locationDate>
+    <plannedRemovalDate>#plannedRemovalDate#</plannedRemovalDate>
+    <movementNote>#movementNote#</movementNote>
+    <reasonForMove>#reasonForMove#</reasonForMove>
+    <currentLocationNote>#currentLocationNote#</currentLocationNote>
+    <currentLocation>#currentLocation#</currentLocation>
+  </ns2:movements_common>
+  <ns2:movements_anthropology xmlns:ns2="http://collectionspace.org/services/movement/domain/anthropology" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <locationHandlers>
+      <locationHandler>#locationHandler#</locationHandler>
+    </locationHandlers>
+  </ns2:movements_anthropology>
+</document>
