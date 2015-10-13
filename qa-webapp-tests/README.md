@@ -13,42 +13,31 @@ To get started, install the latest versions of Ruby:
 2) Install Cucumber and Capybara
 ```ruby
 gem install cucumber
-```
-
-```ruby
 gem install capybara
 ```
 (Source: Tools and Setting Up sections from http://www.gamesparks.com/blog/automated-testing-with-cucumber-and-capybara/)
 
-3) Install the following gems and other software:
-
+3) Additional Installations:
+* [Selenium WebDriver](https://rubygems.org/gems/selenium-webdriver/versions/2.46.2), for automating browsers
+* [rspec](https://github.com/rspec/rspec), the behavior-driven development framework for Ruby
 * [capybara-screenshot](https://github.com/mattheworiordan/capybara-screenshot), which is used with Capybara and Cucumber to capture screen shots for every test failure. 
 
 ```ruby
-gem install capybara-screenshot
-```
-
-(Source: https://github.com/mattheworiordan/capybara-screenshot)
-
-* [rspec](https://github.com/rspec/rspec), the behavior-driven development framework for Ruby
-```ruby
 gem install rspec
-```
-* [Selenium WebDriver](https://rubygems.org/gems/selenium-webdriver/versions/2.46.2), for automating browsers
-```ruby
 gem install selenium-webdriver
+gem install capybara-screenshot
+
 ```
 
-* [Firefox](https://www.mozilla.org/en-US/firefox/new/), is the web browser used to run the tests.
+* Install [Firefox](https://www.mozilla.org/en-US/firefox/new/), the web browser used to run the tests.
 
 4) Fork and clone the Tools repository to your local directory
 
 5) Initialize the environment variables
-* In Tools/qa-webapp-tests/config create an environments.yml file in format of sample_environments.yml.
+* In Tools/qa-webapp-tests/config create an environments.yml file using the format of sample_environments.yml.
 * In Tools/qa-webapp-tests/config/environments.yml:
     - Set 'login' and 'password' to your user credentials but omitting the @xxx.xxx for 'login' (e.g. if the login is sample@cspace.berkeley.edu, set 'login': sample)
     - Set the 'server' variable to "" for prod or "-dev" for dev
-    - The sample_environments.yml file is just an example page of how the environments.yml would work. You will need to create the environments.yml in the same format but with credentials filled out
 
 6) Run the tests
 From the qa-webapp-tests directory, run 
