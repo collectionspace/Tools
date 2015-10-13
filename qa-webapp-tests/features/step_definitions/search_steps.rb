@@ -1,20 +1,29 @@
-Given(/^I am on the "(.*?)" homepage$/) do |institution|
-    $ginstitution = institution
-    visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + institution
-end
-
 Then(/^I check for "(.*?)"$/) do |arg1|
     expect(page).to have_css("img[src*='" + arg1 + "']")
 end
 
-Then(/^I will click the "(.*?)" feature$/) do |feature|
-    find_link(feature).visible?
-    click_link(feature)
-end
-
-When(/^I enter "(.*?)" in the Keyword "(.*?)" and click "(.*?)"$/) do |query, field, button|
+When(/^I enter "(.*?)" in "(.*?)" and click "(.*?)"$/) do |query, field, button|
     fill_in field, :with => query
     click_button button
+end
+
+def fill_in_autocomplete(selector, value)
+    page.execute_script("$('input##{selector}').focus().val('#{value}').keydown()")
+end
+
+def choose_autocomplete(text)
+    expect(find('ul.ui-autocomplete')).to have_content(text)
+    page.execute_script("$('.ui-menu-item:contains(\"#{text}\")').find('a').trigger('mouseenter').click()")
+end
+
+When(/^I enter "(.*?)" in the "(.*?)" field$/) do |query, field|
+    fill_in_autocomplete(field, query)
+end
+
+Then(/^I click on "(.*?)" in the dropdown menu and search$/) do |text|
+    choose_autocomplete(text)
+    click_button "Search"
+    sleep(5)
 end
 
 Then(/^I verify the search fields "(.*?)" in "(.*?)"$/) do |field, range|
@@ -30,26 +39,12 @@ Transform /^(-?\d+)$/ do |number| # transforms string to int, source: https://gi
     number.to_i
 end
 
-Then(/^I see a table with (\d+) headers "(.*?)" and (\d+) rows "(.*?)"$/) do |numheaders, headers, numrows, rows| 
+Then(/^I verify the table headers "(.*?)"$/) do |items| 
     within('div#resultsPanel') do
-        has_css?('resultsListing')
         @table = all('#resultsListing tr')
-        for h in headers.split(', ') do
-            @table[0].has_content?(h)
+        for item in items.split(', ') do
+            expect(@table[0]).to have_content(item)
         end 
-        j = 0
-        row_lst = rows.split(', ')
-        while j < numrows
-            @table[j + 1].has_content?(row_lst[j])
-            j += 1
-        end
-    end
-end
-
-# Problem: doesn't seem to actually identify and click the up and down arrows
-Then(/^I will click the up and down arrows beside the headers$/)  do
-    page.all("tablesorter-headerRow").each do |arrow|
-        arrow.click
     end
 end
 
@@ -66,15 +61,6 @@ Then (/^I click the button "(.*?)" and download the csv file$/) do |button|
     click_button(button)
 end 
 
-Then(/^I see the headers "([^"]*)"$/) do |headers| 
-    within("div#facets") do
-        headers = headers.split(', ')
-        for h in headers
-            find('th', text: h).has_content?(h)
-        end 
-    end
-end
-
 Then(/^I will click the up and down arrows beside the headers without knowing table name$/) do
     page.all("tablesorter-headerRow").each do |arrow|
         arrow.click
@@ -87,7 +73,7 @@ Then(/^I will click on a value "([^"]*)" and see it appear in the field "([^"]*)
     expect(find_field(field).value).to eq val
 end
 
-Then(/^I see two buttons$/) do
+Then(/^I verify the maps buttons$/) do 
     expect(page).to have_selector(:link_or_button, 'map-bmapper' || 'map selected with Berkeley Mapper')
     expect(page).to have_selector(:link_or_button, 'map-google' || 'map selected with Google staticmaps API')
 end
@@ -95,7 +81,7 @@ end
 # Inconsistent, works sometimes, doesn't work other times.    
 Then(/^I find the content "(.*?)" in "(.*?)"$/) do |content, section|
     within(first(section)) do
-        page.has_content?(content)
+        !(page.has_no_content?(content))
     end
 end
 
@@ -105,8 +91,7 @@ Then(/^the url contains "([^"]*)"$/) do |url|
     within_window(new_window) do
         actual = URI.parse(current_url).path
         actual.include?("berkeleymapper.berkeley.edu/")
-        page.has_content?("pointDisplayValue")  
-        expect(page).to have_content("Click on MarkerClusters or draw a polygon to query points") 
+        page.all("pointDisplayValue").any?
         screenshot_and_open_image
     end
     if Capybara.current_driver == :poltergeist
@@ -123,14 +108,8 @@ Then(/^I will select "([^"]*)" under Select field to summarize on$/) do |field|
     expect(page).to have_table('statsListing')
 end
 
-Then(/^I will see a table with the headers "([^"]*)"$/) do |headers|
-    headers = headers.split(', ')
-    for h in headers
-        find('th', text: h).has_content?(h)
-    end
-end
-
 Then(/^I will click "(.*?)" and the "([^"]*)" field should have "([^"]*)"$/) do |button, field, result|
+    expect(page).to have_selector(:link_or_button, button)
     click_button(button)
     page.has_field?(field, :with => result)
 end

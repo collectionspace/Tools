@@ -5,7 +5,7 @@ end
 
 When(/^I click the (\d+) "([^"]*)"$/) do |index, arg2|
     all("input[type='submit']")[index.to_i-1].click
-    page.has_content?("enqueued; 1 images.")
+    page.all("enqueued; 1 images.").any?
 end
 
 # Add these lines below back to xxx_bmu.feature only if running on DEV

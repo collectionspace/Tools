@@ -7,7 +7,7 @@ require File.expand_path('../custom_config', __FILE__)
 include CustomConfig
 
 Capybara.default_driver = :selenium
-Capybara.default_wait_time = 15
+Capybara.default_wait_time = 5
 
 # To override default settings in the capybara-screenshot gem: 
 Capybara.save_and_open_page_path = "tmp/capybara"
@@ -18,11 +18,11 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # Uncomment below to use the Selenium webdriver with 'headless'
 # Note that this only works for Linux machines due to X graphics.
 #########################################################################################
-# if Capybara.current_driver == :selenium
-#   require 'headless'
-#   headless = Headless.new
-#   headless.start
-# end
+if Capybara.current_driver == :selenium
+  require 'headless'
+  headless = Headless.new
+  headless.start
+end
 
 #########################################################################################
 # Uncomment below to use the Poltergeist webdriver. 
@@ -30,7 +30,7 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 #########################################################################################
 # require 'capybara/poltergeist'
 # Capybara.register_driver :poltergeist do |app|
-#   Capybara::Poltergeist::Driver.new(app, :timeout => 45)
+#   Capybara::Poltergeist::Driver.new(app, :timeout => 45, :js_errors =>false)
 # end
 # Capybara.default_driver = :poltergeist
 
