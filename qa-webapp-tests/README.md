@@ -1,6 +1,6 @@
 # CSpaceAutomatedTesting
 
-This repository is for automated files written in Gherkin and Ruby with the Cucumber tool, Capybara library, Selenium driver, and other gems (e.g. rspec, capybara-screenshot).
+This repository is for automated files written in Gherkin and Ruby with the Capybara library, Selenium driver, and other gems (e.g. rspec, capybara-screenshot).
 
 ## I. Setting Up
 To get started, install the latest versions of Ruby:
@@ -18,15 +18,14 @@ gem install capybara
 (Source: Tools and Setting Up sections from http://www.gamesparks.com/blog/automated-testing-with-cucumber-and-capybara/)
 
 3) Additional Installations:
-* [Selenium WebDriver](https://rubygems.org/gems/selenium-webdriver/versions/2.46.2), for automating browsers
 * [rspec](https://github.com/rspec/rspec), the behavior-driven development framework for Ruby
+* [Selenium WebDriver](https://rubygems.org/gems/selenium-webdriver/versions/2.46.2), for automating browsers
 * [capybara-screenshot](https://github.com/mattheworiordan/capybara-screenshot), which is used with Capybara and Cucumber to capture screen shots for every test failure. 
 
 ```ruby
 gem install rspec
 gem install selenium-webdriver
 gem install capybara-screenshot
-
 ```
 
 * Install [Firefox](https://www.mozilla.org/en-US/firefox/new/), the web browser used to run the tests.
@@ -84,9 +83,9 @@ Step definitions describe the user actions for each step. Multiple step definiti
 
 ## III. About the Tools
 
-[Capybara](http://jnicklas.github.io/capybara/) is Ruby gem that drives a browser over the code to run these tests.
+[Capybara](http://jnicklas.github.io/capybara/) is a library written in Ruby that simulates how a user would interact with an app. 
 
-[Cucumber](http://cukes.info) is a tool that supports Behavior Driven Development and software testing. It uses the language, Gherkin, to understand user-readable files (features) and parse them into scenarios. These scenarios contain steps that are then matched to the step definitions written in Ruby. 
+[Cucumber](http://cukes.info) is a tool that interprets plain-text descriptions as automated tests and allows testers to write tests in human-readable format. Cucumber scripts are parsed by Gherkin into scenarios. These scenarios contain steps that are matched to the step definitions written in Ruby. 
 
 (Source: https://girliemangalo.wordpress.com/2012/10/29/introduction-to-cucumber/)
 
