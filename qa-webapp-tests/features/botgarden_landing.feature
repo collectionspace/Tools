@@ -10,6 +10,6 @@ Scenario: Checks that the landing page has the correct apps displayed when User 
     Then I will sign in 
     Then I find the content "All available Webapps" in "div#user-tools"
     Then I find the content "Sign Out" in "div#user-tools"
-    Then I see "imaginator, ireports, search"
+    Then I see "internal, ireports, search" in "div#content-main"
     When I click "logout"  
     Then I find the content "No Apps" in "div#content"

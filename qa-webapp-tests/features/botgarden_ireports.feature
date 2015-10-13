@@ -4,9 +4,9 @@ Scenario: Navigate the ireports feature, select a report, enter a query, and che
     Given I am on the "botgarden" homepage 
     When I click "login"
     Then I will sign in 
-    Then I will click the "ireports" feature
+    Then I click "ireports"
     Then I select a report called "Rare Status (Family)"
-    When I enter "%RUBIACEAE%" in the Keyword "family" and click "report"
+    When I enter "%RUBIACEAE%" in "family" and click "report"
     Then I will see the correct report in pdf format
     Then I will click "reset" and the "family" field should have "%ARAUCARIACEAE%"
     When I click "back"

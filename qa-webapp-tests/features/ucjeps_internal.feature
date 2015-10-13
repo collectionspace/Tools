@@ -4,16 +4,16 @@ Scenario: Find and use the keyword search feature
     Given I am on the "ucjeps" homepage 
     When I click "login"
     Then I will sign in 
-    Then I click "search" 
+    Then I click "search"
     Then I verify the search fields "Scientific Name, Collector(s), Localities, County, Cultivated, Major Group, Date Collected, Associated Taxa, Type Assertions?, Collection Number, Specimen ID, Country" in "div#searchfieldsTarget"
-
-    When I enter "Arroyo" in the "alllocalities" field
-    Then I click on "Arroyo Calmalli" in the dropdown menu and search
+    
+    When I enter "cubensis" in the "keyword" field
+    Then I click on "cubensis" in the dropdown menu and search
     Then I verify the table headers "Specimen ID, Scientific Name, Collector(s) (verbatim), Collection Number, Date Collected, Locality (verbatim), County, State, Country" 
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     Then I mark the checkboxes "pixonly, locsonly"
-
+    
     When I click "Maps" 
     Then I verify the maps buttons
     When I click "map selected with Google staticmaps API"
@@ -29,14 +29,14 @@ Scenario: Find and use the keyword search feature
     When I click "Facets"
     Then I find the content "Scientific Name, Major Group, Family, Collector(s), County, State, Country" in "div#tabs"
     Then I will click the up and down arrows beside the headers without knowing table name
-    Then I will click on a value "C. A. Purpus" and see it appear in the field "collector"
-    Then I will click "Reset" and the "collector" field should have ""
+    Then I will click on a value "Barbella cubensis (Mitt.) Broth." and see it appear in the field "determination"
+    Then I will click "Reset" and the "keyword" field should have ""
 
     When I enter "UC1624979" in "accession" and click "Full"
     Then I will click the arrows to toggle between pages
     Then I click the button "download selected as csv" and download the csv file
     And I verify the contents of the page
-    Then I find the content "Current time:" in "div#container" 
-    When I find the content "About, Help, Credits, Terms" in "div.unit"    
+    Then I find the content "Current time:" in "div#container"
+    When I find the content "About, Help, Credits" in "div.unit"
     When I click "logout"    
     Then I see "eloan, publicsearch, search" in "div#content-main"

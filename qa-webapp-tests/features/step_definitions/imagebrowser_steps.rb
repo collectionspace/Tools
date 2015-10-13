@@ -1,21 +1,12 @@
-When(/^I search for "([^"]*)" and enter "([^"]*)"$/) do |query1, query2|
-    fill_in "text", :with => query1
-    fill_in "maxresults", :with => query2
-    click_button "Search"
-end
-
-Then(/^I see "([^"]*)" images displayed$/) do |img|
-    page.has_content?(img.to_s + " images displayed for 20 objects")
-end
-
-When(/^I click on museum number "([^"]*)"$/) do |arg1|
-    #click_link(arg1) does not work due to another page opening
-    visit 'https://webapps' + env_config['server'] + '.cspace.berkeley.edu/' + $ginstitution + '/search/search/?displayType=full&maxresults=1&resultsOnly=True&text=%22'+ arg1.to_s + '%22'
+When(/^I search for "([^"]*)" in "([^"]*)" and enter "([^"]*)"$/) do |query, label, text|
+    fill_in label, :with => query
+    fill_in "maxresults", :with => text
+    find(:link_or_button, "Search").click
 end
 
 Then(/^I see a page with these headers "([^"]*)"$/) do |headers|
     headers.split(', ').each do |header|
-        page.has_content?(header)
+        page.all(header).any?
     end
 end
 

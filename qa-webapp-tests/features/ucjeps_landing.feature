@@ -8,8 +8,8 @@ Scenario: Checks that the landing page has the correct apps displayed when User 
     Then I find the content "Sign in to the CollectionSpace Webapps using the same login and password you use to login to the CollectionSpace system itself." in "div#login"
     Then I find the content "Or, if you want to see what is available without signing in, click" in "div#login"
     Then I will sign in 
-    Then I find the content "All available Webapps" in "div#user-tools"
+    Then I see "imagebrowser, imaginator, internal, search, uploadmedia" in "div#content-main"
+    Then I find the content "All available Webapps" in "div#user-tools" 
     Then I find the content "Sign Out" in "div#user-tools" 
-    Then I see "eloan, publicsearch, search"
     When I click "logout"    
-    Then I see "eloan, publicsearch" 
+    Then I see "eloan, publicsearch, search" in "div#content-main"
