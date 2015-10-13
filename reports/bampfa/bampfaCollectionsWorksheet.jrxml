@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.1.0.final using JasperReports Library version 6.1.0  -->
-<!-- 2015-10-13T04:09:35 -->
+<!-- 2015-10-13T04:11:35 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bampfaCollectionsWorksheet" language="groovy" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="73f0dc23-1df9-45b6-a0a1-979b2bfe0f35">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
@@ -417,14 +417,14 @@ WHERE h1.name = $P{csid}]]>
 				<textFieldExpression><![CDATA[$F{cataloger}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="479" width="120" height="48" uuid="6bca400d-0f71-4c95-a056-b15407adc278"/>
+				<reportElement x="0" y="479" width="100" height="48" uuid="6bca400d-0f71-4c95-a056-b15407adc278"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Cataloger Notes and Date]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="108" y="479" width="316" height="20" uuid="912ffc86-8f5a-4916-9f2c-16dc642b4063"/>
+				<reportElement x="106" y="479" width="316" height="20" uuid="912ffc86-8f5a-4916-9f2c-16dc642b4063"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
