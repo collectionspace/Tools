@@ -1,5 +1,5 @@
 Then(/^I select a report called "([^"]*)"$/) do |report|
-    click_link(report)
+    find(:link_or_button, report).click
 end
 
 Then(/^I will see the correct report in pdf format$/) do 
