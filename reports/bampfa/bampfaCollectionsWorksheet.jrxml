@@ -419,7 +419,7 @@ WHERE h1.name = $P{csid}]]>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Catalog Date]]></text>
+				<text><![CDATA[Cataloger Notes and Date]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="912ffc86-8f5a-4916-9f2c-16dc642b4063" x="106" y="479" width="316" height="20"/>
