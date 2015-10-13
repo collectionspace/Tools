@@ -192,8 +192,7 @@
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.
     -->
-    <copyField source="objdescr_txt" dest="objdescr_s"/>
-    <copyField source="csid_s" dest="csid_txt"/>
+    <copyField source="objdescr_s" dest="objdescr_txt"/>
     <copyField source="objsortnum_s" dest="objsortnum_txt"/>
     <copyField source="objmusno_s" dest="objmusno_txt"/>
     <copyField source="objdept_s" dest="objdept_txt"/>
