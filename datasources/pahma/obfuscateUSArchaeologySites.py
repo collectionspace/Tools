@@ -2,7 +2,6 @@ import csv
 import hashlib
 import math
 import sys
-import numpy as np
 
 hashkey_column = 10
 fieldCollectionTree_column = 36
@@ -10,15 +9,9 @@ objecttype_column = 5
 latlong_column = 34
 
 
-def cart2pol(x, y):
-    rho = np.sqrt(x ** 2 + y ** 2)
-    phi = np.arctan2(y, x)
-    return (rho, phi)
-
-
 def pol2cart(rho, phi):
-    x = rho * np.cos(phi)
-    y = rho * np.sin(phi)
+    x = rho * math.cos(phi)
+    y = rho * math.sin(phi)
     return (x, y)
 
 
@@ -52,7 +45,7 @@ with open(sys.argv[2], "wb") as out:
                     long_offset = (long_offset % modulus) / modulus
 
                     # pretend these a polar coordinates and convert them to cartesian coordinates
-                    latlongoffset = pol2cart(np.sqrt(lat_offset), long_offset * 2 * math.pi)
+                    latlongoffset = pol2cart(math.sqrt(lat_offset), long_offset * 2 * math.pi)
                     latlongoffset = [r * 0.05 for r in latlongoffset]
 
                     latitude = float(latitude) + latlongoffset[0]
