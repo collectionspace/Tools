@@ -77,20 +77,15 @@ The steps are as follows:
 12. double check that commit "took" on GitHub. e.g. https://github.com/cspace-deployment/Tools/commit/....
 13. update the desired server (dev or prod) with the new .jrxml file as follows:
     a. sign into the desired server: ssh cspace-dev.cspace.berkeley.edu (or own local dev server)
-    b. Sign in as app_webapps users: sudo su - app_webapps
-    c. navigate to tools: cd Tools/
-    d. update to the latest commit: git pull -v
-    e. copy the report to /tmp: cp -r reports /tmp/reports 
-    f. go to the app where the file for [institution] is located: sudo su - app_[institution]
-    g. copy the files from to this server: cp /tmp/reports/[institution]/[myreport].jrxml tomcat6-[institution]/cspace/reports/
-    h. remove the old .jasper files (it is ok to remove all of them): rm tomcat6-[institution]/cspace/reports/*.jasper 
-    i. logout: exit
+    b. log in as the application owner for the deployment you want to operate: e.g. sudo su - app_pahma
+    c. update the git repo: cd ~/src/cspace-deployment/Tools ; git pull -v ; cd 
+    d. run the deployment script: csdeployreports
+    e. logout: exit
     
     if this report will display in a Django web app (see PAHMA-823 for details of why you have to do this) also do the following:
     
-    i. sudo into the webapps server: sudo su - app_webapps
-    j. copy the new file(s) from temp to this directory: cp /tmp/reports/*/*.jrxml ~/jrxml/
-    k. Remove the /tmp/reports directory after finishing: rm -rf /tmp/reports
+    f. sudo into the webapps server: sudo su - app_webapps
+    g. copy the new file(s) from temp to this directory: cd ~/Tools; git pull -v ; cp reports/*/*.jrxml ~/jrxml/
 
 14. if all you are doing is updating an existing report, then you are done. Otherwise, read further below about making a "report record" in CSpace using the helper scripts.
 15. test to see the reports work on Prod and Dev. In the case of Prod reports, some of them can be (and should be) tested via the ireports webapp, e.g., https://dev.cspace.berkeley.edu/botgarden_project/ireports/
@@ -100,37 +95,26 @@ The steps are as follows:
 
 Note that this workflow presumes you use git from the command line. If you are using an IDE to do your editing and communicate with GitHub, steps 3-11 of this workflow will differ for you. Adjust accordingly.
 
-Example monologue, install new PAHMA reports on cspace-prod.
+Example monologue: install a new report for PAHMA on Production; you can cut and paste these commands
 
 ```
 # assuming all the changes to .jrxml files are already committed to GitHub...
 $
 # ssh to Prod
 $ ssh cspace-prod.cspace.berkeley.edu
-# change to my local clone of Tools repo
--sh-4.1$ cd Tools/
-# update it, verify the new .jrxml info is there
--sh-4.1$ git pull -v
-[snip]
+# ... then we become the appropriate CSpace pseudo-user
+-sh-4.1$ sudo su - app_pahma
+# ... then update the repot. It does not (should not!) hurt to recopy all of them
+[app_pahma@cspace-prod-01 ~]$ cd ~/src/cspace-deployment/Tools ; git pull -v ; cd
 Fast-forward
  datasources/ucjeps/solrETL-public.sh |    2 +-
  reports/pahma/GroupWithImages.jrxml  |  257 ++++++++++++++++++++++++++++++++++
  2 files changed, 258 insertions(+), 1 deletions(-)
  create mode 100644 reports/pahma/GroupWithImages.jrxml
-# we need to get the .jrxml over to the appropriate CSpace directory.
-# we don't have privileges to cp them directly to where they need to go, so we move them to /tmp first...
-# copy the reports to /tmp
--sh-4.1$ cp -r reports /tmp/reports
-# ... then we become the appropriate CSpace pseudo-user
--sh-4.1$ sudo su - app_pahma
-# ... then we cp the files from /tmp. It does not (should not!) hurt to recopy all of them
-[app_pahma@cspace-prod-01 ~]$ cp /tmp/reports/pahma/*.jrxml tomcat6-pahma/cspace/reports/
-# ... then we clean out the existing .jasper files (they are all recompiled as needed)
-[app_pahma@cspace-prod-01 ~]$ rm tomcat6-pahma/cspace/reports/*.jasper
+# ... then we invoke the deployment scripts
+[app_pahma@cspace-prod-01 ~]$ csdeployreports
 # go back to being ourselves again
 -sh-4.1$ exit
-# clean up (in case some other user want to use the approach, we need to get rid of our dir in /tmp
--sh-4.1$ rm -rf /tmp/reports
 # we're done here!
 -sh-4.1$ exit
 $
@@ -262,7 +246,7 @@ Installing a new report:
      • Report should be created and either appear in the browser or be downloaded per browser settings to your local machine.
      • The compiled .jasper file is created automatically.
      
-Updating a report:
+Updating a report (no change in CSpace record):
 
 1. Follow steps 1-3 of Installing a report. The report record as "registered" in CSpace need not change.
 
