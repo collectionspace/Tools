@@ -7,6 +7,8 @@
 ##############################################################################
 date
 cd /home/app_solr/solrdatasources/pahma
+# move the current set of extracts to temp (thereby saving the previous run, just in case
+mv 4solr.*.csv.gz /tmp
 TENANT=$1
 HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 export NUMCOLS=36
@@ -51,6 +53,5 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-locations/update" --data '<comm
 ##############################################################################
 time curl -s -S 'http://localhost:8983/solr/pahma-locations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\' --data-binary @4solr.pahma.locations.csv -H 'Content-type:text/plain; charset=utf-8'
 rm m4.csv
-# put them in tmp so they can be gotten at by others
-cp 4solr.*.csv.gz /tmp
+gzip 4solr.*.csv
 date

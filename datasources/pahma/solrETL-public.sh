@@ -7,6 +7,8 @@
 ##############################################################################
 date
 cd /home/app_solr/solrdatasources/pahma
+# move the current set of extracts to temp (thereby saving the previous run, just in case
+mv 4solr.*.csv.gz /tmp
 TENANT=$1
 # nb: using prod db for now... dev is too slow
 SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"

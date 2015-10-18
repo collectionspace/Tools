@@ -1,6 +1,8 @@
 #!/bin/bash -x
 date
 cd /home/app_solr/solrdatasources/botgarden
+# move the current set of extracts to temp (thereby saving the previous run, just in case
+mv 4solr.*.csv.gz /tmp
 TENANT=$1
 SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
@@ -41,6 +43,4 @@ rm p?.csv header4Solr.csv*
 rm 4solr.$TENANT.propagations.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f 4solr.*.csv
-# put them in tmp so they can be gotten at by others
-cp 4solr.*.csv.gz /tmp
 date
