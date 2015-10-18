@@ -17,14 +17,27 @@
 ##############################################################################
 date
 cd /home/app_solr/solrdatasources/pahma
-# move the current set of extracts to temp (thereby saving the previous run, just in case
-mv 4solr.*.csv.gz /tmp
+##############################################################################
+# move the current set of extracts to temp (thereby saving the previous run, just in case)
+# note that in this case there are 3 nightly scripts, public, internal, and locations,
+# and internal depends on data created by public, so this case has to be handled
+# specially, and the scripts need to run in order: public > internal > locations
+# so in this case, the internal script cannot 'stash' any files...they
+# have already been stashed by the public script, and this script needs one
+# of them.
+##############################################################################
+# the needed file is gunzipped further down...
+##############################################################################
+# while most of this script is already tenant specific, many of the specific commands
+# are shared between the different scripts; having them be as similar as possible
+# eases maintainance. ergo, the TENANT parameter
+##############################################################################
 TENANT=$1
 HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
-export NUMCOLS=38
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
+export NUMCOLS=38
 ##############################################################################
 # run the "all media query"
 ##############################################################################
@@ -78,6 +91,4 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit
 ##############################################################################
 rm 4solr.$TENANT.allmedia.csv.gz 4solr.$TENANT.internal.csv.gz
 gzip 4solr.*.csv
-# put them in tmp so they can be gotten at by others
-cp 4solr.*.csv.gz /tmp
 date

@@ -1,8 +1,20 @@
 #!/bin/bash -x
 date
 cd /home/app_solr/solrdatasources/ucjeps
-# move the current set of extracts to temp (thereby saving the previous run, just in case
+##############################################################################
+# move the current set of extracts to temp (thereby saving the previous run, just in case)
+# note that in the case where there are several nightly scripts, e.g. public and internal,
+# like here, the one to run first will "clear out" the previous night's data.
+# since we don't know which order these might run in, I'm leaving the mv commands in both
+# nb: the jobs in general can't overlap as the have some files in common and would step
+# on each other
+##############################################################################
 mv 4solr.*.csv.gz /tmp
+##############################################################################
+# while most of this script is already tenant specific, many of the specific commands
+# are shared between the different scripts; having them be as similar as possible
+# eases maintainance. ergo, the TENANT parameter
+##############################################################################
 TENANT=$1
 SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5310 sslmode=prefer"
 USERNAME="reporter_$TENANT"

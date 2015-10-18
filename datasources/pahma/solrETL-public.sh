@@ -7,8 +7,19 @@
 ##############################################################################
 date
 cd /home/app_solr/solrdatasources/pahma
-# move the current set of extracts to temp (thereby saving the previous run, just in case
+##############################################################################
+# move the current set of extracts to temp (thereby saving the previous run, just in case)
+# note that in this case there are 3 nightly scripts, public, internal, and locations,
+# and internal depends on data created by public, so this case has to be handled
+# specially, and the scripts need to run in order: public > internal > locations
+# the public script, which runs first, *can* 'stash' last night's files...
+##############################################################################
 mv 4solr.*.csv.gz /tmp
+##############################################################################
+# while most of this script is already tenant specific, many of the specific commands
+# are shared between the different scripts; having them be as similar as possible
+# eases maintainance. ergo, the TENANT parameter
+##############################################################################
 TENANT=$1
 # nb: using prod db for now... dev is too slow
 SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
