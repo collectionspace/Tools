@@ -338,6 +338,7 @@ def selectWebapp(form):
     files = os.listdir("../cfgs")
 
     programName = os.path.basename(__file__).replace('Constants', 'Main') + '?webapp=' # yes, this is fragile!
+    programName = programName.replace('.pyc', '.py') # desperate hack
     apptitles = {}
     serverlabels = {}
     badconfigfiles = ''
