@@ -1040,9 +1040,23 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
                 except ValueError:
                     msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
                     del updateItems['objectCount']
+
+        updateMsg = ''
+        for item in updateItems.keys():
+            if updateItems[item] == 'None' or updateItems[item] is None:
+                if item in 'collection inventoryCount objectCount'.split(' '):
+                    del updateItems[item]
+                    #updateMsg += 'deleted %s <br/>' % item
+                else:
+                    updateItems[item] = ''
+                    #updateMsg += 'eliminated %s <br/>' % item
+            else:
+                #updateMsg += 'kept %s, value: %s <br/>' % (item, updateItems[item])
+                pass
+
         try:
             #pass
-            updateMsg = updateKeyInfo(fieldset, updateItems, config, form)
+            updateMsg += updateKeyInfo(fieldset, updateItems, config, form)
             if updateMsg != '':
                 msg += '<span style="color:red;">%s</span>' % updateMsg
             numUpdated += 1
@@ -2040,11 +2054,11 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     # add the user's changes to the XML
     for relationType in fieldList:
         #sys.stderr.write('tag1: %s\n' % relationType)
-        # skip if no refName was provided to update
+        # this app does not insert empty values into anything!
+        if not relationType in updateItems.keys() or updateItems[relationType] == '':
+            continue
         listSuffix = 'List'
         extra = ''
-        if updateItems[relationType] == '':
-            continue
         if relationType == 'assocPeople' or relationType == 'pahmaAltNum':
             extra = 'Group'
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
@@ -2056,7 +2070,12 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             #print ">>> ",'.//'+relationType+extra+'List'
         #sys.stderr.write('tag2: %s\n' % (relationType + extra + listSuffix))
         metadata = root.findall('.//' + relationType + extra + listSuffix)
-        metadata = metadata[0] # there had better be only one!
+        try:
+            metadata = metadata[0] # there had better be only one!
+        except:
+            # hmmm ... we didn't find this element in the record. Make a note a carry on!
+            # message += 'No "' + relationType + extra + listSuffix + '" element found to update.'
+            continue
         #print(etree.tostring(metadata))
         #print ">>> ",relationType,':',updateItems[relationType]
         if relationType in ['assocPeople', 'objectName', 'pahmaAltNum']:
@@ -2110,25 +2129,36 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                 #print '%s, %s<br>' % (e.tag, e.text)
                 #sys.stderr.write(' e: %s\n' % e.text)
             if alreadyExists(updateItems[relationType], Entries):
-                if not IsAlreadyPreferred(updateItems[relationType], Entries):
-                    message += "%s=%s;" % (relationType,updateItems[relationType])
-                #print 'already exists: %s<br>' % updateItems[relationType]
-                continue
-            new_element = etree.Element(relationType)
-            new_element.text = updateItems[relationType]
+                if IsAlreadyPreferred(updateItems[relationType], Entries):
+                    # message += "%s exists as %s, already preferred;" % (updateItems[relationType],relationType)
+                    pass
+                else:
+                    # exists, but not preferred. make it the preferred: remove it from where it is, insert it as 1st
+                    for child in Entries:
+                        sys.stderr.write(' c: %s\n' % child.tag)
+                        if child.text == updateItems[relationType]:
+                            new_element = child
+                            metadata.remove(child)
+                            # message += '%s removed. len = %s<br/>' % (child.text, len(Entries))
+                    metadata.insert(0,new_element)
+                    message += " %s exists in %s, now preferred.<br/>" % (updateItems[relationType],relationType)
+                    #print 'already exists: %s<br>' % updateItems[relationType]
             # check if the existing element is empty; if so, use it, don't add a new element
-            if len(Entries) == 1 and Entries[0].text is None:
-                metadata.remove(Entries[0])
-                metadata.insert(0,new_element)
             else:
+                if len(Entries) == 1 and Entries[0].text is None:
+                    #message += "removed %s ;<br/>" % (Entries[0].tag)
+                    metadata.remove(Entries[0])
+                new_element = etree.Element(relationType)
+                new_element.text = updateItems[relationType]
                 metadata.insert(0,new_element)
+                message += "added preferred term %s as %s.<br/>" % (updateItems[relationType],relationType)
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
                 if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
                     continue
                 else:
-                    message += "%s: %s already exists. Now duplicated with this as preferred.;" % (relationType,updateItems[relationType])
+                    message += "%s: %s already exists. Now duplicated with this as preferred.<br/>" % (relationType,updateItems[relationType])
                     pass
             newElement = etree.Element(relationType)
             newElement.text = updateItems[relationType]
@@ -2160,7 +2190,9 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             collectionobjects_common = root.find(
                 './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
             collectionobjects_common.insert(0, collection)
+            message += " %s added as &lt;%s&gt;.<br/>" % (updateItems['collection'], 'collection')
         collection.text = updateItems['collection']
+
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
     payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')

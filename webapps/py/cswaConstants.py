@@ -566,7 +566,6 @@ def getObjType(form, csid, ot):
         ("(not specified)", "(not specified)"),
         ("Documentation", "documentation"),
         ("None (Registration)", "none (Registration)"),
-        ("None", "None"),
         ("Sample", "sample"),
         ("Indeterminate", "indeterminate"),
         ("Unknown", "unknown")
