@@ -5,6 +5,7 @@ mc.contributor, mp.approvedforweb, 'card' AS "imageType"
 FROM media_common mc
 JOIN media_pahma mp ON (mp.id = mc.id)
 
+JOIN misc ON (mc.id = misc.id AND misc.lifecyclestate <> 'deleted')
 LEFT OUTER JOIN hierarchy h1 ON (h1.id = mc.id)
 INNER JOIN relations_common rc on (h1.name = rc.objectcsid AND rc.subjectdocumenttype='CollectionObject')
 LEFT OUTER JOIN hierarchy h2 on (rc.subjectcsid = h2.name)
