@@ -202,7 +202,7 @@
     <copyField source="osteoageestimatenote_s" dest="osteoageestimatenote_txt"/>
     <copyField source="osteoageestimateverbatim_s" dest="osteoageestimateverbatim_txt"/>
     <copyField source="sexdetermination_s" dest="sexdetermination_txt"/>
-    <copyField source="sexdeterminationnote_s" dest="sexdeterminationnote_s""/>
+    <copyField source="sexdeterminationnote_s" dest="sexdeterminationnote_txt"/>
 
     <copyField source="*_s" dest="text"/>
     <copyField source="*_ss" dest="text"/>
