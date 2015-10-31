@@ -4,16 +4,17 @@
 #
 ##################################################################################
 #
+# CSpace Solr ETL
+#
+##################################################################################
+#
 # run solr ETL (and other webapp and API monitoring)
 #
 # currently runs under pseudo user app_solr on cspace-prod and cspace-dev
 #
 # 1. run the 11 solr4 updates
-# 2. keep for posterity a list of all media uploaded with BMU
-# 3. monitor the imageserver caches on this server
-# 4. monitor use of the solr APIs
-# 5. monitor solr datastore contents (email contents)
-# 5. export and mail BAMPFA view for Orlando
+# 2. monitor solr datastore contents (email contents)
+# 3. export and mail BAMPFA view for Orlando
 #
 ##################################################################################
 01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
@@ -25,11 +26,10 @@
 #
 41 2 * * * /home/app_solr/solrdatasources/pahma/solrETL-public.sh            pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_public.log  2>&1
 41 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_internal.log  2>&1
-31 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_location.log  2>&1
-51 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-osteology.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_location.log  2>&1
+31 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_locations.log  2>&1
+51 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-osteology.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_osteology.log  2>&1
 #
 01 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-public.sh           ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_public.log  2>&1
-15 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-media.sh            ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_media.log  2>&1
 ##################################################################################
 # monitor solr datastores
 ##################################################################################
@@ -42,12 +42,12 @@
 # BMU monitoring / report (i.e. send nightly emails)
 ##################################################################################
 10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
 #10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
 #10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
 10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" dbaxter@berkeley.edu > /dev/null 2>&1
-10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" herb_cspace_reports@lists.berkeley.edu > /dev/null 2>&1
+#10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
 #10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
 ##################################################################################
 # run BMU batch jobs (nightly or twice a day depending)
@@ -84,21 +84,3 @@
 00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
 00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
 30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
-
-##################################################################################
-# the following will not run on the managed servers under app_webapps
-# (they need access to the Apache logs... and a cron job that preps those logs)
-##################################################################################
-# monitor API use
-##################################################################################
-#30 2 * * * cat /tmp/solr.imageserver.records.txt /tmp/solr.select.records.txt> /home/app_webapps/monitor/currAPIuse.csv ; cat /home/app_webapps/monitor/currAPIuse.csv /home/app_webapps/monitor/allAPIuse.csv | sort -u > /home/app_webapps/monitor/tmp2 ; mv /home/app_webapps/monitor/tmp2 /home/app_webapps/monitor/allAPIuse.csv
-#5  1 * * * grep -h imageserver /home/app_webapps/monitor/allAPIuse.csv | grep -v " 302 " | perl -pe 's/^.*?\[(...........).*$/\1/' | sort | uniq -c | sort -k2.4,7 -k2.1,3 > /tmp/solr.images.counts.txt
-#5  1 * * * grep -h select /home/app_webapps/monitor/allAPIuse.csv      | perl -pe 's/^.*?\[(...........).*$/\1/' | sort | uniq -c | sort -k2.4,7 -k2.1,3 > /tmp/solr.selects.counts.txt
-#30 1 * * * cd /home/app_webapps/monitor ; cat /tmp/solr.images.counts.txt > sep ; echo "Imageserver"  | xargs | cat - sep > sep1 ; cat /tmp/solr.selects.counts.txt > sep ; echo "API"  | xargs | cat - sep > sep2 ; cat sep1 sep2 | mail -s "API and Imageserver Usage" -- jblowe@berkeley.edu
-##################################################################################
-# monitor webapps
-##################################################################################
-#5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > /home/app_webapps/monitor/currappuse.csv ; cat /home/app_webapps/monitor/currappuse.csv /home/app_webapps/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 /home/app_webapps/monitor/webappuse.csv ; perl /home/app_webapps/monitor/monitorWebapps.pl > /usr/local/share/tomcat/webapps/cspace-ui/defaults/html/webappuse.html
-# monitor magic bus (currently not in use!)
-#@daily perl /home/app_webapps/import/magicbus/reports/monitorBus.pl > /usr/local/share/tomcat/webapps/cspace-ui/defaults/html/magicbus.html
-
