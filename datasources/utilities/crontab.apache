@@ -8,7 +8,7 @@
 #
 # currently runs under pseudo user app_solr on cspace-prod and cspace-dev
 #
-# 1. run the 9 solr4 updates
+# 1. run the 11 solr4 updates
 # 2. keep for posterity a list of all media uploaded with BMU
 # 3. monitor the imageserver caches on this server
 # 4. monitor use of the solr APIs
@@ -16,15 +16,20 @@
 # 5. export and mail BAMPFA view for Orlando
 #
 ##################################################################################
-30 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solrExtract.log  2>&1
-30 0 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solrExtract.log  2>&1
-0  2 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solrExtract.log  2>&1
-0  3 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solrExtract.log  2>&1
-30 1 * * * /home/app_solr/solrdatasources/botgarden/solrETL-propagations.sh  botgarden  >> /home/app_solr/solrdatasources/botgarden/solrExtract.log  2>&1
-0  1 * * * /home/app_solr/solrdatasources/pahma/solrETL-public.sh            pahma      >> /home/app_solr/solrdatasources/pahma/solrExtract.log  2>&1
-0  4 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solrExtract.log  2>&1
-30 4 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solrExtract.log  2>&1
-0  5 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-public.sh           ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solrExtract.log  2>&1
+01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
+21 0 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
+#
+41 0 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_internal.log  2>&1
+21 1 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
+01 2 * * * /home/app_solr/solrdatasources/botgarden/solrETL-propagations.sh  botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_propagations.log  2>&1
+#
+41 2 * * * /home/app_solr/solrdatasources/pahma/solrETL-public.sh            pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_public.log  2>&1
+41 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_internal.log  2>&1
+31 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_location.log  2>&1
+51 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-osteology.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_location.log  2>&1
+#
+01 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-public.sh           ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_public.log  2>&1
+15 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-media.sh            ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_media.log  2>&1
 ##################################################################################
 # monitor solr datastores
 ##################################################################################
@@ -36,45 +41,50 @@
 ##################################################################################
 # BMU monitoring / report (i.e. send nightly emails)
 ##################################################################################
-10   5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_pahma | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /usr/local/share/django/pahma_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_pahma | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
-10   5 * * * perl /usr/local/share/django/bampfa_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /usr/local/share/django/bampfa_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
-10   5 * * * perl /usr/local/share/django/ucjeps_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /usr/local/share/django/ucjeps_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" dbaxter@berkeley.edu > /dev/null 2>&1
-10   5 * * * perl /usr/local/share/django/cinefiles_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /usr/local/share/django/cinefiles_project/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+#10  5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
+#10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+#10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+#10  5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" dbaxter@berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+#10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
 ##################################################################################
-# run BMU batch jobs (hourly, on dev, for now)
+# run BMU batch jobs (nightly or twice a day depending)
 ##################################################################################
-# run PAHMA BMU
-10 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_pahma/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/pahma/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_pahma/batches.log; done
-# run UCJEPS BMU
-20 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_ucjeps/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/ucjeps/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_ucjeps/batches.log; done
-# run Cinefiles BMU
-30 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/cinefiles/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_cinefiles/batches.log; done
+# run PAHMA BMU (one minute after 7pm)
+01 19   * * * shopt -s nullglob; for f in /tmp/image_upload_cache_pahma/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/pahma/uploadmedia/postblob.sh pahma $f pahma_Uploadmedia_Prod >> /tmp/image_upload_cache_pahma/batches.log; done
+# run UCJEPS BMU (one minute after the hour, noon and 8pm)
+10 12,20 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_ucjeps/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/ucjeps/uploadmedia/postblob.sh ucjeps $f ucjeps_Uploadmedia_Prod >> /tmp/image_upload_cache_ucjeps/batches.log; done
+# run Cinefiles BMU (currently disabled)
+#*/10 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/cinefiles/uploadmedia/postblob.sh cinefiles $f cinefiles_Uploadmedia_Prod >> /tmp/image_upload_cache_cinefiles/batches.log; done
 # run BAMPFA BMU (currently a no-op -- they now use Piction)
-40 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_bampfa/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/bampfa/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_bampfa/batches.log; done
+#30 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_bampfa/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/bampfa/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_bampfa/batches.log; done
 ##################################################################################
-# run the PAHMA tricoder upload job weekdays 9am-6pm, 10 mins after the hour
+# clean up the BMU temp directorys (erase images more than 48 hours old)
 ##################################################################################
-10 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
+1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t | mail -s "Prod image tempdir cleanup" jblowe@berkeley.edu ; done
+##################################################################################
+# run the tricoder upload job weekdays 9am-6pm, 10 mins after the hour
+##################################################################################
+#10 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
-5 6 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do  cp -p /tmp/image_upload_cache_${t}/*.csv  /home/app_webapps/monitor/image_upload_cache_${t}/  ; cp -p /tmp/image_upload_cache_${t}/*.trace.log  /home/app_webapps/monitor/image_upload_cache_${t}/ ; done
+5 6 * * *  for t in bampfa botgarden cinefiles pahma ucjeps; do  cp -p /tmp/image_upload_cache_${t}/*.csv  /home/app_webapps/monitor/image_upload_cache_${t}/  ; cp -p /tmp/image_upload_cache_${t}/*.trace.log  /home/app_webapps/monitor/image_upload_cache_${t}/ ; done
 ##################################################################################
 # monitor imageserver caches
 ##################################################################################
-0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "$t cache status" -- jblowe@berkeley.edu ; rm report.txt ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
+0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- jblowe@berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
-# run the UCJEPS CCH extract jobs weekly
+# run the UCJEPS jobs weekly
 ##################################################################################
 00 5 * * 5 /home/app_webapps/bin/major_group.sh
 00 6 * * 5 /home/app_webapps/bin/cch_extract.sh
 00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
 00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
 30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
+
 ##################################################################################
 # the following will not run on the managed servers under app_webapps
 # (they need access to the Apache logs... and a cron job that preps those logs)

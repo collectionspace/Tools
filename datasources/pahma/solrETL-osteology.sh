@@ -46,5 +46,5 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-osteology/update" --data '<comm
 ##############################################################################
 time curl -s -S 'http://localhost:8983/solr/pahma-osteology/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\' --data-binary @4solr.pahma.osteology.csv -H 'Content-type:text/plain; charset=utf-8'
 rm o1.csv
-gzip 4solr.*.csv
+gzip 4solr.$TENANT.osteology.csv
 date
