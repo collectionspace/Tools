@@ -8,7 +8,7 @@ import pgdb
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-timeoutcommand = "set statement_timeout to 240000; SET NAMES 'utf8';"
+timeoutcommand = "set statement_timeout to 1200000; SET NAMES 'utf8';"
 
 def testDB(config):
     dbconn = pgdb.connect(database=config.get('connect', 'connect_string'))
@@ -315,7 +315,9 @@ ac.id accID,
 h9.name accCSID,
 cp.inventoryCount,
 cc.collection,
-rd.item
+rd.item,
+cp.pahmafieldlocverbatim,
+fcd.datedisplaydate
 
 FROM loctermgroup l
 
@@ -351,6 +353,9 @@ FULL OUTER JOIN acquisitions_common ac ON (ac.id = h7.id)
 FULL OUTER JOIN hierarchy h9 ON (ac.id = h9.id)
 FULL OUTER JOIN acquisitions_common_owners donor ON (ac.id = donor.id AND (donor.pos = 0 OR donor.pos IS NULL))
 FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'deleted')
+
+FULL OUTER JOIN hierarchy h10 ON (h10.parentid = cc.id AND h10.pos = 0 AND h10.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+FULL OUTER JOIN structureddategroup fcd ON (fcd.id = h10.id)
 
 FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
 FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
@@ -642,7 +647,9 @@ ac.id accID,
 h9.name accCSID,
 cp.inventoryCount,
 cc.collection,
-rd.item
+rd.item,
+cp.pahmafieldlocverbatim,
+fcd.datedisplaydate
 
 FROM collectionobjects_pahma cp
 left outer join collectionobjects_common cc on (cp.id=cc.id)
@@ -673,6 +680,9 @@ FULL OUTER JOIN misc msac ON (ac.id = msac.id AND msac.lifecyclestate <> 'delete
 
 FULL OUTER JOIN hierarchy h8 ON (cc.id = h8.parentid AND h8.name = 'collectionobjects_pahma:pahmaAltNumGroupList' AND (h8.pos = 0 OR h8.pos IS NULL))
 FULL OUTER JOIN pahmaaltnumgroup an ON (h8.id = an.id)
+
+FULL OUTER JOIN hierarchy h10 ON (h10.parentid = cc.id AND h10.pos = 0 AND h10.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+FULL OUTER JOIN structureddategroup fcd ON (fcd.id = h10.id)
  
 join misc ms on (cc.id=ms.id and ms.lifecyclestate <> 'deleted')
 

@@ -982,6 +982,9 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['collection'] = form.get('ot.' + index)
             updateItems['responsibleDepartment'] = form.get('cm.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
+        elif fieldset == 'placeanddate':
+            updateItems['pahmaFieldLocVerbatim'] = form.get('vfcp.' + index)
+            updateItems['pahmaFieldCollectionDate'] = form.get('cd.' + index)
         else:
             pass
             #error!
@@ -990,7 +993,7 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems[i] = form.get(i)
 
         #print updateItems
-        msg = 'updated.'
+        msg = 'updated. '
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
                 if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
@@ -1040,6 +1043,9 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
                 except ValueError:
                     msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
                     del updateItems['objectCount']
+        elif fieldset == 'placeanddate':
+            # msg += 'place and date'
+            pass
 
         updateMsg = ''
         for item in updateItems.keys():
@@ -1070,7 +1076,6 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
 
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'objects had key information updated</h4>'
-
 
 
 def doNothing(form, config):
@@ -2047,6 +2052,9 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         fieldList = ('objectName', 'collection', 'responsibleDepartment', 'pahmaFieldCollectionPlace')
     elif fieldset == 'collection':
         fieldList = ('objectName', 'collection')
+    elif fieldset == 'placeanddate':
+        fieldList = ('pahmaFieldLocVerbatim', 'pahmaFieldCollectionDate')
+
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -2059,11 +2067,11 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             continue
         listSuffix = 'List'
         extra = ''
-        if relationType == 'assocPeople' or relationType == 'pahmaAltNum':
+        if relationType in ['assocPeople', 'pahmaAltNum', 'pahmaFieldCollectionDate']:
             extra = 'Group'
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             listSuffix = 's'
-        elif relationType in ['collection']:
+        elif relationType in ['collection', 'pahmaFieldLocVerbatim']:
             listSuffix = ''
         else:
             pass
@@ -2152,6 +2160,18 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                 new_element.text = updateItems[relationType]
                 metadata.insert(0,new_element)
                 message += "added preferred term %s as %s.<br/>" % (updateItems[relationType],relationType)
+
+        elif relationType in ['pahmaFieldCollectionDate']:
+            # we'll be replacing the entire structured date group
+            pahmaFieldCollectionDateGroup = metadata.find('.//pahmaFieldCollectionDateGroup')
+            newpahmaFieldCollectionDateGroup = etree.Element('pahmaFieldCollectionDateGroup')
+            new_element = etree.Element('dateDisplayDate')
+            new_element.text = updateItems[relationType]
+            newpahmaFieldCollectionDateGroup.insert(0,new_element)
+            if pahmaFieldCollectionDateGroup is not None:
+                metadata.remove(pahmaFieldCollectionDateGroup)
+            metadata.insert(0,newpahmaFieldCollectionDateGroup)
+
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
@@ -2183,6 +2203,16 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         inventoryCount.text = updateItems['inventoryCount']
     #print(etree.tostring(root, pretty_print=True))
 
+    if 'pahmaFieldLocVerbatim' in updateItems:
+        pahmaFieldLocVerbatim = root.find('.//pahmaFieldLocVerbatim')
+        if pahmaFieldLocVerbatim is None:
+            pahmaFieldLocVerbatim = etree.Element('pahmaFieldLocVerbatim')
+            pahmaFieldLocVerbatimobjects_common = root.find(
+                './/{http://collectionspace.org/services/collectionobject/local/pahma}collectionobjects_pahma')
+            pahmaFieldLocVerbatimobjects_common.insert(0, pahmaFieldLocVerbatim)
+            message += " %s added as &lt;%s&gt;.<br/>" % (updateItems['pahmaFieldLocVerbatim'], 'pahmaFieldLocVerbatim')
+        pahmaFieldLocVerbatim.text = updateItems['pahmaFieldLocVerbatim']
+
     collection = root.find('.//collection')
     if 'collection' in updateItems:
         if collection is None:
@@ -2192,6 +2222,7 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             collectionobjects_common.insert(0, collection)
             message += " %s added as &lt;%s&gt;.<br/>" % (updateItems['collection'], 'collection')
         collection.text = updateItems['collection']
+
 
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
@@ -2467,6 +2498,16 @@ def formatInfoReviewRow(form, link, rr, link2):
 <input type="hidden" name="csid.%s" value="%s">
 <td><input class="xspan" type="text" size="40" name="cln.%s" value="%s"></td>
 </tr>""" % (link, cgi.escape(rr[1], True), rr[2], cgi.escape(rr[3], True), rr[2], rr[22], rr[2], rr[2], rr[2], cgi.escape(rr[8], True))
+    elif fieldSet == 'placeanddate':
+                return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<input type="hidden" name="csid.%s" value="%s">
+<td class="objname"><input type="hidden" name="onm.%s" value="">%s</td>
+<td><input class="xspan" type="text" size="40" name="vfcp.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="40" name="cd.%s" value="%s"></td>
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], rr[8], rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[28], True), rr[8], cgi.escape(rr[29], True))
+
+
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
@@ -2509,6 +2550,15 @@ def formatInfoReviewForm(form):
     elif fieldSet == 'collection':
         return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
 </tr><tr><th>Collection</th><td><input class="xspan" type="text" size="60" name="cn.user"></td>
+</tr>"""
+    elif fieldSet == 'placeanddate':
+        return """<tr><th>Object name</th>
+        <td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr>
+<tr><th>FCP verbatim</th>
+<td><input class="xspan" type="text" size="60" name="vfcp.user"></td>
+</tr>"<tr><th>Collection Date</th>
+<td><input class="xspan" type="text" size="60" name="cd.user"></td>
 </tr>"""
 
 
@@ -3401,6 +3451,50 @@ if __name__ == "__main__":
 
     updateItems = {}
 
+    if True:
+
+        print "starting keyinfo update"
+
+        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
+                'fieldset': 'placeanddate',
+                'csusername': 'import@pahma.cspace.berkeley.edu',
+                'cspassword': 'lash428!puck',
+                #'fieldset': 'registration',
+                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+                'vfcp.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'yyy',
+                'cd.70d40782-6d11-4346-bb9b-2f85f1e00e91': '11/3/15',
+        }
+
+        config = getConfig(form)
+
+        doUpdateKeyinfo(form, config)
+
+
+    if False:
+
+        print "starting keyinfo update"
+
+        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
+                'fieldset': 'namedesc',
+                'csusername': 'import@pahma.cspace.berkeley.edu',
+                'cspassword': 'lash428!puck',
+                #'fieldset': 'registration',
+                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+                'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
+                'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
+        }
+
+        config = getConfig(form)
+
+        doUpdateKeyinfo(form, config)
+
+
     if False:
 
         form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
@@ -3425,7 +3519,7 @@ if __name__ == "__main__":
 
         #sys.exit()
 
-    if True:
+    if False:
 
         form = {'webapp': 'bamInventoryDev'}
         config = getConfig(form)

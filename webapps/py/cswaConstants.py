@@ -135,6 +135,14 @@ def infoHeaders(fieldSet):
       <th>Object name</th>
       <th>Collection</th>
     </tr>"""
+    elif fieldSet == 'placeanddate':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Verbatim field collection place</th>
+      <th>Field collection date</th>
+    </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
 
@@ -469,6 +477,7 @@ def getFieldset(form, institution):
             ("Registration", "registration"),
             ("HSR Info", "hsrinfo"),
             ("Object Type/CM", "objtypecm"),
+            ("Place and Date", "placeanddate"),
         ]
 
     fieldset = '''
