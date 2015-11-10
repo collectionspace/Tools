@@ -3,7 +3,7 @@ import hashlib
 import math
 import sys
 
-hashkey_column = 10
+hashkey_column = 33
 fieldCollectionTree_column = 36
 objecttype_column = 5
 latlong_column = 34
