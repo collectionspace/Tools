@@ -30,11 +30,13 @@ grep csid o1.csv > header4Solr.csv
 grep -v csid o1.csv > o2.csv
 cat header4Solr.csv o2.csv > o1.csv
 rm o2.csv
-time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" o1.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.$TENANT.osteology.csv &
+time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" o1.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > o3.csv &
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" o1.csv | perl -pe 's/\\/\//g' > errors.osteology.csv &
 wait
 # hack to fix inventorydate_dt
-perl -i -pe 's/([\d\-]+) ([\d:]+)/\1T\2Z/' 4solr.pahma.osteology.csv
+perl -i -pe 's/([\d\-]+) ([\d:]+)/\1T\2Z/' o3.csv
+# "compress the osteology data into a single variable
+python osteology_analyzer.py o3.csv 4solr.pahma.osteology.csv
 # ok, now let's load this into solr...
 # clear out the existing data
 ##############################################################################
@@ -44,7 +46,7 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-osteology/update" --data '<comm
 # this POSTs the csv to the Solr / update endpoint
 # note, among other things, the overriding of the encapsulator with \
 ##############################################################################
-time curl -s -S 'http://localhost:8983/solr/pahma-osteology/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\' --data-binary @4solr.pahma.osteology.csv -H 'Content-type:text/plain; charset=utf-8'
-rm o1.csv
+time curl -s -S 'http://localhost:8983/solr/pahma-osteology/update/csv?commit=true&header=true&trim=true&separator=%09&f.aggregate_ss.split=true&f.aggregate_ss.separator=,&encapsulator=\' --data-binary @4solr.pahma.osteology.csv -H 'Content-type:text/plain; charset=utf-8'
+rm o1.csv o3.csv
 gzip 4solr.$TENANT.osteology.csv
 date
