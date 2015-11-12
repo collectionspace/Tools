@@ -16,7 +16,7 @@ HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
-export NUMCOLS=478
+export NUMCOLS=54
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
@@ -26,7 +26,14 @@ time perl -i -pe 's/[\r\n]/ /g;s/\@\@/\n/g' o1.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid o1.csv > header4Solr.csv
+gunzip 4solr.pahma.internal.csv.gz
+# compress and sort the osteological data
+python osteology_analyzer.py  o1.csv | sort > o2.csv
+# add the internal data
+python join.py o2.csv 4solr.pahma.internal.csv > o1.csv
+# csid_s is both files, let's keep only one in this file
+cut -f1,3- o1.csv > o2.csv
+grep csid o2.csv > header4Solr.csv
 grep -v csid o1.csv > o2.csv
 cat header4Solr.csv o2.csv > o1.csv
 rm o2.csv
