@@ -3,7 +3,26 @@ import hashlib
 import math
 import sys
 
-skip_columns = "id csid_s objectnumber_s inventoryid_s objname_s inventoryiscomplete_b osteoageestimatenote_s osteoageestimateverbatim_s sexdetermination_s sexdeterminationnote_s".split(' ')
+
+skip_columns = ["id",
+                "csid_s",
+                "inventoryid_s",
+                "inventoryanalyst_s",
+                "inventorydate_dt",
+                "inventoryiscomplete_b",
+                "osteoageestimateverbatim_s",
+                "osteoageestimateupper_f",
+                "osteoageestimatelower_f",
+                "sexdetermination_s",
+                "osteoageestimatenote_s",
+                "sexdeterminationnote_s",
+                "notes_postcranialpathology_s",
+                "notes_cranialpathology_s",
+                "notes_dentalpathology_s",
+                "notes_nhtaphonomicalterations_s",
+                "notes_curatorialsuffixing_s",
+                "notes_culturalmodifications_s"]
+
 
 def processHeader(header):
     outputheader =[]
