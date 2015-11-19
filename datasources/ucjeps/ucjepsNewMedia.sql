@@ -1,16 +1,17 @@
 SELECT
-h1.name mediacsid AS id,
-h2.name objectcsid AS objectid_s,
+h1.name AS id,
+h2.name AS objectid_s,
 cc.objectnumber AS objectnumber_s,
 mc.description AS description_s,
 b.name AS name_s,
-mc.creator creatorRefname AS creatorrefname_s,
-mc.creator creator AS creator_s,
-mc.blobcsid AS blobcsid_s,
+mc.creator AS creator_s,
+mc.creator AS creatorrefname_s,
+mc.blobcsid AS blob_ss,
 mc.copyrightstatement AS copyrightstatement_s,
 mc.identificationnumber AS identificationnumber_s,
-mc.rightsholder rightsholderRefname AS rightsholderrefname_s,
-mc.rightsholder rightsholder AS rightsholder_s,
+mc.rightsholder AS rightsholder_s,
+mc.rightsholder AS rightsholderrefname_s,
+mc.contributor AS contributorrefname_s,
 mc.contributor AS contributor_s
 
 FROM media_common mc
