@@ -6,6 +6,7 @@ import sys
 
 skip_columns = ["id",
                 "csid_s",
+                "objectnumber_s",
                 "inventoryid_s",
                 "inventoryanalyst_s",
                 "inventorydate_dt",
@@ -49,8 +50,8 @@ with open(sys.argv[2], "wb") as out:
                     if h[j] in skip_columns:
                         outputrow.append(cell)
                     else:
-                        if cell == '1':
-                            bunch.append(h[j][:-2])
+                        if cell != '' and cell != '0':
+                            bunch.append(h[j][:-2]+'='+cell)
             except:
                 raise
                 print 'problem!!!'
