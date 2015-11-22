@@ -387,6 +387,7 @@ def listSearchResults(authority, config, displaytype, form, rows):
 
     label = authority
     if label[-1] == 's' and rowcount == 1: label = label[:-1]
+    if label == 'taxon' and rowcount > 1: label = 'taxa'
 
     if displaytype == 'silent':
         print """<table>"""
@@ -1271,7 +1272,7 @@ def doAuthorityScan(form, config):
     if updateType == 'locreport':
         Taxon = form.get("ut.taxon")
         if Taxon != None:
-            Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'silent')
+            Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'list')
         else:
             Taxa = []
         tList = [t[0] for t in Taxa]
@@ -1326,12 +1327,12 @@ def doAuthorityScan(form, config):
 
     #print '\n'.join(accessions)
     print """</table>"""
-    print """<hr/>"""
-    print """<table width="100%">"""
-    print """<tr><td colspan="2"><b>Summary Statistics (experimental and unverified!)</b></tr>"""
+    #print """<hr/>"""
+    #print """<table width="100%">"""
+    #print """<tr><td colspan="2"><b>Summary Statistics (experimental and unverified!)</b></tr>"""
 
-    for s in sorted(statistics.keys()):
-        print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
+    #for s in sorted(statistics.keys()):
+    #   print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
 
     #print """<tr><td align="center">Report completed.</td></tr>"""
     print "\n</table><hr/>"
