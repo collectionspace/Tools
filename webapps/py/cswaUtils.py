@@ -433,7 +433,8 @@ def listSearchResults(authority, config, displaytype, form, rows):
         for r in rows:
             if r[1] in duplicates:
                 hasDups = True
-                r.append('Duplicate!')
+                r.append('')
+                # r.append('Duplicate!')
             else:
                 r.append('')
                 duplicates.append(r[1])
