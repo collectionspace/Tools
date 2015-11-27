@@ -34,10 +34,21 @@ time perl -ne 'print unless /\(\d+ rows\)/' d2.csv > d3.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
 ##############################################################################
+# run the media query
+##############################################################################
+time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media.sql  -o i4.csv
+# cleanup newlines and crlf in data, then switch record separator.
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' i4.csv > 4solr.$TENANT.media.csv
+rm i4.csv
+##############################################################################
+# add the blob csids to the rest of the internal
+##############################################################################
+time perl mergeObjectsAndMedia.pl 4solr.$TENANT.media.csv d4.csv > d4a.csv
+##############################################################################
 # check latlongs
 ##############################################################################
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4.csv > d5.csv
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d4.csv > errors_in_latlong.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4a.csv > d5.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d4a.csv > errors_in_latlong.csv
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
@@ -54,9 +65,9 @@ python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv gbi
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid metadata+parsednames.csv | head -1 > h
-perl -pe 's/^1\tid/id\tobjcsid_s/' h > header4Solr.csv
-rm h
+grep csid metadata+parsednames.csv | head -1 > header4Solr.csv
+perl -i -pe 's/^1\tid/id\tobjcsid_s/' header4Solr.csv
+perl -i -pe 's/$/blob_ss/' header4Solr.csv
 grep -v csid metadata+parsednames.csv > d7.csv
 python fixfruits.py d7.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.internal.csv
