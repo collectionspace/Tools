@@ -72,12 +72,14 @@ cultivarpattern = re.compile("(.*)'(.*)'")
 
 
 def check4cultivars(name):
-    if not 'cv.' in name:
-        name = cultivarpattern.sub(r'\1 cv. \2', name)
-    else:
-        count.cultivarsinoriginal += 1
-    if 'cv.' in name: count.cultivars += 1
     return name
+    # the following code is now defunct
+    # if not 'cv.' in name:
+    #     name = cultivarpattern.sub(r'\1 cv. \2', name)
+    # else:
+    #     count.cultivarsinoriginal += 1
+    # if 'cv.' in name: count.cultivars += 1
+    # return name
 
 
 def main():
