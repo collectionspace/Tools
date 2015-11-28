@@ -51,8 +51,8 @@ rm i4.csv
 ##############################################################################
 # check latlongs
 ##############################################################################
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4a.csv > d5.csv
-perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d4a.csv > errors_in_latlong.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if  (abs($x[0])<90 && abs($x[1])<180);' d4.csv > d5.csv
+perl -ne '@y=split /\t/;@x=split ",",$y[17];print if !(abs($x[0])<90 && abs($x[1])<180);' d4.csv > errors_in_latlong.csv
 ##############################################################################
 # temporary hack to parse Locality into County/State/Country
 ##############################################################################
