@@ -126,21 +126,21 @@ order by title, description]]>
 			<textField>
 				<reportElement uuid="ccd172fa-2de0-42fa-8bdb-c5373d5b7a03" x="0" y="0" width="40" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{doc_id}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="74bbc319-5476-4350-9043-29cd32744f83" stretchType="RelativeToBandHeight" x="40" y="0" width="255" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{title}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="61620fa5-a1a1-427b-ad11-3cc578ae1867" x="300" y="0" width="75" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
