@@ -6,7 +6,7 @@ DECLARE
 --2 2nd query section from sybase version.  query 1 not needed because just variables
 BEGIN
 open documentRC FOR
-select 'Document' as Content, doc_id, pubdate as date, pages, 
+select 'Document' as Content, doc_id, pubdate as date, pages, code,
    case when pg_info is null then '' else pg_info end as pg_info,
    case when cast_cr = 'true' then 1 else 0 end as cast_cr,
    case when tech_cr = 'true' then 1 else 0 end as tech_cr,
