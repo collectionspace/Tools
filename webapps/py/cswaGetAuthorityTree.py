@@ -5,6 +5,8 @@ import pgdb
 
 conn = None
 
+timeoutcommand = "set statement_timeout to 600000; SET NAMES 'utf8';"
+
 
 def openConnection(connect_string):
     global conn
@@ -95,6 +97,7 @@ def updateAuthorityHierarchyTable(authority, primarytype, n):
     #print '****',n
     #print query
     cursor = conn.cursor()
+    cursor.execute(timeoutcommand)
     cursor.execute(query)
     res = cursor.rowcount
     cursor.close()

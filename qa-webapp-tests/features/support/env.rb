@@ -18,21 +18,21 @@ Capybara::Screenshot.prune_strategy = :keep_last_run
 # Uncomment below to use the Selenium webdriver with 'headless'
 # Note that this only works for Linux machines due to X graphics.
 #########################################################################################
-if Capybara.current_driver == :selenium
-  require 'headless'
-  headless = Headless.new
-  headless.start
-end
+#if Capybara.current_driver == :selenium
+#  require 'headless'
+#  headless = Headless.new
+#  headless.start
+#end
 
 #########################################################################################
 # Uncomment below to use the Poltergeist webdriver. 
 # Tested successfully on OS X and Linux.
 #########################################################################################
-# require 'capybara/poltergeist'
-# Capybara.register_driver :poltergeist do |app|
-#   Capybara::Poltergeist::Driver.new(app, :timeout => 45, :js_errors =>false)
-# end
-# Capybara.default_driver = :poltergeist
+require 'capybara/poltergeist'
+Capybara.register_driver :poltergeist do |app|
+  Capybara::Poltergeist::Driver.new(app, :timeout => 45, :js_errors =>false)
+end
+Capybara.default_driver = :poltergeist
 
 #########################################################################################
 # Uncomment below to use the capybara-webkit webdriver.
@@ -49,9 +49,9 @@ end
 ##########################################################################
 # Uncomment the code below to run tests on chrome. More info at README.md
 ##########################################################################
-# Capybara.register_driver :chrome do |app|
-#   Capybara::Selenium::Driver.new(app, :browser => :chrome)
-# end
-# Capybara.javascript_driver = :chrome
+Capybara.register_driver :chrome do |app|
+  Capybara::Selenium::Driver.new(app, :browser => :chrome)
+end
+Capybara.javascript_driver = :chrome
 
 World(Capybara)

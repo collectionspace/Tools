@@ -51,7 +51,7 @@ order by coc.objectnumber]]>
 			<textField pattern="EEEEE dd MMMMM yyyy">
 				<reportElement uuid="06fd2da7-1de6-4e3a-92c1-c05b3e6872a4" mode="Transparent" x="0" y="2" width="570" height="16" forecolor="#000000"/>
 				<textElement textAlignment="Center">
-					<font fontName="Times New Roman" size="10"/>
+					<font fontName="Serif" pdfFontName="Times-Roman" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
@@ -87,21 +87,21 @@ order by coc.objectnumber]]>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="61620fa5-a1a1-427b-ad11-3cc578ae1867" x="0" y="0" width="70" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accession_id}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="5f715b3d-dfd8-45e5-9f47-454e2b7a143b" x="70" y="0" width="210" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{collectionobject_csid}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="b2774bdb-bff4-407c-87f7-b3917d04807d" stretchType="RelativeToTallestObject" x="280" y="0" width="290" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{scientific_name}]]></textFieldExpression>
 			</textField>
@@ -112,14 +112,14 @@ order by coc.objectnumber]]>
 			<textField>
 				<reportElement uuid="8fc0002a-ee4c-4378-a211-77d7f7934068" x="217" y="8" width="80" height="16"/>
 				<textElement textAlignment="Right">
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement uuid="45792f78-4cd1-42b7-b114-88e573a9682e" x="296" y="8" width="40" height="16"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>

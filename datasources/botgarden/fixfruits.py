@@ -23,6 +23,6 @@ if __name__ == "__main__":
         datacolumns = line.split('\t')
         datacolumns[54] = rpl(datacolumns[54],['t',])
         datacolumns[55] = rpl(datacolumns[55],['Some','Many'])
-        print '\t'.join(datacolumns)
+        print '\t'.join(datacolumns),
 
 
