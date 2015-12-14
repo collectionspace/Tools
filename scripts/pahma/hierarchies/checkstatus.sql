@@ -8,5 +8,5 @@ select count(*) from utils.placename_hierarchy ;
 select count(*) from utils.taxon_hierarchy ;
 select count(*) from utils.object_culture_hierarchy ;
 select count(*) from utils.object_material_hierarchy ;
-#select count(*) from utils.current_location_view ;
-#select count(*) from utils.object_place_view ;
+select count(*) from utils.current_location_view ;
+select count(*) from utils.object_place_view ;

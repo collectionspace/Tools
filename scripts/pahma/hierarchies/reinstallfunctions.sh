@@ -1,26 +1,27 @@
 # re-install all functions
-./runpsql.sh pahma culture_hierarchy/CreateCultureHierarchyTable.sql
-#./runpsql.sh pahma culture_hierarchy/object_culture_hierarchy_table.sql
-./runpsql.sh pahma culture_hierarchy/PopulateCultureHierarchyTable.sql
-./runpsql.sh pahma culture_hierarchy/RefreshCultureHierarchyTable.sql
-./runpsql.sh pahma culture_hierarchy/UpdateCultureHierarchyTable.sql
-#./runpsql.sh pahma material_hierarchy/AddMaterialtoOPL.sql
-./runpsql.sh pahma material_hierarchy/CreateMaterialHierarchyTable.sql
-#./runpsql.sh pahma material_hierarchy/object_material_hierarchy_table.sql
-./runpsql.sh pahma material_hierarchy/PopulateMaterialHierarchyTable.sql
-./runpsql.sh pahma material_hierarchy/RefreshMaterialHierarchyTable.sql
-./runpsql.sh pahma material_hierarchy/UpdateMaterialHierarchyTable.sql
-./runpsql.sh pahma object_location/CreateCurrentLocationTable.sql
-./runpsql.sh pahma object_location/CreateCurrentLocationView.sql
-./runpsql.sh pahma object_location/CreateObjectPlaceLocationTable.sql
-./runpsql.sh pahma object_location/CreateObjectPlaceTable.sql
-./runpsql.sh pahma object_location/CreateObjectPlaceView.sql
-./runpsql.sh pahma object_location/RefreshObjectPlaceLocationTable.sql
-./runpsql.sh pahma object_location/UpdateObjectPlaceLocation.sql
-./runpsql.sh pahma place_hierarchy/CreatePlacenameHierarchyTable.sql
-./runpsql.sh pahma place_hierarchy/PopulatePlacenameHierarchyTable.sql
-./runpsql.sh pahma place_hierarchy/UpdatePlacenameHierarchyTable.sql
-./runpsql.sh pahma taxon_hierarchy/CreateTaxonHierarchyTable.sql
-./runpsql.sh pahma taxon_hierarchy/PopulateTaxonHierarchyTable.sql
-./runpsql.sh pahma taxon_hierarchy/RefreshTaxonHierarchyTable.sql
-./runpsql.sh pahma taxon_hierarchy/UpdateTaxonHierarchyTable.sql
+./runpsql.sh pahma 5307 culture_hierarchy/CreateCultureHierarchyTable.sql
+./runpsql.sh pahma 5307 culture_hierarchy/PopulateCultureHierarchyTable.sql
+./runpsql.sh pahma 5307 culture_hierarchy/RefreshCultureHierarchyTable.sql
+./runpsql.sh pahma 5307 culture_hierarchy/UpdateCultureHierarchyTable.sql
+./runpsql.sh pahma 5307 material_hierarchy/CreateMaterialHierarchyTable.sql
+./runpsql.sh pahma 5307 material_hierarchy/object_material_hierarchy_table.sql
+./runpsql.sh pahma 5307 material_hierarchy/PopulateMaterialHierarchyTable.sql
+./runpsql.sh pahma 5307 material_hierarchy/RefreshMaterialHierarchyTable.sql
+./runpsql.sh pahma 5307 material_hierarchy/UpdateMaterialHierarchyTable.sql
+./runpsql.sh pahma 5307 object_location/CreateCurrentLocationTable.sql
+./runpsql.sh pahma 5307 object_location/CreateCurrentLocationView.sql
+./runpsql.sh pahma 5307 object_location/CreateObjectPlaceLocationTable.sql
+./runpsql.sh pahma 5307 object_location/CreateObjectPlaceTable.sql
+./runpsql.sh pahma 5307 object_location/CreateObjectPlaceView.sql
+./runpsql.sh pahma 5307 object_location/RefreshObjectPlaceLocationTable.sql
+./runpsql.sh pahma 5307 object_location/UpdateObjectPlaceLocation.sql
+./runpsql.sh pahma 5307 place_hierarchy/CreatePlacenameHierarchyTable.sql
+./runpsql.sh pahma 5307 place_hierarchy/PopulatePlacenameHierarchyTable.sql
+./runpsql.sh pahma 5307 place_hierarchy/UpdatePlacenameHierarchyTable.sql
+./runpsql.sh pahma 5307 taxon_hierarchy/CreateTaxonHierarchyTable.sql
+./runpsql.sh pahma 5307 taxon_hierarchy/PopulateTaxonHierarchyTable.sql
+./runpsql.sh pahma 5307 taxon_hierarchy/RefreshTaxonHierarchyTable.sql
+./runpsql.sh pahma 5307 taxon_hierarchy/UpdateTaxonHierarchyTable.sql
+# it seems these 2 query have to run after the object_place_location queries
+./runpsql.sh pahma 5307 material_hierarchy/AddMaterialtoOPL.sql
+./runpsql.sh pahma 5307 culture_hierarchy/object_culture_hierarchy_table.sql
