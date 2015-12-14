@@ -4,7 +4,6 @@
 ./runpsql.sh pahma 5307 culture_hierarchy/RefreshCultureHierarchyTable.sql
 ./runpsql.sh pahma 5307 culture_hierarchy/UpdateCultureHierarchyTable.sql
 ./runpsql.sh pahma 5307 material_hierarchy/CreateMaterialHierarchyTable.sql
-./runpsql.sh pahma 5307 material_hierarchy/object_material_hierarchy_table.sql
 ./runpsql.sh pahma 5307 material_hierarchy/PopulateMaterialHierarchyTable.sql
 ./runpsql.sh pahma 5307 material_hierarchy/RefreshMaterialHierarchyTable.sql
 ./runpsql.sh pahma 5307 material_hierarchy/UpdateMaterialHierarchyTable.sql
