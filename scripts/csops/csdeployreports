@@ -1,3 +1,5 @@
+cd ~/src/cspace-deployment/Tools
+git pull
 cp ~/src/cspace-deployment/Tools/reports/`csname`/*.jrxml ~/`csservname`/cspace/reports
 rm ~/`csservname`/cspace/reports/*.jasper
 echo "reports for `csname` redeployed"
