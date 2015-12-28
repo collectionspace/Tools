@@ -18,10 +18,9 @@
 date
 cd /home/app_solr/solrdatasources/pahma
 ##############################################################################
-# move the current set of extracts to temp (thereby saving the previous run, just in case)
-# note that in this case there are 3 nightly scripts, public, internal, and locations,
-# and internal depends on data created by public, so this case has to be handled
-# specially, and the scripts need to run in order: public > internal > locations
+# note that there are 3 nightly scripts, public, internal, and locations,
+# and the scripts need to run in order: public > internal > locations.
+# internal (this script) depends on data created by public
 # so in this case, the internal script cannot 'stash' any files...they
 # have already been stashed by the public script, and this script needs one
 # of them.
@@ -38,6 +37,11 @@ USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 export NUMCOLS=38
+##############################################################################
+# get rid of these if they exist
+##############################################################################
+rm -f 4solr.$TENANT.allmedia.csv.gz 4solr.$TENANT.internal.csv.gz
+rm -f 4solr.$TENANT.allmedia.csv    4solr.$TENANT.internal.csv
 ##############################################################################
 # run the "all media query"
 ##############################################################################
@@ -89,6 +93,5 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
-rm 4solr.$TENANT.allmedia.csv.gz 4solr.$TENANT.internal.csv.gz
 gzip 4solr.*.csv
 date
