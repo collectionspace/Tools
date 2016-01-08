@@ -78,9 +78,8 @@ The steps are as follows:
 13. update the desired server (dev or prod) with the new .jrxml file as follows:
     a. sign into the desired server: ssh cspace-dev.cspace.berkeley.edu (or own local dev server)
     b. log in as the application owner for the deployment you want to operate: e.g. sudo su - app_pahma
-    c. update the git repo: cd ~/src/cspace-deployment/Tools ; git pull -v ; cd 
-    d. run the deployment script: csdeployreports
-    e. logout: exit
+    c. run the deployment script: csdeployreports  (this re-deploys *all* the reports, which will do the trick)
+    d. logout: exit
     
     if this report will display in a Django web app (see PAHMA-823 for details of why you have to do this) also do the following:
     
