@@ -29,7 +29,6 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<commit/>
 time curl -S -s "http://localhost:8983/solr/${TENANT}-media/update/csv?commit=true&header=true&trim=true&separator=%09&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.media.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 #rm media.csv
-rm 4solr.*.media.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
 date

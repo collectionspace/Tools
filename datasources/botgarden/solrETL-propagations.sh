@@ -52,7 +52,6 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update" --data '<c
 time curl -S -s "http://localhost:8983/solr/${TENANT}-propagations/update/csv?commit=true&header=true&trim=true&separator=%09&encapsulator=\\" --data-binary @4solr.$TENANT.propagations.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm p?.csv header4Solr.csv*
-rm 4solr.$TENANT.propagations.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f 4solr.*.csv
 date
