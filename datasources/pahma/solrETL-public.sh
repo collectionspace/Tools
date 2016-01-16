@@ -150,7 +150,6 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=t
 ##############################################################################
 # get rid of intermediate files
 rm d?.csv m?.csv part*.csv basic.csv
-rm 4solr.*.csv.gz
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
 date
