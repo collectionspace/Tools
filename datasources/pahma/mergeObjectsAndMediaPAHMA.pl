@@ -47,7 +47,7 @@ while (<METADATA>) {
   my ($id, $objectid, @rest) = split /$delim/;
   # handle header line
   if ($id eq 'id') {
-    print $_ . $delim . join($delim,qw(cards_ss blobs_ss primaryimage_s imagetypes_ss)) . "\n";
+    print $_ . $delim . join($delim,qw(blobs_ss cards_ss primaryimage_s imagetypes_ss)) . "\n";
     next;
   }
   $count{'metadata'}++;
@@ -57,7 +57,7 @@ while (<METADATA>) {
   # insert list of blobs, etc. as final columns
     $blobs{$objectid}{'type'} =~ s/,$//;
     $blobs{$objectid}{'type'} = join(',', sort(split(',', $blobs{$objectid}{'type'})));
-    for my $column (qw(card image primary type)) {
+    for my $column (qw(image card primary type)) {
       $mediablobs .= $blobs{$objectid}{$column} . $delim;
     }
     $count{'object: ' . $blobs{$objectid}{'type'}}++;
