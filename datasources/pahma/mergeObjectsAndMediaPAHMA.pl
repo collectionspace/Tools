@@ -7,6 +7,7 @@ open MEDIA,$ARGV[0] || die "couldn't open media file $ARGV[0]";
 my %blobs ;
 my %seen;
 my $restricted = '59a733dd-d641-4e1a-8552';
+my $runtype = $ARGV[2]; # generate media for public or internal
 
 while (<MEDIA>) {
   $count{'media'}++;
@@ -29,7 +30,10 @@ while (<MEDIA>) {
     $blobs{$objectcsid}{'card'} .= $blobcsid   . ',' ;
   }
   else {
-    $blobcsid = $ispublic eq 'public' ? $blobcsid   . ',' : $restricted . ',';
+    # if this run is to generate the public datastore, use the restricted image if this blob is restricted.
+    if ($runtype eq 'public') {
+      $blobcsid = $ispublic eq 'public' ? $blobcsid   . ',' : $restricted . ',';
+    }
     if ($primarydisplay eq 't') {
       $blobs{$objectcsid}{'primary'} = $blobcsid;
     }
@@ -65,6 +69,7 @@ while (<METADATA>) {
   }
   else {
     $count{'unmatched'}++;
+    $mediablobs = $delim x 4;
   }
   $mediablobs =~ s/,$delim/$delim/g; # get rid of trailing commas
   print $_ . $mediablobs . "\n";
