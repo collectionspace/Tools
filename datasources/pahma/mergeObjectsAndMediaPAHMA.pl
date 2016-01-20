@@ -47,7 +47,7 @@ while (<METADATA>) {
   my ($id, $objectid, @rest) = split /$delim/;
   # handle header line
   if ($id eq 'id') {
-    print $_ . $delim . join($delim,qw(blobs_ss cards_ss primaryimage_s imagetypes_ss)) . "\n";
+    print $_ . $delim . join($delim,qw(blob_ss card_ss primaryimage_s imagetype_ss)) . "\n";
     next;
   }
   $count{'metadata'}++;
@@ -58,7 +58,7 @@ while (<METADATA>) {
     $blobs{$objectid}{'type'} =~ s/,$//;
     $blobs{$objectid}{'type'} = join(',', sort(split(',', $blobs{$objectid}{'type'})));
     for my $column (qw(image card primary type)) {
-      $mediablobs .= $blobs{$objectid}{$column} . $delim;
+      $mediablobs .= $delim . $blobs{$objectid}{$column};
     }
     $count{'object: ' . $blobs{$objectid}{'type'}}++;
     $count{'matched'}++;
@@ -67,7 +67,7 @@ while (<METADATA>) {
     $count{'unmatched'}++;
   }
   $mediablobs =~ s/,$delim/$delim/g; # get rid of trailing commas
-  print $_ . $delim . $mediablobs . "\n";
+  print $_ . $mediablobs . "\n";
 }
 
 foreach my $s (sort keys %count) {
