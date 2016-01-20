@@ -28,8 +28,8 @@ process.on('SIGINT', function() {
 
 let cspace = new CollectionSpace({
   host: process.env.CSPACE_HOST,
-  port: '',
-  ssl: true,
+  port: process.env.CSPACE_PORT,
+  ssl: (process.env.CSPACE_SSL === 'true'),
   tenant: process.env.CSPACE_TENANT
 });
 
@@ -41,6 +41,35 @@ module.exports = {
       connect()
         .then(() => {
           return processInputFile(rowHandler, stopOnFailedRow);
+        })
+        .then(disconnect)
+        .then(finish)
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          if (error && (error === exitRequest)) {
+            log.info('Exiting by request: ' + error.reason);
+            
+            resolve();
+          }
+          else {
+            log.error(error);
+        
+            reject(error);
+          }
+        });
+    });
+  },
+  
+  loadIterable({items: itemProducer, onItem: itemHandler, stopOnFailedItem}) {
+    return new Promise((resolve, reject) => {
+      connect()
+        .then(() => {
+          return getItems(itemProducer);
+        })
+        .then((items) => {
+          return processIterable(items, itemHandler, stopOnFailedItem);
         })
         .then(disconnect)
         .then(finish)
@@ -81,6 +110,16 @@ function finish() {
   log.info('Loading complete');
   
   return Promise.resolve();
+}
+
+function getItems(itemProducer) {
+  log.info('Getting items');
+  
+  if (itemProducer) {
+    return itemProducer(cspace);
+  }
+  
+  return Promise.resolve([]);
 }
 
 function processInputFile(rowHandler, stopOnFailedRow) {
@@ -136,6 +175,61 @@ function processInputFile(rowHandler, stopOnFailedRow) {
     transformer.on('error', (error) => {
       reject(error);
     });
+  });
+}
+
+function processIterable(items, itemHandler, stopOnFailedItem) {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    
+    let processor = Q.async(function* () {
+      for (let item of items) {
+        try {
+          yield processItem(item, itemHandler);
+        }
+        catch(error) {
+          if (stopOnFailedItem) {
+            log.warn('Stopping processing because of a failed item');
+            throw(error);
+          }
+          else {
+            // Log the error, but let processing continue.
+            log.warn(error);
+          }
+        }
+
+        count++;
+        
+        if (exitRequest) {
+          throw exitRequest;
+        }
+      
+        yield checkConnection();
+      }
+    });
+  
+    processor()
+      .then(() => {
+        log.info('Processed ' + count + ' items');
+        resolve(count);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+function processItem(item, itemHandler) {
+  return new Promise((resolve, reject) => {
+    let processor = Q.async(itemHandler);
+  
+    processor(item, cspace)
+      .then(() => {
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
 
