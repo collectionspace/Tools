@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -o verbose
 # note the assumptions made by this script:
 # - it will run in cd /home/app_cinefiles/bin/qc
@@ -6,10 +7,9 @@ set -o verbose
 # - config file cinefilesProd.cfg exists with the needed paramaters.
 #
 cd /home/app_cinefiles/bin/qc
-source venv/bin/activate
 rdate=`date --date="last month" +%Y-%m`
 REPORT=image_qc_report-${rdate}
-time python checkBlobs.py db cinefilesProd `date --date="last month" +%Y-%m-01` `date --date="this month" +%Y-%m-01` $REPORT.csv
+time /var/www/venv/bin/python checkBlobs.py db cinefilesProd `date --date="last month" +%Y-%m-01` `date --date="this month" +%Y-%m-01` $REPORT.csv
 perl -ne '@x = split /\t/; print if $x[1] eq "False"; ' $REPORT.csv > bad.temp
 head -1 $REPORT.csv | cat - bad.temp | perl -pe 's/\r//g' > $REPORT.problems.csv
 rm bad.temp
