@@ -7,11 +7,12 @@ if [[ -z $CS_TEMP_MMIN ]]; then
 fi
 
 TEMP_DIR=~/`~/bin/csservname`/temp
-COUNT=0
 
 cd "$TEMP_DIR"
 
 echo "`date`: Cleaning `pwd`"
+
+DIR_COUNT=0
 
 while read dir
 do
@@ -22,8 +23,25 @@ do
 	if [[ -d $dir ]]; then
 		echo "ERROR: Failed to remove $dir"
 	else
-		COUNT=$((COUNT+1))
+		DIR_COUNT=$((DIR_COUNT+1))
 	fi
 done < <(find . -maxdepth 1 -type d -name '*-*-*-*-*' -mmin +${CS_TEMP_MMIN})
 
-echo "Removed $COUNT directories from `pwd`"
+echo "Removed $DIR_COUNT directories from `pwd`"
+
+FILE_COUNT=0
+
+while read file
+do
+	echo "Removing $file"
+
+	/bin/rm "$file"
+
+	if [[ -f $file ]]; then
+		echo "ERROR: Failed to remove $file"
+	else
+		FILE_COUNT=$((FILE_COUNT+1))
+	fi
+done < <(find . -maxdepth 1 -type f -name '*.tmp' -o -name '*.xml' -o -name '*.properties' -mmin +${CS_TEMP_MMIN})
+
+echo "Removed $FILE_COUNT files from `pwd`"
