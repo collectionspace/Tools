@@ -178,7 +178,7 @@ def getBlobsFromDB(config, startdate, enddate, binariesrepo):
             m = re.search(r'(..)(..)', tif['md5'])
             tif['fullpathtofile'] = binariesrepo % (
                 # nb: we are assuming here that this app is running with the CSpace variable set...
-                environ['CATALINA_HOME'], m.group(1), m.group(2), tif['md5'])
+                m.group(1), m.group(2), tif['md5'])
 
             records.append(tif)
         return records

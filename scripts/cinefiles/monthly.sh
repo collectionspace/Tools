@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -o verbose
 # note the assumptions made by this script:
-# - it will run in cd /home/app_cinefiles/bin/qc
+# - it will run in ~/bin/qc
 # - it will run at the beginning of a month and report on the previous month
 # - monthly reports will be retained forever..this script does not groom them
 # - config file cinefilesProd.cfg exists with the needed paramaters.
 #
-cd /home/app_cinefiles/bin/qc
+cd ~/bin/qc
 rdate=`date --date="last month" +%Y-%m`
 REPORT=image_qc_report-${rdate}
 time /var/www/venv/bin/python checkBlobs.py db cinefilesProd `date --date="last month" +%Y-%m-01` `date --date="this month" +%Y-%m-01` $REPORT.csv
@@ -18,6 +18,5 @@ bad=`wc -l $REPORT.problems.csv | cut -f1 -d" "`
 all=$((all-1))
 bad=$((bad-1))
 echo "bad: $bad :: all: $all"
-rm $REPORT.csv.gz
-gzip $REPORT.csv
+gzip -f $REPORT.csv
 echo "Report for the month starting $rdate: $all images, $bad problems, see attached." | mail -a $REPORT.problems.csv -a $REPORT.csv.gz -s "image qc for $rdate: $all images, $bad problems" -- $1
