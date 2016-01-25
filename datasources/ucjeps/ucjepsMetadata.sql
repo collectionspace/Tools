@@ -5,7 +5,6 @@ select
                 then regexp_replace(regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
     end as determination_s,
     ttg.termformatteddisplayname as termformatteddisplayname_s,
-    tig.qualifier as determinationqualifier_s,
     regexp_replace(regexp_replace(tnh.family, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') as family_s,
     tnh.taxonbasionym as taxonbasionym_s,
     tu.taxonmajorgroup as majorgroup_s,
@@ -151,6 +150,7 @@ select
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as alllocalities_ss,
+  tig.qualifier as determinationqualifier_s,
   CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s,
   com.item AS comment_s
 
