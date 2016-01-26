@@ -150,9 +150,9 @@ select
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as alllocalities_ss,
-  tig.qualifier as determinationqualifier_s,
   CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s,
-  com.item AS comment_s
+  tig.qualifier as determinationqualifier_s,
+  com.item AS comments_ss
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
