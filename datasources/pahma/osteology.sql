@@ -1,7 +1,7 @@
 SELECT
   cc.id                              AS "id",
   h1.name                            AS "csid_s",
-  cc.objectnumber_s                  AS "objectnumber_s",
+  cc.objectnumber                    AS "objectnumber_s",
   ost.acetabulum_l                   AS "acetabulum_l_s",
   ost.acetabulum_r                   AS "acetabulum_r_s",
   ost.auricular_surf_l               AS "auricular_surf_l_s",

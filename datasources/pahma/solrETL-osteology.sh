@@ -16,7 +16,7 @@ HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
-export NUMCOLS=61
+export NUMCOLS=62
 ##############################################################################
 # extract media info from CSpace
 ##############################################################################
