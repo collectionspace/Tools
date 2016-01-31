@@ -86,5 +86,5 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=t
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
-gzip 4solr.*.csv
+gzip -f 4solr.*.csv
 date
