@@ -4,15 +4,15 @@ h2.name AS objectid_s,
 cc.objectnumber AS objectnumber_s,
 mc.description AS description_s,
 b.name AS name_s,
-mc.creator AS creator_s,
+regexp_replace(mc.creator, '^.*\)''(.*)''$', '\1') AS creator_s,
 mc.creator AS creatorrefname_s,
 mc.blobcsid AS blob_ss,
 mc.copyrightstatement AS copyrightstatement_s,
 mc.identificationnumber AS identificationnumber_s,
-mc.rightsholder AS rightsholder_s,
+regexp_replace(mc.rightsholder, '^.*\)''(.*)''$', '\1') AS rightsholder_s,
 mc.rightsholder AS rightsholderrefname_s,
-mc.contributor AS contributorrefname_s,
-mc.contributor AS contributor_s
+regexp_replace(mc.contributor, '^.*\)''(.*)''$', '\1') AS contributor_s,
+mc.contributor AS contributorrefname_s
 
 FROM media_common mc
 
