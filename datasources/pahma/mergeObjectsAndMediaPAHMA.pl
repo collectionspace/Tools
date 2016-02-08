@@ -27,7 +27,8 @@ while (<MEDIA>) {
   $ispublic = 'notpublic' if ($pahmatmslegacydepartment =~ /Human Remains/i) ;
   $ispublic = 'notpublic' if ($pahmatmslegacydepartment =~ /NAGPRA-associated Funerary Objects/i) ;
   $ispublic = 'notpublic' if ($objectstatus =~ /culturally/i) ;
-  $ispublic = 'notpublic' if ($approvedforweb eq 'f') ;
+  # NB: the test 'burial' in context of use occurs below -- we only mask if the FCP is in North America
+  $ispublic = 'notapprovedforweb' if ($approvedforweb eq 'f') ;
   # warn $ispublic . $imagetype;
   $count{$imagetype}++;
   $count{$ispublic}++;
@@ -65,7 +66,12 @@ while (<METADATA>) {
   my $mediablobs;
   my $foundobject = $blobs{$objectid};
   if ($foundobject) {
-  # insert list of blobs, etc. as final columns
+    # if context of use field contains the word burial
+    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[33] =~ /United States/i);
+    # if object name contains something like "charm stone"
+    $blobs{$objectcsid}{'image'} = $restricted if ($name =~ /charm.*stone/i && @rest[33] =~ /United States/i);
+
+    # insert list of blobs, etc. as final columns
     $blobs{$objectid}{'type'} =~ s/,$//;
     $blobs{$objectid}{'type'} = join(',', sort(split(',', $blobs{$objectid}{'type'})));
     $blobs{$objectid}{'hasimages'} = 'no' unless $blobs{$objectid}{'hasimages'} eq 'yes';;
