@@ -14,24 +14,22 @@ mc.rightsholder AS rightsholderrefname_s,
 regexp_replace(mc.contributor, '^.*\)''(.*)''$', '\1') AS contributor_s,
 mc.contributor AS contributorrefname_s,
 regexp_replace(regexp_replace(mu.scientifictaxonomy, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') AS scientifictaxonomy_s,
--- regexp_replace(regexp_replace(tnh.family, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') AS family_s,
-'' AS family_s,
--- tu.taxonmajorgroup AS majorgroup_s,
-'' AS majorgroup_s,
--- NOT mu.majorcategory, this is empty since this is now a dynamic vocab!
--- mum.item AS majorcategory_s,
-'' AS majorcategory_s,
--- mct.item AS typeofmedia_s
-'' AS typeofmedia_s,
+regexp_replace(regexp_replace(tnh.family, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') AS family_s,
+tu.taxonmajorgroup AS majorgroup_s,
+mum.item AS morphologycategoryrefname_s,
+regexp_replace(mum.item, '^.*\)''(.*)''$', '\1') AS morphologycategory_s,
+mu.majorcategory AS majorcategoryrefname_s,
+regexp_replace(mu.majorcategory, '^.*\)''(.*)''$', '\1') AS majorcategory_s,
+mct.item AS typeofmedia_s,
 mu.locality AS locality_s,
-'' AS mediadate_s,
+sdg.datedisplaydate as mediadate_s,
 mu.posttopublic AS posttopublic_s,
 mu.handwritten AS handwritten_s,
 mu.collector AS collector_s
 
 FROM media_common mc
 
-JOIN media_ucjeps mu on (mc.id=mu.id and mu.posttopublic='yes')
+JOIN media_ucjeps mu on (mc.id=mu.id and mu.posttopublic !='no')
 JOIN misc ON (mc.id = misc.id AND misc.lifecyclestate <> 'deleted')
 LEFT OUTER JOIN hierarchy h1 ON (h1.id = mc.id)
 LEFT OUTER JOIN relations_common r on (h1.name = r.objectcsid)
@@ -39,18 +37,18 @@ LEFT OUTER JOIN hierarchy h2 on (r.subjectcsid = h2.name)
 LEFT OUTER JOIN collectionobjects_common cc on (h2.id = cc.id)
 LEFT OUTER JOIN collectionobjects_ucjeps cop on (h2.id = cop.id)
 
---- still need to work these joins out...
---
--- JOIN media_common_typelist mct
--- JOIN media_ucjeps_morphologycategories mum
---
--- LEFT OUTER JOIN hierarchy htig
---         on (cc.id = htig.parentid and htig.pos = 0
---         and htig.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
--- LEFT OUTER JOIN taxonomicIdentGroup tig on (tig.id = htig.id)
--- LEFT OUTER JOIN taxon_common tc on (tig.taxon = tc.refname)
--- LEFT OUTER JOIN taxon_ucjeps tu on (tu.id = tc.id)
--- LEFT OUTER JOIN taxon_naturalhistory tnh on (tnh.id = tc.id)
+LEFT OUTER JOIN hierarchy hsdg
+        on (mc.id = hsdg.parentid and hsdg.name = 'media_common:dateGroupList' and hsdg.pos = 0)
+LEFT OUTER JOIN structureddategroup sdg on (sdg.id = hsdg.id)
+
+LEFT OUTER JOIN media_common_typelist mct on (mct.id = mc.id and mct.pos = 0)
+LEFT OUTER JOIN media_ucjeps_morphologycategories mum on (mum.id = mc.id and mum.pos = 0)
+
+LEFT OUTER JOIN taxon_common tc on (mu.scientifictaxonomy = tc.refname)
+LEFT OUTER JOIN taxon_ucjeps tu on (tu.id = tc.id)
+LEFT OUTER JOIN taxon_naturalhistory tnh on (tnh.id = tc.id)
 
 JOIN hierarchy h3 ON (mc.blobcsid = h3.name)
-LEFT OUTER JOIN blobs_common b on (h3.id = b.id);
+LEFT OUTER JOIN blobs_common b on (h3.id = b.id)
+
+WHERE mct.item IN ('Digital Image','Slide (Photograph)');
