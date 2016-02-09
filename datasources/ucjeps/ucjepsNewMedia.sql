@@ -22,7 +22,7 @@ mu.majorcategory AS majorcategoryrefname_s,
 regexp_replace(mu.majorcategory, '^.*\)''(.*)''$', '\1') AS majorcategory_s,
 mct.item AS typeofmedia_s,
 mu.locality AS locality_s,
-sdg.datedisplaydate as mediadate_s,
+dg.datedisplaydate as mediadate_s,
 mu.posttopublic AS posttopublic_s,
 mu.handwritten AS handwritten_s,
 mu.collector AS collector_s
@@ -39,7 +39,8 @@ LEFT OUTER JOIN collectionobjects_ucjeps cop on (h2.id = cop.id)
 
 LEFT OUTER JOIN hierarchy hsdg
         on (mc.id = hsdg.parentid and hsdg.name = 'media_common:dateGroupList' and hsdg.pos = 0)
-LEFT OUTER JOIN structureddategroup sdg on (sdg.id = hsdg.id)
+-- nb: should be structureddategroup, but for some reason it isn't
+LEFT OUTER JOIN dategroup dg on (dg.id = hsdg.id)
 
 LEFT OUTER JOIN media_common_typelist mct on (mct.id = mc.id and mct.pos = 0)
 LEFT OUTER JOIN media_ucjeps_morphologycategories mum on (mum.id = mc.id and mum.pos = 0)
