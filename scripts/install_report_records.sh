@@ -44,11 +44,11 @@ function test {
 
 test ./scripts/create-report-records.sh "Acquisition Summary" "An Acquisition Summary report" Acquisition true false false true acq_basic.jrxml
 test ./scripts/create-report-records.sh "Acquisition Basic List" "Catalog info for objects related to an acquisition record" Acquisition true false false true Acq_List_Basic.jrxml
-test ./scripts/create_report_records.sh "Condition Check Basic List" "Catalog info for objects related to a condition check record" Conditioncheck true false false true CC_List_Basic.jrxml
-test ./scripts/create_report_records.sh "Exhibition Basic List" "Catalog info for objects related to a exhibition record" Exhibition true false false true Exhibition_List_Basic.jrxml
-test ./scripts/create_report_records.sh "Group Basic List" "Catalog info for objects related to a group record" Group true false false true Group_List_Basic.jrxml
-test ./scripts/create_report_records.sh "Loan-in Basic List" "Catalog info for objects related to a Loan-in record" Loanin true false false true LoansIn_List_Basic.jrxml
-test ./scripts/create_report_records.sh "Loan-out Basic List" "Catalog info for objects related to a Loan-out record" Loanout true false false true LoansOut_List_Basic.jrxml
+test ./scripts/create-report-records.sh "Condition Check Basic List" "Catalog info for objects related to a condition check record" Conditioncheck true false false true CC_List_Basic.jrxml
+test ./scripts/create-report-records.sh "Exhibition Basic List" "Catalog info for objects related to a exhibition record" Exhibition true false false true Exhibition_List_Basic.jrxml
+test ./scripts/create-report-records.sh "Group Basic List" "Catalog info for objects related to a group record" Group true false false true Group_List_Basic.jrxml
+test ./scripts/create-report-records.sh "Loan-in Basic List" "Catalog info for objects related to a Loan-in record" Loanin true false false true LoansIn_List_Basic.jrxml
+test ./scripts/create-report-records.sh "Loan-out Basic List" "Catalog info for objects related to a Loan-out record" Loanout true false false true LoansOut_List_Basic.jrxml
 
 
 #curl -G -v http://localhost:8180/cspace-services/reports --data-urlencode "as=reports_common:name ILIKE 'Acquisition Summary%'" -u admin@core.collectionspace.org:Administrator
