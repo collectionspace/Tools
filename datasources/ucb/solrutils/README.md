@@ -40,7 +40,7 @@ git clone https://github.com/cspace-deployment/Tools
 # run the following script which unpacks solr, makes the UCB cores in multicore, copies the customized files needed
 #
 cd ~/Tools/datasources/ucb/solrutils
-./configureMultiCoreSolr.sh /User/myhomedir/Tools solr4 4.10.4
+./configureMultiCoreSolr.sh ~/Tools ~/solr4 4.10.4
 #
 # NB: if solr is *already* running and you did not kill it before reconfiguring the cores, you'll need to 
 #     kill it in order to start it again so it will see the new cores.
@@ -64,7 +64,25 @@ cp ~/Tools/datasources/ucb/solrutils/startSolr.sh .
 mkdir ~/4solr
 cd ~/4solr
 ~/Tools/datasources/ucb/solrutils/scp4solr.sh
-# 
+#
+# NB: this script makes *a lot* of assumptions!
+# * You must be able to connect to the CSpace production server, cspace-prod.cspace.berkeley.edu
+#   via secure connection, i.e. ssh.
+#   to check if you can get in, try "ssh cspace-prod.cspace.berkeley.edu". if this does not
+#   work, debug that issue first before proceeding. You may wish to try getting the files
+#   from Dev (see below).
+# * If you're off-campus, you will probably need a VPN connection. The only evidence of this
+#   might be that invoking the script does nothing -- just hangs
+# * If you get 'Permission denied', it may be because the user name being supplied by default
+#   is not the same as your login to the server.
+#   In this case, try the following:
+#       scp <your-dev-login>@cspace-prod.cspace.berkeley.edu:/tmp/4solr*.gz .
+# * You may not have credentials for Prod (only dev). In this case, try:
+#       scp <your-dev-login>@cspace-dev.cspace.berkeley.edu:/tmp/4solr*.gz .
+#   (this will get you whatever is on Dev, which may not be the latest versions)
+# * In any case, if you have to do the scp by hand, you'll also need to uncompress the files by hand:
+#       gunzip -f 4solr*.gz
+# * Be patient: it may take a while -- 10-20 minutes -- to download all the files. They're a bit big.
 #
 # 6. execute the script to load all the .csv dump files (take 15 mins or so...some biggish datasources!)
 #

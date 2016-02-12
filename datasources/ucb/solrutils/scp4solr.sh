@@ -3,5 +3,5 @@
 # run this before you run loadAllDatasourcees.sh
 #
 # caution: downloads serveral GB of compressed files! And you need to have ssh access to the prod server.
-scp cspace-prod.cspace.berkeley.edu:/tmp/4solr*.gz .
-gunzip 4solr*.gz
+scp -v cspace-prod.cspace.berkeley.edu:/tmp/4solr*.gz .
+gunzip -f 4solr*.gz

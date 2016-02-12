@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # mostly untested!
 set -e
 if [ $# -lt 3 ];
@@ -29,7 +30,7 @@ then
 fi
 if [ -d $SOLR4 ];
 then
-   echo "$SOLR4 directory exists, please remove (e.g. rm -rf solr4/), then try again."
+   echo "$SOLR4 directory exists, please remove (e.g. rm -rf $SOLR4/), then try again."
    exit 1
 fi
 if [ ! -e solr-$SOLRVERSION.tgz ];
@@ -149,7 +150,7 @@ cp $TOOLS/datasources/ucb/multicore/bampfa.media.solrconfig.xml bampfa/media/con
 cp $TOOLS/datasources/ucb/multicore/cinefiles.media.solrconfig.xml cinefiles/media/conf/solrconfig.xml
 #cp $TOOLS/datasources/ucb/multicore/ucjeps.media.solrconfig.xml ucjeps/media/conf/solrconfig.xml
 cp $TOOLS/datasources/ucb/multicore/botgarden.media.solrconfig.xml botgarden/media/conf/solrconfig.xml
-
+echo
 echo "*** Multicore solr4 installed for UCB deployments! ****"
 echo "You can now start solr4. A good way to do this for development purposes is to use"
 echo "the script made for the purpose, in the $TOOLS/datasources/ucb/solrutils directory:"
@@ -157,7 +158,11 @@ echo "cp $TOOLS/datasources/ucb/solrutils/startSolr.sh ${SOLR4}/ucb"
 echo "cd ${SOLR4}/ucb"
 echo "./startSolr.sh"
 echo
+echo "You may also want to clean up a bit -- get rid of the clone of the Tools repo, unless you"
+echo "think you'll need it again."
+echo "rm -rf $TOOLS"
+echo
 echo "Let me try it for you..."
-cp $TOOLS/datasources/ucb/solrutils/startSolr.sh ${SOLR4}/ucb"
-cd ${SOLR4}/ucb"
-./startSolr.sh"
+cp $TOOLS/datasources/ucb/solrutils/startSolr.sh $SOLR4/ucb/
+cd ${SOLR4}/ucb
+./startSolr.sh
