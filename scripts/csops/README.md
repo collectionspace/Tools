@@ -112,6 +112,14 @@ cscleantemp
 ##### Description
 Removes old files from the CollectionSpace temporary file directory. Files with names matching the pattern `*-*-*-*-*`, and that have not been modified for some amount of time are removed. The minimum time since last modification may be specified in the `CS_TEMP_MMIN` environment variable, in minutes. If `CS_TEMP_MMIN` is not set, a default of 60 minutes (1 hour) is used.
 
+### cscleanlog - rotate log files
+##### Synopsis
+```
+cscleanlog
+```
+##### Description
+Rotates log files. Currently, this script only rotates tomcat's catalina.out log. In the future, this script may also rotate and/or remove additional log files.
+
 ### csdeployreports - (re)deploy reports from this repo
 ##### Synopsis
 ```

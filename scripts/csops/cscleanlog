@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Clean up log files
+
+LOG_DIR=~/log
+LOGROTATE_CONFIG_FILE=$LOG_DIR/logrotate.conf
+LOGROTATE_STATE_FILE=$LOG_DIR/logrotate.status
+
+TOMCAT_DIR=~/`~/bin/csservname`
+TOMCAT_LOG_DIR=$TOMCAT_DIR/logs
+
+cat <<CONFIG > $LOGROTATE_CONFIG_FILE
+$TOMCAT_LOG_DIR/catalina.out {
+        copytruncate
+        size 5M
+        rotate 10
+        missingok
+}
+CONFIG
+
+/usr/sbin/logrotate -s $LOGROTATE_STATE_FILE $LOGROTATE_CONFIG_FILE
