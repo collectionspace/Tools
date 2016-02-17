@@ -3,7 +3,7 @@
 
 # target server
 export URL="https://pahma-dev.cspace.berkeley.edu/cspace-services/imports"
-export USER="import@pahma.cspace.berkeley.edu:lash428!puck"
+export USER="xxxx@pahma.cspace.berkeley.edu:xxxxxx"
 export CONTENT_TYPE="Content-Type: application/xml"
 
 # password comes from .pgpass
