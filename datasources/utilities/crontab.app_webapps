@@ -1,39 +1,7 @@
 ##################################################################################
 #
-# CRON TABLE (crontab) for CSpace Solr ETL and BMU-related jobs
+# CRON TABLE (crontab) for CSpace webapps (BMU, tricoder, CCH, QC, etc.)
 #
-##################################################################################
-#
-# CSpace Solr ETL
-#
-##################################################################################
-#
-# run solr ETL (and other webapp and API monitoring)
-#
-# currently runs under pseudo user app_solr on cspace-prod and cspace-dev
-#
-# 1. run the 11 solr4 updates
-# 2. monitor solr datastore contents (email contents)
-# 3. export and mail BAMPFA view for Orlando
-#
-##################################################################################
-01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
-21 0 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
-#
-41 0 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_internal.log  2>&1
-21 1 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
-01 2 * * * /home/app_solr/solrdatasources/botgarden/solrETL-propagations.sh  botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_propagations.log  2>&1
-#
-41 2 * * * /home/app_solr/solrdatasources/pahma/solrETL-public.sh            pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_public.log  2>&1
-41 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_internal.log  2>&1
-31 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_locations.log  2>&1
-51 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-osteology.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_osteology.log  2>&1
-#
-01 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-public.sh           ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_public.log  2>&1
-##################################################################################
-# monitor solr datastores
-##################################################################################
-0  7 * * * /home/app_solr/checkstatus.sh | mail -s "solr nightly status" --  jblowe@berkeley.edu
 ##################################################################################
 #
 # BMU-related jobs
@@ -56,12 +24,12 @@
 01 19   * * * shopt -s nullglob; for f in /tmp/image_upload_cache_pahma/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/pahma/uploadmedia/postblob.sh pahma $f pahma_Uploadmedia_Prod >> /tmp/image_upload_cache_pahma/batches.log; done
 # run UCJEPS BMU (one minute after the hour, noon and 8pm)
 10 12,20 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_ucjeps/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/ucjeps/uploadmedia/postblob.sh ucjeps $f ucjeps_Uploadmedia_Prod >> /tmp/image_upload_cache_ucjeps/batches.log; done
-# run Cinefiles BMU (twice a day)
-10 15,22 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/cinefiles/uploadmedia/postblob.sh cinefiles $f cinefiles_Uploadmedia_Prod >> /tmp/image_upload_cache_cinefiles/batches.log; done
+# run Cinefiles BMU
+10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/cinefiles/uploadmedia/postblob.sh cinefiles $f cinefiles_Uploadmedia_Prod >> /tmp/image_upload_cache_cinefiles/batches.log; done
 # run BAMPFA BMU (currently a no-op -- they now use Piction)
 #30 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_bampfa/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/bampfa/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_bampfa/batches.log; done
-# run UCBG BMU (twice a day)
-10 16,23 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_botgarden/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/botgarden/uploadmedia/postblob.sh botgarden $f botgarden_Uploadmedia_Prod >> /tmp/image_upload_cache_botgarden/batches.log; done
+# run UCBG BMU
+10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_botgarden/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/botgarden/uploadmedia/postblob.sh botgarden $f botgarden_Uploadmedia_Prod >> /tmp/image_upload_cache_botgarden/batches.log; done
 ##################################################################################
 # clean up the BMU temp directorys (erase images more than 48 hours old)
 ##################################################################################
@@ -70,6 +38,10 @@
 # run the tricoder upload job weekdays 9am-6pm, 10 mins after the hour
 ##################################################################################
 #10 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
+##################################################################################
+# update BAMPFA's materialized view for Piction
+##################################################################################
+15 12,20 * * * psql -d "host=dba-postgres-prod-32.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" | mail -s "Piction mv updated on Prod" -c "lkv@berkeley.edu" chris.hoffman@berkeley.edu
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
@@ -86,3 +58,12 @@
 00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
 00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
 30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
+##################################################################################
+# refresh the denormalized hierarchies
+##################################################################################
+01 1 * * * ~/hierarchies/refresh.sh pahma
+15 1 * * * cd ~/hierarchies ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
+##################################################################################
+# run the cinefiles month qc report
+##################################################################################
+00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu

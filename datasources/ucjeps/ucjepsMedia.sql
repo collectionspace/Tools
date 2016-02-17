@@ -5,12 +5,12 @@ h1.name mediacsid,
 mc.description,
 b.name,
 mc.creator creatorRefname,
-mc.creator creator,
+regexp_replace(mc.creator, '^.*\)''(.*)''$', '\1') creator,
 mc.blobcsid,
 mc.copyrightstatement,
 mc.identificationnumber,
 mc.rightsholder rightsholderRefname,
-mc.rightsholder rightsholder,
+regexp_replace(mc.rightsholder, '^.*\)''(.*)''$', '\1') rightsholder,
 mc.contributor
 
 FROM media_common mc

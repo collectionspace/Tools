@@ -17,7 +17,7 @@ export NUMCOLS=55
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsNewMedia.sql -o newmedia.csv
 time perl -i -pe 's/[\r\n]/ /g;s/\@\@/\n/g' newmedia.csv
-perl -ne 's/\\/x/g; next if / rows/; print $_' newmedia.csv > 4solr.ucjeps.media.csv
+perl -ne 's/\\/x/g; next if / rows/; print $_' newmedia.csv > 4solr.${TENANT}.media.csv
 ##############################################################################
 # clear out the existing data
 ##############################################################################
@@ -28,7 +28,7 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<delete><
 curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${TENANT}-media/update/csv?commit=true&header=true&trim=true&separator=%09&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.media.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
-#rm media.csv
+rm newmedia.csv
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
 date

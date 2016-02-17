@@ -69,11 +69,14 @@ select
         else conh.labelfooter
     end as labelfooter_s,
     array_to_string(array
-      (SELECT CASE WHEN (tig2.taxon IS NOT NULL AND tig2.taxon <>'' and tig2.taxon not like '%no name%') THEN (getdispl(tig2.taxon)
+      (SELECT
+	CASE WHEN (tig2.qualifier IS NOT NULL AND tig2.qualifier <>'') THEN  '' || tig2.qualifier || ' ' ELSE '' END
+  ||CASE WHEN (tig2.taxon IS NOT NULL AND tig2.taxon <>'' and tig2.taxon not like '%no name%') THEN (getdispl(tig2.taxon)
 	||CASE WHEN (tig2.identby IS NOT NULL AND tig2.identby <>'' and tig2.identby not like '%unknown%') THEN ', by ' || getdispl(tig2.identby) ELSE '' END
 	||CASE WHEN (tig2.institution IS NOT NULL AND tig2.institution <>'') THEN ', ' || getdispl(tig2.institution) ELSE '' END
 	||CASE WHEN (prevdetsdg.datedisplaydate IS NOT NULL AND prevdetsdg.datedisplaydate <>'' and prevdetsdg.datedisplaydate <>' ') THEN ', ' || prevdetsdg.datedisplaydate ELSE '' END
-	||CASE WHEN (tig2.identkind IS NOT NULL AND tig2.identkind <>'') THEN  ' (' || tig2.identkind || ')' ELSE '' END) ELSE '' END
+	||CASE WHEN (tig2.identkind IS NOT NULL AND tig2.identkind <>'') THEN  ' (' || tig2.identkind || ')'ELSE '' END) ELSE '' END
+	||CASE WHEN (tig2.notes IS NOT NULL AND tig2.notes <>'') THEN  '. ' || tig2.notes ELSE '' END
        from collectionobjects_common co1
         inner join hierarchy h1int on co1.id = h1int.id
         left outer join hierarchy htig2 on (co1.id = htig2.parentid and htig2.pos > 0
@@ -125,7 +128,8 @@ select
     CASE WHEN (tig.identby IS NOT NULL AND tig.identby <>'' and tig.identby not like '%unknown%') THEN (getdispl(tig.identby)
 	||CASE WHEN (tig.institution IS NOT NULL AND tig.institution <>'') THEN ', ' || getdispl(tig.institution) ELSE '' END
 	||CASE WHEN (detdetailssdg.datedisplaydate IS NOT NULL AND detdetailssdg.datedisplaydate <>'' and detdetailssdg.datedisplaydate <>' ') THEN ', ' || detdetailssdg.datedisplaydate ELSE '' END
-	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END) ELSE '' END AS determinationdetails_s,
+	||CASE WHEN (tig.identkind IS NOT NULL AND tig.identkind <>'') THEN ' (' || tig.identkind || ')' ELSE '' END
+  ||CASE WHEN (tig.notes IS NOT NULL AND tig.notes <>'') THEN  '. ' || tig.notes ELSE '' END) ELSE '' END AS determinationdetails_s,
   '' as loanstatus_s,
   '' as loannumber_s,
     case when (fc.item is not null and fc.item <> '')
@@ -147,7 +151,9 @@ select
 	      and hlg2.name = 'collectionobjects_naturalhistory:localityGroupList')
 	      left outer join localityGroup lg2 on (lg2.id = hlg2.id)
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as alllocalities_ss,
-  CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s
+  CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s,
+  tig.qualifier as determinationqualifier_s,
+  com.item AS comments_ss
 
 from collectionobjects_common co
 inner join misc on co.id = misc.id
@@ -172,6 +178,7 @@ left outer join hierarchy httg on (
     tc.id = httg.parentid
     and httg.name = 'taxon_common:taxonTermGroupList'
     and httg.pos = 0)
+join collectionobjects_common_comments com ON (com.id = cc.id AND (com.pos = 0))
 
 inner join hierarchy h2int on co.id = h2int.id and h2int.name = h1.name
 left outer join hierarchy htsg on (co.id = htsg.parentid and htsg.name = 'collectionobjects_naturalhistory:typeSpecimenGroupList')
@@ -191,5 +198,6 @@ where misc.lifecyclestate <> 'deleted'
 -- and h1.name = '291d85e2-06dc-4fc2-9364' -- UC1300355
 -- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
 -- and h1.name like '3380%'
+-- and h1.name = '0ad96db0-be78-4a0b-8f99-9fb229222ffb'	-- JEPS70526
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'UCSB', 'UCSC')
 order by co.objectnumber
