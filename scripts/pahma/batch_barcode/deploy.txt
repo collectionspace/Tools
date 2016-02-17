@@ -1,0 +1,25 @@
+# to "deploy" the tricoder "suite"
+#
+# get the tarball and unzip it
+cp /tmp/batch_barcode.tgz .
+tar xvf batch_barcode.tgz 
+cd batch_barcode
+# check that everything is need and tidy (and empty)
+find temp
+rm processed/*
+rm log/*
+rm holding/*
+# edit the environment variables
+vi setBarcodeEnv.sh 
+# copy a test file to the input directory
+cp testfiles/barcode.TRIDATA_2015-MM-DD_Number2_2nd.test.DAT input/barcode.TRIDATA_2015-08-01_Number2_2nd.test.DAT
+# run it by hand
+./import_barcode_typeR.sh 
+# check the results
+less log/*
+less processed/*
+# set up cron job
+crontab -e
+# $ crontab -l
+# run the tricoder upload job weekdays 9am-6pm
+# 0 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:TalendMetadata="http://www.talend.org/metadata/connection/2010" xmlns:orgomg.cwm.resource.record="http:///orgomg/cwm/resource/record.ecore">
+  <TalendMetadata:DelimitedFileConnection xmi:id="_NJ4YIRs8EeKZC9DLsGHKXQ" name="repository.metadataFileDelimited" dataPackage="_NJ4YIhs8EeKZC9DLsGHKXQ" Server="Localhost 127.0.0.1" FilePath="C:/Informatics/PAHMA/PAHMA_barcode_files/all_obj.tab" Encoding="US-ASCII" FieldSeparatorValue="&quot;\t&quot;" RowSeparatorValue="&quot;\n&quot;" FieldSeparatorType="Tabulation"/>
+  <orgomg.cwm.resource.record:RecordFile xmi:id="_NJ4YIhs8EeKZC9DLsGHKXQ" name="repository.metadataFileDelimited" dataManager="_NJ4YIRs8EeKZC9DLsGHKXQ">
+    <ownedElement xsi:type="TalendMetadata:MetadataTable" xmi:id="_NJ4YIxs8EeKZC9DLsGHKXQ" id="_2Dd2MBs7EeKZC9DLsGHKXQ" label="metadata">
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_NJ4YJBs8EeKZC9DLsGHKXQ" name="obj_nuxeoID" label="obj_nuxeoID" talendType="id_String"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_NJ4YJRs8EeKZC9DLsGHKXQ" name="obj_CSID" label="obj_CSID" talendType="id_String"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_NJ4YJhs8EeKZC9DLsGHKXQ" name="objectNumber" label="objectNumber" talendType="id_String"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_NJ4YJxs8EeKZC9DLsGHKXQ" name="objectID" label="objectID" talendType="id_String"/>
+    </ownedElement>
+  </orgomg.cwm.resource.record:RecordFile>
+</xmi:XMI>

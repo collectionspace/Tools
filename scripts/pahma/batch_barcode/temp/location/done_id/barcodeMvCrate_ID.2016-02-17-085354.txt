@@ -1,0 +1,1 @@
+Item_Num;moveID;loc_reject;handler_reject;obj_reject;loc_refname;crate_refname;loc_handler_refname;capture_datetime;moveCSID;move2obj_CSID;obj2move_CSID
