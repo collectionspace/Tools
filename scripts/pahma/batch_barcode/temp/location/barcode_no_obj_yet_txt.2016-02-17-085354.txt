@@ -1,1 +1,0 @@
-reason_for_move;person_scanning;date_time;current_crate;new_location;person_refname;crate_refname;loc_refname;moveID;move_CSID;datetimeTZ
