@@ -1,5 +1,8 @@
 #!/bin/bash -xv
 
+#
+# 2/17/2016 refactored a good deal for managed servers and parameterization
+#
 # 12/11/2013 modify for production ... change UPLOAD_PATH, ROOT_PATH (cd)
 #
 # 10/18/2013 temporarily set UPLOAD_PATH (checking for scanned file) to
