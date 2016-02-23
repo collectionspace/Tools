@@ -64,17 +64,17 @@ while (<METADATA>) {
   }
   $count{'metadata'}++;
   my $mediablobs;
-  my $foundobject = $blobs{$objectcsid};
-  if ($foundobject) {
+  $blobs{$objectcsid}{'hasimages'} = 'no' unless $blobs{$objectcsid}{'hasimages'} eq 'yes';
+  my $foundimage = $blobs{$objectcsid}{'image'};
+  if ($foundimage) {
     # if context of use field contains the word burial
-    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[33] =~ /United States/i);
+    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[34] =~ /United States/i);
     # if object name contains something like "charm stone"
-    $blobs{$objectcsid}{'image'} = $restricted if (@rest[8] =~ /charm.*stone/i && @rest[33] =~ /United States/i);
+    $blobs{$objectcsid}{'image'} = $restricted if (@rest[8] =~ /charm.*stone/i && @rest[34] =~ /United States/i);
 
     # insert list of blobs, etc. as final columns
     $blobs{$objectcsid}{'type'} =~ s/,$//;
     $blobs{$objectcsid}{'type'} = join(',', sort(split(',', $blobs{$objectcsid}{'type'})));
-    $blobs{$objectcsid}{'hasimages'} = 'no' unless $blobs{$objectcsid}{'hasimages'} eq 'yes';;
     for my $column (qw(image card primary type hasimages)) {
       $mediablobs .= $delim . $blobs{$objectcsid}{$column};
     }
