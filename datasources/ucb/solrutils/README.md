@@ -1,5 +1,4 @@
-Solr4 helpers for UCB CSpace webapps
-====================================
+## Solr4 helpers for UCB CSpace webapps
 
 Tools (mainly shell scripts) to:
  
@@ -17,15 +16,18 @@ Currently there are 7 tools, some mature, but mostly unripe, raw, and needy:
 * checkstatus.sh -- *on UCB managed servers only* this script checks the ETL logs and counts records in all the solr cores
 * countSolr4.sh -- if your Solr4 server is running, this script will count the records in the UCB cores
 
-Suggestions for "local installs", e.g. on your Macbook or Ubuntu labtop, for development.
+#### Suggestions for "local installs"
+
+e.g. on your Macbook or Ubuntu labtop, for development. Sorry, no help for Windows here!
 
 The essence:
 
 * Install Solr4
 * Configure for UCB solr datastores
 * Start the Solr4 server
-* Attempt to obtain the latest data from UCB servers (you must have ssh access!)
-* Unzip and load the latest data.
+* Obtain the latest data extracts from UCB servers
+* Unzip and load the extracts
+* Verify Solr4 server works
 
 ```bash
 #
@@ -119,6 +121,7 @@ rm -rf ~/solrdump
 #
 ```
 
+#### Installation on UCB Managed VMs (RHEL6)
 
 To install solr4 on Manage VMs at UCB, from scratch, or to completely update the solr datastores,the following seems to work.
 Not that this procedure is a complete ground up rebuild of the Solr4 service, and during the time
@@ -175,7 +178,7 @@ Caveats:
 * But they will mostly run on your Mac, perhaps with some tweaking.
 
 
-Install solr4 as a service on UCB VMs
+#### Installing solr4 as a service on UCB VMs
 
 ```bash
 # install the solr4.service script in /etc/init.d
