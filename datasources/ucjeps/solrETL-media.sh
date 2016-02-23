@@ -13,6 +13,10 @@ DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 export NUMCOLS=55
 ##############################################################################
+# save last night results to tmp just in case
+##############################################################################
+mv 4solr.${TENANT}.media.csv /tmp
+##############################################################################
 # get media
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f ucjepsNewMedia.sql -o newmedia.csv
