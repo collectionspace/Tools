@@ -49,8 +49,8 @@ LEFT OUTER JOIN taxon_common tc on (mu.scientifictaxonomy = tc.refname)
 LEFT OUTER JOIN taxon_ucjeps tu on (tu.id = tc.id)
 LEFT OUTER JOIN taxon_naturalhistory tnh on (tnh.id = tc.id)
 LEFT OUTER JOIN hierarchy hlg
-        on (cc.id = hlg.parentid and hlg.pos = 0
-        and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
+        on (mu.id = hlg.parentid and hlg.pos = 0
+        and hlg.name = 'media_ucjeps:localityGroupList')
 LEFT OUTER JOIN localitygroup lg on (lg.id = hlg.id)
 
 JOIN hierarchy h3 ON (mc.blobcsid = h3.name)
