@@ -35,12 +35,12 @@ nerr=0
 # ------ test handler (2nd field) -----
 # cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",".*$/$1/' |sort |uniq > /tmp/handler5.in 
 # chk_handler=`cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",".*$/''\'\''$1''\'\'',/' |sort |uniq | tr -d "\\n"  | sed -e "s/,$//" `
-cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/$1/' |sort |uniq | perl ${ROOT_PATH}/handler.pl | sort > /tmp/handler5.in.${TIMESTAMP}
+cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/$1/' |sort |uniq | perl ${ROOT_PATH}/handlerid2name.pl ${ROOT_PATH}/LocHandlers.txt | sort > /tmp/handler5.in.${TIMESTAMP}
 sleep 3
 # echo "handler5.in.${TIMESTAMP} before handler extraction contains the following lines: "
 # cat /tmp/handler5.in.${TIMESTAMP}
 chk_handler=`cat /tmp/handler5.in.${TIMESTAMP} | perl -pe 's/^(.*)$/''\'\''$1''\'\'',/' |sort |uniq | tr -d "\\n"  | sed -e "s/,$//" `
-# echo "handler5.in.${TIMESTAMP} contains: $chk_handler"
+echo "handler5.in.${TIMESTAMP} contains: $chk_handler"
 psql -X -d "$CONNECTSTRING" -c "select pt.termdisplayname from persontermgroup pt where pt.termdisplayname in ($chk_handler);" | awk '1<=NR && NR<=2 {next}{sub(/^[ ]+/,"")}{print}' | sed -e '$d' | sed -e '$d' | sort |uniq > /tmp/handler5.out.${TIMESTAMP}
 # echo "handler5.out.${TIMESTAMP} from psql run contains the following lines: "
 # cat /tmp/handler5.out.${TIMESTAMP}

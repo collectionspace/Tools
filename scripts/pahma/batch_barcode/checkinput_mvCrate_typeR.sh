@@ -47,7 +47,7 @@ ROOT_PATH=`pwd`
 # cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/$1/' |sort |uniq > /tmp/handler_mvCrate.in 
 # chk_handler=`cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/''\'\''$1''\'\'',/' |sort |uniq | tr -d "\\n"  | sed -e "s/,$//" `
 
-cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/$1/' |sort |uniq | perl ${ROOT_PATH}/handler.pl |sort > /tmp/handler_mvCrate.in.${TIMESTAMP}
+cat $INFILE | perl -pe 's/^.*","(.*)",".*",".*",.*$/$1/' |sort |uniq | perl ${ROOT_PATH}/handlerid2name.pl ${ROOT_PATH}/LocHandlers.txt |sort > /tmp/handler_mvCrate.in.${TIMESTAMP}
 sleep 3
 # echo "handler_mvCrate.in.${TIMESTAMP} before handler extraction contains the following lines: "
 # cat /tmp/handler_mvCrate.in.${TIMESTAMP}
