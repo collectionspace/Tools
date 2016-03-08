@@ -3,7 +3,7 @@
 import time
 import sys
 import cgi
-import pgdb
+import psycopg2
 import locale
 
 import gatherPahmaStats
@@ -17,7 +17,7 @@ timeoutcommand = 'set statement_timeout to 1200000'
 def gettotalobjcount(config):
     timepoint0 = time.time()
 
-    pahmadb  = pgdb.connect(database=config.get('connect','connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect','connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -92,7 +92,7 @@ def gettotalobjcount(config):
 def getgroupedobjcounts(additionaljoin1, additionaljoin2, additionalwhere, fieldalias, field, config):
     timepoint0 = time.time()
     
-    pahmadb  = pgdb.connect(database=config.get('connect','connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect','connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -179,7 +179,7 @@ def getgroupedobjcounts(additionaljoin1, additionaljoin2, additionalwhere, field
 def continentcounts(continents, objecttypes, totalMusNoCountOverall, totalObjectCountOverall, trueObjectCountOverall, totalPieceCountOverall, truePieceCountOverall, unixruntime, isoruntime, dbsource, config):
     timepoint0 = time.time()
     
-    pahmadb  = pgdb.connect(database=config.get('connect','connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect','connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -312,7 +312,7 @@ def replNone(repl):
 
 def doarchivestats(dbsource, statgroup, stattarget, statmetric, label, unixruntime, isoruntime, statvalue, statpercent, config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect','connect_string2'))
+    pahmadb  = psycopg2.connect(config.get('connect','connect_string2'))
     cursor  = pahmadb.cursor()
     cursor.execute(timeoutcommand)
 

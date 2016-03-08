@@ -387,14 +387,15 @@ def selectWebapp(form):
 
 
 <html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + getStyle('lightblue') + '''
-<style type="text/css">
-/*<![CDATA[*/
-@import "../css/jquery-ui-1.8.22.custom.css";
-@import "../css/blue/style.css";
-@import "../css/jqtree.css";
-/*]]>*/
-</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="../css/base.css">
+    <!--[if lte IE 7]>
+    <link rel="stylesheet" type="text/css" href="https://webapps-dev.cspace.berkeley.edu/pahma_static/admin/css/ie.css"/><![endif]-->
+    <meta name="robots" content="NONE,NOARCHIVE">
+</head>
+<body class="">
+<div id="container">
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
 <script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
@@ -406,10 +407,12 @@ def selectWebapp(form):
 </head>
 <body>
 <form id="ucbwebapp" method="post">
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
+<h2>Legacy Webapps</h2>
 <table cellpadding="4px"><tr>
-<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
-        "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
+<p>The following table lists the legacy webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
+        "%Y-%m-%dT%H:%M:%SZ") + '''.<br/>
+We call them <i>legacy</i> because the are written in an ancient web framework called "CGI". <br/>Someday they will be rewritten and
+improved in a more modern framework. In the meantime -- Enjoy!</p>'''
 
     for museum in sorted(webapps.keys()):
         line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2>%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
@@ -433,7 +436,7 @@ def selectWebapp(form):
     line += '''
 </tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 14 January 2015</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 8 March 2016</h4>''' + payload + '''
 </form>
 </body>
 </html>'''

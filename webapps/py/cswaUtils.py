@@ -431,13 +431,15 @@ def listSearchResults(authority, config, displaytype, form, rows):
         if displaytype == 'select': rowtype = 'select'
         duplicates = []
         for r in rows:
+	    #print "<b>r = </b>",r
             if r[1] in duplicates:
                 hasDups = True
-                r.append('')
+                #r.append('')
                 # r.append('Duplicate!')
             else:
-                r.append('')
-                duplicates.append(r[1])
+                #r.append('')
+                #duplicates.append(r[1])
+                pass
             print formatRow({'boxtype': authority, 'rowtype': rowtype, 'data': r}, form, config)
 
     elif displaytype == 'nolist':
@@ -2288,7 +2290,8 @@ def formatRow(result, form, config):
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
     elif result['rowtype'] == 'location':
         return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a> <span style="color:red;">%s</span></td><td/></tr>''' % (
-            result['data'][0], result['data'][0], result['data'][-1])
+            result['data'][0], result['data'][0], '')
+            #result['data'][0], result['data'][0], result['data'][-1])
     elif result['rowtype'] == 'select':
         rr = result['data']
         boxType = result['boxtype']

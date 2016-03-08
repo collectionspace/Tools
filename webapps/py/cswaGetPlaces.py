@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-import pgdb
+import psycopg2
 
 conn = None
 
@@ -10,7 +10,7 @@ def openConnection(connect_string):
     global conn
 
     try:
-        conn = pgdb.connect(database=connect_string)
+        conn = psycopg2.connect(connect_string)
     except Exception:
         print "In openConnection(), unable to open connection"
         sys.exit(1)
