@@ -161,7 +161,7 @@ def doObjectDetails(form, config):
             #/blobs/be903851-a2a8-4eee-bf15/derivatives/Thumbnail/content
             #link = "https://pahma.cspace.berkeley.edu/cspace-services/blobs/%s/derivatives/%s/content"
             # use spiffy, new "public image service", to avoid having to re-authenticate user
-            link = "http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/%s/derivatives/%s/content"
+            link = "https://webapps.cspace.berkeley.edu/pahma/imageserver/blobs/%s/derivatives/%s/content"
             thumb = link % (image[1], 'Thumbnail')
             original = link % (image[1], 'OriginalJpeg')
             print '<div class="imagecell"><a href="%s" target="_blank"><img src="%s"></a></div>' % (original, thumb)

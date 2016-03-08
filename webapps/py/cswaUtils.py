@@ -2869,7 +2869,7 @@ def starthtml(form, config):
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a target="help" href="%s">Help</a>
     ''' % ('switchapp', programName + 'switchapp', 'switch app',
-           'https://dev.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
+           'https://webapps.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>

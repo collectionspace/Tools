@@ -390,8 +390,6 @@ def selectWebapp(form):
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" type="text/css" href="../css/reset.css">
     <link rel="stylesheet" type="text/css" href="../css/base.css">
-    <!--[if lte IE 7]>
-    <link rel="stylesheet" type="text/css" href="https://webapps-dev.cspace.berkeley.edu/pahma_static/admin/css/ie.css"/><![endif]-->
     <meta name="robots" content="NONE,NOARCHIVE">
 </head>
 <body class="">
@@ -449,7 +447,7 @@ def getPrinters(form):
 
     printerlist = [
         ("Hearst Gym Basement", "cluster1"),
-        ("Marchant", "cluster2")
+        ("Regatta", "cluster2")
     ]
 
     printers = '''
