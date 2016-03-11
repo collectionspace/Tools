@@ -8,16 +8,25 @@
 #
 # mvn clean verify -Dcucumber.options="--dry-run --strict" > outputfile.txt
 
-# Print usage instructions and quit if fewer or more than one argument
+# Print usage instructions and quit if anything other than one argument
 # is provided
 scriptname=`basename "$0"`
-if [ "$#" -ne 1 ]; then
+if [[ "$#" -ne 1 ]]; then
     echo "Usage: $scriptname filename"
     exit 1
 fi
 
-# Print an error message and quit if the argument isn't a readable file
+# Print an error message and quit if the argument isn't the name of, or
+# a path to, a readable file
 INPUT_FILE=$1
+if [[ ! -e $INPUT_FILE ]]; then
+    echo "'$INPUT_FILE' does not exist"
+    exit 1
+fi
+if [[ ! -f $INPUT_FILE ]]; then
+    echo "'$INPUT_FILE' is not a regular file"
+    exit 1
+fi
 if [[ ! -r $INPUT_FILE ]]; then
     echo "Could not read file '$INPUT_FILE'"
     exit 1
