@@ -37,7 +37,7 @@ while (<APPDATA>) {
   $apps{$app}++;
 }
 print "<html>\n<a name=\"top\"/>\n<h1>Webapp Utilization Report</h1>\n<table border=\"1\">";
-print "\n<h3>last updated: " . scalar localtime() . "</h3>\n";
+print "\n<h3>last updated: " . scalar localtime() . " (" . $count . ")</h3>\n";
 foreach my $sys (sort keys %stats) {
   print "\n<h2>CSpace Database/Instance: $sys</h2>\n";
   print "\n<h3>Overall Use</h3>\n";
