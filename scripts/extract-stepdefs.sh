@@ -19,12 +19,12 @@ fi
 # Print an error message and quit if the argument isn't a readable file
 INPUT_FILE=$1
 if [[ ! -r $INPUT_FILE ]]; then
-    echo "Could not read file '$1'"
+    echo "Could not read file '$INPUT_FILE'"
     exit 1
 fi
 
 # Match only lines containing step defs (those beginning with '@')
-step_defs=$(grep '^@' $1)
+step_defs=$(grep '^@' $INPUT_FILE)
   
 # Remove keywords like '@And' from the beginning of each line, via 'sed'
 # (Remove text from the start of each line, until the first left parens)
