@@ -13,11 +13,12 @@ sub fixDate {
 
 my %stats;
 my %dates;
-my %apps;
+my %apps;my $count = 0;
 
-open APPDATA,'/home/developers/monitor/webappuse.csv';
+open APPDATA,"<@ARGV[0]";
 while (<APPDATA>) {
   chomp;
+  $count++;
   s/ *\t */\t/g;
   my ($date,$ip,$app,$action,$end,$sec,$sys,$loc1,$loc2,$parms) = split "\t";
   $date = fixDate($date);
