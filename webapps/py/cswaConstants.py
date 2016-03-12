@@ -413,7 +413,7 @@ We call them <i>legacy</i> because the are written in an ancient web framework c
 improved in a more modern framework. In the meantime -- Enjoy!</p>'''
 
     for museum in sorted(webapps.keys()):
-        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2>%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
+        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2 style="background-color: tomato;">%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
         listOfWebapps = sorted(webapps[museum]['apps'].keys())
         for webapp in listOfWebapps:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp

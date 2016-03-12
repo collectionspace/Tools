@@ -17,6 +17,8 @@ import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
 
+import cswaSMBclient
+
 MAXLOCATIONS = 1000
 
 try:
@@ -1714,36 +1716,13 @@ def doListGovHoldings(form, config):
     print '<h4>', len(sites), ' sites listed.</h4>'
 
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
-    auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
     slug = re.sub('[^\w-]+', '_', location).strip().lower()
     barcodeFile = config.get('files', 'cmdrfmtstring') % (
-        config.get('files', 'cmdrfileprefix'), dataType, printerDir, slug,
+        dataType, printerDir, slug,
         datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"), filenameinfo)
 
-    try:
-        barcodeFh = codecs.open(barcodeFile, 'w', 'utf-8-sig')
-        alogFh = codecs.open(auditFile, 'a', 'utf-8')
-        csvlogfh = csv.writer(barcodeFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        audlogfh = csv.writer(alogFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        if dataType == 'locationLabels':
-            csvlogfh.writerow('termdisplayname'.split(','))
-            for d in data:
-                csvlogfh.writerow((d[0],))  # writerow needs a tuple or array
-                audlogfh.writerow(d)
-        elif dataType == 'objectLabels':
-            csvlogfh.writerow(
-                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
-            for d in data:
-                csvlogfh.writerow(d[3:9])
-                audlogfh.writerow(d)
-        barcodeFh.close()
-        alogFh.close()
-        newName = barcodeFile.replace('.tmp', '.txt')
-        os.rename(barcodeFile, newName)
-    except:
-        #raise
-        newName = '<span style="color:red;">could not write to %s</span>' % barcodeFile
+    newName = cswaSMBclient.uploadCmdrWatch(barcodeFile, dataType, data, config)
 
     return newName
 
@@ -3358,7 +3337,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?connect_string=''' + urllib2.quote(connect_string) + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
