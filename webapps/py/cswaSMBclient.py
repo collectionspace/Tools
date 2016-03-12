@@ -1,12 +1,11 @@
-import tempfile
 from smb.SMBConnection import SMBConnection
-import codecs, csv, os
+import codecs, csv, os, re
 
 
 def uploadCmdrWatch(barcodeFile, dataType, data, config):
-
     try:
-        barcodeFh = codecs.open('/tmp/%s' % barcodeFile, 'w', 'utf-8-sig')
+        localslug = re.sub('[^\w-]+', '_', barcodeFile).strip().lower()
+        barcodeFh = codecs.open('/tmp/%s' % localslug, 'w', 'utf-8-sig')
         csvlogfh = csv.writer(barcodeFh, delimiter=",", quoting=csv.QUOTE_ALL)
         if dataType == 'locationLabels':
             csvlogfh.writerow('termdisplayname'.split(','))
@@ -14,11 +13,13 @@ def uploadCmdrWatch(barcodeFile, dataType, data, config):
                 csvlogfh.writerow((d[0],))  # writerow needs a tuple or array
         elif dataType == 'objectLabels':
             csvlogfh.writerow(
-                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
+                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(
+                    ','))
             for d in data:
                 csvlogfh.writerow(d[3:9])
+        barcodeFh.close()
     except:
-        #raise
+        # raise
         barcodeFile = '<span style="color:red;">could not write to %s</span>' % barcodeFile
         return
 
@@ -41,7 +42,11 @@ def uploadCmdrWatch(barcodeFile, dataType, data, config):
 
     # storeFile(service_name, path, file_obj, timeout=30)
     # service_name - the name of the shared folder for the path
+
+    barcodeFh = open('/tmp/%s' % localslug, 'rb')
     bytes = conn.storeFile(service_name, barcodeFile, barcodeFh)
 
     barcodeFh.close()
-    os.unlink('/tmp/%s' % barcodeFile)
+    os.unlink('/tmp/%s' % localslug)
+
+    return barcodeFile
