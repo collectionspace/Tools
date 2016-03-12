@@ -1,21 +1,12 @@
 import tempfile
 from smb.SMBConnection import SMBConnection
-from cswaUtils import getConfig
 import codecs, csv, os
 
 
 def uploadCmdrWatch(barcodeFile, dataType, data, config):
 
     try:
-        # we open and close (and retain) a temporary file
-        # we do this because we need to set the BOM for this Window files
-        # and write it as a .csv file as well
-        # not the most optimal way to code this perhaps, but it works!
-        f = tempfile.TemporaryFile(delete=False)
-        tempfilename = f.name
-        f.close()
-
-        barcodeFh = codecs.open(tempfilename, 'w', 'utf-8-sig')
+        barcodeFh = codecs.open('/tmp/%s' % barcodeFile, 'w', 'utf-8-sig')
         csvlogfh = csv.writer(barcodeFh, delimiter=",", quoting=csv.QUOTE_ALL)
         if dataType == 'locationLabels':
             csvlogfh.writerow('termdisplayname'.split(','))
@@ -26,11 +17,10 @@ def uploadCmdrWatch(barcodeFile, dataType, data, config):
                 'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
             for d in data:
                 csvlogfh.writerow(d[3:9])
-        newName = barcodeFile.replace('.tmp', '.txt')
-        #os.rename(barcodeFile, newName)
     except:
         #raise
-        newName = '<span style="color:red;">could not write to %s</span>' % barcodeFile
+        barcodeFile = '<span style="color:red;">could not write to %s</span>' % barcodeFile
+        return
 
     # OK, now we have the file object with the data in it. write it to the
     # commanderWatch server via SMB
@@ -54,4 +44,4 @@ def uploadCmdrWatch(barcodeFile, dataType, data, config):
     bytes = conn.storeFile(service_name, barcodeFile, barcodeFh)
 
     barcodeFh.close()
-    os.unlink(tempfilename)
+    os.unlink('/tmp/%s' % barcodeFile)
