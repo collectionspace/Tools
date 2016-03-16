@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:TalendMetadata="http://www.talend.org/metadata/connection/2010" xmlns:orgomg.cwm.resource.record="http:///orgomg/cwm/resource/record.ecore">
+  <TalendMetadata:DelimitedFileConnection xmi:id="_oYbQ8AuBEeK9rZnE8YnKrg" name="repository.metadataFileDelimited" dataPackage="_oYbQ8QuBEeK9rZnE8YnKrg" Server="Localhost 127.0.0.1" FilePath="C:/Informatics/PAHMA/PAHMA_barcode_files/barcode_ok.2012-08-29_17-48" Encoding="US-ASCII" FieldSeparatorValue="&quot;,&quot;" RowSeparatorValue="&quot;\n&quot;" EscapeType="CSV" EscapeChar="&quot;'&quot;" TextEnclosure="&quot;\&quot;&quot;" CsvOption="true" FieldSeparatorType="Comma"/>
+  <orgomg.cwm.resource.record:RecordFile xmi:id="_oYbQ8QuBEeK9rZnE8YnKrg" name="repository.metadataFileDelimited" dataManager="_oYbQ8AuBEeK9rZnE8YnKrg">
+    <ownedElement xsi:type="TalendMetadata:MetadataTable" xmi:id="_oYbQ8guBEeK9rZnE8YnKrg" id="_zNr_wAuAEeK9rZnE8YnKrg" label="metadata">
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_oYbQ8wuBEeK9rZnE8YnKrg" label="reason_for_move" length="10" talendType="id_String" pattern="&quot;dd-MM-yyyy&quot;"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_oYbQ9AuBEeK9rZnE8YnKrg" label="person_scanning" length="40" talendType="id_String" pattern="&quot;dd-MM-yyyy&quot;"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_oYbQ9QuBEeK9rZnE8YnKrg" label="objectNumber" length="40" talendType="id_String" pattern="&quot;dd-MM-yyyy&quot;"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_oYbQ9guBEeK9rZnE8YnKrg" label="location" length="100" talendType="id_String" pattern="&quot;dd-MM-yyyy&quot;"/>
+      <feature xsi:type="TalendMetadata:MetadataColumn" xmi:id="_oYbQ9wuBEeK9rZnE8YnKrg" label="date_time" length="16" talendType="id_String" pattern="&quot;dd-MM-yyyy&quot;"/>
+    </ownedElement>
+  </orgomg.cwm.resource.record:RecordFile>
+</xmi:XMI>

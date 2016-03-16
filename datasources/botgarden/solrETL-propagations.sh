@@ -9,7 +9,7 @@ cd /home/app_solr/solrdatasources/botgarden
 # nb: the jobs in general can't overlap as the have some files in common and would step
 # on each other
 ##############################################################################
-mv 4solr.*.csv.gz /tmp
+# mv 4solr.*.csv.gz /tmp
 ##############################################################################
 # while most of this script is already tenant specific, many of the specific commands
 # are shared between the different scripts; having them be as similar as possible

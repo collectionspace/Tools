@@ -3,7 +3,7 @@
 import time
 import sys
 import cgi
-import pgdb
+import psycopg2
 import locale
 
 locale.setlocale(locale.LC_ALL, 'en_US')
@@ -14,7 +14,7 @@ timeoutcommand = 'set statement_timeout to 300000'
 
 def getnamesoversixtycharslong(config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 

@@ -51,19 +51,7 @@ inner join hierarchy hctg on (ctg.id = hctg.id)
 inner join concepts_common cc on (hctg.parentid = cc.id)
 inner join hierarchy hcc on (cc.id = hcc.id)
 inner join hierarchy hcac on (cc.inauthority = hcac.name)
-inner join conceptauthorities_common cac on (hcac.id = cac.id)
-where ctg.termsource is null or ctg.termsource = ''
-UNION
-select
-  hcc.name as csid,
-  'Citation' as authority_name,
-  ctg.termdisplayname as term_name,
-  '<a href="https://cinefiles.cspace.berkeley.edu/collectionspace/ui/cinefiles/html/citation.html?csid=' ||
-    hcc.name || '">' || ctg.termdisplayname || '</a>' as csid_link
-from citationtermgroup ctg
-inner join hierarchy hctg on (ctg.id = hctg.id)
-inner join citations_common cc on (hctg.parentid = cc.id)
-inner join hierarchy hcc on (cc.id = hcc.id)
+inner join conceptauthorities_common cac on (hcac.id = cac.id and cac.shortidentifier not in ('genre', 'concept'))
 where ctg.termsource is null or ctg.termsource = ''
 order by authority_name, term_name]]>
 	</queryString>

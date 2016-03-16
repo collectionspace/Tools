@@ -56,7 +56,7 @@ while (<MEDIA>) {
 open METADATA,$ARGV[1] || die "couldn't open metadata file $ARGV[1]";
 while (<METADATA>) {
   chomp;
-  my ($id, $objectid, @rest) = split /$delim/;
+  my ($id, $objectcsid, @rest) = split /$delim/;
   # handle header line
   if ($id eq 'id') {
     print $_ . $delim . join($delim,qw(blob_ss card_ss primaryimage_s imagetype_ss hasimages_s)) . "\n";
@@ -64,21 +64,21 @@ while (<METADATA>) {
   }
   $count{'metadata'}++;
   my $mediablobs;
-  my $foundobject = $blobs{$objectid};
-  if ($foundobject) {
+  $blobs{$objectcsid}{'hasimages'} = 'no' unless $blobs{$objectcsid}{'hasimages'} eq 'yes';
+  my $foundimage = $blobs{$objectcsid}{'image'};
+  if ($foundimage) {
     # if context of use field contains the word burial
-    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[33] =~ /United States/i);
+    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[34] =~ /United States/i);
     # if object name contains something like "charm stone"
-    $blobs{$objectcsid}{'image'} = $restricted if ($name =~ /charm.*stone/i && @rest[33] =~ /United States/i);
+    $blobs{$objectcsid}{'image'} = $restricted if (@rest[8] =~ /charm.*stone/i && @rest[34] =~ /United States/i);
 
     # insert list of blobs, etc. as final columns
-    $blobs{$objectid}{'type'} =~ s/,$//;
-    $blobs{$objectid}{'type'} = join(',', sort(split(',', $blobs{$objectid}{'type'})));
-    $blobs{$objectid}{'hasimages'} = 'no' unless $blobs{$objectid}{'hasimages'} eq 'yes';;
+    $blobs{$objectcsid}{'type'} =~ s/,$//;
+    $blobs{$objectcsid}{'type'} = join(',', sort(split(',', $blobs{$objectcsid}{'type'})));
     for my $column (qw(image card primary type hasimages)) {
-      $mediablobs .= $delim . $blobs{$objectid}{$column};
+      $mediablobs .= $delim . $blobs{$objectcsid}{$column};
     }
-    $count{'object: ' . $blobs{$objectid}{'type'}}++;
+    $count{'object: ' . $blobs{$objectcsid}{'type'}}++;
     $count{'matched'}++;
   }
   else {

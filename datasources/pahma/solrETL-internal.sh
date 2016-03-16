@@ -50,6 +50,8 @@ gunzip -f 4solr.$TENANT.allmedia.csv.gz
 # add the blob csids to the rest of the internal
 ##############################################################################
 time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv internal > d7.csv
+# ugh, something bad seems to be happening in the merge script above
+perl -i -ne 'print unless length > 20000' d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
