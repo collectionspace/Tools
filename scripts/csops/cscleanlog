@@ -38,9 +38,10 @@ ACCESS_LOG_FILEGLOB=localhost_access_log.$YEAR_MONTH-*.txt
 ARCHIVE_FILE=localhost_access_log.$YEAR_MONTH.tar.gz
 
 if [ `ls -1 $ACCESS_LOG_FILEGLOB | wc -l` -gt 0 ]; then
-        if tar -czf $ARCHIVE_FILE $ACCESS_LOG_FILEGLOB ; then
-                rm $ACCESS_LOG_FILEGLOB 
-        fi
+	if tar -czf $ARCHIVE_FILE $ACCESS_LOG_FILEGLOB ; then
+		chmod 444 $ARCHIVE_FILE
+		rm $ACCESS_LOG_FILEGLOB
+	fi
 fi
 
 # TODO: Transfer tarballed access logs to Box.
