@@ -1,6 +1,0 @@
-#[jblowe@pahma-dev batch_barcode]$ sudo crontab -u yuteh -l
-0 9-18 * * 1-5 /home/developers/batch_barcode/import_barcode_typeR.sh &> /tmp/all_barcode_typeR.msg
-5 9    * * 1-5 /home/developers/batch_barcode/writable_log.sh
-40 10,11 14 11 * /home/developers/batch_barcode/move_testfiles.sh
-5  8   * *  6  /home/developers/batch_MH_obj/MH2obj_update.sh &> /tmp/MH2obj.msg
-0  4   * *  0  /home/yueh/bin/delete_oldbarcode_files 
