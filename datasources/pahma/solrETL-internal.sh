@@ -32,11 +32,6 @@ cd /home/app_solr/solrdatasources/pahma
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
-USERNAME="reporter_pahma"
-DATABASE="pahma_domain_pahma"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
-export NUMCOLS=38
 ##############################################################################
 # get rid of these if somehow they exist
 ##############################################################################
@@ -47,17 +42,17 @@ rm -f 4solr.$TENANT.internal.csv.gz 4solr.$TENANT.internal.csv
 gunzip -f 4solr.$TENANT.baseinternal.csv.gz
 gunzip -f 4solr.$TENANT.allmedia.csv.gz
 ##############################################################################
-# add the blob csids to the rest of the internal
+# add the blob and card csids and other flags to the rest of the metadata
 ##############################################################################
-time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv internal > d7.csv
-# ugh, something bad seems to be happening in the merge script above
-perl -i -ne 'print unless length > 20000' d7.csv
+time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv internal > d6.csv
+##############################################################################
+#  compute a boolean: hascoords = yes/no
+##############################################################################
+perl setCoords.pl 34 < d6.csv > d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid d7.csv > header4Solr.csv
-# add the blob field name to the header (the header already ends with a tab)
-perl -i -pe 's/$/blob_ss/' header4Solr.csv
 grep -v csid d7.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.internal.csv
 # clean up some outstanding sins perpetuated by other scripts

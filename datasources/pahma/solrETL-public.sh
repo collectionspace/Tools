@@ -95,15 +95,16 @@ rm internal.csv all.csv
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid 4solr.$TENANT.baseinternal.csv > header4Solr.csv
-# add the blob field name to the header (the header already ends with a tab)
 grep -v csid 4solr.$TENANT.baseinternal.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.baseinternal.csv
 ##############################################################################
-# add the blob csids to the rest of the metadata
+# add the blob and card csids and other flags to the rest of the metadata
 ##############################################################################
 time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.public.csv public > d6.csv
-# ugh, something bad seems to be happening in the merge script above
-perl -i -ne 'print unless length > 20000' d6.csv
+##############################################################################
+#  compute a boolean: hascoords = yes/no
+##############################################################################
+perl setCoords.pl 34 < d6.csv > d6a.csv
 ##############################################################################
 #  Obfuscate the lat-longs of sensitive sites
 ##############################################################################
