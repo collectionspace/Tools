@@ -20,33 +20,39 @@ def uploadCmdrWatch(barcodeFile, dataType, data, config):
         barcodeFh.close()
     except:
         # raise
-        barcodeFile = '<span style="color:red;">could not write to %s</span>' % barcodeFile
-        return
+        barcodeFile = '<span style="color:red;">could not write to /tmp/%s</span>' % localslug
+        return barcodeFile
 
-    # OK, now we have the file object with the data in it. write it to the
-    # commanderWatch server via SMB
+    try:
 
-    domain = config.get('files', 'domain')
-    userID = config.get('files', 'userID')
-    password = config.get('files', 'password')
-    client_name = config.get('files', 'client_name')
-    server_ip = config.get('files', 'server_ip')
-    service_name = config.get('files', 'service_name')
+        # OK, now we have the file object with the data in it. write it to the
+        # commanderWatch server via SMB
 
-    # client_machine_name can be an arbitary ASCII string
-    # server_name should match the remote machine name, or else the connection will be rejected
-    #
-    # SMBConnection(username, password, my_name, remote_name, domain='')
-    conn = SMBConnection(userID, password, client_name, service_name, domain, is_direct_tcp=True)
-    assert conn.connect(server_ip, 445)
+        domain = config.get('files', 'domain')
+        userID = config.get('files', 'userID')
+        password = config.get('files', 'password')
+        client_name = config.get('files', 'client_name')
+        server_ip = config.get('files', 'server_ip')
+        service_name = config.get('files', 'service_name')
 
-    # storeFile(service_name, path, file_obj, timeout=30)
-    # service_name - the name of the shared folder for the path
+        # client_machine_name can be an arbitary ASCII string
+        # server_name should match the remote machine name, or else the connection will be rejected
+        #
+        # SMBConnection(username, password, my_name, remote_name, domain='')
+        conn = SMBConnection(userID, password, client_name, service_name, domain, is_direct_tcp=True)
+        assert conn.connect(server_ip, 445)
 
-    barcodeFh = open('/tmp/%s' % localslug, 'rb')
-    bytes = conn.storeFile(service_name, barcodeFile, barcodeFh)
+        # storeFile(service_name, path, file_obj, timeout=30)
+        # service_name - the name of the shared folder for the path
 
-    barcodeFh.close()
-    os.unlink('/tmp/%s' % localslug)
+        barcodeFh = open('/tmp/%s' % localslug, 'rb')
+        bytes = conn.storeFile(service_name, barcodeFile, barcodeFh)
 
-    return barcodeFile
+        barcodeFh.close()
+        os.unlink('/tmp/%s' % localslug)
+        return barcodeFile
+    except:
+        # raise
+        os.unlink('/tmp/%s' % localslug)
+        barcodeFile = '<span style="color:red;">could not transmit %s to commanderWatch</span>' % barcodeFile
+        return barcodeFile
