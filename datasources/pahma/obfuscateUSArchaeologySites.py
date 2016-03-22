@@ -21,7 +21,8 @@ with open(sys.argv[2], "wb") as out:
         reader = csv.reader(original, delimiter="\t")
         for row in reader:
             try:
-                if "United States" in row[fieldCollectionTree_column] and row[objecttype_column] == "archaeology" and row[latlong_column] != '':
+                # *all* archeology sites worldwide are obscured
+                if row[objecttype_column] == "archaeology" and row[latlong_column] != '':
                     # obfuscate lat-long
 
                     # first, get the actual values...
