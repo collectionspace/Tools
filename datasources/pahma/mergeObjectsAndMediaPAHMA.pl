@@ -71,6 +71,8 @@ while (<METADATA>) {
     $blobs{$objectcsid}{'images'} = $restricted if (@rest[12] =~ /burial/i && @rest[34] =~ /United States/i);
     # if object name contains something like "charm stone"
     $blobs{$objectcsid}{'images'} = $restricted if (@rest[8] =~ /charm.*stone/i && @rest[34] =~ /United States/i);
+    # belt-and-suspenders: restrict if charm stone or NAGPRA appear anywhere in USA records...
+    $blobs{$objectcsid}{'images'} = $restricted if ($_ =~ /(charm.*stone|NAGPRA-associated Funerary Objects)/i && @rest[34] =~ /United States/i);
 
     # insert list of blobs, etc. as final columns
     $blobs{$objectcsid}{'restrictions'} =~ s/,$//;
