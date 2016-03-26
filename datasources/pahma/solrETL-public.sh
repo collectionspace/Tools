@@ -108,7 +108,7 @@ perl setCoords.pl 34 < d6.csv > d6a.csv
 ##############################################################################
 #  Obfuscate the lat-longs of sensitive sites
 ##############################################################################
-time python obfuscateUSArchaeologySites.py d6.csv d7.csv
+time python obfuscateUSArchaeologySites.py d6a.csv d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
@@ -143,7 +143,7 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=t
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################
 # get rid of intermediate files
-rm d?.csv m?.csv part*.csv basic.csv
+rm d?.csv d6a.csv m?.csv part*.csv basic.csv
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
 date
