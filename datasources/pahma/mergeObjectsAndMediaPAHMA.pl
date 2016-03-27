@@ -69,13 +69,15 @@ while (<METADATA>) {
   if ($blobs{$objectcsid}{'type'}) {
     if ($runtype eq 'public') {
       # if context of use field contains the word burial
-      $blobs{$objectcsid}{'images'} = $restricted if (@rest[13] =~ /burial/i && @rest[34] =~ /United States/i);
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[13] =~ /burial/i
+      && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
       # if object name contains something like "charm stone"
-      $blobs{$objectcsid}{'images'} = $restricted if (@rest[8] =~ /charm.*stone/i && @rest[34] =~ /United States/i);
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[8] =~ /charm.*stone/i
+      && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
       # belt-and-suspenders: restrict if charm stone or NAGPRA appear anywhere in USA records...
       $blobs{$objectcsid}{'images'} = $restricted if ($_ =~ /(charm.*stone|NAGPRA-associated Funerary Objects)/i
       && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
-    } 
+    }
     # insert list of blobs, etc. as final columns
     $blobs{$objectcsid}{'restrictions'} =~ s/,$//;
     $blobs{$objectcsid}{'type'} =~ s/,$//;
