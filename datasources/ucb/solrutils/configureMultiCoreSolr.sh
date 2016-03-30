@@ -35,7 +35,7 @@ then
    echo "$SOLR4 directory exists, please remove (e.g. rm -rf $SOLR4/), then try again."
    exit 1
 fi
-if [ ! -e solr-$SOLRVERSION.tgz ];
+if [ ! -e /tmp/solr-$SOLRVERSION.tgz ];
 then
    echo "solr-$SOLRVERSION.tgz does not exist, attempting to download"
    # install solr
