@@ -7,16 +7,16 @@ then
   echo 1>&2 "First, cd to the directory in which you want solr4 installed. E.g cd ~ or cd /usr/local/share"
   echo 1>&2 ""
   echo 1>&2 "call with three arguments:"
-  echo 1>&2 "$0 toolsdir solr4dir solrversion"
+  echo 1>&2 "$0 fullpathtotoolsdir fullpathtosolr4dir solrversion"
   echo 1>&2 ""
   echo 1>&2 "e.g."
-  echo 1>&2 "$0  ~/Tools solr4 4.10.4"
+  echo 1>&2 "$0  ~/Tools ~/solr4 4.10.4"
   echo 1>&2 ""
   echo 1>&2 ""
   echo 1>&2 "- path to Tool git repo"
   echo 1>&2 "- directory to create with all Solr goodies in it"
   echo 1>&2 "- solr4 version (e.g. 4.10.4)"
-  echo 1>&2 "(toolsdir must exist and be current; solr4dir must not)"
+  echo 1>&2 "(toolsdir clone repo must exist; solr4dir must not)"
   echo 1>&2 ""
   exit 2
 fi
@@ -28,6 +28,8 @@ then
    echo "Tools directory $TOOLS not found. Please clone from GitHub and provide it as the first argument."
    exit 1
 fi
+cd ${TOOLS}
+git pull -v
 if [ -d $SOLR4 ];
 then
    echo "$SOLR4 directory exists, please remove (e.g. rm -rf $SOLR4/), then try again."
@@ -37,10 +39,10 @@ if [ ! -e solr-$SOLRVERSION.tgz ];
 then
    echo "solr-$SOLRVERSION.tgz does not exist, attempting to download"
    # install solr
-   curl -O http://mirror.symnds.com/software/Apache/lucene/solr/$SOLRVERSION/solr-$SOLRVERSION.tgz
+   curl -o /tmp/solr-$SOLRVERSION.tgz http://mirror.symnds.com/software/Apache/lucene/solr/$SOLRVERSION/solr-$SOLRVERSION.tgz
 fi
-tar xzf solr-$SOLRVERSION.tgz
-mv solr-$SOLRVERSION $SOLR4
+tar xzf /tmp/solr-$SOLRVERSION.tgz
+mv /tmp/solr-$SOLRVERSION $SOLR4
 cd $SOLR4
 mv example ucb
 
@@ -163,6 +165,6 @@ echo "think you'll need it again."
 echo "rm -rf $TOOLS"
 echo
 echo "Let me try it for you..."
-cp $TOOLS/datasources/ucb/solrutils/startSolr.sh $SOLR4/ucb/
+cp $TOOLS/datasources/ucb/solrutils/startSolr.sh ${SOLR4}/ucb
 cd ${SOLR4}/ucb
 ./startSolr.sh
