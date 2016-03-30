@@ -42,7 +42,7 @@ then
    curl -o /tmp/solr-$SOLRVERSION.tgz http://mirror.symnds.com/software/Apache/lucene/solr/$SOLRVERSION/solr-$SOLRVERSION.tgz
 fi
 tar xzf /tmp/solr-$SOLRVERSION.tgz
-mv /tmp/solr-$SOLRVERSION $SOLR4
+mv solr-$SOLRVERSION $SOLR4
 cd $SOLR4
 mv example ucb
 
