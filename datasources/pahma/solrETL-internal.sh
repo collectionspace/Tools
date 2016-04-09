@@ -32,11 +32,6 @@ cd /home/app_solr/solrdatasources/pahma
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
-USERNAME="reporter_pahma"
-DATABASE="pahma_domain_pahma"
-CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
-export NUMCOLS=38
 ##############################################################################
 # get rid of these if somehow they exist
 ##############################################################################
@@ -47,17 +42,17 @@ rm -f 4solr.$TENANT.internal.csv.gz 4solr.$TENANT.internal.csv
 gunzip -f 4solr.$TENANT.baseinternal.csv.gz
 gunzip -f 4solr.$TENANT.allmedia.csv.gz
 ##############################################################################
-# add the blob csids to the rest of the internal
+# add the blob and card csids and other flags to the rest of the metadata
 ##############################################################################
-time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv internal > d7.csv
-# ugh, something bad seems to be happening in the merge script above
-perl -i -ne 'print unless length > 20000' d7.csv
+time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.baseinternal.csv internal > d6.csv
+##############################################################################
+#  compute a boolean: hascoords = yes/no
+##############################################################################
+perl setCoords.pl 34 < d6.csv > d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
 grep csid d7.csv > header4Solr.csv
-# add the blob field name to the header (the header already ends with a tab)
-perl -i -pe 's/$/blob_ss/' header4Solr.csv
 grep -v csid d7.csv > d8.csv
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.internal.csv
 # clean up some outstanding sins perpetuated by other scripts
@@ -72,7 +67,7 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss
 # here are the solr csv update parameters needed for multivalued fields
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
-rm d7.csv d8.csv
+rm d6.csv d7.csv d8.csv
 wc -l *.csv
 ##############################################################################
 # ok, now let's load this into solr...
@@ -84,7 +79,7 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update" --data '<commi
 # this POSTs the csv to the Solr / update endpoint
 # note, among other things, the overriding of the encapsulator with \
 ##############################################################################
-time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&f.card_ss.split=true&f.card_ss.separator=,&f.imagetype_ss.split=true&f.imagetype_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.internal.csv -H 'Content-type:text/plain; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit=true&header=true&separator=%09&f.objaltnum_ss.split=true&f.objaltnum_ss.separator=%7C&f.objfilecode_ss.split=true&f.objfilecode_ss.separator=%7C&f.objdimensions_ss.split=true&f.objdimensions_ss.separator=%7C&f.objmaterials_ss.split=true&f.objmaterials_ss.separator=%7C&f.objinscrtext_ss.split=true&f.objinscrtext_ss.separator=%7C&f.objcollector_ss.split=true&f.objcollector_ss.separator=%7C&f.objaccno_ss.split=true&f.objaccno_ss.separator=%7C&f.objaccdate_ss.split=true&f.objaccdate_ss.separator=%7C&f.objacqdate_ss.split=true&f.objacqdate_ss.separator=%7C&f.objassoccult_ss.split=true&f.objassoccult_ss.separator=%7C&f.objculturetree_ss.split=true&f.objculturetree_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&f.card_ss.split=true&f.card_ss.separator=,&f.imagetype_ss.split=true&f.imagetype_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.internal.csv -H 'Content-type:text/plain; charset=utf-8'
 ##############################################################################
 # wrap things up: make a gzipped version of what was loaded
 ##############################################################################

@@ -56,6 +56,7 @@ nameparts = ["authorsParsed",
              "infraSpecificEpithet",
              "rankMarker",
              "scientificName",
+             "cultivarEpithet",
              "specificEpithet",
              "type"]
 

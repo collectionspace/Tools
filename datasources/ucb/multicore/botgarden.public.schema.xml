@@ -208,6 +208,7 @@
     <copyField source="rankMarker_s" dest="rankMarker_txt"/>
     <copyField source="scientificName_s" dest="scientificName_txt"/>
     <copyField source="specificEpithet_s" dest="specificEpithet_txt"/>
+    <copyField source="cultivarEpithet_s" dest="cultivarEpithet_txt"/>
     <copyField source="type_s" dest="type_txt"/>
     <copyField source="determination_s" dest="determination_txt"/>
     <copyField source="collector_s" dest="collector_txt"/>
