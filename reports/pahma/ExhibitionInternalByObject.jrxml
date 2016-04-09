@@ -16,7 +16,7 @@ spd.datedisplaydate AS "Prod. date",
 scd.datedisplaydate AS "Coll. date",
 STRING_AGG(DISTINCT REGEXP_REPLACE(fc.item, '^.*\)''(.*)''$', '\1'), '; ') AS "Collector(s)",
 STRING_AGG(DISTINCT ac.acquisitionreferencenumber, '; ') AS "Acc. No.",
-STRING_AGG(DISTINCT REGEXP_REPLACE(aco.item, '^.*\)''(.*)''$', '\1'), '; ') AS "Donor(s)",
+STRING_AGG(DISTINCT REGEXP_REPLACE(adg.donor, '^.*\)''(.*)''$', '\1'), '; ') AS "Donor(s)",
 STRING_AGG(DISTINCT REGEXP_REPLACE(apg.assocpeople, '^.*\)''(.*)''$', '\1'),'; ') AS "Culture",
 REGEXP_REPLACE(opp.objectproductionperson, '^.*\)''(.*)''$', '\1') AS "Maker",
 REGEXP_REPLACE(oppl.objectproductionplace, '^.*\)''(.*)''$', '\1') AS "Production place",
@@ -87,7 +87,8 @@ LEFT OUTER JOIN collectionobjects_common_fieldcollectors fc ON (fc.id=cc.id)
 LEFT OUTER JOIN relations_common rca ON (h1.name=rca.subjectcsid AND rca.objectdocumenttype='Acquisition')
 LEFT OUTER JOIN hierarchy hac ON (hac.name=rca.objectcsid AND (hac.pos=0 OR hac.pos IS NULL))
 LEFT OUTER JOIN acquisitions_common ac ON (hac.id=ac.id)
-LEFT OUTER JOIN acquisitions_common_owners aco ON (ac.id=aco.id)
+LEFT OUTER JOIN hierarchy hadg ON (hadg.parentid=hac.id AND hadg.name='acquisitions_pahma:acquisitionDonorGroupList' AND hadg.primarytype='acquisitionDonorGroup')
+LEFT OUTER JOIN acquisitiondonorgroup adg ON (adg.id=hadg.id)
 LEFT OUTER JOIN hierarchy hc ON (hc.parentid=cc.id AND hc.primarytype='assocPeopleGroup')
 LEFT OUTER JOIN assocpeoplegroup apg ON (apg.id=hc.id)
 LEFT OUTER JOIN hierarchy hmk ON (cc.id=hmk.parentid AND hmk.name='collectionobjects_common:objectProductionPersonGroupList' AND (hmk.pos=0 OR hmk.pos IS NULL))
