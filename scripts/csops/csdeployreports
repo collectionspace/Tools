@@ -1,5 +1,25 @@
-cd ~/src/cspace-deployment/Tools
-git pull
-cp ~/src/cspace-deployment/Tools/reports/`csname`/*.jrxml ~/`csservname`/cspace/reports
-rm ~/`csservname`/cspace/reports/*.jasper
-echo "reports for `csname` redeployed"
+#!/bin/bash
+
+# Update and deploy reports.
+
+SOURCE_DIR=~/src/cspace-deployment
+TOOLS_DIR=$SOURCE_DIR/Tools
+DEPLOYMENT_NAME=`csname`
+TOMCAT_DIR=~/`csservname`
+REPORT_DIR=$TOMCAT_DIR/cspace/reports
+
+cd $TOOLS_DIR
+
+echo "Updating reports..."
+
+if ! git pull; then
+	echo "ERROR: Failed to pull updates"
+	exit 1
+fi
+
+echo "Deploying reports..."
+
+cp reports/$DEPLOYMENT_NAME/*.jrxml $REPORT_DIR
+rm $REPORT_DIR/*.jasper
+
+echo "Reports for $DEPLOYMENT_NAME deployed"
