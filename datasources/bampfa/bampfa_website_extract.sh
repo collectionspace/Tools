@@ -14,7 +14,7 @@ CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f bampfa_website_extract.sql -o bwe.tab
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
-time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g;' bwe.tab | time perl addStatus.pl 27 |  cut -f1-27,30- > ${TENANT}_website_objects_extract.tab
+time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g;' bwe.tab | perl addStatus.pl 26 |  cut -f1-26,29- > ${TENANT}_website_objects_extract.tab
 cut -f4-10 ${TENANT}_website_objects_extract.tab | sort | uniq > artist.extract
 grep    nationality artist.extract > artist.header
 grep -v nationality artist.extract > artist.tmp

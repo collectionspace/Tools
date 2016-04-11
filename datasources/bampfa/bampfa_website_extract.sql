@@ -38,7 +38,6 @@ SELECT
    case when (cb.permissiontoreproduce is null or cb.permissiontoreproduce='') then 'Unknown'
       else cb.permissiontoreproduce 
    end as permissiontoreproduce,
-   cas.item acquisitionsource,
    utils.getdispl(cb.legalstatus) legalstatus,
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate,
