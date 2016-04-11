@@ -68,6 +68,22 @@ csidletime
 ##### Description
 Shows the amount of time elapsed since the last user activity in CollectionSpace. The time is printed to standard output, in seconds.  The time of last user activity is heuristically determined using log files, and therefore may not be accurate. For example, requests do not appear in certain logs until they have completed, so a long running request that is still in progress may not be detected. If no idle time can be determined (for example, if no logs exist), nothing is printed.
 
+### csstarttime - show when CollectionSpace started
+##### Synopsis
+```
+csstarttime [+FORMAT]
+```
+##### Description
+Shows the date/time the CollectionSpace server was started. The time is printed to standard output, using the format specified. If CollectionSpace is not running, nothing is printed. The format string is interpreted by the `date` program.
+
+### cspid - show the PID of the CollectionSpace process
+##### Synopsis
+```
+cspid
+```
+##### Description
+Shows the process ID of the CollectionSpace server. The pid is printed to standard output. If CollectionSpace is not running, nothing is printed.
+
 ### csver - show the installed CollectionSpace version number
 ##### Synopsis
 ```
@@ -120,10 +136,10 @@ cscleanlog
 ##### Description
 Rotates log files. Currently, this script only rotates tomcat's catalina.out log. In the future, this script may also rotate and/or remove additional log files.
 
-### csdeployreports - (re)deploy reports from this repo
+### csdeployreports - (re)deploy reports for this deployment
 ##### Synopsis
 ```
 csdeployreports
 ```
 ##### Description
-Copies the JRXML files from this repo into the reports directory cleans out the existing compiled versions. CollectionSpace will recompile them as needed.
+Copies the JRXML files for this deployment into the reports directory, and cleans out the existing compiled reports. CollectionSpace will recompile them as needed.
