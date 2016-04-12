@@ -74,7 +74,7 @@ Shows the amount of time elapsed since the last user activity in CollectionSpace
 csstarttime [+FORMAT]
 ```
 ##### Description
-Shows the date/time the CollectionSpace server was started. The time is printed to standard output, using the format specified. If CollectionSpace is not running, nothing is printed. The format string is interpreted by the `date` program.
+Shows the date/time the CollectionSpace server was started. The time is printed to standard output, using the format specified. If CollectionSpace is not running, nothing is printed. The format string is interpreted by the `date` program. Note that the format must start with a plus sign.
 
 ### cspid - show the PID of the CollectionSpace process
 ##### Synopsis
@@ -135,6 +135,14 @@ cscleanlog
 ```
 ##### Description
 Rotates log files. Currently, this script only rotates tomcat's catalina.out log. In the future, this script may also rotate and/or remove additional log files.
+
+### cscheckjava - check for Java updates
+##### Synopsis
+```
+cscheckjava
+```
+##### Description
+Checks if the Java installation used by CollectionSpace has been updated. If an update to Java is detected that occurred after the start time of the running CollectionSpace server, the CollectionSpace server is restarted using the `csbounce` program. This ensures that CollectionSpace is using the newest version of Java. This program should be run shortly after the scheduled OS update times.
 
 ### csdeployreports - (re)deploy reports for this deployment
 ##### Synopsis

@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Check if java has been updated. If so, attempt to restart tomcat.
+# This is necessary because reports may fail after a java update (UCBG-318).
+
+# The UNIX team schedules updates for Tuesday at 6pm on dev, and Thursday
+# at 6pm on production. This script should be run shortly thereafter.
+
+PATH=~/bin:$PATH
+MAIL_TO=cspace-support@lists.berkeley.edu
+
+if [[ -z "$JAVA_HOME" ]]; then
+	. ~/.cspace
+fi
+
+# Time cspace was started, in seconds since the epoch
+CS_START_TIME_EPOCH=`csstarttime +%s`
+
+# Time java was last modified, in seconds since the epoch
+JAVA_MOD_TIME_EPOCH=`stat -c '%Y' $JAVA_HOME`
+
+if [[ -z $CS_START_TIME_EPOCH ]]; then
+	echo "ERROR: Could not determine CollectionSpace start time"
+	exit 1;
+fi
+
+if [[ -z $JAVA_MOD_TIME_EPOCH ]]; then
+	echo "ERROR: Could not determine java last modified time"
+	exit 1;
+fi
+
+if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
+	# Java was updated since cspace was last started.
+	# Need to restart cspace.
+	
+	echo "Restarting CollectionSpace..."
+
+	OLD_CS_START_TIME=`csstarttime`
+	SERVICE_NAME=`csservname`
+	SCRIPT_NAME=`basename -- "$0"`
+	JAVA_DIR=`readlink -e "$JAVA_HOME"`
+	JAVA_VER=`basename -- "$JAVA_DIR"`
+	JAVA_UPDATE_TIME=`stat -c '%y' "$JAVA_HOME"`
+	BOUNCE_PROGRAM=csbounce
+
+	read -r -d '' MAIL_INTRO <<-ENDTEXT
+		Java was updated after CollectionSpace was last started at ${OLD_CS_START_TIME}.
+
+		Java version: $JAVA_VER
+		Updated at:   $JAVA_UPDATE_TIME
+	ENDTEXT
+
+	if BOUNCE_OUTPUT=$($BOUNCE_PROGRAM); then
+		BOUNCE_STATUS=OK
+		NEW_CS_START_TIME=`csstarttime`
+
+		read -r -d '' MAIL_DESC <<-ENDTEXT
+			$SCRIPT_NAME restarted $SERVICE_NAME successfully at ${NEW_CS_START_TIME}.
+		ENDTEXT
+	else
+		EXIT_CODE=$?
+		BOUNCE_STATUS=FAILED
+
+		read -r -d '' MAIL_DESC <<-ENDTEXT
+			$SCRIPT_NAME attempted to restart $SERVICE_NAME, but $BOUNCE_PROGRAM failed with exit code ${EXIT_CODE}.
+			$BOUNCE_OUTPUT
+
+			This tomcat instance must be manually restarted.
+		ENDTEXT
+	fi
+
+	MAIL_SUBJECT="$SCRIPT_NAME: restart of $SERVICE_NAME $BOUNCE_STATUS"
+
+	/bin/mail -s "$MAIL_SUBJECT" $MAIL_TO <<-ENDTEXT
+		$MAIL_INTRO
+
+		$MAIL_DESC
+	ENDTEXT
+fi
