@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Check if java has been updated. If so, attempt to restart tomcat.
-# This is necessary because reports may fail after a java update (UCBG-318).
+# Check if Java has been updated. If so, attempt to restart tomcat.
+# This is necessary because reports may fail after a Java update (UCBG-318).
 
 # The UNIX team schedules updates for Tuesday at 6pm on dev, and Thursday
 # at 6pm on production. This script should be run shortly thereafter.
@@ -16,7 +16,7 @@ fi
 # Time cspace was started, in seconds since the epoch
 CS_START_TIME_EPOCH=`csstarttime +%s`
 
-# Time java was last modified, in seconds since the epoch
+# Time Java was last modified, in seconds since the epoch
 JAVA_MOD_TIME_EPOCH=`stat -c '%Y' $JAVA_HOME`
 
 if [[ -z $CS_START_TIME_EPOCH ]]; then
@@ -33,8 +33,6 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 	# Java was updated since cspace was last started.
 	# Need to restart cspace.
 	
-	echo "Restarting CollectionSpace..."
-
 	OLD_CS_START_TIME=`csstarttime`
 	SERVICE_NAME=`csservname`
 	SCRIPT_NAME=`basename -- "$0"`
@@ -42,6 +40,9 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 	JAVA_VER=`basename -- "$JAVA_DIR"`
 	JAVA_UPDATE_TIME=`stat -c '%y' "$JAVA_HOME"`
 	BOUNCE_PROGRAM=csbounce
+
+	echo `date`: Java updated at $JAVA_UPDATE_TIME
+	echo `date`: restarting CollectionSpace...
 
 	read -r -d '' MAIL_INTRO <<-ENDTEXT
 		Java was updated after CollectionSpace was last started at ${OLD_CS_START_TIME}.
@@ -63,11 +64,14 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 
 		read -r -d '' MAIL_DESC <<-ENDTEXT
 			$SCRIPT_NAME attempted to restart $SERVICE_NAME, but $BOUNCE_PROGRAM failed with exit code ${EXIT_CODE}.
+
 			$BOUNCE_OUTPUT
 
-			This tomcat instance must be manually restarted.
+			This tomcat instance must be restarted manually.
 		ENDTEXT
 	fi
+
+	echo `date`: restart $BOUNCE_STATUS
 
 	MAIL_SUBJECT="$SCRIPT_NAME: restart of $SERVICE_NAME $BOUNCE_STATUS"
 
@@ -76,4 +80,6 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 
 		$MAIL_DESC
 	ENDTEXT
+else
+	echo `date`: Java not updated
 fi
