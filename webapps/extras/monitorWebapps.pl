@@ -13,7 +13,30 @@ sub fixDate {
 
 my %stats;
 my %dates;
-my %apps;my $count = 0;
+my %apps;
+my $count = 0;
+
+my %labels = (
+ 'barcodeprint' => 'barcode print',
+ 'bedlist' => 'bed list',
+ 'bulkedit' => 'bulk edit',
+ 'check' => 'server check',
+ 'collectionstats' => 'coll stats',
+ 'governmentholdings' => 'govt holdings',
+ 'hierarchyviewer' => 'hierarchy viewer',
+ 'holdings' => 'hold ings',
+ 'inventory' => 'invent ory',
+ 'keyinfo' => 'key info',
+ 'locreport' => 'location report',
+ 'movecrate' => 'move crate',
+ 'moveobject' => 'move objects',
+ 'objdetails' => 'object details',
+ 'objinfo' => 'object info',
+ 'objnamecleaning' => 'name cleaning',
+ 'packinglist' => 'packing list',
+ 'powermove' => 'power move',
+ 'upload' => 'tricoder upload'
+);
 
 open APPDATA,"<@ARGV[0]";
 while (<APPDATA>) {
@@ -23,12 +46,12 @@ while (<APPDATA>) {
   my ($date,$ip,$app,$action,$end,$sec,$sys,$loc1,$loc2,$parms) = split "\t";
   $date = fixDate($date);
   $app =~ s/check server/check/;
+  $app =~ s/'//g;
   next if $sys =~ /PROTOTYPE/;
   next if $sys =~ /\*/;
   next if $sys eq '';
   next if $app =~ / /;
-  next if $sys =~ /dev2 /;
-  $app =~ s/'//g;
+  next if $app =~ /^(move|objnamecleaning)$/;
   $stats{$sys}{$app}{uses}++;
   $stats{$sys}{$app}{time}+=$sec;
   $date = substr($date,0,10);
@@ -36,13 +59,23 @@ while (<APPDATA>) {
   $dates{$sys}{$date}{$app}++;
   $apps{$app}++;
 }
-print "<html>\n<a name=\"top\"/>\n<h1>Webapp Utilization Report</h1>\n<table border=\"1\">";
-print "\n<h3>last updated: " . scalar localtime() . " (" . $count . ")</h3>\n";
+print << "EOF";
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/base.css">
+</head>
+<a name="top"/>
+<h2>Legacy Webapp Utilization Report</h2>
+EOF
+print "\n<h4>" . scalar localtime() . "</h4>\n<table border=\"1\">";
 foreach my $sys (sort keys %stats) {
-  print "\n<h2>CSpace Database/Instance: $sys</h2>\n";
-  print "\n<h3>Overall Use</h3>\n";
+  # print "\n<h2>system: $sys</h2>\n";
+  print '<p style="height: 10px;"/>';
+  print "\n<h2>Overall use for each webapp</h2>\n";
   print "\n<table border=\"1\" cellpadding=\"4px\">\n";
-  my @header = ('app','uses','response time (s.)','average (s.)');
+  # my @header = ('app','uses','response time (s.)','average (s.)');
+  my @header = ('app','uses','average response time (s.)');
   print '<tr><th>' . join('<th>',@header) . '</tr>' . "\n";
   my %usage = %{ $stats{$sys} };
   my %myapps;
@@ -52,14 +85,15 @@ foreach my $sys (sort keys %stats) {
     my $appuses = $usage{$app}{uses};
     $totaluse += $appuses;
     my $avgtime = $appuses > 0 ? $usage{$app}{'time'}/$appuses : 0;
-    printf "<tr><td>%s</td><td>%s</td><td>%.1f</td><td>%.1f</td>\n",$app,$usage{$app}{uses},$usage{$app}{time},$avgtime; 
+    # printf "<tr><td>%s</td><td>%s</td><td>%.1f</td><td>%.1f</td>\n",$app,$usage{$app}{uses},$usage{$app}{time},$avgtime; 
+    printf "<tr><td>%s</td><td>%s</td><td>%.1f</td>\n",$labels{$app},$usage{$app}{uses},$avgtime; 
   }
-  printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",'Total',$totaluse,'--','--';
+  printf "<tr><td>%s</td><td>%s</td><td>%s</td>\n",'Total',$totaluse,'--';
   print "</table>\n";
-  
-  print "\n<h3>Daily Use</h3>\n";
-  print "\n<table border=\"1\" cellpadding=\"4px\">\n";
-  print '<tr><th>date<th>' . join('<th>',sort keys %myapps) ;
+  print '<p style="height: 30px;"/>';
+  print "\n<h2>Daily Use for each webapp</h2>\n";
+  print "\n<table style=\"table-layout: fixed;\" cellpadding=\"4px\">\n";
+  print '<tr><th style="min-width: 70px;">date<th>' . join('<th>',map($labels{$_},sort keys %myapps)) ;
   print '<th>daily</th><th>cumulative</th></tr>' . "\n";
   my %sysdates = %{ $dates{$sys} };
   my $dailytotal;
