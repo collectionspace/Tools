@@ -20,9 +20,11 @@ grep    nationality artist.extract > artist.header
 grep -v nationality artist.extract > artist.tmp
 cat artist.header artist.tmp > ${TENANT}_website_artists_extract.tab
 wc ${TENANT}_website_*_extract.tab
-rm ${TENANT}_website_*_extract.tab.gz
-gzip ${TENANT}_website_*_extract.tab
-mail -a ${TENANT}_website_objects_extract.tab.gz -a ${TENANT}_website_artists_extract.tab.gz -s "${TENANT} website extract `date`" -- jblowe@berkeley.edu < /dev/null
+cp ${TENANT}_website_*_extract.tab /var/www/static
+echo "https://webapps.cspace.berkeley.edu/${TENANT}_website_objects_extract.tab" | mail -s "new ${TENANT} website extract available" -- aharris@berkeley.edu
+#rm ${TENANT}_website_*_extract.tab.gz
+#gzip ${TENANT}_website_*_extract.tab
+#mail -a ${TENANT}_website_objects_extract.tab.gz -a ${TENANT}_website_artists_extract.tab.gz -s "${TENANT} website extract `date`" -- jblowe@berkeley.edu < /dev/null
 rm bwe.tab artist.header artist.tmp artist.extract
 #
 date
