@@ -9,6 +9,10 @@ my %seen;
 my $restricted = '59a733dd-d641-4e1a-8552';
 my $runtype = $ARGV[2]; # generate media for public or internal
 
+my $fcpcol = 35;
+my $contextofusecol = 13;
+my $objectnamecol = 8;
+
 while (<MEDIA>) {
   $count{'media'}++;
   chomp;
@@ -69,14 +73,14 @@ while (<METADATA>) {
   if ($blobs{$objectcsid}{'type'}) {
     if ($runtype eq 'public') {
       # if context of use field contains the word burial
-      $blobs{$objectcsid}{'images'} = $restricted if (@rest[13] =~ /burial/i
-      && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[$contextofusecol] =~ /burial/i
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
       # if object name contains something like "charm stone"
-      $blobs{$objectcsid}{'images'} = $restricted if (@rest[8] =~ /charm.*stone/i
-      && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[$objectnamecol] =~ /charm.*stone/i
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
       # belt-and-suspenders: restrict if charm stone or NAGPRA appear anywhere in USA records...
       $blobs{$objectcsid}{'images'} = $restricted if ($_ =~ /(charm.*stone|NAGPRA-associated Funerary Objects)/i
-      && @rest[34] =~ /United States/i && $blobs{$objectcsid}{'images'});
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
     }
     # insert list of blobs, etc. as final columns
     $blobs{$objectcsid}{'restrictions'} =~ s/,$//;
