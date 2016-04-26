@@ -15,8 +15,10 @@
 #10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
 10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
 10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" herb_cspace_reports@lists.berkeley.edu > /dev/null 2>&1
-#10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/botgarden/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_botgarden | expand -12 | mail -s "recent UCBG BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+# 10  5 * * * perl /home/app_webapps/botgarden/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_botgarden | expand -12 | mail -s "recent UCBG BMU jobs" tadditon@lists.berkeley.edu > /dev/null 2>&1
 ##################################################################################
 # run BMU batch jobs (nightly or twice a day depending)
 ##################################################################################
@@ -37,11 +39,12 @@
 ##################################################################################
 # run the tricoder upload job weekdays 9am-6pm, 10 mins after the hour
 ##################################################################################
-#10 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
+3 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
+#5 8  * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
 ##################################################################################
 # update BAMPFA's materialized view for Piction
 ##################################################################################
-15 12,20 * * * psql -d "host=dba-postgres-prod-32.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" | mail -s "Piction mv updated on Prod" -c "lkv@berkeley.edu" chris.hoffman@berkeley.edu
+15 12,20 * * * psql -d "host=dba-postgres-prod-42.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" | mail -s "Piction mv updated on Prod" -c "lkv@berkeley.edu" chris.hoffman@berkeley.edu
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
@@ -51,13 +54,13 @@
 ##################################################################################
 0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- jblowe@berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
-# run the UCJEPS jobs weekly
+# run the UCJEPS jobs daily
 ##################################################################################
-00 5 * * 5 /home/app_webapps/bin/major_group.sh
-00 6 * * 5 /home/app_webapps/bin/cch_extract.sh
-00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
-00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
-30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
+00 5 * * * /home/app_webapps/bin/major_group.sh
+00 6 * * * /home/app_webapps/bin/cch_extract.sh
+00 7 * * * /home/app_webapps/bin/get_taxonauth.sh taxon
+00 8 * * * /home/app_webapps/bin/get_taxonauth.sh unverified
+30 8 * * * /home/app_webapps/bin/rsync2herbaria4.sh
 ##################################################################################
 # refresh the denormalized hierarchies
 ##################################################################################
@@ -67,3 +70,12 @@
 # run the cinefiles month qc report
 ##################################################################################
 00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu
+##################################################################################
+# run the nightly bampfa extract for the drupal website
+##################################################################################
+01 05 * * * cd ~/extracts/bampfa ; /home/app_webapps/extracts/bampfa/bampfa_website_extract.sh bampfa
+##################################################################################
+# monitor webapp use
+##################################################################################
+5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > ~/monitor/currappuse.csv ; cat ~/monitor/currappuse.csv ~/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 ~/monitor/webappuse.csv ; perl ~/monitor/monitorWebapps.pl ~/monitor/webappuse.csv > /var/www/static/webappuse.html
+5 04 * * * cd ~/monitor ; ./analyze.sh
