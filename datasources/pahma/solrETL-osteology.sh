@@ -12,7 +12,7 @@ cd /home/app_solr/solrdatasources/pahma
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
+HOSTNAME="dba-postgres-prod-42.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
