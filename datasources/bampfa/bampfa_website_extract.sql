@@ -41,6 +41,7 @@ SELECT
    utils.getdispl(cb.legalstatus) legalstatus,
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate,
+   utils.get_first_blobcsid(h1.name) image1blobcsid,
    core.updatedat
 from
    hierarchy h1
