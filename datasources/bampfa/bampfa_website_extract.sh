@@ -4,7 +4,6 @@
 #
 date
 TENANT=$1
-cd /home/app_solr/solrdatasources/${TENANT}
 SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
