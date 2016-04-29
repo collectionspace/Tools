@@ -10,7 +10,7 @@
 #
 # 1. run the 10 solr4 updates
 # 2. monitor solr datastore contents (email contents)
-# 3. export and mail BAMPFA view for Orlando (bampfa_collectionitems_vw.sh)
+# 3. export and mail BAMPFA view for Orlando
 #
 ##################################################################################
 01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1

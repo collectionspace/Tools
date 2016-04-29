@@ -22,13 +22,14 @@ mv 4solr.*.csv.gz /tmp
 ##############################################################################
 TENANT=$1
 # nb: using prod db for now... dev is too slow
-SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
+SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-export PUBLICCOLS=36
+FCPCOL=35
+PUBLICCOLS=37
 # the internal dataset has 7 more columns than the public one
-export INTERNALCOLS=43
+INTERNALCOLS=44
 ##############################################################################
 # run the "all media query"
 ##############################################################################
@@ -57,20 +58,20 @@ done
 ##############################################################################
 # check latlongs for restricted (i.e. public) datastore
 ##############################################################################
-perl -ne '@y=split /\t/;@x=split ",",$y[34];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' restricted.csv > d6.csv
-perl -ne '@y=split /\t/;@x=split ",",$y[34];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' restricted.csv > errors_in_latlong.csv
+perl -ne "@y=split /\t/;@x=split ',',$y[\$ENV{FCPCOL}];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[\$ENV{FCPCOL}]!~/[^0-9\, \.\-]/) || $y[\$ENV{FCPCOL}]=~/_p/);" restricted.csv > d6.csv
+perl -ne "@y=split /\t/;@x=split ',',$y[\$ENV{FCPCOL}];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[\$ENV{FCPCOL}]!~/[^0-9\, \.\-]/) || $y[\$ENV{FCPCOL}]=~/_p/);" restricted.csv > errors_in_latlong.csv
 mv d6.csv restricted.csv
 ##############################################################################
 # check latlongs for internal datastore
 ##############################################################################
-perl -ne '@y=split /\t/;@x=split ",",$y[34];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' all.csv > d6.csv
+perl -ne "@y=split /\t/;@x=split ',',$y[\$ENV{FCPCOL}];print if     ((abs($x[0])<90 && abs($x[1])<180 && $y[\$ENV{FCPCOL}]!~/[^0-9\, \.\-]/) || $y[\$ENV{FCPCOL}]=~/_p/);" all.csv > d6.csv
 # nb: we don't have to save the errors in this datastore, they will be the same as the restricted one.
-# perl -ne '@y=split /\t/;@x=split ",",$y[34];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[34]!~/[^0-9\, \.\-]/) || $y[34]=~/_p/);' all.csv > errors_in_latlong.csv
+# perl -ne "@y=split /\t/;@x=split ',',$y[\$ENV{FCPCOL}];print unless ((abs($x[0])<90 && abs($x[1])<180 && $y[\$ENV{FCPCOL}]!~/[^0-9\, \.\-]/) || $y[\$ENV{FCPCOL}]=~/_p/);" all.csv > errors_in_latlong.csv
 ##############################################################################
 # these queries are for the internal datastore
 ##############################################################################
 mv d6.csv internal.csv
-for i in {18..20}
+for i in {18..21}
 do
  time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f part$i.sql | perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' | sort > part$i.csv
  time python join.py internal.csv part$i.csv > temp.csv
@@ -104,7 +105,7 @@ time perl mergeObjectsAndMediaPAHMA.pl 4solr.$TENANT.allmedia.csv 4solr.$TENANT.
 ##############################################################################
 #  compute a boolean: hascoords = yes/no
 ##############################################################################
-perl setCoords.pl 34 < d6.csv > d6a.csv
+perl setCoords.pl ${FCPCOL} < d6.csv > d6a.csv
 ##############################################################################
 #  Obfuscate the lat-longs of sensitive sites
 ##############################################################################

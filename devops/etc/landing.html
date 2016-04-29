@@ -1,99 +1,194 @@
 <html lang="en-us">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/base.css">
-    <!--[if lte IE 7]>
-    <link rel="stylesheet" type="text/css" href="https://webapps-dev.cspace.berkeley.edu/pahma_static/admin/css/ie.css"/><![endif]-->
     <meta name="robots" content="NONE,NOARCHIVE">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <!-- link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.22.custom.css"/>
+    <script type="text/javascript" src="js/jquery-1.10.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script -->
+    <style>
+    li {margin: 10px 0;}
+    .likeabutton {
+        appearance: button;
+        -moz-appearance: button;
+        -webkit-appearance: button;
+        text-decoration: none; font: menu; color: ButtonText;
+        display: inline-block; padding: 4px 10px;
+    }
+    </style>
 </head>
 <body class="">
 <div id="container">
-    <div id="content-main">
-        <h1>UCB CollectionSpace Endpoints</h1>
+    <div id="content-main" style="max-width: 1080px">
+        <div>
+            <img height="40px" src="http://www.collectionspace.org/wp-content/uploads/2014/11/CSpaceLogo.png">
+            <span style="font-size: 28px;vertical-align: 35%;">@</span>
+            <img height="60px" src="https://www.berkeley.edu/brand/berkeley-logo.png">
+        </div>
+         <div id="tabs">
+            <ul>
+                <li><a href="#prodtab">Production</a></li>
+                <li><a href="#devtab">Development</a></li>
+                <li><a href="#analyticstab">Analytics</a></li>
+                <li><a href="#newstab">News</a></li>
+            </ul>
+            <div id="prodtab">
+                <h3>Links to <span style="color: red">Production</span> Systems</h3>
+                <table>
+                    <tbody id="prod">
+                    <tr>
+                        <th></th>
+                        <th>Public Portal</th>
+                        <th>Other Public Endpoints</th>
+                        <th>Internal Endpoints</th>
+                        <th>"Legacy" Apps</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        <h2>Production</h2>
-
-        <table>
-            <tbody>
-            <tr>
-                <th>Tenant</th>
-                <th>Webapps</th>
-                <th>Regular UI</th>
-            </tr>
-            <tr>
-                <td>BAM/PFA</td>
-                <td><a target="_new" href="https://webapps.cspace.berkeley.edu/bampfa">webapps.cspace.berkeley.edu/bampfa</a></td>
-                <td><a target="_new" href="https://bampfa.cspace.berkeley.edu/">bampfa.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>UC Botanical Garden</td>
-                <td><a target="_new" href="https://webapps.cspace.berkeley.edu/botgarden">webapps.cspace.berkeley.edu/botgarden</a></td>
-                <td><a target="_new" href="https://botgarden.cspace.berkeley.edu/">botgarden.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>Cinefiles</td>
-                <td><a target="_new" href="https://webapps.cspace.berkeley.edu/cinefiles">webapps.cspace.berkeley.edu/cinefiles</a></td>
-                <td><a target="_new" href="https://cinefiles.cspace.berkeley.edu/">cinefiles.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>PAHMA</td>
-                <td><a target="_new" href="https://webapps.cspace.berkeley.edu/pahma">webapps.cspace.berkeley.edu/pahma</a></td>
-                <td><a target="_new" href="https://pahma.cspace.berkeley.edu/">pahma.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>UCJEPS</td>
-                <td><a target="_new" href="https://webapps.cspace.berkeley.edu/ucjeps">webapps.cspace.berkeley.edu/ucjeps</a></td>
-                <td><a target="_new" href="https://ucjeps.cspace.berkeley.edu/">ucjeps.cspace.berkeley.edu</a></td>
-            </tr>
-            </tbody>
-        </table>
-
-        <h2>Development</h2>
-
-        <table>
-            <tbody>
-            <tr>
-                <th>Tenant</th>
-                <th>Webapps</th>
-                <th>Regular UI</th>
-            </tr>
-            <tr>
-                <td>BAM/PFA</td>
-                <td><a target="_new" href="https://webapps-dev.cspace.berkeley.edu/bampfa">webapps-dev.cspace.berkeley.edu/bampfa</a></td>
-                <td><a target="_new" href="https://bampfa-dev.cspace.berkeley.edu/">bampfa-dev.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>UC Botanical Garden</td>
-                <td><a target="_new" href="https://webapps-dev.cspace.berkeley.edu/botgarden">webapps-dev.cspace.berkeley.edu/botgarden</a></td>
-                <td><a target="_new" href="https://botgarden-dev.cspace.berkeley.edu/">botgarden-dev.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>Cinefiles</td>
-                <td><a target="_new" href="https://webapps-dev.cspace.berkeley.edu/cinefiles">webapps-dev.cspace.berkeley.edu/cinefiles</a></td>
-                <td><a target="_new" href="https://cinefiles-dev.cspace.berkeley.edu/">cinefiles-dev.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>PAHMA</td>
-                <td><a target="_new" href="https://webapps-dev.cspace.berkeley.edu/pahma">webapps-dev.cspace.berkeley.edu/pahma</a></td>
-                <td><a target="_new" href="https://pahma-dev.cspace.berkeley.edu/">pahma-dev.cspace.berkeley.edu</a></td>
-            </tr>
-            <tr>
-                <td>UCJEPS</td>
-                <td><a target="_new" href="https://webapps-dev.cspace.berkeley.edu/ucjeps">webapps-dev.cspace.berkeley.edu/ucjeps</a></td>
-                <td><a target="_new" href="https://ucjeps-dev.cspace.berkeley.edu/">ucjeps-dev.cspace.berkeley.edu</a></td>
-            </tr>
-            </tbody>
-        </table>
-
+            <div id="devtab">
+                <h3>Links to <span style="color: green">Development</span> Systems</h3>
+                <table>
+                    <tbody id="dev">
+                    <tr>
+                        <th></th>
+                        <th>Public Portal</th>
+                        <th>Other Public Endpoints</th>
+                        <th>Internal Endpoints</th>
+                        <th>"Legacy" Apps</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+             <div id="analyticstab">
+                 <div id="analyticspages">
+                     <ul>
+                         <li><a href="#djangotab">Django Webapp Usage</a></li>
+                         <li><a href="#legacytab">Legacy Webapp Usage</a></li>
+                     </ul>
+                     <div id="djangotab">
+                         <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/summary.html"></iframe>
+                     </div>
+                     <div id="legacytab">
+                         <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/webappuse.html"></iframe>
+                     </div>
+                 </div>
+             </div>
+             <div id="newstab">
+            </div>
+        </div>
     </div>
-    <div>
-        <iframe width="100%" height="700px" frameborder="0" src="https://webapps-dev.cspace.berkeley.edu/cgi-bin/cswaMain.py"/>
-    </div>
-
     <br class="clear">
 </div>
 <!-- END Content -->
 <div id="footer"></div>
 <!-- END Container -->
-</body></html>
+
+<script>
+    $(function () {
+
+        var museums = [
+            ['UC Botanical Garden', 'botgarden', '7d54623a-ac9a-4165-980e', ['searchmedia', 'uploadtricoder', 'eloan', 'imaginator']],
+            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan']],
+            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator']],
+            ['PAHMA', 'pahma', '884e47c2-4e6c-42ed-b410', ['searchmedia', 'eloan']],
+            ['UCJEPS', 'ucjeps', '1c18cf1e-4826-4f33-b047', ['uploadtricoder', 'ireports', 'internal']]
+        ];
+
+
+        var obj = {
+            'public': [
+                ["imagebrowser", "Image Browser"],
+                ["imaginator", "Imaginator"],
+                ["eloan", "e-Loans"],
+                ["searchmedia", "Media Search"]
+            ],
+            'internal': [
+                ["internal", "Internal Portal"],
+                ["ireports", "iReports"],
+                ["uploadmedia", "Bulk Media Uploader"],
+                ["uploadtricoder", "Tricoder File Uploader"]
+            ]
+        };
+
+        var rowh = '100px';
+        var roww = '280px';
+        museums.forEach(function (item) {
+            ['prod', 'dev'].forEach(function (sys) {
+                var system = '';
+                var systemlabel = '<h3 style="color: red">Production</h3>';
+                if (sys === 'dev') {
+                    system = '-dev';
+                    systemlabel = '<h3 style="color: red">Development</h3>';
+                }
+                var newtr = document.createElement("tr");
+                newtr.style.height = rowh;
+                var regularui = "https://" + item[1] + system + ".cspace.berkeley.edu";
+                var webapps = "https://webapps" + system + ".cspace.berkeley.edu/" + item[1];
+                var img = '<img style="max-height: ' + rowh + '" alt="' + item[0] + '" src="https://webapps' + system + '.cspace.berkeley.edu/' + item[1] + '_static/cspace_django_site/images/header-logo.png">';
+                var newtd = document.createElement("td");
+                newtd.style.width = "310px";
+                var title = '<h4 style="padding-bottom: 10px;">' + item[0] + "</h4>";
+                newtd.innerHTML = '<a target="_blank" href="' + regularui + '">' + title + img + '</a>';
+                $(newtr).append(newtd);
+                var url = 'https://webapps.cspace.berkeley.edu/' + item[1] + '/imageserver/blobs/' + item[2] + '/derivatives/Medium/content';
+                var img = '<img height="' + rowh + '"; alt="' + item[0] + '" src="' + url + '">';
+                var newtd = document.createElement("td");
+                newtd.style.width = "200px";
+                // newtd.style.textAlign = 'center';
+                newtd.innerHTML = '<a href="' + webapps + '/search">' + img + '</a>';
+                $(newtr).append(newtd);
+
+                ['public', 'internal'].forEach(function (apptype) {
+                    var newtd = document.createElement("td");
+                    newtd.style.width = "170px";
+                    var webapp = "https://webapps" + system + ".cspace.berkeley.edu/" + item[1];
+                    $.each(obj[apptype], function (appindex) {
+                        if (item[3].indexOf(this[0]) === -1) {
+                            var newp = document.createElement("p");
+                            newp.style.padding = "6px 0px 6px 0px";
+                            newp.innerHTML += '<a style="color: white;" class="prettyBtn" target="_blank" href="' + webapp + '/' + this[0] + '">' + this[1] + '</a>';
+                            $(newtd).append(newp);
+                        }
+                    });
+                    $(newtr).append(newtd);
+                    $("#" + sys).append(newtr);
+                });
+                if (item[1] === 'botgarden') {
+                    var newtd = document.createElement("td");
+                    newtd.style.backgroundColor = "lemonchiffon";
+                    newtd.innerHTML = '<p style="padding: 6px 0px;"><a style="color: white;" class="prettyBtn" target="_blank" href="https://webapps' + system + '.cspace.berkeley.edu/cgi-bin/cswaMain.py">Click Here</a></p>';
+                    newtd.innerHTML += '<br/><br/>The legacy webapps for all tenants all reside together:' +
+                            '<br/><br/><ul style="list-style-type: circle; padding-left: 20px;">' +
+                            "<li>Barcode Label Generator</li>" +
+                            "<li>Bed List Report</li>" +
+                            "<li>Bulk Object Edit</li>" +
+                            "<li>Collection Holdings</li>" +
+                            "<li>Government Holdings</li>" +
+                            "<li>Hierarchy Viewer</li>" +
+                            "<li>Key Information Review</li>" +
+                            "<li>Location Report</li>" +
+                            "<li>Move Crate</li>" +
+                            "<li>Move Object Range</li>" +
+                            "<li>Object Details</li>" +
+                            "<li>Object Info Review</li>" +
+                            "<li>Packing List Report</li>" +
+                            "<li>Power Move</li>" +
+                            "<li>Systematic Inventory</li>" +
+                            "</ul>";
+                    newtd.rowSpan = 5;
+                    $(newtr).append(newtd);
+                }
+            });
+        });
+        $('#tabs').tabs({active: 0});
+        $('#analyticspages').tabs({active: 0});
+    });
+</script>
+</body>
+</html>

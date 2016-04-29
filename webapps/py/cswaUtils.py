@@ -3337,7 +3337,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py?connect_string=''' + urllib2.quote(connect_string) + '''",
+                    url: "../cgi-bin/autosuggest.py?webapp=''' + urllib2.quote(form['webapp']) + '''",
                     dataType: "json",
                     data: {
                         q : request.term,

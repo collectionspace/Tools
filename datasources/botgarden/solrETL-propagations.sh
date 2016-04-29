@@ -16,7 +16,7 @@ cd /home/app_solr/solrdatasources/botgarden
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
+SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"

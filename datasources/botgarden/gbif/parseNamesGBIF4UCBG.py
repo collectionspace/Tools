@@ -85,21 +85,22 @@ def main():
         picklefh = open(picklefile, "rb")
     except:
         print "could not open pickle file, will try to create"
-        pickle.dump({}, open(picklefile, "wb"))
+        picklefh = open(picklefile, "wb")
+        pickle.dump({}, picklefh)
+        picklefh.close()
+        picklefh = open(picklefile, "rb")
 
     try:
         parsednames = pickle.load(picklefh)
         picklefh.close()
         print "%s names in datasource." % len(parsednames.keys())
     except:
-        raise
         print "could not parse data in picklefile %s" % picklefile
         sys.exit(1)
 
     try:
         inputfile = codecs.open(sys.argv[1], "rb", "utf-8")
     except:
-        raise
         print "could not open input file %s" % sys.argv[1]
         sys.exit(1)
 
@@ -111,7 +112,7 @@ def main():
             name2use = parsednames[name]
             pass
         else:
-            time.sleep(1)  # delays for 1 second
+            # time.sleep(1)  # no delay
             response = requests.get('http://api.gbif.org/v1/parser/name', params={'name': name})
             response.encoding = 'utf-8'
             name2use = response.json()[0]

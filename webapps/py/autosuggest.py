@@ -7,7 +7,11 @@ import cgitb;
 cgitb.enable()  # for troubleshooting
 import psycopg2
 
-form = cgi.FieldStorage()
+from cswaUtils import getConfig,cgiFieldStorageToDict
+
+actualform = cgi.FieldStorage()
+form       = cgiFieldStorageToDict(actualform)
+config  = getConfig(form)
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -24,9 +28,9 @@ def makeTemplate(table, term, expression):
 
 
 def dbtransaction(form):
-    postgresdb = psycopg2.connect(form.getvalue('connect_string'))
-    q = form.getvalue("q")
-    elementID = form.getvalue("elementID")
+    postgresdb = psycopg2.connect(config.get('connect','connect_string'))
+    q = form['q']
+    elementID = form['elementID']
     cursor = postgresdb.cursor()
     # elementID is of the form xx.csid, where xx is a 2-letter code and csid is the csid of the record
     # for which the sought value is relevant.
