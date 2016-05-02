@@ -108,7 +108,7 @@ order by accession]]>
 		<band height="83">
 			<image>
 				<reportElement x="447" y="3" width="72" height="72"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://ucjeps.cspace.berkeley.edu:8180/collectionspace/ui/ucjeps/images/jepslogosmall.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/jepslogosmall.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="80" y="18" width="66" height="15"/>
@@ -147,7 +147,7 @@ order by accession]]>
 			</staticText>
 			<image>
 				<reportElement x="2" y="3" width="72" height="72"/>
-				<imageExpression class="java.lang.String"><![CDATA["http://ucjeps.cspace.berkeley.edu:8180/collectionspace/ui/ucjeps/images/uclogosmall.png"]]></imageExpression>
+				<imageExpression class="java.lang.String"><![CDATA["https://ucjeps.cspace.berkeley.edu/collectionspace/ui/ucjeps/images/uclogosmall.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

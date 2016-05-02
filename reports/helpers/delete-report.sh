@@ -15,7 +15,6 @@ if [ $# -ne 1 ]; then
 fi
 
 echo "curl -X DELETE $REPORTURL/$SERVICE/$CSID -u \"$REPORTUSER\" -H \"$CONTENT_TYPE\""
-# exit on error (so we don't print the "report deleted" message)
-set -e
 curl -X DELETE $REPORTURL/$SERVICE/$CSID -u "$REPORTUSER" -H "$CONTENT_TYPE"
-echo report $CSID deleted
+echo
+echo

@@ -1,0 +1,9 @@
+These are the scripts that were in ucjeps:~ucjeps/scr
+
+They get run by cron on that system:
+
+[jblowe@ucjeps ~]$ sudo crontab -l -u ucjeps 
+00 7 * * 5 /home/ucjeps/scr/major_group.sh
+00 8 * * 5 /home/ucjeps/scr/cch_extract.sh
+
+There appear to be serveral versions.

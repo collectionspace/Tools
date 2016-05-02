@@ -42,7 +42,7 @@ def doGetNamesOverSixtyCharsLong(config):
       objectname = badobjectnames[icount][1]
       description = badobjectnames[icount][2]
       objectcsid = badobjectnames[icount][3]
-      objecturl = "http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/cataloging.html?csid=" + str(objectcsid)
+      objecturl = "https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/html/cataloging.html?csid=" + str(objectcsid)
       print '''<tr><td><a href="''' + str(objecturl) + '''" target="_blank">''' + str(objectnumber) + "</a></td><td>" + str(objectname) + "</td></tr>"
 
    print "</table>"

@@ -17,6 +17,8 @@ import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
 
+import cswaSMBclient
+
 MAXLOCATIONS = 1000
 
 try:
@@ -42,7 +44,6 @@ except ImportError:
 # the only other module: isolate postgres calls and connection
 import cswaDB as cswaDB
 import cswaConstants as cswaConstants
-import cswaGetPlaces as cswaGetPlaces
 import cswaGetAuthorityTree as cswaGetAuthorityTree
 import cswaConceptutils as concept
 import cswaCollectionUtils as cswaCollectionUtils
@@ -388,6 +389,7 @@ def listSearchResults(authority, config, displaytype, form, rows):
 
     label = authority
     if label[-1] == 's' and rowcount == 1: label = label[:-1]
+    if label == 'taxon' and rowcount > 1: label = 'taxa'
 
     if displaytype == 'silent':
         print """<table>"""
@@ -431,12 +433,15 @@ def listSearchResults(authority, config, displaytype, form, rows):
         if displaytype == 'select': rowtype = 'select'
         duplicates = []
         for r in rows:
+	    #print "<b>r = </b>",r
             if r[1] in duplicates:
                 hasDups = True
-                r.append('Duplicate!')
+                #r.append('')
+                # r.append('Duplicate!')
             else:
-                r.append('')
-                duplicates.append(r[1])
+                #r.append('')
+                #duplicates.append(r[1])
+                pass
             print formatRow({'boxtype': authority, 'rowtype': rowtype, 'data': r}, form, config)
 
     elif displaytype == 'nolist':
@@ -978,9 +983,14 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
             updateItems['briefDescription'] = form.get('bdx.' + index)
         elif fieldset == 'objtypecm':
+            if form.get('ocn.' + index) != '':
+                updateItems['objectCount'] = form.get('ocn.' + index)
             updateItems['collection'] = form.get('ot.' + index)
             updateItems['responsibleDepartment'] = form.get('cm.' + index)
             updateItems['pahmaFieldCollectionPlace'] = refNames2find[form.get('cp.' + index)]
+        elif fieldset == 'placeanddate':
+            updateItems['pahmaFieldLocVerbatim'] = form.get('vfcp.' + index)
+            updateItems['pahmaFieldCollectionDate'] = form.get('cd.' + index)
         else:
             pass
             #error!
@@ -989,7 +999,7 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
             updateItems[i] = form.get(i)
 
         #print updateItems
-        msg = 'updated.'
+        msg = 'updated. '
         if fieldset == 'keyinfo':
             if updateItems['pahmaFieldCollectionPlace'] == '' and form.get('cp.' + index):
                 if form.get('cp.' + index) == cswaDB.getCSIDDetail(config, index, 'fieldcollectionplace'):
@@ -1039,9 +1049,26 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
                 except ValueError:
                     msg += '<span style="color:red;"> Object count: "%s" is not a valid number!</span>' % form.get('ocn.' + index)
                     del updateItems['objectCount']
+        elif fieldset == 'placeanddate':
+            # msg += 'place and date'
+            pass
+
+        updateMsg = ''
+        for item in updateItems.keys():
+            if updateItems[item] == 'None' or updateItems[item] is None:
+                if item in 'collection inventoryCount objectCount'.split(' '):
+                    del updateItems[item]
+                    #updateMsg += 'deleted %s <br/>' % item
+                else:
+                    updateItems[item] = ''
+                    #updateMsg += 'eliminated %s <br/>' % item
+            else:
+                #updateMsg += 'kept %s, value: %s <br/>' % (item, updateItems[item])
+                pass
+
         try:
             #pass
-            updateMsg = updateKeyInfo(fieldset, updateItems, config, form)
+            updateMsg += updateKeyInfo(fieldset, updateItems, config, form)
             if updateMsg != '':
                 msg += '<span style="color:red;">%s</span>' % updateMsg
             numUpdated += 1
@@ -1055,7 +1082,6 @@ def doTheUpdate(CSIDs, form, config, fieldset, refNames2find):
 
     print "\n</table>"
     print '<h4>', numUpdated, 'of', row + 1, 'objects had key information updated</h4>'
-
 
 
 def doNothing(form, config):
@@ -1155,11 +1181,13 @@ def doPackingList(form, config):
     if not validateParameters(form, config): return
 
     place = form.get("cp.place")
-    if place != None:
-        places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+    if place != None and place != '':
+        places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
+        places = [p[0] for p in places]
     else:
         places = []
 
+    #[sys.stderr.write('packing list place term: %s\n' % x) for x in places]
     try:
         locationList = cswaDB.getloclist('range', form.get("lo.location1"), form.get("lo.location2"), MAXLOCATIONS,
                                          config)
@@ -1167,6 +1195,8 @@ def doPackingList(form, config):
         raise
 
     rowcount = len(locationList)
+
+    #[sys.stderr.write('packing list locations : %s\n' % x[0]) for x in locationList]
 
     if rowcount == 0:
         print '<tr><td width="500px"><h2>No locations in this range!</h2></td></tr>'
@@ -1183,6 +1213,8 @@ def doPackingList(form, config):
         except:
             raise
 
+
+        #[sys.stderr.write('packing list objects: %s\n' % x[3]) for x in objects]
         rowcount = len(objects)
         if rowcount == 0:
             if updateType != 'packinglistbyculture':
@@ -1245,7 +1277,7 @@ def doAuthorityScan(form, config):
     if updateType == 'locreport':
         Taxon = form.get("ut.taxon")
         if Taxon != None:
-            Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'silent')
+            Taxa = listAuthorities('taxon', 'TaxonTenant35', Taxon, config, form, 'list')
         else:
             Taxa = []
         tList = [t[0] for t in Taxa]
@@ -1300,12 +1332,12 @@ def doAuthorityScan(form, config):
 
     #print '\n'.join(accessions)
     print """</table>"""
-    print """<hr/>"""
-    print """<table width="100%">"""
-    print """<tr><td colspan="2"><b>Summary Statistics (experimental and unverified!)</b></tr>"""
+    #print """<hr/>"""
+    #print """<table width="100%">"""
+    #print """<tr><td colspan="2"><b>Summary Statistics (experimental and unverified!)</b></tr>"""
 
-    for s in sorted(statistics.keys()):
-        print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
+    #for s in sorted(statistics.keys()):
+    #   print """<tr><th width=300px>%s</th><td>%s</td></tr>""" % (s, len(counts[s]))
 
     #print """<tr><td align="center">Report completed.</td></tr>"""
     print "\n</table><hr/>"
@@ -1355,8 +1387,8 @@ def downloadCsv(form, config):
             raise
 
         place = form.get("cp.place")
-        if place != None:
-            places = cswaGetPlaces.getPlaces(place, config.get('connect', 'connect_string'))
+        if place != None and place != '':
+            places = cswaGetAuthorityTree.getAuthority('places',  'Placeitem', place,  config.get('connect', 'connect_string'))
         else:
             places = []
 
@@ -1368,7 +1400,8 @@ def downloadCsv(form, config):
         print
         writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
         for r in rows:
-            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo',institution)
+            objects = cswaDB.getlocations(r[0], '', 1, config, 'keyinfo', institution)
+            #[sys.stderr.write('packing list csv objects: %s\n' % x[3]) for x in objects]
             for o in objects:
                 if checkObject(places, o):
                     if institution == 'bampfa':
@@ -1654,15 +1687,17 @@ def doHierarchyView(form, config):
 
 
 def doListGovHoldings(form, config):
-    query = cswaDB.getDisplayName(config, form.get('agency'))[0]
+    query = cswaDB.getDisplayName(config, form.get('agency'))
+    if query is None:
+        print '<h3>Please Select An Agency: "%s" not found.</h><hr>' % form.get('agency')
+        return
+    else:
+        query = query[0]
     hostname = config.get('connect', 'hostname')
     institution = config.get('info', 'institution')
     protocol = 'https'
     port = ''
     link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/place.html?csid='
-    if query == "None":
-        print '<h3>Please Select An Agency</h><hr>'
-        return
     sites = cswaDB.getSitesByOwner(config, form.get('agency'))
     print '<table width="100%">'
     print '<tr><td class="subheader" colspan="4">%s</td></tr>' % query
@@ -1681,36 +1716,13 @@ def doListGovHoldings(form, config):
     print '<h4>', len(sites), ' sites listed.</h4>'
 
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
-    auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
     slug = re.sub('[^\w-]+', '_', location).strip().lower()
     barcodeFile = config.get('files', 'cmdrfmtstring') % (
-        config.get('files', 'cmdrfileprefix'), dataType, printerDir, slug,
+        dataType, printerDir, slug,
         datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"), filenameinfo)
 
-    try:
-        barcodeFh = codecs.open(barcodeFile, 'w', 'utf-8-sig')
-        alogFh = codecs.open(auditFile, 'a', 'utf-8')
-        csvlogfh = csv.writer(barcodeFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        audlogfh = csv.writer(alogFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        if dataType == 'locationLabels':
-            csvlogfh.writerow('termdisplayname'.split(','))
-            for d in data:
-                csvlogfh.writerow((d[0],))  # writerow needs a tuple or array
-                audlogfh.writerow(d)
-        elif dataType == 'objectLabels':
-            csvlogfh.writerow(
-                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
-            for d in data:
-                csvlogfh.writerow(d[3:9])
-                audlogfh.writerow(d)
-        barcodeFh.close()
-        alogFh.close()
-        newName = barcodeFile.replace('.tmp', '.txt')
-        os.rename(barcodeFile, newName)
-    except:
-        #raise
-        newName = '<span style="color:red;">could not write to %s</span>' % barcodeFile
+    newName = cswaSMBclient.uploadCmdrWatch(barcodeFile, dataType, data, config)
 
     return newName
 
@@ -2021,6 +2033,11 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         fieldList = ('objectName', 'pahmaFieldCollectionPlace', 'briefDescription')
     elif fieldset == 'objtypecm':
         fieldList = ('objectName', 'collection', 'responsibleDepartment', 'pahmaFieldCollectionPlace')
+    elif fieldset == 'collection':
+        fieldList = ('objectName', 'collection')
+    elif fieldset == 'placeanddate':
+        fieldList = ('pahmaFieldLocVerbatim', 'pahmaFieldCollectionDate')
+
 
     # get the XML for this object
     url, content, elapsedtime = getxml(uri, realm, hostname, username, password, getItems)
@@ -2028,29 +2045,35 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     # add the user's changes to the XML
     for relationType in fieldList:
         #sys.stderr.write('tag1: %s\n' % relationType)
-        # skip if no refName was provided to update
+        # this app does not insert empty values into anything!
+        if not relationType in updateItems.keys() or updateItems[relationType] == '':
+            continue
         listSuffix = 'List'
         extra = ''
-        if updateItems[relationType] == '':
-            continue
-        if relationType == 'assocPeople' or relationType == 'pahmaAltNum':
+        if relationType in ['assocPeople', 'pahmaAltNum', 'pahmaFieldCollectionDate']:
             extra = 'Group'
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             listSuffix = 's'
-        elif relationType in ['collection']:
+        elif relationType in ['collection', 'pahmaFieldLocVerbatim']:
             listSuffix = ''
         else:
             pass
             #print ">>> ",'.//'+relationType+extra+'List'
         #sys.stderr.write('tag2: %s\n' % (relationType + extra + listSuffix))
         metadata = root.findall('.//' + relationType + extra + listSuffix)
-        metadata = metadata[0] # there had better be only one!
+        try:
+            metadata = metadata[0] # there had better be only one!
+        except:
+            # hmmm ... we didn't find this element in the record. Make a note a carry on!
+            # message += 'No "' + relationType + extra + listSuffix + '" element found to update.'
+            continue
         #print(etree.tostring(metadata))
         #print ">>> ",relationType,':',updateItems[relationType]
         if relationType in ['assocPeople', 'objectName', 'pahmaAltNum']:
             #group = metadata.findall('.//'+relationType+'Group')
             #sys.stderr.write('  updateItem: ' + relationType + ':: ' + updateItems[relationType] + '\n' )
-            if not alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
+            Entries = metadata.findall('.//' + relationType)
+            if not alreadyExists(updateItems[relationType], Entries):
                 newElement = etree.Element(relationType + 'Group')
                 leafElement = etree.Element(relationType)
                 leafElement.text = updateItems[relationType]
@@ -2060,33 +2083,85 @@ def updateKeyInfo(fieldset, updateItems, config, form):
                     apgType.text = updateItems[relationType + 'Type'].lower() if relationType == 'pahmaAltNum' else 'made by'
                     #sys.stderr.write(relationType + 'Type:' + updateItems[relationType + 'Type'])
                     newElement.append(apgType)
-                metadata.insert(0, newElement)
+                if len(Entries) == 1 and Entries[0].text is None:
+                    #sys.stderr.write('reusing empty element: %s\n' % Entries[0].tag)
+                    #sys.stderr.write('ents : %s\n' % Entries[0].text)
+                    #print '<br>before',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
+                    for child in metadata:
+                        #print '<br>tag: ', child.tag
+                        if child.tag == relationType + 'Group':
+                            #print '<br> found it! ',child.tag
+                            metadata.remove(child)
+                    metadata.insert(0,newElement)
+                    #print '<br>after',etree.tostring(metadata).replace('<','&lt;').replace('>','&gt;')
+                else:
+                    metadata.insert(0,newElement)
             else:
-                # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
-                if relationType == 'pahmaAltNum':
-                    apgType = metadata.find('.//' + relationType + 'Type')
-                    apgType.text = updateItems[relationType + 'Type']
-                    #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
+                if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
+                    continue
+                else:
+                    # exists, but not preferred. make it the preferred: remove it from where it is, insert it as 1st
+                    for child in metadata:
+                        if child.tag == relationType + 'Group':
+                            checkval = child.find('.//' + relationType)
+                            if checkval.text == updateItems[relationType]:
+                                savechild = child
+                                metadata.remove(child)
+                    metadata.insert(0,savechild)
+                pass
+            # for AltNums, we need to update the AltNumType even if the AltNum hasn't changed
+            if relationType == 'pahmaAltNum':
+                apgType = metadata.find('.//' + relationType + 'Type')
+                apgType.text = updateItems[relationType + 'Type']
+                #sys.stderr.write('  updated: pahmaAltNumType to' + updateItems[relationType + 'Type'] + '\n' )
         elif relationType in ['briefDescription', 'fieldCollector', 'responsibleDepartment']:
             Entries = metadata.findall('.//' + relationType)
             #for e in Entries:
                 #print '%s, %s<br>' % (e.tag, e.text)
                 #sys.stderr.write(' e: %s\n' % e.text)
             if alreadyExists(updateItems[relationType], Entries):
-                if not IsAlreadyPreferred(updateItems[relationType], Entries):
-                    message += "%s=%s;" % (relationType,updateItems[relationType])
-                #print 'already exists: %s<br>' % updateItems[relationType]
-                continue
-            new_element = etree.Element(relationType)
+                if IsAlreadyPreferred(updateItems[relationType], Entries):
+                    # message += "%s exists as %s, already preferred;" % (updateItems[relationType],relationType)
+                    pass
+                else:
+                    # exists, but not preferred. make it the preferred: remove it from where it is, insert it as 1st
+                    for child in Entries:
+                        sys.stderr.write(' c: %s\n' % child.tag)
+                        if child.text == updateItems[relationType]:
+                            new_element = child
+                            metadata.remove(child)
+                            # message += '%s removed. len = %s<br/>' % (child.text, len(Entries))
+                    metadata.insert(0,new_element)
+                    message += " %s exists in %s, now preferred.<br/>" % (updateItems[relationType],relationType)
+                    #print 'already exists: %s<br>' % updateItems[relationType]
+            # check if the existing element is empty; if so, use it, don't add a new element
+            else:
+                if len(Entries) == 1 and Entries[0].text is None:
+                    #message += "removed %s ;<br/>" % (Entries[0].tag)
+                    metadata.remove(Entries[0])
+                new_element = etree.Element(relationType)
+                new_element.text = updateItems[relationType]
+                metadata.insert(0,new_element)
+                message += "added preferred term %s as %s.<br/>" % (updateItems[relationType],relationType)
+
+        elif relationType in ['pahmaFieldCollectionDate']:
+            # we'll be replacing the entire structured date group
+            pahmaFieldCollectionDateGroup = metadata.find('.//pahmaFieldCollectionDateGroup')
+            newpahmaFieldCollectionDateGroup = etree.Element('pahmaFieldCollectionDateGroup')
+            new_element = etree.Element('dateDisplayDate')
             new_element.text = updateItems[relationType]
-            metadata.insert(0,new_element)
+            newpahmaFieldCollectionDateGroup.insert(0,new_element)
+            if pahmaFieldCollectionDateGroup is not None:
+                metadata.remove(pahmaFieldCollectionDateGroup)
+            metadata.insert(0,newpahmaFieldCollectionDateGroup)
+
         else:
             # check if value is already present. if so, skip
             if alreadyExists(updateItems[relationType], metadata.findall('.//' + relationType)):
                 if IsAlreadyPreferred(updateItems[relationType], metadata.findall('.//' + relationType)):
                     continue
                 else:
-                    message += "%s: %s already exists. Now duplicated with this as preferred.;" % (relationType,updateItems[relationType])
+                    message += "%s: %s already exists. Now duplicated with this as preferred.<br/>" % (relationType,updateItems[relationType])
                     pass
             newElement = etree.Element(relationType)
             newElement.text = updateItems[relationType]
@@ -2111,6 +2186,16 @@ def updateKeyInfo(fieldset, updateItems, config, form):
         inventoryCount.text = updateItems['inventoryCount']
     #print(etree.tostring(root, pretty_print=True))
 
+    if 'pahmaFieldLocVerbatim' in updateItems:
+        pahmaFieldLocVerbatim = root.find('.//pahmaFieldLocVerbatim')
+        if pahmaFieldLocVerbatim is None:
+            pahmaFieldLocVerbatim = etree.Element('pahmaFieldLocVerbatim')
+            pahmaFieldLocVerbatimobjects_common = root.find(
+                './/{http://collectionspace.org/services/collectionobject/local/pahma}collectionobjects_pahma')
+            pahmaFieldLocVerbatimobjects_common.insert(0, pahmaFieldLocVerbatim)
+            message += " %s added as &lt;%s&gt;.<br/>" % (updateItems['pahmaFieldLocVerbatim'], 'pahmaFieldLocVerbatim')
+        pahmaFieldLocVerbatim.text = updateItems['pahmaFieldLocVerbatim']
+
     collection = root.find('.//collection')
     if 'collection' in updateItems:
         if collection is None:
@@ -2118,7 +2203,10 @@ def updateKeyInfo(fieldset, updateItems, config, form):
             collectionobjects_common = root.find(
                 './/{http://collectionspace.org/services/collectionobject}collectionobjects_common')
             collectionobjects_common.insert(0, collection)
+            message += " %s added as &lt;%s&gt;.<br/>" % (updateItems['collection'], 'collection')
         collection.text = updateItems['collection']
+
+
 
     uri = 'collectionobjects' + '/' + updateItems['objectCsid']
     payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')
@@ -2181,7 +2269,8 @@ def formatRow(result, form, config):
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
     elif result['rowtype'] == 'location':
         return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a> <span style="color:red;">%s</span></td><td/></tr>''' % (
-            result['data'][0], result['data'][0], result['data'][-1])
+            result['data'][0], result['data'][0], '')
+            #result['data'][0], result['data'][0], result['data'][-1])
     elif result['rowtype'] == 'select':
         rr = result['data']
         boxType = result['boxtype']
@@ -2217,20 +2306,23 @@ def formatRow(result, form, config):
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-
         if institution == 'bampfa':
-            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="not found|%s|%s|%s|%s|%s"/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[16], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
         else:
-            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" name="r.%s" value="not found|%s|%s|%s|%s|%s"></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s" checked></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="not found|%s|%s|%s|%s|%s"/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'powermove':
         link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objcount 4 | objname 5| movecsid 6 | locrefname 7 | objcsid 8 | objrefname 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
-        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+        if institution == 'bampfa':
+            return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td>%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="found|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
+            link, rr[3], rr[5], rr[16], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
+            rr[3])
+        return """<tr><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="rdo" ><input type="radio" id="sel-move" name="r.%s" value="move|%s|%s|%s|%s|%s"></td><td class="rdo" ><input type="radio" id="sel-nomove" name="r.%s" value="do not move|%s|%s|%s|%s|%s" checked/></td><td class="zcell"><input class="xspan" type="text" size="65" name="n.%s"></td></tr>""" % (
             link, rr[3], rr[5], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14], rr[3], rr[8], rr[7], rr[6], rr[3], rr[14],
             rr[3])
     elif result['rowtype'] == 'moveobject':
@@ -2241,8 +2333,12 @@ def formatRow(result, form, config):
         return """<tr><td class="rdo" ><input type="checkbox" name="r.%s" value="moved|%s|%s|%s|%s|%s" checked></td><td class="objno"><a target="cspace" href="%s">%s</a></td><td class="objname">%s</td><td class="zcell">%s</td><td class="zcell">%s</td></tr>""" % (
             rr[3], rr[8], rr[1], '', rr[3], rr[13], link, rr[3], rr[4], rr[5], rr[0])
     elif result['rowtype'] == 'keyinfo' or result['rowtype'] == 'objinfo':
-        link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
-        link2 = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/acquisition.html?csid=%s' % rr[24]
+        if institution == 'bampfa':
+            link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[2]
+            link2 = ''
+        else:
+            link = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/cataloging.html?csid=%s' % rr[8]
+            link2 = protocol + '://' + hostname + port + '/collectionspace/ui/'+institution+'/html/acquisition.html?csid=%s' % rr[24]
         # loc 0 | lockey 1 | locdate 2 | objnumber 3 | objname 4 | objcount 5| fieldcollectionplace 6 | culturalgroup 7 | objcsid 8 | ethnographicfilecode 9
         # f/nf | objcsid | locrefname | [loccsid] | objnum
         return formatInfoReviewRow(form, link, rr, link2)
@@ -2375,6 +2471,27 @@ def formatInfoReviewRow(form, link, rr, link2):
 <td><input type="checkbox"></td>
 </tr>""" % (link, cgi.escape(rr[3], True), rr[8], cgi.escape(rr[4], True), rr[8], rr[5], rr[8], cgi.escape(rr[3], True),
                   rr[8], rr[8], objtypes, collmans, rr[8], cgi.escape(rr[6], True))
+    elif fieldSet == 'collection':
+                return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<td class="objname">
+<input type="hidden" name="onm.%s" value="">
+%s
+</td>
+<input type="hidden" name="clnx.%s" value="%s">
+<input type="hidden" name="csid.%s" value="%s">
+<td><input class="xspan" type="text" size="40" name="cln.%s" value="%s"></td>
+</tr>""" % (link, cgi.escape(rr[1], True), rr[2], cgi.escape(rr[3], True), rr[2], rr[22], rr[2], rr[2], rr[2], cgi.escape(rr[8], True))
+    elif fieldSet == 'placeanddate':
+                return """<tr>
+<td class="objno"><a target="cspace" href="%s">%s</a></td>
+<input type="hidden" name="csid.%s" value="%s">
+<td class="objname"><input type="hidden" name="onm.%s" value="">%s</td>
+<td><input class="xspan" type="text" size="40" name="vfcp.%s" value="%s"></td>
+<td><input class="xspan" type="text" size="40" name="cd.%s" value="%s"></td>
+</tr>""" % (link, cgi.escape(rr[3], True), rr[8], rr[8], rr[8], cgi.escape(rr[4], True), rr[8], cgi.escape(rr[28], True), rr[8], cgi.escape(rr[29], True))
+
+
 
 def formatInfoReviewForm(form):
     fieldSet = form.get("fieldset")
@@ -2414,6 +2531,19 @@ def formatInfoReviewForm(form):
 </tr><tr><th>Collection Manager</th><td class="zcell">%s</td>
 </tr><tr><th>Field Collection Place</th><td><input class="xspan" type="text" size="60" name="cp.user"></td>
 </tr>""" % (objtypes, collmans)
+    elif fieldSet == 'collection':
+        return """<tr><th>Object name</th><td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr><tr><th>Collection</th><td><input class="xspan" type="text" size="60" name="cn.user"></td>
+</tr>"""
+    elif fieldSet == 'placeanddate':
+        return """<tr><th>Object name</th>
+        <td class="objname"><input class="objname" type="text" size="60" name="onm.user"></td>
+</tr>
+<tr><th>FCP verbatim</th>
+<td><input class="xspan" type="text" size="60" name="vfcp.user"></td>
+</tr>"<tr><th>Collection Date</th>
+<td><input class="xspan" type="text" size="60" name="cd.user"></td>
+</tr>"""
 
 
 def formatError(cspaceObject):
@@ -2718,7 +2848,7 @@ def starthtml(form, config):
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a target="help" href="%s">Help</a>
     ''' % ('switchapp', programName + 'switchapp', 'switch app',
-           'https://dev.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
+           'https://webapps.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>
@@ -2784,7 +2914,7 @@ def starthtml(form, config):
     elif updateType == 'keyinfo':
         location1 = str(form.get("lo.location1")) if form.get("lo.location1") else ''
         location2 = str(form.get("lo.location2")) if form.get("lo.location2") else ''
-        fieldset, selected = cswaConstants.getFieldset(form)
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
 
         otherfields = '''
 	    <tr><th><span class="cell">start location:</span></th>
@@ -2799,7 +2929,7 @@ def starthtml(form, config):
     elif updateType == 'bulkedit' or updateType == 'objinfo':
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
-        fieldset, selected = cswaConstants.getFieldset(form)
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
 
         otherfields = '''
         <tr><th><span class="cell">start object no:</span></th>
@@ -2973,7 +3103,7 @@ def starthtml(form, config):
                                                                          'checked value="groupbyculture"')
 
     elif updateType == 'upload':
-        reasons, selected = cswaConstants.getReasons(form)
+        reasons, selected = cswaConstants.getReasons(form, institution)
         
         button = '''<input id="actionbutton" class="save" type="submit" value="Upload" name="action">'''
         otherfields = '''<tr><th><span class="cell">file:</span></th><th><input type="file" name="file"></th><th/></tr>
@@ -3180,6 +3310,15 @@ $(function () {
        });
     });
 
+$(document).on('click', '#check-move', function() {
+    if ($('#check-move').is(':checked')) {
+        $('input[id="sel-move"]').each(function () { this.checked = true; });
+    } else {
+        $('input[id="sel-nomove"]').each(function () { this.checked = true; });
+    }
+});
+
+
 $(document).ready(function () {
 
 ''' + focusSnippet + '''
@@ -3198,7 +3337,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?webapp=''' + urllib2.quote(form['webapp']) + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
@@ -3296,6 +3435,50 @@ if __name__ == "__main__":
 
     updateItems = {}
 
+    if True:
+
+        print "starting keyinfo update"
+
+        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
+                'fieldset': 'placeanddate',
+                'csusername': 'import@pahma.cspace.berkeley.edu',
+                'cspassword': 'lash428!puck',
+                #'fieldset': 'registration',
+                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+                'vfcp.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'yyy',
+                'cd.70d40782-6d11-4346-bb9b-2f85f1e00e91': '11/3/15',
+        }
+
+        config = getConfig(form)
+
+        doUpdateKeyinfo(form, config)
+
+
+    if False:
+
+        print "starting keyinfo update"
+
+        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
+                'fieldset': 'namedesc',
+                'csusername': 'import@pahma.cspace.berkeley.edu',
+                'cspassword': 'lash428!puck',
+                #'fieldset': 'registration',
+                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
+                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
+                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
+                'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
+                'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
+                'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
+        }
+
+        config = getConfig(form)
+
+        doUpdateKeyinfo(form, config)
+
+
     if False:
 
         form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
@@ -3320,7 +3503,7 @@ if __name__ == "__main__":
 
         #sys.exit()
 
-    if True:
+    if False:
 
         form = {'webapp': 'bamInventoryDev'}
         config = getConfig(form)

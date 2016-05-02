@@ -105,16 +105,18 @@
       trailing underscores (e.g. _version_) are reserved.
    -->
 
-
     <!-- In this "semi-schemaless" example, only 3 fields are pre-declared: id and _version_ and the catchall text field.
       -->
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="_version_" type="long" indexed="true" stored="true"/>
 
+   <field name="location" type="location" indexed="true" stored="true" />
+   <field name="location_0_coordinate" type="double" indexed="true" stored="true" />
+   <field name="location_1_coordinate" type="double" indexed="true" stored="true" />
+
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
    <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
-
 
     <!-- Dynamic field definitions allow using convention over configuration
        for fields via the specification of patterns to match field names. 
@@ -195,24 +197,59 @@
         or to add multiple fields to the same field for easier/faster searching.
    -->
 
-   <copyField source="accessionnumber_txt" dest="accessionnumber_s"/>
-   <copyField source="determination_txt" dest="determination_s"/>
-   <copyField source="majorgroup_txt" dest="majorgroup_s"/>
-   <copyField source="collectornumber_txt" dest="collectornumber_s"/>
-   <copyField source="locality_txt" dest="locality_s"/>
-   <copyField source="collector_txt" dest="collector_s"/>
-   <copyField source="collcounty_txt" dest="collcounty_s"/>
-   <copyField source="collstate_txt" dest="collstate_s"/>
-   <copyField source="collcountry_txt" dest="collcountry_s"/>
-   <copyField source="habitat_txt" dest="habitat_s"/>
-   <copyField source="collectiondate_txt" dest="collectiondate_s"/>
+   <!-- Create keyword versions for searching -->
 
-   <copyField source="elevation_txt" dest="text"/>
-   <copyField source="datum_txt" dest="text"/>
+
+    <copyField source="briefdescription_txt" dest="briefdescription_s"/>
+    <copyField source="accessionnumber_s" dest="accessionnumber_txt"/>
+    <copyField source="determination_s" dest="determination_txt"/>
+    <!-- copyField source="termformatteddisplayname_s" dest="termformatteddisplayname_txt"/ -->
+    <copyField source="family_s" dest="family_txt"/>
+    <copyField source="taxonbasionym_s" dest="taxonbasionym_txt"/>
+    <copyField source="majorgroup_s" dest="majorgroup_txt"/>
+    <copyField source="collectornumber_s" dest="collectornumber_txt"/>
+    <copyField source="collectiondate_s" dest="collectiondate_txt"/>
+    <copyField source="locality_s" dest="locality_txt"/>
+    <copyField source="collcounty_s" dest="collcounty_txt"/>
+    <copyField source="collstate_s" dest="collstate_txt"/>
+    <copyField source="collcountry_s" dest="collcountry_txt"/>
+    <copyField source="elevation_s" dest="elevation_txt"/>
+    <copyField source="minelevation_s" dest="minelevation_txt"/>
+    <copyField source="maxelevation_s" dest="maxelevation_txt"/>
+    <copyField source="elevationunit_s" dest="elevationunit_txt"/>
+    <copyField source="habitat_s" dest="habitat_txt"/>
+    <copyField source="trscoordinates_s" dest="trscoordinates_txt"/>
+    <copyField source="datum_s" dest="datum_txt"/>
+    <copyField source="coordinatesource_s" dest="coordinatesource_txt"/>
+    <copyField source="coordinateuncertaintyunit_s" dest="coordinateuncertaintyunit_txt"/>
+    <copyField source="localitynote_s" dest="localitynote_txt"/>
+    <copyField source="localitysource_s" dest="localitysource_txt"/>
+    <copyField source="localitysourcedetail_s" dest="localitysourcedetail_txt"/>
+    <copyField source="labelheader_s" dest="labelheader_txt"/>
+    <copyField source="labelfooter_s" dest="labelfooter_txt"/>
+    <copyField source="localname_s" dest="localname_txt"/>
+    <copyField source="depth_s" dest="depth_txt"/>
+    <copyField source="mindepth_s" dest="mindepth_txt"/>
+    <copyField source="maxdepth_s" dest="maxdepth_txt"/>
+    <copyField source="depthunit_s" dest="depthunit_txt"/>
+    <copyField source="cultivated_s" dest="cultivated_txt"/>
+    <copyField source="sex_s" dest="sex_txt"/>
+    <copyField source="phase_s" dest="phase_txt"/>
+    <copyField source="ucbgaccessionnumber_s" dest="ucbgaccessionnumber_txt"/>
+    <copyField source="determinationdetails_s" dest="determinationdetails_txt"/>
+    <copyField source="loanstatus_s" dest="loanstatus_txt"/>
+    <copyField source="loannumber_s" dest="loannumber_txt"/>
+    <copyField source="collector_ss" dest="collector_txt"/>
+    <copyField source="previousdeterminations_ss" dest="previousdeterminations_txt"/>
+    <copyField source="associatedtaxa_ss" dest="associatedtaxa_txt"/>
+    <copyField source="typeassertions_ss" dest="typeassertions_txt"/>
+    <copyField source="alllocalitites_ss" dest="alllocalitites_txt"/>
+    <copyField source="othernumber_ss" dest="othernumber_txt"/>
 
    <copyField source="*_s" dest="text"/>
    <copyField source="*_ss" dest="text"/>
    <copyField source="*_txt" dest="text"/>
+
 	
   <!-- Above, multiple source fields are copied to the [text] field. 
 	  Another way to map multiple source fields to the same 

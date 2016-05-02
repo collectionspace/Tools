@@ -3,7 +3,7 @@
 import time
 import sys
 import cgi
-import pgdb
+import psycopg2
 import locale
 
 locale.setlocale(locale.LC_ALL, '')
@@ -14,7 +14,7 @@ timeoutcommand = 'set statement_timeout to 300000'
 
 def gettotalobjcount(config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -63,7 +63,7 @@ def gettotalobjcount(config):
 
 def getgroupedobjcounts(additionaljoin1, additionaljoin2, fieldalias, field, config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -113,8 +113,8 @@ ORDER BY totalMusNoCount DESC""" % (str(fieldalias), str(selectedfield), str(add
 
 def latestcollectionstats(dbsource, statgroup, config):
 
-    #pahmadb  = pgdb.connect(config.get('connect','connect_string2'))
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    #pahmadb  = psycopg2.connect(config.get('connect','connect_string2'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -180,8 +180,8 @@ ORDER BY musnoval DESC""" % (str(dbsource), str(statgroup), str(latestruntime), 
 
 def lateststatsforstatgroupbycounttype(dbsource, statgroup, statmetric, config):
 
-    #pahmadb  = pgdb.connect(config.get('connect','connect_string2'))
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    #pahmadb  = psycopg2.connect(config.get('connect','connect_string2'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -209,14 +209,14 @@ def lateststatsforstatgroupbycounttype(dbsource, statgroup, statmetric, config):
 
 def dbtransaction(command,config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     cursor   = pahmadb.cursor()
     cursor.execute(command)
 
 
 def getrefname(table,term,config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -236,7 +236,7 @@ def getrefname(table,term,config):
 
 def getStatSeries(statTarget, category, config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 
@@ -257,7 +257,7 @@ ORDER BY label ASC, isoruntime DESC""" % (category, statTarget, statMetric[statT
 
 def findrefnames(table,termlist,config):
 
-    pahmadb  = pgdb.connect(database=config.get('connect', 'connect_string'))
+    pahmadb  = psycopg2.connect(config.get('connect', 'connect_string'))
     objects  = pahmadb.cursor()
     objects.execute(timeoutcommand)
 

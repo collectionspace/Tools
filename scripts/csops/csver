@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Print the version number of CollectionSpace that is currently installed.
+
+VERSION_MESSAGE_PATTERN="^login-deployment: Version (.*)$"
+MESSAGE_FILE=~/`csservname`/webapps/cspace-ui/tenants/`csname`/bundle/core-messages.properties-overlay
+VERSION_MESSAGE=`grep 'login-deployment:' $MESSAGE_FILE`
+
+if [[ $VERSION_MESSAGE =~ $VERSION_MESSAGE_PATTERN ]]; then
+	version=${BASH_REMATCH[1]}
+	echo $version
+fi

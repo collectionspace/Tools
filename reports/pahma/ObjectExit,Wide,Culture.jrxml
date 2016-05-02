@@ -75,7 +75,7 @@ ORDER BY cp.sortableobjectnumber]]>
 			</staticText>
 			<image>
 				<reportElement uuid="30c8ebd0-41ba-4294-92ad-877c2f7a12a3" x="481" y="2" width="270" height="51"/>
-				<imageExpression><![CDATA["http://dev.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/logored100.png"]]></imageExpression>
 			</image>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="a0e6ab41-4f07-4d8f-b49c-be98b1f4ff23" stretchType="RelativeToTallestObject" x="273" y="62" width="479" height="24"/>
@@ -206,7 +206,7 @@ ORDER BY cp.sortableobjectnumber]]>
 			</textField>
 			<image>
 				<reportElement uuid="770781ae-687b-4194-a249-0ee203b3d3e8" x="629" y="5" width="120" height="16"/>
-				<imageExpression><![CDATA["http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/images/header-logo-cspace.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="fbe83320-677e-4c02-8379-2cbd9bb0bf8d" x="550" y="3" width="70" height="17"/>

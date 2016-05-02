@@ -1,13 +1,18 @@
 #!/usr/bin/python
 
 import sys
-import cswaGetPlaces
 
-p = sys.argv[1]
-print 'p:', p
-places = cswaGetPlaces.getPlaces(p)
+from cswaUtils import getConfig
+import cswaGetAuthorityTree
+
+
+config = getConfig({'webapp': 'pahma_Packinglist_Dev'})
+
+place = sys.argv[1]
+print 'place:', place
+places = cswaGetAuthorityTree.getAuthority('places', 'Placeitem', place, config.get('connect', 'connect_string'))
 if len(places) < 200:
-    for place in places:
-        print place
+    for placeitem in places:
+        print placeitem
 else:
-    print p, ':', len(places)
+    print place, ':', len(places)

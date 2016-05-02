@@ -1,13 +1,17 @@
-#!/usr/bin/env /usr/bin/python
+#!/usr/bin/env /var/www/venv/bin/python
 
 import sys, json, re
 import cgi
 import cgitb;
 
 cgitb.enable()  # for troubleshooting
-import pgdb
+import psycopg2
 
-form = cgi.FieldStorage()
+from cswaUtils import getConfig,cgiFieldStorageToDict
+
+actualform = cgi.FieldStorage()
+form       = cgiFieldStorageToDict(actualform)
+config  = getConfig(form)
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -24,9 +28,9 @@ def makeTemplate(table, term, expression):
 
 
 def dbtransaction(form):
-    postgresdb = pgdb.connect(database=form.getvalue('connect_string'))
-    q = form.getvalue("q")
-    elementID = form.getvalue("elementID")
+    postgresdb = psycopg2.connect(config.get('connect','connect_string'))
+    q = form['q']
+    elementID = form['elementID']
     cursor = postgresdb.cursor()
     # elementID is of the form xx.csid, where xx is a 2-letter code and csid is the csid of the record
     # for which the sought value is relevant.
@@ -127,7 +131,7 @@ def dbtransaction(form):
         #print 'debug autosuggest', srchindex,elementID
         print json.dumps(result)    # or "json.dump(result, sys.stdout)"
 
-    except pgdb.DatabaseError, e:
+    except psycopg2.DatabaseError, e:
         sys.stderr.write('autosuggest select error: %s' % e)
         return None
     except:

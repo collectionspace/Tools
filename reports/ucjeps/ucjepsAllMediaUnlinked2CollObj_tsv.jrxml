@@ -48,7 +48,7 @@ order by tu.taxonmajorgroup, tc.displayname]]>
 			<textField pattern="EEEEE dd MMMMM yyyy">
 				<reportElement uuid="06fd2da7-1de6-4e3a-92c1-c05b3e6872a4" mode="Transparent" x="0" y="2" width="750" height="16" forecolor="#000000"/>
 				<textElement>
-					<font fontName="Times New Roman" size="10"/>
+					<font fontName="Serif" pdfFontName="Times-Roman" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
@@ -98,35 +98,35 @@ order by tu.taxonmajorgroup, tc.displayname]]>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="61620fa5-a1a1-427b-ad11-3cc578ae1867" x="100" y="0" width="100" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accession_id}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="5f715b3d-dfd8-45e5-9f47-454e2b7a143b" x="300" y="0" width="130" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{media_csid}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="b2774bdb-bff4-407c-87f7-b3917d04807d" x="430" y="0" width="320" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{scientific_name}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="ccb7a9a7-a480-4ab5-85f1-4113e7d41704" x="200" y="0" width="100" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{file_name}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="ac617e98-a760-4826-b462-648578976779" x="0" y="0" width="100" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{major_group}]]></textFieldExpression>
 			</textField>

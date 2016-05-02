@@ -12,8 +12,11 @@ select
    sdgpd.datedisplaydate artistdeathdate,
    pb.datesactive,
    bt.bampfatitle title,
-   cb.initialvalue,
-   cv.currentvalue,
+   -- not included, for now
+   -- cb.initialvalue,
+   -- cv.currentvalue,
+   '-REDACTED-' as initialvalue,
+   '-REDACTED-' as currentvalue,
    cv.currentvaluesource,
    sdgcv.datedisplaydate currentvaluedate,
    cb.creditline, 

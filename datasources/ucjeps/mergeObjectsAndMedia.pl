@@ -16,9 +16,10 @@ open METADATA,'metadata.csv';
 while (<METADATA>) {
   $count{'metadata'}++;
   chomp;
-  my ($objectid, @rest) = split "\t";
+  my ($id, $objectid, @rest) = split "\t";
   # insert list of blobs as final column
   my $mediablobs = $media{$objectid};
+  $count{'matched'}++ if $mediablobs;
   $mediablobs =~ s/,$//; # get rid of trailing comma
   print $_ . "\t" . $mediablobs . "\n";
 }

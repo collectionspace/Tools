@@ -78,21 +78,21 @@ order by doc_id, doc_source, doc_url]]>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="ccd172fa-2de0-42fa-8bdb-c5373d5b7a03" stretchType="RelativeToBandHeight" x="40" y="0" width="95" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{doc_source}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="7a215486-c7dd-4a46-a785-adda78b80f9f" x="0" y="0" width="40" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{doc_id}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="ed80a646-fa4d-4257-8278-01fbde34c71c" stretchType="RelativeToBandHeight" x="135" y="0" width="615" height="12"/>
 				<textElement markup="html">
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{doc_url_link}]]></textFieldExpression>
 			</textField>

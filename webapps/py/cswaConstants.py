@@ -128,6 +128,21 @@ def infoHeaders(fieldSet):
       <th>Field Collection Place</th>
       <th>P?</th>
     </tr>"""
+    elif fieldSet == 'collection':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Collection</th>
+    </tr>"""
+    elif fieldSet == 'placeanddate':
+        return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th>Verbatim field collection place</th>
+      <th>Field collection date</th>
+    </tr>"""
     else:
         return "<table><tr>DEBUG</tr>"
 
@@ -168,18 +183,39 @@ def getHandlers(form, institution):
 
         handlerlist = [
             ("Victoria Bradshaw", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7267)'Victoria Bradshaw'"),
-            ("Zachary Brown","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ZacharyBrown1389986714647)'Zachary Brown'"),
+            ("Sofia Cano", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SofiaCano1441412806257)'Sofia Cano'"),
+            ("Iris Close", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(IrisClose1351199196181)'Iris Close'"),
+            ("Barrett Dryden", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BarrettDryden1441411842447)'Barrett Dryden'"),
             ("Alicja Egbert", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(8683)'Alicja Egbert'"),
             ("Madeleine Fang", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7248)'Madeleine W. Fang'"),
             ("Leslie Freund", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7475)'Leslie Freund'"),
+            ("Haley Goren", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HaleyGoren1441412331902)'Haley Goren'"),
+            ("Samuel Hemsley", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SamuelHemsley1441412367955)'Samuel Hemsley'"),
+            ("Chelsea Hernandez-Garcia", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(ChelseaHernandezGarcia1436388486316)'Chelsea Hernandez-Garcia'"),
+            ("Alexandra Idso", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(AlexandraIdso1441412402823)'Alexandra Idso'"),
             ("Natasha Johnson", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7652)'Natasha Johnson'"),
             ("Brenna Jordan","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BrennaJordan1383946978257)'Brenna Jordan'"),
+            ("Dani Knapp", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(DaniKnapp1436386634306)'Dani Knapp'"),
+            ("Theo Lovett","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(TheoLovett1441780245610)'Theo Lovett'"),
             ("Corri MacEwen", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9090)'Corri MacEwen'"),
+            ("Rebekah McKay","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RebekahMcKay1441780293210)'Rebekah McKay'"),
             ("Karyn Moore","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KarynMoore1399567930777)'Karyn Moore'"),
             ("Jon Oligmueller", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(JonOligmueller1372192617217)'Jon Oligmueller'"),
+            ("Katrina Oshima", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KatrinaOshima1441412692846)'Katrina Oshima'"),
+            ("Nathaniel Rigler", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(NathanielRigler1441412770505)'Nathaniel Rigler'"),
+            ("Adrian Rios", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(AdrianRios1441412383598)'Adrian Rios'"),
+            ("Barbara Rocha", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(BarbaraRocha1441413033713)'Barbara Rocha'"),
+            ("Rubi Ruopp", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(RubiRuopp1441412850032)'Rubi Ruopp'"),
+            ("Emily Sandoval", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(EmilySandoval1441412274520)'Emily Sandoval'"),
+            ("Holly Seyler", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HollySeyler1351291017723)'Holly Seyler'"),
             ("Martina Smith", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(9034)'Martina Smith'"),
+            ("Kaci Spooner", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(KaciSpooner1441412653643)'Kaci Spooner'"),
+            ("Susannah Starr","urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(SusannahStarr1438363401681)'Susannah Starr'"),
             ("Linda Waterfield", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LindaWaterfield1358535276741)'Linda Waterfield'"),
-            ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'")
+            ("Leah Weaver", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(LeahWeaver1441412347620)'Leah Weaver'"),
+            ("Jane Williams", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7420)'Jane L. Williams'"),
+            ("Madlyne Woodward", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(MadlyneWoodward1441412735172)'Madlyne Woodward'"),
+            ("Heather Van Zankwyk", "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(HeatherVanZankwyk1436386602136)'Heather Van Zankwyk'"),
         ]
 
     handlers = '''
@@ -210,13 +246,14 @@ def getReasons(form, institution):
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(2015MoveStaging1423179160443)'2015 Move Staging'">2015 Move Staging</option>
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(2015Packing1422385332220)'2015 Packing'">2015 Packing</option>
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason001)'Conservation'">Conservation</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(DataCleanUp1416598052252)'Data Clean Up'">Data Clean Up</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason003)'Inventory'">Inventory</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason004)'Loan'">Loan</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason005)'New Storage Location'">New Storage Location</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason006)'Photography'">Photography</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason007)'Research'">Research</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(DataCleanUp1416598052252)'Data Clean Up'">Data Clean Up</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason003)'Inventory'">Inventory</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason004)'Loan'">Loan</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason005)'New Storage Location'">New Storage Location</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason006)'Photography'">Photography</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(Reconciled1458582185744)'Reconciled'">Reconciled</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason007)'Research'">Research</option>
         </options>
         </select>
 
@@ -310,6 +347,7 @@ def selectWebapp(form):
     files = os.listdir("../cfgs")
 
     programName = os.path.basename(__file__).replace('Constants', 'Main') + '?webapp=' # yes, this is fragile!
+    programName = programName.replace('.pyc', '.py') # desperate hack
     apptitles = {}
     serverlabels = {}
     badconfigfiles = ''
@@ -350,14 +388,13 @@ def selectWebapp(form):
 
 
 <html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + getStyle('lightblue') + '''
-<style type="text/css">
-/*<![CDATA[*/
-@import "../css/jquery-ui-1.8.22.custom.css";
-@import "../css/blue/style.css";
-@import "../css/jqtree.css";
-/*]]>*/
-</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="../css/base.css">
+    <meta name="robots" content="NONE,NOARCHIVE">
+</head>
+<body class="">
+<div id="container">
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
 <script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
@@ -369,13 +406,15 @@ def selectWebapp(form):
 </head>
 <body>
 <form id="ucbwebapp" method="post">
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
+<h2>Legacy Webapps</h2>
 <table cellpadding="4px"><tr>
-<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
-        "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
+<p>The following table lists the legacy webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
+        "%Y-%m-%dT%H:%M:%SZ") + '''.<br/>
+We call them <i>legacy</i> because the are written in an ancient web framework called "CGI". <br/>Someday they will be rewritten and
+improved in a more modern framework. In the meantime -- Enjoy!</p>'''
 
     for museum in sorted(webapps.keys()):
-        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2>%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
+        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2 style="background-color: tomato;">%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
         listOfWebapps = sorted(webapps[museum]['apps'].keys())
         for webapp in listOfWebapps:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
@@ -396,7 +435,7 @@ def selectWebapp(form):
     line += '''
 </tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 14 January 2015</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 8 March 2016</h4>''' + payload + '''
 </form>
 </body>
 </html>'''
@@ -409,7 +448,7 @@ def getPrinters(form):
 
     printerlist = [
         ("Hearst Gym Basement", "cluster1"),
-        ("Marchant", "cluster2")
+        ("Regatta", "cluster2")
     ]
 
     printers = '''
@@ -426,16 +465,22 @@ def getPrinters(form):
     return printers, selected, printerlist
 
 
-def getFieldset(form):
+def getFieldset(form, institution):
     selected = form.get('fieldset')
 
-    fields = [
-        ("Key Info", "keyinfo"),
-        ("Name & Desc.", "namedesc"),
-        ("Registration", "registration"),
-        ("HSR Info", "hsrinfo"),
-        ("Object Type/CM", "objtypecm"),
-    ]
+    if institution == 'bampfa':
+        fields = [
+            ("Collection", "collection"),
+        ]
+    else:
+        fields = [
+            ("Key Info", "keyinfo"),
+            ("Name & Desc.", "namedesc"),
+            ("Registration", "registration"),
+            ("HSR Info", "hsrinfo"),
+            ("Object Type/CM", "objtypecm"),
+            ("Place and Date", "placeanddate"),
+        ]
 
     fieldset = '''
           <select class="cell" name="fieldset">'''
@@ -532,7 +577,6 @@ def getObjType(form, csid, ot):
         ("(not specified)", "(not specified)"),
         ("Documentation", "documentation"),
         ("None (Registration)", "none (Registration)"),
-        ("None", "None"),
         ("Sample", "sample"),
         ("Indeterminate", "indeterminate"),
         ("Unknown", "unknown")
@@ -646,7 +690,7 @@ def getHeader(updateType, institution):
         if institution == 'bampfa':
             return """
     <table><tr>
-      <th>ID number </th>
+      <th>ID number</th>
       <th>Title</th>
       <th>Artist</th>
       <th>Found</th>
@@ -662,15 +706,49 @@ def getHeader(updateType, institution):
       <th style="width:60px; text-align:center;">Not Found</th>
       <th>Notes</th>
     </tr>"""
-    elif updateType == 'movecrate' or updateType == 'powermove':
-        return """
+    elif updateType == 'movecrate':
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>ID number</th>
+      <th>Title</th>
+      <th>Artist</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move" checked/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move"/></th>
+      <th>Notes</th>
+    </tr>"""
+        else:
+            return """
     <table><tr>
       <th>Museum #</th>
       <th>Object name</th>
-      <th>Move</th>
-      <th style="width:60px; text-align:center;">Don't Move</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move" checked/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move"/></th>
       <th>Notes</th>
     </tr>"""
+
+    elif updateType == 'powermove':
+        if institution == 'bampfa':
+            return """
+    <table><tr>
+      <th>ID number</th>
+      <th>Title</th>
+      <th>Artist</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move"/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move" checked/></th>
+     <th>Notes</th>
+    </tr>"""
+        else:
+            return """
+    <table><tr>
+      <th>Museum #</th>
+      <th>Object name</th>
+      <th style="width:60px; text-align:center;">Move <input type="radio" name="check-move" id="check-move"/></th>
+      <th style="width:60px; text-align:center;">Don't Move  <input type="radio" name="check-move" id="check-move" checked/></th>
+     <th>Notes</th>
+    </tr>"""
+
+
     elif updateType == 'packinglist':
 
         if institution == 'bampfa':
@@ -1029,7 +1107,8 @@ if __name__ == '__main__':
     result += handleResult(getReasons(form,'bampfa'),'getReasons:bampfa')
     result += handleResult(getReasons(form,''),'getReasons')
     result += handleResult(getPrinters(form),'getPrinters')
-    result += handleResult(getFieldset(form),'getFieldset')
+    result += handleResult(getFieldset(form,'pahma'),'getFieldset')
+    result += handleResult(getFieldset(form,'bampfa'),'getFieldset')
     result += handleResult(getHierarchies(form),'getHierarchies')
     result += handleResult(getAgencies(form),'getAgencies')
     result += '</table>'

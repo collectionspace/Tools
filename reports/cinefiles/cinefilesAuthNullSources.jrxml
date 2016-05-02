@@ -51,19 +51,7 @@ inner join hierarchy hctg on (ctg.id = hctg.id)
 inner join concepts_common cc on (hctg.parentid = cc.id)
 inner join hierarchy hcc on (cc.id = hcc.id)
 inner join hierarchy hcac on (cc.inauthority = hcac.name)
-inner join conceptauthorities_common cac on (hcac.id = cac.id)
-where ctg.termsource is null or ctg.termsource = ''
-UNION
-select
-  hcc.name as csid,
-  'Citation' as authority_name,
-  ctg.termdisplayname as term_name,
-  '<a href="https://cinefiles.cspace.berkeley.edu/collectionspace/ui/cinefiles/html/citation.html?csid=' ||
-    hcc.name || '">' || ctg.termdisplayname || '</a>' as csid_link
-from citationtermgroup ctg
-inner join hierarchy hctg on (ctg.id = hctg.id)
-inner join citations_common cc on (hctg.parentid = cc.id)
-inner join hierarchy hcc on (cc.id = hcc.id)
+inner join conceptauthorities_common cac on (hcac.id = cac.id and cac.shortidentifier not in ('genre', 'concept'))
 where ctg.termsource is null or ctg.termsource = ''
 order by authority_name, term_name]]>
 	</queryString>
@@ -127,21 +115,21 @@ order by authority_name, term_name]]>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="ccd172fa-2de0-42fa-8bdb-c5373d5b7a03" stretchType="RelativeToBandHeight" x="100" y="0" width="200" height="12"/>
 				<textElement markup="none">
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{csid}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="7a215486-c7dd-4a46-a785-adda78b80f9f" x="0" y="0" width="100" height="12"/>
 				<textElement>
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{authority_name}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="ed80a646-fa4d-4257-8278-01fbde34c71c" stretchType="RelativeToBandHeight" x="300" y="0" width="270" height="12"/>
 				<textElement markup="html">
-					<font fontName="Times New Roman"/>
+					<font fontName="Serif" pdfFontName="Times-Roman"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{csid_link}]]></textFieldExpression>
 			</textField>

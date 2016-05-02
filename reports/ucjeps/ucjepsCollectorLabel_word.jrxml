@@ -98,7 +98,7 @@ where hgc.name = $P{csid}]]>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="aba96d0a-6a03-4ea9-a3b2-b76bac5b1f6e" x="10" y="10" width="270" height="30"/>
 				<textElement textAlignment="Center" markup="html">
-					<font fontName="Arial" size="10" isBold="true"/>
+					<font size="10" isBold="true"/>
 					<paragraph spacingBefore="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{label_header}]]></textFieldExpression>
@@ -106,35 +106,35 @@ where hgc.name = $P{csid}]]>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="18f328a1-d3e3-41de-8613-f18fa516d371" positionType="Float" stretchType="RelativeToTallestObject" x="10" y="142" width="270" height="30" isRemoveLineWhenBlank="true"/>
 				<textElement textAlignment="Center" markup="html">
-					<font fontName="Arial" size="10" isBold="false"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{label_footer}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="66"/>
 				<textElement markup="html">
-					<font fontName="Arial" size="8"/>
+					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{concat_data}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="482a958d-31b0-4a1f-a1b6-105ba1176a46" x="10" y="41" width="270" height="10"/>
 				<textElement>
-					<font fontName="Arial" size="8" isBold="true"/>
+					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accession_id}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="b20a04d2-3f65-4b67-b198-40abe4794c3f" x="10" y="52" width="270" height="10"/>
 				<textElement markup="html">
-					<font fontName="Arial" size="8"/>
+					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{sci_name_fmt}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="a409f16f-08b9-46ba-b926-1de80bd62955" positionType="Float" x="10" y="63" width="270" height="10" isRemoveLineWhenBlank="true"/>
 				<textElement markup="html">
-					<font fontName="Arial" size="8"/>
+					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{local_name}]]></textFieldExpression>
 			</textField>

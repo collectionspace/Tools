@@ -58,7 +58,7 @@ def doObjectDetails(form, config):
     if childlocations == None: childlocations = 4 * [None]
 
     print '<span class="objtitle">'
-    print '<a href="http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/cataloging.html?csid=%s" target="_blank">%s</a>' % (
+    print '<a href="https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/html/cataloging.html?csid=%s" target="_blank">%s</a>' % (
     objresult[15], objresult[0])
 
     if objresult[6] == None:
@@ -147,7 +147,7 @@ def doObjectDetails(form, config):
     print formatField('Field collection place (vebatim)', objresult[12], parentinfo[9], '%s', 'none entered')
     print formatField('Collector', objresult[2], parentinfo[5], '%s', 'none entered')
     print formatField('Donor', accresult[1], parentaccinfo[1], '%s', 'none entered')
-    link = '<a href="http://pahma.cspace.berkeley.edu:8180/collectionspace/ui/pahma/html/acquisition.html?csid=%s" target="_blank">'
+    link = '<a href="https://pahma.cspace.berkeley.edu/collectionspace/ui/pahma/html/acquisition.html?csid=%s" target="_blank">'
     print formatField('Accession', accresult[0], parentaccinfo[0], link, 'none entered')
     print formatField('PAHMA legacy catalog', objresult[11], parentinfo[8], '%s', 'none entered')
 
@@ -159,9 +159,9 @@ def doObjectDetails(form, config):
     if objmedia != None:
         for image in objmedia:
             #/blobs/be903851-a2a8-4eee-bf15/derivatives/Thumbnail/content
-            #link = "http://pahma.cspace.berkeley.edu:8180/cspace-services/blobs/%s/derivatives/%s/content"
+            #link = "https://pahma.cspace.berkeley.edu/cspace-services/blobs/%s/derivatives/%s/content"
             # use spiffy, new "public image service", to avoid having to re-authenticate user
-            link = "http://dev.cspace.berkeley.edu/pahma_project/imageserver/blobs/%s/derivatives/%s/content"
+            link = "https://webapps.cspace.berkeley.edu/pahma/imageserver/blobs/%s/derivatives/%s/content"
             thumb = link % (image[1], 'Thumbnail')
             original = link % (image[1], 'OriginalJpeg')
             print '<div class="imagecell"><a href="%s" target="_blank"><img src="%s"></a></div>' % (original, thumb)
