@@ -24,6 +24,18 @@ def get_field_name(value):
             # print "\nisdict\n"
             # print v
 
+MESSAGEKEY_KEY = 'messagekey'
+def get_messagekey_from_item(item):
+    # 'basestring' -> 'str' here in Python 3
+    if isinstance(item, dict):
+        try:
+            messagekey = item[MESSAGEKEY_KEY]
+            return messagekey
+        except KeyError, e:
+            return None
+    else:
+        return None
+
 LABEL_SUFFIX = '-label'
 def get_label_name_from_field_name(field_name):
     # TODO:
@@ -33,7 +45,6 @@ def get_label_name_from_field_name(field_name):
 
 # Given the name of a label entry in the uispec file,
 # get its 'messagekey' value
-MESSAGEKEY_KEY = 'messagekey'
 def get_messagekey_from_label_name(label_name, items):
     label_value = items[label_name]
     messagekey = label_value[MESSAGEKEY_KEY]
@@ -121,6 +132,7 @@ if __name__ == '__main__':
     # uispec file
     # ##################################################
     
+    messagekeys = {}
     for selector, value in sorted(uispec_items.iteritems()):
         
         # TODO:
@@ -130,6 +142,28 @@ if __name__ == '__main__':
         # the latters' selectors)
         #
         # That would entail a bit of refactoring here 
+        messagekey = get_messagekey_from_item(value)
+        if messagekey is not None:
+            try:
+                text_label = text_labels_lowercase[messagekey.lower()]
+                if not text_label.strip():
+                    print "// Could not find text label for message key '%s'" % messagekey
+                else:
+                    # Strip leading '.' from selector
+                    selector = selector.replace(selector[:1], '')
+                    messagekeys[selector] = text_label
+            except KeyError, e:
+                print "// Could not find message key '%s'" % messagekey
+        
+        for key, value in messagekeys.iteritems():
+            print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
+            
+        # http://stackoverflow.com/a/12507546
+        # TODO:
+        # Walk the entire tree, get all field values, construct field selectors
+        # compare to the label selectors (sans '-label') and see where there
+        # are - and are not - matches. Output any non-matches, either of
+        # labels or fields, as comments.
         
         # Get selectors that are specifically for fields. (There are some
         # selectors in uispec files that are for other entity types)
@@ -140,21 +174,22 @@ if __name__ == '__main__':
         # E.g. for selector '.csc-acquisition-acquisition-provisos'
         # its actual field name, following the initial '.csc-recordtype-...'
         # prefix, is 'acquisitionProvisos' (i.e. ${fields.acquisitionProvisos})
-        field_name = get_field_name(value)
-        if field_name is not None:
-            prefix = get_record_type_selector_prefix(selector)
-            field_name = prefix + field_name
-            label = get_label_name_from_field_name(field_name)
-            messagekey = get_messagekey_from_label_name(label, uispec_items)
-            try:
-                text_label = text_labels_lowercase[messagekey.lower()]
-                if not text_label.strip():
-                    print "// Could not find text label for message key '%s'" % messagekey
-                else:
-                    # Strip leading '.' from selector
-                    print 'fieldSelectorByLabel.put("%s", "%s");' % (text_label, selector.replace(selector[:1], ''))
-            except KeyError, e:
-                print "// Could not find message key '%s'" % messagekey
+
+        # field_name = get_field_name(value)
+        # if field_name is not None:
+        #     prefix = get_record_type_selector_prefix(selector)
+        #     field_name = prefix + field_name
+        #     label = get_label_name_from_field_name(field_name)
+        #     messagekey = get_messagekey_from_label_name(label, uispec_items)
+        #     try:
+        #         text_label = text_labels_lowercase[messagekey.lower()]
+        #         if not text_label.strip():
+        #             print "// Could not find text label for message key '%s'" % messagekey
+        #         else:
+        #             # Strip leading '.' from selector
+        #             print 'fieldSelectorByLabel.put("%s", "%s");' % (text_label, selector.replace(selector[:1], ''))
+        #     except KeyError, e:
+        #         print "// Could not find message key '%s'" % messagekey
 
             
         
