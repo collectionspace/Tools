@@ -33,10 +33,6 @@ def list_generator_from_dict(current_dict, prefix=None):
     else:
         yield current_dict
         
-# http://stackoverflow.com/q/2436607
-def filterPick(list,filter):
-    return [ ( l, m.group(1) ) for l in list for m in (filter(l),) if m]
-        
 FIELD_PATTERN = re.compile("^\$\{fields\.(\w+)\}$", re.IGNORECASE)
 def get_field_name(value):
     # 'basestring' -> 'str' here in Python 3
@@ -67,20 +63,6 @@ def get_messagekey_from_item(item):
     else:
         return None
 
-LABEL_SUFFIX = '-label'
-def get_label_name_from_field_name(field_name):
-    # TODO:
-    # This may be wildly too simplistic and may miss many fields;
-    # we might instead need to get all items that have 'messagekey' children
-    return '.' + field_name + LABEL_SUFFIX
-
-# Given the name of a label entry in the uispec file,
-# get its 'messagekey' value
-def get_messagekey_from_label_name(label_name, items):
-    label_value = items[label_name]
-    messagekey = label_value[MESSAGEKEY_KEY]
-    return messagekey
-
 # Get the selector prefix for the current record type (e.g. "acquisition-")
 RECORD_TYPE_PREFIX = None
 SELECTOR_PATTERN = re.compile("^\.(csc-\w+\-)?.*$", re.IGNORECASE)
@@ -94,7 +76,8 @@ def get_record_type_selector_prefix(selector):
             RECORD_TYPE_PREFIX = str(match.group(1))       
             return RECORD_TYPE_PREFIX
 
-# Per Stack Overflow member 'Roberto' in http://stackoverflow.com/a/31852401
+# From Roberto
+# http://stackoverflow.com/a/31852401
 def load_properties(filepath, sep=':', comment_char='#'):
     props = {}
     with open(filepath, "rt") as f:
@@ -228,14 +211,13 @@ if __name__ == '__main__':
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
             messagekey_fieldname = messagekey_fieldname[CSC_RECORD_TYPE_PREFIX_LENGTH:]
         found = False
-        print messagekey_fieldname
+        # For debugging
+        # print messagekey_fieldname
         num_found = 0
         for field_item in field_items:
             for item in field_item:
                 messagekey_fieldname_regex = re.compile(".*fields\." + messagekey_fieldname, re.IGNORECASE)
                 if messagekey_fieldname_regex.match(str(item)):
-                    # The following needs work; the first item may not hold a selector
-                    # We need to find the item in a list that contains the 
                     for possible_selector_item in field_item:
                         if str(possible_selector_item).startswith("." + CSC_PREFIX):
                             # For debugging
@@ -259,6 +241,8 @@ if __name__ == '__main__':
         print msg
     
         
+    # Some possible code to set CSC_RECORD_TYPE_PREFIX, above. 
+    
         # Get selectors that are specifically for fields. (There are some
         # selectors in uispec files that are for other entity types)
         #
