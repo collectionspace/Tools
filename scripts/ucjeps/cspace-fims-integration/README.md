@@ -1,0 +1,2 @@
+# cspace-fims-integration
+Scripts to help with using Biocode-FIMS to validate specimen records to be loaded in CollectionSpace. Additional README documentation for how to load the FIMS output to CSpace is attached to the UCJEPS-FIMS JIRA: https://issues.collectionspace.org/browse/UCJEPS-562. The canonical UCJEPS-FIMS config file, which FIMS actually works from, is at http://ucjeps.berkeley.edu/ucjeps_fims.xml
