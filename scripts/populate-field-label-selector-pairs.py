@@ -40,15 +40,6 @@ def get_field_name(value):
         match = FIELD_PATTERN.match(value)
         if match is not None:
             return str(match.group(1))
-    # TODO:
-    # Many fields are in repeatable structures, and
-    # code MUST be added here to match those.
-    # 
-    # if isinstance(value, dict):
-    #     for v in value.values():
-            # stub
-            # print "\nisdict\n"
-            # print v
 
 MESSAGEKEY_KEY = 'messagekey'
 UNICODE_MESSAGEKEY_KEY = unicode(MESSAGEKEY_KEY)
@@ -65,7 +56,7 @@ def get_messagekey_from_item(item):
 
 # Get the selector prefix for the current record type (e.g. "acquisition-")
 RECORD_TYPE_PREFIX = None
-SELECTOR_PATTERN = re.compile("^\.(csc-\w+\-)?.*$", re.IGNORECASE)
+SELECTOR_PATTERN = re.compile("^\.csc-(\w+\-)?.*$", re.IGNORECASE)
 def get_record_type_selector_prefix(selector):
     global RECORD_TYPE_PREFIX
     if RECORD_TYPE_PREFIX is not None:
@@ -75,6 +66,20 @@ def get_record_type_selector_prefix(selector):
         if match is not None:
             RECORD_TYPE_PREFIX = str(match.group(1))       
             return RECORD_TYPE_PREFIX
+
+# Exclude messagekeys for generic metadata fields like 'tenant ID'
+# and 'workflow state'. These typically aren't displayed with
+# text labels, and most don't even appear in a user-visible context
+# within the CollectionSpace UI.
+def in_messagekey_stoplist(messagekey):
+    global RECORD_TYPE_PREFIX
+    stoplist = ['createdAtLabel', 'createdByLabel','refNameLabel', 'tenantIdLabel',
+        'updatedAtLabel', 'updatedByLabel', 'uriLabel', 'workflowLabel']
+    in_stoplist = False
+    for stop_item in stoplist:
+        if messagekey == RECORD_TYPE_PREFIX + stop_item:
+            in_stoplist = True
+            return in_stoplist
 
 # From Roberto
 # http://stackoverflow.com/a/31852401
@@ -128,8 +133,6 @@ if __name__ == '__main__':
     
     # From the uispec file ...
     
-    # Get the list of items below the top level item
-    
     # Check for presence of the expected top-level item
     TOP_LEVEL_KEY='recordEditor'
     try:
@@ -137,13 +140,17 @@ if __name__ == '__main__':
     except KeyError, e:
         sys.exit("Could not find expected top level item \'%s\' in uispec file" % TOP_LEVEL_KEY)
     
-    # Check that at least one item was returned
+    # Verify that at least one item is present in the list of items
+    # below the top level item
     if not uispec_items:
         sys.exit("Could not find expected items in uispec file")
     
     # ##################################################
     # Iterate through the list of selectors in the
-    # uispec file
+    # uispec file and find those that have messagekeys.
+    # These represent text labels that are, in many,
+    # cases, associated with fields. Store these selectors
+    # and their text labels for further use below ...
     # ##################################################
     
     messagekeys = {}
@@ -151,11 +158,28 @@ if __name__ == '__main__':
     text_labels_not_found_msgs = []
     for selector, value in uispec_items.iteritems():
         
+        # Set the record type prefix - just once - when we encounter
+        # the first 'fields.fieldname' value
+        if RECORD_TYPE_PREFIX is None:
+            # For debugging
+            # print "record type prefix is none"
+            field_name = get_field_name(value)
+            if field_name is not None:
+                # For debugging
+                # print "Found record type prefix"
+                prefix = get_record_type_selector_prefix(selector)
+        
         # For debugging
         # print "%s %s\n" % (selector, value)
         
+        # ##################################################
+        # For each selector, get its text label (if any)
+        # ##################################################
+        
         messagekey = get_messagekey_from_item(value)
         if messagekey is not None:
+            if in_messagekey_stoplist(messagekey):
+                continue
             try:
                 text_label = text_labels_lowercase[messagekey.lower()]
                 if not text_label.strip():
@@ -171,7 +195,16 @@ if __name__ == '__main__':
     # for key, value in messagekeys.iteritems():
     #     print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
             
+    # ##################################################
+    # Get a set of lists from the uispec file dict
+    # ##################################################
+    
     generator = list_generator_from_dict(uispec[TOP_LEVEL_KEY])
+
+    # ##################################################
+    # Filter the set of lists, retaining just those items
+    # that have selectors
+    # ##################################################
 
     selector_items = []
     for uispec_item in generator:
@@ -186,7 +219,12 @@ if __name__ == '__main__':
     # For debugging
     # for s_item in selector_items:
     #     print s_item
-    
+
+    # ##################################################
+    # Further filter the set of lists, retaining just
+    # those selector items that also have fields
+    # ##################################################
+        
     field_items = []
     field_regex = re.compile(".*fields\.", re.IGNORECASE)
     for selector_item in selector_items:
@@ -197,15 +235,19 @@ if __name__ == '__main__':
     # For debugging
     # for f_item in field_items:
     #     print f_item
+
+    # ##################################################
+    # For each field, match it with its associated
+    # text label
+    # ##################################################
                     
-    LABEL_SUFFIX = "-label"
-    #########
-    CSC_PREFIX = "csc-"
-    CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + "acquisition-" # HARD_CODED!!! get_record_type_selector_prefix('any')
-    #########
+    LABEL_SUFFIX = '-label'
+    CSC_PREFIX = 'csc-'
+    CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + RECORD_TYPE_PREFIX
     CSC_RECORD_TYPE_PREFIX_LENGTH = len(CSC_RECORD_TYPE_PREFIX)
     fields = {}
     fields_not_found_msgs = []
+    # Iterate through the list of text labels
     for key, value in messagekeys.iteritems():
         messagekey_fieldname = rchop(key, LABEL_SUFFIX)
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
@@ -225,6 +267,10 @@ if __name__ == '__main__':
                             fieldkey = possible_selector_item.replace(possible_selector_item[:1], '')
                             fields[fieldkey] = value
                             found = True
+                            # For debugging
+                            # num_found += 1
+                            # print num_found
+                            # print "fieldkey %s, value %s" % (fieldkey, value)
         if not found:
             fields_not_found_msgs.append("// Not found: field for label %s" % rchop(key, LABEL_SUFFIX))
         
