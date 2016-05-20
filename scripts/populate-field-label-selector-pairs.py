@@ -7,6 +7,15 @@ import re
 import os
 import sys
 
+# TODO: Replace commented-out debugging statements
+# with debug or trace level log statements
+
+# TODO: Handle structured dates. These will be present within
+# lists containing key 'func', value 'cspace.structuredDate',
+# and have the form '${fields.groupname.fieldname}', while
+# their associated text labels in the message bundle file
+# will have the form 'structuredDate-fieldname'.
+
 # From Jack Kelly
 # http://stackoverflow.com/a/3663505
 def rchop(thestring, ending):
@@ -210,11 +219,15 @@ if __name__ == '__main__':
     for uispec_item in generator:
         # TODO: There may be more elegant and/or faster ways to do this
         # with list comprehensions and/or fiters
+        # For debugging
+        # print uispec_item
         if isinstance(uispec_item, list):
             for u_item in uispec_item:
                 # TODO: Replace with regex to avoid unintentional matches
                 if str(u_item).startswith(".cs"):
                     selector_items.append(uispec_item)
+
+            
     
     # For debugging
     # for s_item in selector_items:
@@ -285,36 +298,6 @@ if __name__ == '__main__':
 
     for msg in sorted(text_labels_not_found_msgs):
         print msg
-    
-        
-    # Some possible code to set CSC_RECORD_TYPE_PREFIX, above. 
-    
-        # Get selectors that are specifically for fields. (There are some
-        # selectors in uispec files that are for other entity types)
-        #
-        # From those selectors, get their actual field names, as these
-        # may not always match even a part of the selector.
-        #
-        # E.g. for selector '.csc-acquisition-acquisition-provisos'
-        # its actual field name, following the initial '.csc-recordtype-...'
-        # prefix, is 'acquisitionProvisos' (i.e. ${fields.acquisitionProvisos})
-
-        # field_name = get_field_name(value)
-        # if field_name is not None:
-        #     prefix = get_record_type_selector_prefix(selector)
-        #     field_name = prefix + field_name
-        #     label = get_label_name_from_field_name(field_name)
-        #     messagekey = get_messagekey_from_label_name(label, uispec_items)
-        #     try:
-        #         text_label = text_labels_lowercase[messagekey.lower()]
-        #         if not text_label.strip():
-        #             print "// Could not find text label for message key '%s'" % messagekey
-        #         else:
-        #             # Strip leading '.' from selector
-        #             print 'fieldSelectorByLabel.put("%s", "%s");' % (text_label, selector.replace(selector[:1], ''))
-        #     except KeyError, e:
-        #         print "// Could not find message key '%s'" % messagekey
-
             
         
     
