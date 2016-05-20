@@ -51,7 +51,6 @@ def get_field_name(value):
             return str(match.group(1))
 
 MESSAGEKEY_KEY = 'messagekey'
-UNICODE_MESSAGEKEY_KEY = unicode(MESSAGEKEY_KEY)
 def get_messagekey_from_item(item):
     # 'basestring' -> 'str' here in Python 3
     if isinstance(item, dict):
@@ -190,16 +189,13 @@ if __name__ == '__main__':
         if messagekey is not None:
             if in_messagekey_stoplist(messagekey):
                 continue
-            try:
-                text_label = text_labels_lowercase[messagekey.lower()]
-                if not text_label.strip():
-                    text_labels_not_found_msgs.append("// Not found: text label for message key '%s'" % messagekey)
-                else:
-                    # Strip leading '.' from selector
-                    selector = selector.replace(selector[:1], '')
-                    messagekeys[selector] = text_label
-            except KeyError, e:
-                messagekeys_not_found_msgs.append("// Not found: message key '%s'" % messagekey)
+            text_label = text_labels_lowercase.get(messagekey.lower(), None)
+            if text_label is None or text_label.strip() is None:
+                text_labels_not_found_msgs.append("// Not found: text label for message key '%s'" % messagekey)
+            else:
+                # Strip leading '.' from selector
+                selector = selector.replace(selector[:1], '')
+                messagekeys[selector] = text_label
 
     # For debugging
     # for key, value in messagekeys.iteritems():
@@ -303,7 +299,9 @@ if __name__ == '__main__':
     
     # Print various potential errors as Java comments, for a human to look at/sort out
     
-    # Duplicate text labels
+    # Duplicate text labels: instances where the same text label is
+    # associated with two or more fields, or there is some other
+    # discrepancy in text label-to-field associations.
     #
     # Per user2357112
     # http://stackoverflow.com/a/20463090 
@@ -312,19 +310,21 @@ if __name__ == '__main__':
         if value > 1:
             print "// Duplicate text label: %s (appears %d times)" % (key, value)
 
-    # Text labels without associated fields in the uispec
-    # (These could potentially be cases where existence of a '... fieldName-label'
-    # messagekey selector isn't matched by a field selector 'fieldName')
+    # Text labels that aren't matched by associated fields in the uispec.
+    #
+    # (These might sometimes reflect exceptions to a nearly always-followed
+    # naming convention, in which the existence of a '... fieldName-label'
+    # messagekey selector is matched by a field selector 'fieldName';
+    # i.e. the same name with the '-label' suffix removed.)
     for msg in sorted(fields_not_found_msgs):
         print msg
 
-    # TODO: Determine why some message keys are not found; how/why
-    # these items are being populated. (This is likely a bug.) 
-    for msg in sorted(messagekeys_not_found_msgs):
-        print msg
-
     # Messagekeys in the 'uispec file without associated text labels in the
-    # message bundle file (e.g. 'core-messages.properties')
+    # message bundle file (e.g. 'core-messages.properties').
+    #
+    # (Example: messagekey 'acquisition-ownerLabel' is present in the uispec
+    # for the Acquisition record, but isn't found in the message bundle file;
+    # only 'acquisition-ownersLabel' is present there.)
     for msg in sorted(text_labels_not_found_msgs):
         print msg
             
