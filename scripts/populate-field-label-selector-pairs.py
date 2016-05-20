@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser
-from collections import OrderedDict
+import collections
 import json
 import re
 import os
@@ -167,8 +167,12 @@ if __name__ == '__main__':
     text_labels_not_found_msgs = []
     for selector, value in uispec_items.iteritems():
         
+        # For debugging
+        # print "%s %s\n" % (selector, value)
+        
         # Set the record type prefix - just once - when we encounter
-        # the first 'fields.fieldname' value
+        # the first 'fields.fieldname' value. After that's initialized,
+        # this block will be bypassed thereafter.
         if RECORD_TYPE_PREFIX is None:
             # For debugging
             # print "record type prefix is none"
@@ -177,9 +181,6 @@ if __name__ == '__main__':
                 # For debugging
                 # print "Found record type prefix"
                 prefix = get_record_type_selector_prefix(selector)
-        
-        # For debugging
-        # print "%s %s\n" % (selector, value)
         
         # ##################################################
         # For each selector, get its text label (if any)
@@ -265,37 +266,65 @@ if __name__ == '__main__':
         messagekey_fieldname = rchop(key, LABEL_SUFFIX)
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
             messagekey_fieldname = messagekey_fieldname[CSC_RECORD_TYPE_PREFIX_LENGTH:]
-        found = False
         # For debugging
         # print messagekey_fieldname
+        # if 'somestringhere' in messagekey_fieldname:
+        #     print messagekey_fieldname
+        found = False
         num_found = 0
         for field_item in field_items:
             for item in field_item:
-                messagekey_fieldname_regex = re.compile(".*fields\." + messagekey_fieldname, re.IGNORECASE)
+                messagekey_fieldname_regex = re.compile(".*fields\.([^\.]\.)?" + messagekey_fieldname, re.IGNORECASE)
                 if messagekey_fieldname_regex.match(str(item)):
                     for possible_selector_item in field_item:
                         if str(possible_selector_item).startswith("." + CSC_PREFIX):
                             # For debugging
                             # print "=> %s" % possible_selector_item
                             fieldkey = possible_selector_item.replace(possible_selector_item[:1], '')
-                            fields[fieldkey] = value
-                            found = True
+                            # Add this field selector if we haven't already added it
+                            key_already_added = fields.get(fieldkey, None)
+                            if not key_already_added:
+                                fields[fieldkey] = value
+                                found = True
+                                # For debugging
+                                # if 'somestringhere' in messagekey_fieldname:
+                                #     print fieldkey
+                                #     print value
                             # For debugging
                             # num_found += 1
                             # print num_found
                             # print "fieldkey %s, value %s" % (fieldkey, value)
         if not found:
             fields_not_found_msgs.append("// Not found: field for label %s" % rchop(key, LABEL_SUFFIX))
-        
+    
+    # Print associations between text labels and field selectors
     for key, value in sorted(fields.iteritems(), key=lambda (k,v): (v,k)):
         print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
+    
+    # Print various potential errors as Java comments, for a human to look at/sort out
+    
+    # Duplicate text labels
+    #
+    # Per user2357112
+    # http://stackoverflow.com/a/20463090 
+    value_occurrences = collections.Counter(fields.values())
+    for key, value in value_occurrences.iteritems():
+        if value > 1:
+            print "// Duplicate text label: %s (appears %d times)" % (key, value)
 
+    # Text labels without associated fields in the uispec
+    # (These could potentially be cases where existence of a '... fieldName-label'
+    # messagekey selector isn't matched by a field selector 'fieldName')
     for msg in sorted(fields_not_found_msgs):
         print msg
 
+    # TODO: Determine why some message keys are not found; how/why
+    # these items are being populated. (This is likely a bug.) 
     for msg in sorted(messagekeys_not_found_msgs):
         print msg
 
+    # Messagekeys in the 'uispec file without associated text labels in the
+    # message bundle file (e.g. 'core-messages.properties')
     for msg in sorted(text_labels_not_found_msgs):
         print msg
             
