@@ -353,6 +353,9 @@ if __name__ == '__main__':
         print "// Some of these may be common record metadata that is never displayed"
         print "// in the UI. If so, they can be added to the script's stoplist."
         print "//"
+        print "// In other instances, these may represent messagekeys for section"
+        print "// headers in the record, rather than for fields."
+        print "//"
         for msg in sorted(text_labels_not_found_msgs):
             print msg
 
