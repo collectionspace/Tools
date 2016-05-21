@@ -299,6 +299,7 @@ if __name__ == '__main__':
     print "\n"
     
     # Print associations between text labels and field selectors
+    # TODO: Need to do case independent sorting here (e.g. on lowercase values)
     for key, value in sorted(fields.iteritems(), key=lambda (k,v): (v,k)):
         print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
     
