@@ -226,8 +226,6 @@ if __name__ == '__main__':
                 # TODO: Replace with regex to avoid unintentional matches
                 if str(u_item).startswith(".cs"):
                     selector_items.append(uispec_item)
-
-            
     
     # For debugging
     # for s_item in selector_items:
@@ -310,7 +308,7 @@ if __name__ == '__main__':
     # associated with two or more fields, or there is some other
     # discrepancy in text label-to-field associations.
     #
-    # Per user2357112
+    # From user2357112
     # http://stackoverflow.com/a/20463090 
     value_occurrences = collections.Counter(fields.values())
     if value_occurrences is not None and len(value_occurrences) > 0:
