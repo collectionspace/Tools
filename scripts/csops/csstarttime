@@ -2,8 +2,7 @@
 
 # Print the time the CollectionSpace tomcat service was started.
 
-SERVICE_NAME=`csservname`
-PID=`pgrep -fn -u $USER "java .* -Dcatalina.base=/home/$USER/$SERVICE_NAME "`
+PID=`cspid`
 
 if [ -n "$PID" ]; then
 	START_TIME=`ps -o lstart= -p $PID`

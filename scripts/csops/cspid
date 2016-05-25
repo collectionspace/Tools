@@ -4,4 +4,4 @@
 
 SERVICE_NAME=`csservname`
 
-pgrep -fn -u $USER "java .* -Dcatalina.base=/home/$USER/$SERVICE_NAME "
+pgrep -fn -u $USER "java .* -Dcatalina.base=/home/$USER/$SERVICE_NAME"
