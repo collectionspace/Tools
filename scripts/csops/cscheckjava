@@ -39,6 +39,7 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 	JAVA_DIR=`readlink -e "$JAVA_HOME"`
 	JAVA_VER=`basename -- "$JAVA_DIR"`
 	JAVA_UPDATE_TIME=`stat -c '%y' "$JAVA_HOME"`
+	HOSTNAME=`hostname`
 	BOUNCE_PROGRAM=csbounce
 
 	echo `date`: Java updated at $JAVA_UPDATE_TIME
@@ -56,14 +57,14 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 		NEW_CS_START_TIME=`csstarttime`
 
 		read -r -d '' MAIL_DESC <<-ENDTEXT
-			$SCRIPT_NAME restarted $SERVICE_NAME successfully at ${NEW_CS_START_TIME}.
+			$SCRIPT_NAME restarted $SERVICE_NAME on $HOSTNAME successfully at ${NEW_CS_START_TIME}.
 		ENDTEXT
 	else
 		EXIT_CODE=$?
 		BOUNCE_STATUS=FAILED
 
 		read -r -d '' MAIL_DESC <<-ENDTEXT
-			$SCRIPT_NAME attempted to restart $SERVICE_NAME, but $BOUNCE_PROGRAM failed with exit code ${EXIT_CODE}.
+			$SCRIPT_NAME attempted to restart $SERVICE_NAME on $HOSTNAME, but $BOUNCE_PROGRAM failed with exit code ${EXIT_CODE}.
 
 			$BOUNCE_OUTPUT
 
@@ -75,11 +76,13 @@ if (( JAVA_MOD_TIME_EPOCH > CS_START_TIME_EPOCH )); then
 
 	MAIL_SUBJECT="$SCRIPT_NAME: restart of $SERVICE_NAME $BOUNCE_STATUS"
 
-	/bin/mail -s "$MAIL_SUBJECT" $MAIL_TO <<-ENDTEXT
-		$MAIL_INTRO
+	if [ "$BOUNCE_STATUS" != "OK" ]; then
+		/bin/mail -s "$MAIL_SUBJECT" $MAIL_TO <<-ENDTEXT
+			$MAIL_INTRO
 
-		$MAIL_DESC
-	ENDTEXT
+			$MAIL_DESC
+		ENDTEXT
+	fi
 else
 	echo `date`: Java not updated
 fi
