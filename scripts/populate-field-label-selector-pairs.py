@@ -46,13 +46,17 @@ def list_generator_from_dict(current_dict, prefix=None):
         yield current_dict
         
 FIELD_PATTERN = re.compile("^\$\{fields\.(\w+)\}$", re.IGNORECASE)
+ROW_PATTERN = re.compile("^\$\{\{row\}\.(\w+)\}$", re.IGNORECASE)
 def get_field_name(value):
     # 'basestring' -> 'str' here in Python 3
     if isinstance(value, basestring):
         match = FIELD_PATTERN.match(value)
         if match is not None:
             return str(match.group(1))
-
+        match = ROW_PATTERN.match(value)
+        if match is not None:
+            return str(match.group(1))
+            
 MESSAGEKEY_KEY = 'messagekey'
 def get_messagekey_from_item(item):
     # 'basestring' -> 'str' here in Python 3
@@ -243,12 +247,13 @@ if __name__ == '__main__':
     # ##################################################
         
     field_items = []
-    field_regex = re.compile(".*fields\.", re.IGNORECASE)
     for selector_item in selector_items:
         for entry in selector_item:
-            if field_regex.match(entry):
+            if FIELD_PATTERN.match(entry):
                 field_items.append(selector_item)
-               
+            if ROW_PATTERN.match(entry):
+                field_items.append(selector_item)
+         
     # For debugging
     # for f_item in field_items:
     #     print f_item
@@ -270,7 +275,6 @@ if __name__ == '__main__':
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
             messagekey_fieldname = messagekey_fieldname[CSC_RECORD_TYPE_PREFIX_LENGTH:]
         # For debugging
-        # print messagekey_fieldname
         # if 'somestringhere' in messagekey_fieldname:
         #     print messagekey_fieldname
         found = False
@@ -278,7 +282,8 @@ if __name__ == '__main__':
         for field_item in field_items:
             for item in field_item:
                 messagekey_fieldname_regex = re.compile(".*fields\.([^\.]\.)?" + messagekey_fieldname, re.IGNORECASE)
-                if messagekey_fieldname_regex.match(str(item)):
+                messagekey_rowname_regex = re.compile(".*row\}\.([^\.]\.)?" + messagekey_fieldname, re.IGNORECASE)
+                if messagekey_fieldname_regex.match(str(item)) or messagekey_rowname_regex.match(str(item)):
                     for possible_selector_item in field_item:
                         if str(possible_selector_item).startswith("." + CSC_PREFIX):
                             # For debugging
