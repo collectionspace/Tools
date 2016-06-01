@@ -84,7 +84,8 @@ def get_record_type_selector_prefix(selector):
 # within the CollectionSpace UI.
 def in_messagekey_stoplist(messagekey):
     global RECORD_TYPE_PREFIX
-    stoplist = ['createdAtLabel', 'createdByLabel','refNameLabel', 'tenantIdLabel',
+    stoplist = ['coreInformationLabel', 'createdAtLabel', 'createdByLabel', 'domaindataLabel',
+        'numberLabel', 'refNameLabel', 'summaryLabel', 'tenantIdLabel',
         'updatedAtLabel', 'updatedByLabel', 'uriLabel', 'workflowLabel']
     in_stoplist = False
     for stop_item in stoplist:
@@ -173,8 +174,7 @@ if __name__ == '__main__':
         # print "%s %s\n" % (selector, value)
         
         # Set the record type prefix - just once - when we encounter
-        # the first 'fields.fieldname' value. After that's initialized,
-        # this block will be bypassed thereafter.
+        # the first 'fields.fieldname' value.
         if RECORD_TYPE_PREFIX is None:
             # For debugging
             # print "record type prefix is none"
@@ -183,6 +183,12 @@ if __name__ == '__main__':
                 # For debugging
                 # print "Found record type prefix"
                 prefix = get_record_type_selector_prefix(selector)
+                break
+    
+    for selector, value in uispec_items.iteritems():
+        
+        # For debugging
+        # print "%s %s\n" % (selector, value)
         
         # ##################################################
         # For each selector, get its text label (if any)
@@ -330,6 +336,7 @@ if __name__ == '__main__':
         print "\n"
         print "// Messagekeys not matched by fields in the 'uispec' file."
         print "//"
+        print "// Label-field associations for these fields may need to be human-added."
         print "// Perhaps 'fieldname-label' => 'fieldname' convention was not followed?"
         print "// Sometimes this can result from pluralization of one of these names."
         print "// In other cases, these may be fields within a repeatable group"
