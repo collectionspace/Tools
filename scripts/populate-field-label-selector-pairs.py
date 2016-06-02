@@ -42,14 +42,10 @@ def get_field_name(value):
 
 MESSAGEKEY_KEY = 'messagekey'
 def get_messagekey_from_item(item):
-    if isinstance(item, dict):
-        try:
-            messagekey = item[MESSAGEKEY_KEY]
-            return messagekey
-        except KeyError, e:
-            return None
-    else:
+    if not isinstance(item, dict):
         return None
+    else:
+        messagekey = item.get(MESSAGEKEY_KEY, None)
 
 # Recursively walk a nested collection and return
 # lists representing each of its parts
@@ -72,6 +68,8 @@ def get_messagekeys_generator(indict, key=MESSAGEKEY_KEY):
         yield indict
 
 # Get the selector prefix for the current record type (e.g. "acquisition-").
+# Once acquired, cache it within a global variable and return the cached
+# value to all subsequent queries.
 RECORD_TYPE_PREFIX = None
 SELECTOR_PATTERN = re.compile("^\.csc-(\w+\-)?.*$", re.IGNORECASE)
 def get_record_type_selector_prefix(selector):
@@ -192,15 +190,11 @@ if __name__ == '__main__':
         # For debugging
         # print "%s %s\n" % (selector, value)
         
-        # Set the record type prefix - just once - when we encounter
-        # the first 'fields.fieldname' value.
+        # On encountering the first '${fields}.fieldname' item,
+        # set the record type prefix from its selector
         if RECORD_TYPE_PREFIX is None:
-            # For debugging
-            # print "record type prefix is none"
             field_name = get_field_name(value)
             if field_name is not None:
-                # For debugging
-                # print "Found record type prefix"
                 prefix = get_record_type_selector_prefix(selector)
                 break
 
