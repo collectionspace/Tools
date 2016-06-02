@@ -10,9 +10,6 @@ import sys
 # TODO: Replace commented-out debugging statements
 # with debug or trace level log statements.
 
-# TODO: Handle term lists for authority term records.
-# These will have messagekeys similar to 'preferred...-term...'
-
 # TODO: Handle cases like CollectionObject (Cataloging)
 # where there may be multiple, discrepant record type names.
 # (E.g. csc-object v. csc-collection-object, as well as
