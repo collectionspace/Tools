@@ -36,13 +36,10 @@ ROW_PATTERN = re.compile("^\$\{\{row\}\.(\w+)\}$", re.IGNORECASE)
 def get_field_name(value):
     # 'basestring' -> 'str' here in Python 3
     if isinstance(value, basestring):
-        match = FIELD_PATTERN.match(value)
+        match = FIELD_PATTERN.match(value) or ROW_PATTERN.match(value)
         if match is not None:
             return str(match.group(1))
-        match = ROW_PATTERN.match(value)
-        if match is not None:
-            return str(match.group(1))
-            
+
 MESSAGEKEY_KEY = 'messagekey'
 def get_messagekey_from_item(item):
     if isinstance(item, dict):
@@ -107,6 +104,7 @@ def in_messagekey_stoplist(messagekey):
 # E.g. with per-line entries in the form 'key: value'.
 # From Roberto
 # http://stackoverflow.com/a/31852401
+# Adapted slightly as commented below.
 def load_properties(filepath, sep=':', comment_char='#'):
     props = {}
     with open(filepath, "rt") as f:
