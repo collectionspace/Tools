@@ -8,10 +8,15 @@ import os
 import sys
 
 # TODO: Replace commented-out debugging statements
-# with debug or trace level log statements
+# with debug or trace level log statements.
 
-# TODO: Handle fields represented in the 'uispec' file as
-# ${row.fieldname} values, not just ${fields.fieldname} values.
+# TODO: Handle term lists for authority term records.
+# These will have messagekeys similar to 'preferred...-term...'
+
+# TODO: Handle cases like CollectionObject (Cataloging)
+# where there may be multiple, discrepant record type names.
+# (E.g. csc-object v. csc-collection-object, as well as
+# some items that have neither prefix.)
 
 # TODO: Handle structured dates. These will be present within
 # lists containing key 'func', value 'cspace.structuredDate',
@@ -19,6 +24,7 @@ import sys
 # their associated text labels in the message bundle file
 # will have the form 'structuredDate-fieldname'.
 
+# Remove a substring from the right of a string.
 # From Jack Kelly
 # http://stackoverflow.com/a/3663505
 def rchop(thestring, ending):
@@ -26,25 +32,8 @@ def rchop(thestring, ending):
     return thestring[:-len(ending)]
   return thestring
 
-# From Bryukhanov Valentin
-# http://stackoverflow.com/a/12507546
-# (renamed and with minor changes to variable names)
-def list_generator_from_dict(current_dict, prefix=None):
-    prefix = prefix[:] if prefix else []
-    if isinstance(current_dict, dict):
-        for key, value in current_dict.items():
-            if isinstance(value, dict):
-                for d in list_generator_from_dict(value, [key] + prefix):
-                    yield d
-            elif isinstance(value, list) or isinstance(value, tuple):
-                for v in value:
-                    for d in list_generator_from_dict(v, [key] + prefix):
-                        yield d
-            else:
-                yield prefix + [key, value]
-    else:
-        yield current_dict
-        
+# Extract the name of a field from an entry for a field or row (the
+# latter for repeatable fields) in a CollectionSpace 'uispec' file.
 FIELD_PATTERN = re.compile("^\$\{fields\.(\w+)\}$", re.IGNORECASE)
 ROW_PATTERN = re.compile("^\$\{\{row\}\.(\w+)\}$", re.IGNORECASE)
 def get_field_name(value):
@@ -69,7 +58,7 @@ def get_messagekey_from_item(item):
     else:
         return None
 
-# Get the selector prefix for the current record type (e.g. "acquisition-")
+# Get the selector prefix for the current record type (e.g. "acquisition-").
 RECORD_TYPE_PREFIX = None
 SELECTOR_PATTERN = re.compile("^\.csc-(\w+\-)?.*$", re.IGNORECASE)
 def get_record_type_selector_prefix(selector):
@@ -88,8 +77,8 @@ def get_record_type_selector_prefix(selector):
 # within the CollectionSpace UI.
 def in_messagekey_stoplist(messagekey):
     global RECORD_TYPE_PREFIX
-    stoplist = ['coreInformationLabel', 'createdAtLabel', 'createdByLabel', 'domaindataLabel',
-        'numberLabel', 'refNameLabel', 'summaryLabel', 'tenantIdLabel',
+    stoplist = ['coreInformationLabel', 'createdAtLabel', 'createdByLabel', 'csidLabel', 'domaindataLabel',
+        'inAuthorityLabel', 'numberLabel', 'refNameLabel', 'shortIdentifierLabel', 'summaryLabel', 'tenantIdLabel',
         'updatedAtLabel', 'updatedByLabel', 'uriLabel', 'workflowLabel']
     in_stoplist = False
     for stop_item in stoplist:
@@ -97,6 +86,8 @@ def in_messagekey_stoplist(messagekey):
             in_stoplist = True
             return in_stoplist
 
+# Load the contents of a Java-style properties file.
+# E.g. with per-line entries in the form 'key: value'.
 # From Roberto
 # http://stackoverflow.com/a/31852401
 def load_properties(filepath, sep=':', comment_char='#'):
@@ -164,7 +155,7 @@ if __name__ == '__main__':
     # ##################################################
     # Iterate through the list of selectors in the
     # uispec file and find those that have messagekeys.
-    # These represent text labels that are, in many,
+    # These represent text labels that are, in many
     # cases, associated with fields. Store these selectors
     # and their text labels for further use below ...
     # ##################################################
@@ -215,110 +206,44 @@ if __name__ == '__main__':
     #     print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
             
     # ##################################################
-    # Get a set of lists from the uispec file dict
-    # ##################################################
-    
-    generator = list_generator_from_dict(uispec[TOP_LEVEL_KEY])
-
-    # ##################################################
-    # Filter the set of lists, retaining just those items
-    # that have selectors
-    # ##################################################
-
-    selector_items = []
-    for uispec_item in generator:
-        # TODO: There may be more elegant and/or faster ways to do this
-        # with list comprehensions and/or fiters
-        # For debugging
-        # print uispec_item
-        if isinstance(uispec_item, list):
-            for u_item in uispec_item:
-                # TODO: Replace with regex to avoid unintentional matches
-                if str(u_item).startswith(".cs"):
-                    selector_items.append(uispec_item)
-    
-    # For debugging
-    # for s_item in selector_items:
-    #     print s_item
-
-    # ##################################################
-    # Further filter the set of lists, retaining just
-    # those selector items that also have fields
-    # ##################################################
-        
-    field_items = []
-    for selector_item in selector_items:
-        for entry in selector_item:
-            if FIELD_PATTERN.match(entry):
-                field_items.append(selector_item)
-            if ROW_PATTERN.match(entry):
-                field_items.append(selector_item)
-         
-    # For debugging
-    # for f_item in field_items:
-    #     print f_item
-
-    # ##################################################
-    # For each field, match it with its associated
-    # text label
+    # Match each messagekey with its associated text
+    # label, adding placeholders for missing values
     # ##################################################
                     
     ADD_ME_VALUE = "ADD_ME"
     CSC_PREFIX = 'csc-'
     CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + RECORD_TYPE_PREFIX
-    CSC_RECORD_TYPE_PREFIX_LENGTH = len(CSC_RECORD_TYPE_PREFIX)
     LABEL_SUFFIX = '-label'
     fields = {}
-    fields_not_found_msgs = []
-    # Iterate through the list of text labels
     for key, value in messagekeys.iteritems():
         messagekey_fieldname = rchop(key, LABEL_SUFFIX)
-        # Default to a placeholder label, which can be replaced by a human
-        # if this script can't populate the label value for this field
-        fields[messagekey_fieldname] = ADD_ME_VALUE
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
-            messagekey_fieldname = messagekey_fieldname[CSC_RECORD_TYPE_PREFIX_LENGTH:]
-        # if 'somestringhere' in messagekey_fieldname:
-        #     print messagekey_fieldname
-        found = False
-        num_found = 0
-        for field_item in field_items:
-            for item in field_item:
-                messagekey_fieldname_regex = re.compile(".*fields\.([^\.]\.)?" + messagekey_fieldname, re.IGNORECASE)
-                messagekey_rowname_regex = re.compile(".*row\}\.([^\.]\.)?" + messagekey_fieldname, re.IGNORECASE)
-                if messagekey_fieldname_regex.match(str(item)) or messagekey_rowname_regex.match(str(item)):
-                    for possible_selector_item in field_item:
-                        if str(possible_selector_item).startswith("." + CSC_PREFIX):
-                            # For debugging
-                            # print "=> %s" % possible_selector_item
-                            fieldkey = possible_selector_item.replace(possible_selector_item[:1], '')
-                            # Add this field selector if we haven't already added it
-                            key_already_added = fields.get(fieldkey, None)
-                            if key_already_added is not None:
-                                if not key_already_added.find(ADD_ME_VALUE):
-                                    fields[fieldkey] = value
-                                    found = True
-                                    break
-                                    # For debugging
-                                    # if 'somestringhere' in messagekey_fieldname:
-                                    #     print fieldkey
-                                    #     print value
-                                # For debugging
-                                # num_found += 1
-                                # print num_found
-                                # print "fieldkey %s, value %s" % (fieldkey, value)
-                
-        # if not found:
-        #     fields_not_found_msgs.append("// Not found: field for label %s" % rchop(key, LABEL_SUFFIX))
-    
+            messagekey_fieldname = rchop(key, LABEL_SUFFIX)
+            # Expression here includes ternary operator
+            fields[messagekey_fieldname] = value if value is not (None or '') else ADD_ME_VALUE
+        # else {check for term list messagekeys here}
+        # TODO: Implement this stub
+
+    # ##################################################
+    # Generate output suitable for pasting
+    # ##################################################
+
     print '// ----- Start of entries generated by an automated script -----'
     print '// (Note: these require review by a human.)'
     print "\n"
-    
+
+    # ##################################################
+    # Output regarding text label-selector associations
+    # ##################################################
+                    
     # Print associations between text labels and field selectors
     # TODO: Need to do case independent sorting here (e.g. on lowercase values)
     for key, value in sorted(fields.iteritems(), key=lambda (k,v): (v,k)):
         print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
+
+    # ##################################################
+    # Output regarding errors
+    # ##################################################
     
     # Print various potential errors as Java comments, for a human to look at/sort out
     
@@ -331,32 +256,12 @@ if __name__ == '__main__':
     value_occurrences = collections.Counter(fields.values())
     if value_occurrences is not None and len(value_occurrences) > 0:
         print "\n"
-        print "// Entries above with duplicate text labels, to be checked by a human"
+        print "// Entries above with duplicate text labels, to be checked by a human."
         print "//"
-        for key, value in value_occurrences.iteritems():
+        print "// Some may represent labels for headers above repeatable fields/groups."
+        for key, value in sorted(value_occurrences.iteritems()):
             if value > 1:
                 print "// Duplicate text label: %s (appears %d times)" % (key, value)
-
-    # Text labels that aren't matched by associated fields in the uispec.
-    #
-    # (These might sometimes reflect exceptions to a nearly always-followed
-    # naming convention, in which the existence of a '... fieldName-label'
-    # messagekey selector is matched by a field selector 'fieldName';
-    # i.e. the same name with the '-label' suffix removed.)
-    if len(fields_not_found_msgs) > 0:
-        print "\n"
-        print "// Messagekeys not matched by fields in the 'uispec' file."
-        print "//"
-        print "// Label-field associations for these fields may need to be human-added."
-        print "// Perhaps 'fieldname-label' => 'fieldname' convention was not followed?"
-        print "// Sometimes this can result from pluralization of one of these names."
-        print "// In other cases, these may be fields within a repeatable group"
-        print "// that are not yet handled by the automated script."
-        print "//"
-        for msg in sorted(fields_not_found_msgs):
-            print msg
-            if 'DateGroup' in msg:
-                print "// (If item above is a structured date, it must be added manually here)"
 
     # Messagekeys in the 'uispec file without associated text labels in the
     # message bundle file (e.g. 'core-messages.properties').
@@ -364,12 +269,12 @@ if __name__ == '__main__':
     # (Example: messagekey 'acquisition-ownerLabel' is present in the uispec
     # for the Acquisition record, but isn't found in the message bundle file;
     # only 'acquisition-ownersLabel' is present there.)
-    if len(fields_not_found_msgs) > 0:
+    if len(text_labels_not_found_msgs) > 0:
         print "\n"
         print "// Messagekeys in the 'uispec' file not matched by text labels"
-        print "// in the message bundles file (e.g. 'core-messages.properties')"
+        print "// in the message bundles file (e.g. 'core-messages.properties')."
         print "//"
-        print "// Some of these may be common record metadata that is never displayed"
+        print "// Some of these may be record metadata that is never displayed"
         print "// in the UI. If so, they can be added to the script's stoplist."
         print "//"
         print "// In other instances, these may represent messagekeys for section"
