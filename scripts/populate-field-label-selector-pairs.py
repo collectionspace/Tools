@@ -169,17 +169,15 @@ if __name__ == '__main__':
     # below the top level item
     if not uispec_items:
         sys.exit("Could not find expected items in uispec file")
-    
+
     # ##################################################
-    # Iterate through the list of selectors in the
-    # uispec file and find those that have messagekeys.
-    # These represent text labels that are, in many
-    # cases, associated with fields. Store these selectors
-    # and their text labels for further use below ...
-    # ##################################################
+    # Get the prefix for this record type
+    # (used in selectors)
+    # ################################################## 
     
-    messagekeys_not_found_msgs = []
-    text_labels_not_found_msgs = []
+    # TODO: As noted above, also need to handle instances of irregular
+    # use of this prefix, as in CollectionObjects/Cataloging records   
+    
     for selector, value in uispec_items.iteritems():
         
         # For debugging
@@ -196,7 +194,19 @@ if __name__ == '__main__':
                 # print "Found record type prefix"
                 prefix = get_record_type_selector_prefix(selector)
                 break
-    
+
+    # ##################################################
+    # Iterate through the list of selectors in the
+    # uispec file and find those that have messagekeys.
+    # These represent text labels that are, in many
+    # cases, associated with fields. Store these selectors
+    # and their text labels for further use below ...
+    # ##################################################
+        
+    # ##################################################
+    # Get messagekeys and their associated selectors
+    # ##################################################
+
     CSC_PREFIX = 'csc-'
     CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + RECORD_TYPE_PREFIX
     LABEL_CAMELCASE_SUFFIX = "Label"
@@ -206,10 +216,6 @@ if __name__ == '__main__':
         
         # For debugging
         # print "%s %s" % (selector, value)
-        
-        # ##################################################
-        # For each selector, get its text label (if any)
-        # ##################################################
         
         mkey = get_messagekey_from_item(value)
         # 'basestring' -> 'str' here in Python 3
@@ -228,6 +234,11 @@ if __name__ == '__main__':
                             mkey_selector= mkey_selector.replace(LABEL_CAMELCASE_SUFFIX, LABEL_SUFFIX)
                         mkeys[mkey_selector] = str(item[1])
             
+    # ##################################################
+    # For each messagekey, get its text label (if any)
+    # ##################################################
+        
+    text_labels_not_found_msgs = []
     messagekeys = {}
     for selector, messagekey in mkeys.iteritems():
         # For debugging
@@ -248,12 +259,12 @@ if __name__ == '__main__':
     #     print 'fieldSelectorByLabel.put("%s", "%s");' % (value, key)
             
     # ##################################################
-    # Match each messagekey with its associated text
-    # label, adding placeholders for missing values
+    # Do one last cleanup pass on messagekeys:
+    # * Remove the 'Label' suffix from selectors
+    # * Add placeholders for missing text labels
     # ##################################################
                     
     ADD_ME_VALUE = "ADD_ME"
-    TERM_LIST_PATTERN = re.compile(CSC_PREFIX + "\-preferred\w+\-", re.IGNORECASE)
     fields = {}
     for key, value in messagekeys.iteritems():
         messagekey_fieldname = rchop(key, LABEL_SUFFIX)
