@@ -122,11 +122,11 @@ def load_properties(filepath, sep=':', comment_char='#'):
 
 if __name__ == '__main__':
     
-    parser = ArgumentParser(description='Populate field label/selector associations')
+    parser = ArgumentParser(description='Generates pairs for the text labels that appear next to fields and the CSS selectors for those fields. Used, in part, for CSpace QA Automation via Cucumber.')
     parser.add_argument('-b', '--bundle_file',
         help='file with text labels (defaults to \'core-messages.properties\' in current directory)', default = 'core-messages.properties')
     parser.add_argument('-u', '--uispec_file',
-        help='file with data used to generate the page (defaults to \'uispec\' in current directory)', default = 'uispec')
+        help='file with data used to generate page (defaults to \'uispec\' in current directory)', default = 'uispec')
     args = parser.parse_args()
     
     # ##################################################
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     
     bundle_path = args.bundle_file.strip()
     if not os.path.isfile(bundle_path):
-        sys.exit("Could not find file \'%s\'" % bundle_path)
+        sys.exit("Could not find file '%s'.\n(Re-run script with '-h' option to view help instructions.)" % bundle_path)
         
     text_labels = load_properties(bundle_path)
     text_labels_lowercase = {k.lower():v for k,v in text_labels.items()}
@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     uispec_path = args.uispec_file.strip()
     if not os.path.isfile(uispec_path):
-        sys.exit("Could not find file \'%s\'" % uispec_path)
+        sys.exit("Could not find file '%s'.\n(Re-run script with '-h' option to view help instructions.)" % uispec_path)
         
     with open(uispec_path) as uispec_file:    
         uispec = json.load(uispec_file)
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     try:
         uispec_items = uispec[TOP_LEVEL_KEY]
     except KeyError, e:
-        sys.exit("Could not find expected top level item \'%s\' in uispec file" % TOP_LEVEL_KEY)
+        sys.exit("Could not find expected top level item \'%s\' in uispec file." % TOP_LEVEL_KEY)
     
     # Verify that at least one item is present in the list of items
     # below the top level item
