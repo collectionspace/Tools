@@ -92,8 +92,9 @@ def get_record_type_selector_prefix(selector):
 # within the CollectionSpace UI.
 def in_messagekey_stoplist(messagekey):
     global RECORD_TYPE_PREFIX
-    stoplist = ['coreInformationLabel', 'createdAtLabel', 'createdByLabel', 'csidLabel', 'domaindataLabel',
-        'inAuthorityLabel', 'numberLabel', 'refNameLabel', 'shortIdentifierLabel', 'summaryLabel', 'tenantIdLabel',
+    stoplist = ['coreInformationLabel', 'createdAtLabel', 'createdByLabel', 'csidLabel', 'deprecatedLabel',
+        'deprecatedRefNameLabel', 'domaindataLabel', 'inAuthorityLabel', 'numberLabel', 'otherInformationLabel',
+        'proposedLabel', 'refNameLabel', 'revLabel', 'sasLabel', 'shortIdentifierLabel', 'summaryLabel', 'tenantIdLabel',
         'updatedAtLabel', 'updatedByLabel', 'uriLabel', 'workflowLabel']
     in_stoplist = False
     for stop_item in stoplist:
