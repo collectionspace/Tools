@@ -48,7 +48,6 @@ def get_field_name(value):
             
 MESSAGEKEY_KEY = 'messagekey'
 def get_messagekey_from_item(item):
-    # 'basestring' -> 'str' here in Python 3
     if isinstance(item, dict):
         try:
             messagekey = item[MESSAGEKEY_KEY]
@@ -57,6 +56,25 @@ def get_messagekey_from_item(item):
             return None
     else:
         return None
+
+# Recursively walk a nested collection and return
+# lists representing each of its parts
+# From Bryukhanov Valentin
+# http://stackoverflow.com/a/12507546
+def get_messagekeys_generator(indict, key=MESSAGEKEY_KEY):
+    if isinstance(indict, dict):
+        for key, value in indict.items():
+            if isinstance(value, dict):
+                for d in get_messagekeys_generator(value, [key]):
+                    yield d
+            elif isinstance(value, list) or isinstance(value, tuple):
+                for v in value:
+                    for d in get_messagekeys_generator(v, [key]):
+                        yield d
+            else:
+                yield [key, value]
+    else:
+        yield indict
 
 # Get the selector prefix for the current record type (e.g. "acquisition-").
 RECORD_TYPE_PREFIX = None
@@ -160,7 +178,6 @@ if __name__ == '__main__':
     # and their text labels for further use below ...
     # ##################################################
     
-    messagekeys = {}
     messagekeys_not_found_msgs = []
     text_labels_not_found_msgs = []
     for selector, value in uispec_items.iteritems():
@@ -180,16 +197,41 @@ if __name__ == '__main__':
                 prefix = get_record_type_selector_prefix(selector)
                 break
     
+    CSC_PREFIX = 'csc-'
+    CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + RECORD_TYPE_PREFIX
+    LABEL_CAMELCASE_SUFFIX = "Label"
+    LABEL_SUFFIX = '-label'
+    mkeys = {}
     for selector, value in uispec_items.iteritems():
         
         # For debugging
-        # print "%s %s\n" % (selector, value)
+        # print "%s %s" % (selector, value)
         
         # ##################################################
         # For each selector, get its text label (if any)
         # ##################################################
         
-        messagekey = get_messagekey_from_item(value)
+        mkey = get_messagekey_from_item(value)
+        # 'basestring' -> 'str' here in Python 3
+        if isinstance(mkey, basestring):
+            mkeys[selector] = mkey
+        # Can use collections.abc abstract classes here in Python 3.3 and higher
+        if mkey is None and isinstance(value, (dict, list, set, tuple)):
+            for item in get_messagekeys_generator(value):
+                # For debugging
+                # print item
+                if isinstance(item, list):
+                    if str(item[0]) == MESSAGEKEY_KEY:
+                        # This block is an outright hack
+                        mkey_selector = '.' + CSC_RECORD_TYPE_PREFIX + str(item[1])
+                        if mkey_selector.endswith(LABEL_CAMELCASE_SUFFIX):
+                            mkey_selector= mkey_selector.replace(LABEL_CAMELCASE_SUFFIX, LABEL_SUFFIX)
+                        mkeys[mkey_selector] = str(item[1])
+            
+    messagekeys = {}
+    for selector, messagekey in mkeys.iteritems():
+        # For debugging
+        # print "selector messagekey = %s %s\n" % (selector, messagekey)
         if messagekey is not None:
             if in_messagekey_stoplist(messagekey):
                 continue
@@ -211,19 +253,16 @@ if __name__ == '__main__':
     # ##################################################
                     
     ADD_ME_VALUE = "ADD_ME"
-    CSC_PREFIX = 'csc-'
-    CSC_RECORD_TYPE_PREFIX = CSC_PREFIX + RECORD_TYPE_PREFIX
-    LABEL_SUFFIX = '-label'
+    TERM_LIST_PATTERN = re.compile(CSC_PREFIX + "\-preferred\w+\-", re.IGNORECASE)
     fields = {}
     for key, value in messagekeys.iteritems():
         messagekey_fieldname = rchop(key, LABEL_SUFFIX)
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
-            messagekey_fieldname = rchop(key, LABEL_SUFFIX)
             # Expression here includes ternary operator
             fields[messagekey_fieldname] = value if value is not (None or '') else ADD_ME_VALUE
-        # else {check for term list messagekeys here}
-        # TODO: Implement this stub
-
+        # elif TERM_LIST_PATTERN.match(messagekey_fieldname):
+        #     fields[messagekey_fieldname] = value if value is not (None or '') else ADD_ME_VALUE
+            
     # ##################################################
     # Generate output suitable for pasting
     # ##################################################
