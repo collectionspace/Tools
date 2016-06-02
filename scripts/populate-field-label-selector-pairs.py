@@ -260,8 +260,6 @@ if __name__ == '__main__':
         if messagekey_fieldname.startswith(CSC_RECORD_TYPE_PREFIX):
             # Expression here includes ternary operator
             fields[messagekey_fieldname] = value if value is not (None or '') else ADD_ME_VALUE
-        # elif TERM_LIST_PATTERN.match(messagekey_fieldname):
-        #     fields[messagekey_fieldname] = value if value is not (None or '') else ADD_ME_VALUE
             
     # ##################################################
     # Generate output suitable for pasting
