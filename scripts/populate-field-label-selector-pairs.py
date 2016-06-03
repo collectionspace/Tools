@@ -233,7 +233,7 @@ if __name__ == '__main__':
                     if str(item[0]) == MESSAGEKEY_KEY:
                         # This block is an outright hack
                         selector = str(item[1])
-                        mkey_selector = '.' + CSC_RECORD_TYPE_PREFIX + selector
+                        mkey_selector = '.' + CSC_PREFIX + selector
                         if mkey_selector.endswith(LABEL_CAMELCASE_SUFFIX):
                             mkey_selector= mkey_selector.replace(LABEL_CAMELCASE_SUFFIX, LABEL_SUFFIX)
                         mkeys[mkey_selector] = selector
