@@ -15,6 +15,17 @@ import sys
 # (E.g. csc-object v. csc-collection-object, as well as
 # some items that have neither prefix.)
 
+# TODO: Handle cases where field name isn't a match for
+# CSS selector; e.g. csc-loanOut-loanOutConditions
+# selector pertains to specialConditionsOfLoan field
+
+# TODO: Improve choice of CSS selectors for term list fields in
+# authority term records. Currently, selector names for these are
+# generated inaccurately. For instance, for Concept records, the
+# messagekeys for term list fields begin with 'preferredCA-...'
+# and that's how their selectors are currently rendered, but their
+# actual selectors are of the form 'csc-conceptAuthority-...'
+
 # TODO: Handle structured dates. These will be present within
 # lists containing key 'func', value 'cspace.structuredDate',
 # and have the form '${fields.groupname.fieldname}', while
