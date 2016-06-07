@@ -8,7 +8,7 @@ DECLARE filepath VARCHAR(1000);
 BEGIN
 
 select
-   '/usr/local/share/tomcat/nuxeo-server/data/binaries/data/'||substring(c.data, 1, 2)||'/'||substring(c.data, 3,2)||'/'||c.data
+   '/home/app_bampfa/tomcat6-bampfa/nuxeo-server/data/bampfa_domain/data/'||substring(c.data, 1, 2)||'/'||substring(c.data, 3,2)||'/'||c.data
    into filepath
 from collectionobjects_common co
    JOIN hierarchy hrel on (co.id = hrel.id)
