@@ -23,8 +23,7 @@ echo "Sending $DATA to $URL, filename is $FILENAME"
 attempts=0
 while [ $attempts -le 2 ]
 do
-    curl -s -i -u "$USER" ${URL}?impTimout=900 -X POST -H "$CONTENT_TYPE" -T $DA
-TA -o "curl.out.$FILENAME.$y$m$d"
+    curl -s -i -u "$USER" ${URL}?impTimout=900 -X POST -H "$CONTENT_TYPE" -T $DATA -o "curl.out.$FILENAME.$y$m$d"
     if grep -q "Unable to commit/rollback" curl.out.$FILENAME.$y$m$d
     then
         echo "commit error detected; retrying $FILENAME ---" >> $LOGFILE
