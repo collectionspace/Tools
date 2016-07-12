@@ -19,10 +19,15 @@ fi
 
 if [ $# -ne 4 ]; then
     echo "Usage: load-report.sh reportname \"report name\" \"forDocType\" \"note\""
+    echo
+    echo "NB: for values which can be blank, use \"\" as a placeholder"
+    echo "    reportname is the filename, without extension of the JRXML file you have placed/will place"
+    echo "    in the reports directory, (e.g. myreport, not myreport.jrxml)"
     exit
 fi
 
-if [ -r $1.jrxml ];
+#if [ -r $1.jrxml ];
+if true;
 then
   #sudo cp $1.jrxml /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
   perl -pe 's/#name#/'"$2"'/g;s/#jrxml#/'$1'/g;s/#notes#/'"$4"'/g;s/#doctype#/'"$3"'/g' < $SCRIPTPATH/reporttemplate.xml  > tempreportpayload.xml
