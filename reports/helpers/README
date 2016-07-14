@@ -33,23 +33,25 @@
 #
 #  set-config-default.sh  ::  basic environment var setting script
 #  load-report.sh report  "report name" "forDocType" "note":: create a report record in CSpace server
-#  delete-report.sh csid  ::  deletes report having specified csid (deletes config only!)
+#  delete-report.sh report-csid  ::  deletes report having specified csid (deletes config only!)
 #  list-reports.sh > reports.csv  :: lists the reports installed
+#  list-report-details.sh report-csid  :: xml payload showing details of installed report
 #  delete-all-reports.sh reports.csv :: deletes all the reports listed in reports.csv
+#  delete-report.sh report-csid  :: delete a single report record
+#  fetch-report.sh report-csid context-csid doctype :: fetches a report from the server
 # 
 # EXAMPLES
 #
-# this script fetches a report that takes no parameters (e.g. ucbgVoucherLabel) using a dummy payload
+# this script fetches a PDF report; it takes the csid of the report and the csid of cspace context element (e.g group
+# csid, object csid, etc. depending on report and context).
 #
-# takes the csid of the report and the name of a pdf file to create.
-#
-$ ./fetch-report.sh de1f82ab-a9b2-4c7b-a4b9 voucherlabel.pdf
+$ ./fetch-report.sh f45de201-3429-4d67-a1b2 ebf5f72f-65ab-499f-ac47-4fa9b720a6d3 CollectionObject > groupReport.pdf
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  209k    0  209k  125   250  25899     30  0:00:08  0:00:08 --:--:-- 50492
 
 $ ls -ltr | tail -1
--rw-r--r--  1 jblowe  staff  214744 Aug 18 13:24 voucherlabel.pdf
+-rw-r--r--  1 jblowe  staff  214744 Aug 18 13:24 groupReport.pdf
 
 
 # script to set environment variables.
@@ -81,13 +83,13 @@ REPORTUSER xxxx@pahma.cspace.berkeley.edu:xxxx
 
 # now go to town!
 
-# load and configure report (assumes you have a file zzz.jasper in this directory)
-$ ./load-report.sh zzz "example" ""
-zzz.jasper -- not found.
+# load and configure report (assumes you have or will install a file zzz.jrxml on the server)
+$ ./load-report.sh zzz "example object report" CollectionObject ""
 
-# put the .jasper file where it belongs (use this command when you have modified the report)
-# but it still works the same.
-sudo cp zzz.jasper /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
+# put the .jrxml file where it belongs (use this command when you have modified the report)
+ssh my.server
+cd Tools
+cp zzz.jrxml /usr/local/share/apache-tomcat-6.0.33/cspace/reports/
 
 # make a list of installed reports
 $ ./list-reports.sh > listofreports.csv
