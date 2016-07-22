@@ -49,12 +49,12 @@ test ./scripts/create-report-records.sh "Exhibition Basic List" "Catalog info fo
 test ./scripts/create-report-records.sh "Group Basic List" "Catalog info for objects related to a group record" Group true false false true Group_List_Basic.jrxml
 test ./scripts/create-report-records.sh "Loan-in Basic List" "Catalog info for objects related to a Loan-in record" Loanin true false false true LoansIn_List_Basic.jrxml
 test ./scripts/create-report-records.sh "Loan-out Basic List" "Catalog info for objects related to a Loan-out record" Loanout true false false true LoansOut_List_Basic.jrxml
-test ./scripts/create-report-records.sh "Acquisition Report" "Core Acquisition Report for CODE-37" Acquisition true false false true coreAcquisition.jrxml 
-test ./scripts/create-report-records.sh "Group Object Report" "Core Group Object Report for CODE-37" Group true false true true coreGroupObject.jrxml
-test ./scripts/create-report-records.sh "Intake Report" "Core Intake Report for CODE-37" Intake true false false true coreIntake.jrxml
-test ./scripts/create-report-records.sh "Loan In Report" "Core Loan In Report for CODE-37" Loanin true false false true coreLoanIn.jrxml
-test ./scripts/create-report-records.sh "Loan Out Report" "Core Loan Out Report for CODE-37" Loanout true false false true coreLoanOut.jrxml
-test ./scripts/create-report-records.sh "Object Exit Report" "Core Object Exit Report for CODE-37" ObjectExit true false false true coreObjectExit.jrxml
+test ./scripts/create-report-records.sh "Acquisition Ethnographic Object List" "Core Acquisition Report" Acquisition true false false true coreAcquisition.jrxml 
+test ./scripts/create-report-records.sh "Group Object Ethnographic Object List" "Core Group Object Report" Group true false true true coreGroupObject.jrxml
+test ./scripts/create-report-records.sh "Intake Ethnographic Object List" "Core Intake Report" Intake true false false true coreIntake.jrxml
+test ./scripts/create-report-records.sh "Loan In Ethnographic Object List" "Core Loan In Report" Loanin true false false true coreLoanIn.jrxml
+test ./scripts/create-report-records.sh "Loan Out Ethnographic Object List" "Core Loan Out Report" Loanout true false false true coreLoanOut.jrxml
+test ./scripts/create-report-records.sh "Object Exit Ethnographic Object List" "Core Object Exit Report" ObjectExit true false false true coreObjectExit.jrxml
 
 
 #curl -G -v http://localhost:8180/cspace-services/reports --data-urlencode "as=reports_common:name ILIKE 'Acquisition Summary%'" -u admin@core.collectionspace.org:Administrator
