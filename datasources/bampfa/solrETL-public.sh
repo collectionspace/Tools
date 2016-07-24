@@ -3,9 +3,9 @@ date
 cd /home/app_solr/solrdatasources/bampfa
 ##############################################################################
 # move the current set of extracts to temp (thereby saving the previous run, just in case)
-# note that in the case where there are several nightly scripts, e.g. public and internal,
+# note that in the case where there are several nightly scripts, e.g. public and public,
 # the one to run first will "clear out" the previous night's data.
-# NB: at the moment BAMPFA has only an internal portal.
+# NB: at the moment BAMPFA has only an public portal.
 # since we don't know which order these might run in, I'm leaving the mv commands in both
 # nb: the jobs in general can't overlap as the have some files in common and would step
 # on each other
@@ -27,12 +27,12 @@ export NUMCOLS=38
 ##############################################################################
 # NB: unlike the other ETL processes, we're still using the default | delimiter here
 ##############################################################################
-time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata_internal.sql -o d1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata_public.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne " \$x = \$_ ;s/[^\|]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\|]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
-time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media-internal.sql -o m1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media_public.sql -o m1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv 
 time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f blobs.sql -o b1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' b1.csv > blobs.csv
@@ -46,12 +46,12 @@ perl -i -pe 's/\|/_s\|/g;s/objectcsid_s/id/;s/$/_s|blob_ss/' header4Solr.csv
 time perl mergeObjectsAndMedia.pl > d6.csv
 # we want to use our "special" solr-friendly header.
 tail -n +2 d6.csv > d7.csv
-cat header4Solr.csv d7.csv > 4solr.$TENANT.internal.csv
+cat header4Solr.csv d7.csv > 4solr.$TENANT.public.csv
 wc -l *.csv
 # clear out the existing data
-curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${TENANT}-internal/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.internal.csv -H 'Content-type:text/plain; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm d?.csv m?.csv b?.csv media.csv metadata.csv
 # zip up .csvs, save a bit of space on backups
