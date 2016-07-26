@@ -14,9 +14,10 @@
 #
 ##################################################################################
 01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
+01 0 * * * /home/app_solr/solrdatasources/bampfa/solrETL-public.sh           bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_public.log  2>&1
 21 0 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
 #
-21 0 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
+11 0 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
 31 1 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_internal.log  2>&1
 31 2 * * * /home/app_solr/solrdatasources/botgarden/solrETL-propagations.sh  botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_propagations.log  2>&1
 #
@@ -30,4 +31,4 @@
 ##################################################################################
 # monitor solr datastores
 ##################################################################################
-0  7 * * * /home/app_solr/checkstatus.sh | mail -s "solr nightly status" --  jblowe@berkeley.edu
+0  7 * * * /home/app_solr/checkstatus.sh | mail -s "solr refresh nightly status" -- cspace-app-logs@lists.berkeley.edu
