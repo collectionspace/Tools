@@ -42,7 +42,7 @@ SELECT
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate,
    utils.get_first_blobcsid(h1.name) image1blobcsid,
-   core.updatedat
+   utils.get_updatedat_co_mh(h1.name) updatedat
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co
@@ -51,7 +51,6 @@ from
       ON (co.id = m.id AND m.lifecyclestate <> 'deleted')
    INNER JOIN collectionobjects_bampfa cb
       ON (co.id = cb.id)
-   INNER JOIN collectionspace_core core on co.id=core.id
    LEFT OUTER JOIN hierarchy h2
       ON (h2.parentid = co.id AND h2.name='collectionobjects_common:objectProductionDateGroupList' and h2.pos=0)
    LEFT OUTER JOIN structuredDateGroup sdg ON (h2.id = sdg.id)
