@@ -3,10 +3,10 @@ import hashlib
 import math
 import sys
 
-hashkey_column = 33
-fieldCollectionTree_column = 36
+hashkey_column = 34
+fieldCollectionTree_column = 37
 objecttype_column = 5
-latlong_column = 34
+latlong_column = 35
 
 
 def pol2cart(rho, phi):
