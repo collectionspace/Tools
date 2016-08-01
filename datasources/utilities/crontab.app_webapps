@@ -69,7 +69,7 @@
 # run the cinefiles month qc report
 ##################################################################################
 00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu
-00 04 1 * * /home/app_webapps/bin/qc/monthly.sh cspace-app-logs@lists.berkeley.edu
+10 03 1 * * /home/app_webapps/bin/qc/monthly.sh cspace-app-logs@lists.berkeley.edu
 ##################################################################################
 # run the nightly bampfa extract for the drupal website
 ##################################################################################

@@ -8,22 +8,22 @@
 #
 # currently runs under pseudo user app_solr on cspace-prod and cspace-dev
 #
-# 1. run the 10 solr4 updates
+# 1. run the 11 solr4 updates
 # 2. monitor solr datastore contents (email contents)
 # 3. export and mail BAMPFA view for Orlando
 #
 ##################################################################################
 01 3 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
-01 4 * * * /home/app_solr/solrdatasources/bampfa/solrETL-public.sh           bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_public.log  2>&1
-21 4 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
+21 3 * * * /home/app_solr/solrdatasources/bampfa/solrETL-public.sh           bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_public.log  2>&1
+41 3 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
 #
 15 3 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
 31 4 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_internal.log  2>&1
 31 5 * * * /home/app_solr/solrdatasources/botgarden/solrETL-propagations.sh  botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_propagations.log  2>&1
 #
 31 3 * * * /home/app_solr/solrdatasources/pahma/solrETL-public.sh            pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_public.log  2>&1
-41 4 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_internal.log  2>&1
-11 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_locations.log  2>&1
+01 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-internal.sh          pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_internal.log  2>&1
+21 5 * * * /home/app_solr/solrdatasources/pahma/solrETL-locations.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_locations.log  2>&1
 51 6 * * * /home/app_solr/solrdatasources/pahma/solrETL-osteology.sh         pahma      >> /home/app_solr/solrdatasources/pahma/solr_extract_osteology.log  2>&1
 #
 01 6 * * * /home/app_solr/solrdatasources/ucjeps/solrETL-public.sh           ucjeps     >> /home/app_solr/solrdatasources/ucjeps/solr_extract_public.log  2>&1
@@ -31,4 +31,4 @@
 ##################################################################################
 # monitor solr datastores
 ##################################################################################
-0  7 * * * /home/app_solr/checkstatus.sh | mail -s "solr refresh nightly status" -- cspace-app-logs@lists.berkeley.edu
+0  8 * * * /home/app_solr/checkstatus.sh | mail -s "solr refresh nightly status" -- cspace-app-logs@lists.berkeley.edu
