@@ -1,5 +1,5 @@
 LOCKFILE=/tmp/tricoderlock
-SUBJECT="Tricoder Batch Script is locked out on `hostname`"
+SUBJECT="Tricoder Batch Script still running on `hostname`"
 EMAIL="pahma-tricoder@lists.berkeley.edu,cspace-support@lists.berkeley.edu"
 
 if mkdir $LOCKFILE; then
@@ -8,6 +8,6 @@ if mkdir $LOCKFILE; then
   rm -rf $LOCKFILE
 else
   echo "Lock failed - exit" >&2
-  echo "Please investigate. This is not necessarily an error, but no batches will run until the lock is cleared." | /bin/mail -s "${SUBJECT}" "${EMAIL}"
+  echo " The Tricoder Batch script tried to run but found an existing lock. This situation should clear up by itself but if it persists, please notify RIT staff." | /bin/mail -s "${SUBJECT}" "${EMAIL}"
   exit 1
 fi
