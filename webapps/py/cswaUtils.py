@@ -17,6 +17,7 @@ import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
 
+from cswaConstants import BASE_DIR
 import cswaSMBclient
 
 MAXLOCATIONS = 1000
@@ -61,7 +62,10 @@ def cgiFieldStorageToDict(fieldStorage):
     params = {}
     for key in fieldStorage.keys():
         #sys.stderr.write('%-13s:: %s' % ('key:',key))
-        params[key] = fieldStorage[key].value
+        try:
+            params[key] = fieldStorage[key].value
+        except:
+            sys.stderr.write('%-13s:: %s\n' % ('problem key:',str(key)))
     return params
 
 
@@ -69,7 +73,7 @@ def getConfig(form):
     try:
         fileName = form.get('webapp') + '.cfg'
         config = ConfigParser.RawConfigParser()
-        config.read(os.path.join('../cfgs',fileName))
+        config.read(os.path.join(BASE_DIR, 'cfgs', fileName))
         # test to see if it seems like it is really a config file
         updateType = config.get('info', 'updatetype')
         return config
@@ -491,6 +495,49 @@ def getTableFooter(config, displaytype, msg):
     print "</table><hr/>"
 
 
+def doGroupSearch(form, config, displaytype):
+    if not validateParameters(form, config): return
+    updateType = config.get('info', 'updatetype')
+
+    if form.get('gr.group') == '':
+        print '<h3>Please enter group identifier!</h3><hr>'
+        return
+
+    if updateType == "barcodeprint":
+        updateType = 'packinglist'
+    else:
+        updateType = 'objinfo'
+    institution = config.get('info','institution')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        #sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        rows = cswaDB.getgrouplist(form.get("gr.group"), 3000, config)
+        #sys.stderr.write('group result: %s\n' % len(rows))
+    except:
+        #sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        raise
+    #[sys.stderr.write('group member : %s\n' % x[2]) for x in rows]
+
+    if len(rows) == 0:
+        print '<span style="color:red;">No objects in this group! Sorry!</span>'
+    else:
+        totalobjects = 0
+        if updateType == 'objinfo':
+            print cswaConstants.infoHeaders(form.get('fieldset'))
+        else:
+            print cswaConstants.getHeader(updateType,institution)
+        for r in rows:
+            totalobjects += 1
+            print formatRow({'rowtype': updateType, 'data': r}, form, config)
+
+        print '\n</table><hr/><table width="100%"'
+        print """<tr><td align="center" colspan="3">"""
+        msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+        print "\n</table><hr/>"
+
+
 def doEnumerateObjects(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
@@ -651,6 +698,62 @@ def doCheckMove(form, config):
     print "\n</table><hr/>"
     print '<input type="hidden" name="toRefname" value="%s">' % toRefname
     print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
+
+
+def doCheckGroupMove(form, config):
+    updateactionlabel = config.get('info', 'updateactionlabel')
+    #updateType = config.get('info', 'updatetype')
+    institution = config.get('info', 'institution')
+
+    if form.get('gr.group') == '':
+        print '<h3>Please enter group identifier!</h3><hr>'
+        return
+
+    toLocation = verifyLocation(form.get("lo.location"), form, config)
+    toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+
+    if toLocation is None:
+        print '<h3>Please enter a valid storage location!</h3><hr>'
+        return
+
+    updateType = 'powermove'
+    institution = config.get('info','institution')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        objects = cswaDB.getgrouplist(form.get("gr.group"), 3000, config)
+    except:
+        raise
+
+    locations = []
+    if len(objects) == 0:
+        print '<span style="color:red;">No objects found for this group! Sorry!</span>'
+        return
+
+    totalobjects = 0
+
+    # sys.stderr.write('%-13s:: %s :: %-18s:: %s\n' % (updateType, crate, 'objects', len(objects)))
+    for r in objects:
+        # sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[3],  r[0]))
+        # swap these two elements: getgrouplist and getlocations return slightly different sets.
+        x = r[4]
+        r[4] = r[5]
+        r[5] = x
+        totalobjects += 1
+        locations.append(formatRow({'rowtype': 'powermove', 'data': r}, form, config))
+
+    print cswaConstants.getHeader('powermove', institution)
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print '\n'.join(locations)
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="3">"""
+    msg = "Caution: clicking on the button at left will move <b>ALL %s objects</b> shown for this group!" % totalobjects
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+
+    print "\n</table><hr/>"
+    print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+    print '<input type="hidden" name="toLocAndCrate" value="%s">' % (toLocation)
+    print '<input type="hidden" name="toCrate" value="%s">' % ''
 
 
 def doCheckPowerMove(form, config):
@@ -835,6 +938,95 @@ def doBulkEditForm(form, config, displaytype):
 
     print '</table>'
     print "<hr/>"
+
+
+def getints(var,form):
+    value = ''
+    try:
+        value = form.get(var)
+        value = int(value)
+        return value,''
+    except:
+        return 'x','invalid value for %s: %s' % (var.replace('create.',''),value)
+
+def doCreateObjects(form, config):
+        # print form
+        #if not validateParameters(form, config): return
+
+        updateType = config.get('info', 'updatetype')
+        updateactionlabel = config.get('info', 'updateactionlabel')
+        msgs = []
+
+        print '''<table width="100%" cellpadding="8px"><tbody><tr class="smallheader">
+          <td>Item</td><td>Value</td>'''
+
+        year, msg = getints('create.year', form)
+        if msg != '': msgs.append(msg)
+        accession, msg = getints('create.accession', form)
+        if msg != '': msgs.append(msg)
+        sequence, msg = getints('create.sequence', form)
+        if msg != '': msgs.append(msg)
+        count, msg = getints('create.count', form)
+        if msg != '': msgs.append(msg)
+
+        try:
+            startsortobject = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence)
+            startobject = '%s.%s.%s' % (year, accession, sequence)
+        except:
+            startobject = 'invalid'
+            msgs.append('start object value invalid')
+
+        try:
+            endsortobject = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence + count - 1)
+            endobject = '%s.%s.%s' % (year, accession, sequence + count - 1)
+        except:
+            endobject = 'invalid'
+            msgs.append('end object value invalid')
+
+        try:
+            objs = cswaDB.getlistofobjects('range', startsortobject, endsortobject, 100, config)
+            totalobjects = len(objs)
+            if totalobjects != 0:
+                msgs.append('there are already %s objects in this range!' % totalobjects)
+                msgs.append('(%s to %s)' % (startobject, endobject))
+                for o in objs:
+                    msgs.append(o[0])
+        except:
+            msgs.append('problem checking object range')
+            totalobjects = -1
+
+        if count > 100:
+            msgs.append('Maximum objects you can create at one time is 100.')
+            msgs.append('Consider breaking your work into chunks of 100.')
+
+        if len(msgs) == 0:
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('first object', startobject)
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('last object', endobject)
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('objects requested', count)
+
+            if form.get('action') == config.get('info', 'updateactionlabel'):
+                # create objects here
+                for seq in range(count):
+                    objectNumber = '%s.%s.%s' % (year, accession, sequence + seq)
+                    sortableobjectnumber = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence + seq)
+                    objectinfo = {'objectNumber': objectNumber}
+                    objectinfo['sortableObjectNumber'] = sortableobjectnumber
+                    message,csid = createObject(objectinfo, config, form)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (objectNumber, csid)
+                print "<tr><td>%s</td><td>%s</td></tr>" % ('created objects', count)
+            else:
+                # list objects to be created
+                msg = "Caution: clicking on the button at left will create <b> %s empty objects</b>!" % count
+                print """<tr><td align="center" colspan="3"><hr></tr>"""
+                print """<tr><td align="center" colspan="2">"""
+                print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td colspan="1">%s</td></tr>''' % msg
+
+        else:
+            for m in msgs:
+                print '<tr><td class="error">%s</td><td></td></tr>' % m
+
+        print '</table>'
+        print "<hr/>"
 
 
 def doSetupIntake(form, config):
@@ -1095,18 +1287,21 @@ def doNothing(form, config):
 def doUpdateLocations(form, config):
 
     institution = config.get('info','institution')
+    updateType = config.get('info', 'updatetype')
     #notlocated = config.get('info','notlocated')
     if institution == 'bampfa':
         notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x781)'Not Located'"
     else:
         notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
-    updateValues = [form.get(i) for i in form if 'r.' in i]
+    updateValues = [form.get(i) for i in form if 'r.' in i and not 'gr.' in i]
 
     # if reason is a refname (e.g. bampfa), extract just the displayname
     reason = form.get('reason')
     reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
 
     Now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Now = midnight local time for locations...
+    # Now = datetime.datetime.utcnow().strftime("%Y-%m-%dT00:00:00Z")
 
     print cswaConstants.getHeader('inventoryResult',institution)
 
@@ -1131,18 +1326,17 @@ def doUpdateLocations(form, config):
         # ugh...this logic is in fact rather complicated...
         msg = 'location updated.'
         # if we are moving a crate, use the value of the toLocation's refname, which is stored hidden on the form.
-        if config.get('info', 'updatetype') == 'movecrate':
+        if updateType == 'movecrate':
             updateItems['locationRefname'] = form.get('toRefname')
             msg = 'crate moved to %s.' % form.get('toLocAndCrate')
 
-        if config.get('info', 'updatetype') in ['moveobject', 'powermove']:
+        if updateType in ['moveobject', 'powermove', 'grpmove']:
             if updateItems['objectStatus'] == 'do not move':
                 msg = "not moved."
             else:
                 updateItems['locationRefname'] = form.get('toRefname')
                 updateItems['crate'] = form.get('toCrate')
                 msg = 'object moved to %s.' % form.get('toLocAndCrate')
-
 
 
         if updateItems['objectStatus'] == 'not found':
@@ -1156,7 +1350,7 @@ def doUpdateLocations(form, config):
                 updateLocations(updateItems, config, form)
                 numUpdated += 1
         except:
-            msg = '<span style="color:red;">problem updating</span>'
+            msg = '<span style="color:red;">location update failed!</span>'
         print ('<tr>' + (4 * '<td class="ncell">%s</td>') + '</tr>\n') % (
             updateItems['objectNumber'], updateItems['objectStatus'], updateItems['inventoryNote'], msg)\
 
@@ -1430,8 +1624,18 @@ def doBarCodes(form, config):
         print cswaConstants.getHeader(updateType,institution)
 
     totalobjects = 0
+    #If the group field has input, use that
+    if form.get("gr.group") != '':
+        sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        objs = cswaDB.getgrouplist(form.get("gr.group"), 5000, config)
+        if action == 'Create Labels for Objects':
+            totalobjects += len(objs)
+            o = [o[0:8] + [o[9]] for o in objs]
+            labelFilename = writeCommanderFile('objectrange', form.get("printer"), 'objectLabels', 'objects', o, config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
+                'objectrange', len(o), labelFilename)
     #If the museum number field has input, print by object
-    if form.get('ob.objno1') != '':
+    elif form.get('ob.objno1') != '':
         try:
             if form.get('ob.objno2'):
                 objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
@@ -2224,6 +2428,56 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     #print "<h3>Done w update!</h3>"
 
 
+def createObject(objectinfo, config, form):
+
+    message = ''
+
+    realm = config.get('connect', 'realm')
+    hostname = config.get('connect', 'hostname')
+    username, password = getCreds(form)
+    #sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
+
+    uri = 'collectionobjects'
+
+    # get the XML for this object
+    content = '''<document name="collectionobjects">
+<ns2:collectionobjects_common xmlns:ns2="http://collectionspace.org/services/collectionobject" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<objectNameList>
+<objectNameGroup>
+<objectName/>
+</objectNameGroup>
+</objectNameList>
+<objectNumber/>
+</ns2:collectionobjects_common>
+</document>'''
+
+    x = '''
+<ns2:collectionobjects_omca xmlns:ns2="http://collectionspace.org/services/collectionobject/local/omca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<sortableObjectNumber/>
+</ns2:collectionobjects_omca>
+'''
+
+    root = etree.fromstring(content)
+    for elementname in objectinfo:
+        if elementname in objectinfo:
+            element = root.find('.//' + elementname)
+            element.text = objectinfo[elementname]
+
+    uri = 'collectionobjects'
+    payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')
+    # update collectionobject..
+    sys.stderr.write("post new object %s to REST API..." % objectinfo['objectNumber'])
+    #sys.stderr.write(etree.tostring(root))
+    (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+    sys.stderr.write("created new object with csid %s to REST API..." % csid)
+    writeLog(objectinfo, uri, 'POST', username, config)
+    # message = 'succeeded'
+
+    return message, csid
+
+    #print "<h3>Done w update!</h3>"
+
+
 def updateLocations(updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
@@ -2973,6 +3227,40 @@ def starthtml(form, config):
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>
         '''
 
+    elif updateType == 'grpinfo':
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
+
+        otherfields = '''
+            <tr><th><span class="cell">group:</span></th>
+            <th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+        <th><th><span class="cell">set:</span></th><th>''' + fieldset + '''</th></tr>'''
+        otherfields += '''
+        <tr></tr>'''
+
+    elif updateType == 'createobjects':
+
+        year = str(form.get("create.year")) if form.get("create.year") else ''
+        accession = str(form.get("create.accession")) if form.get("create.accession") else ''
+        sequence = str(form.get("create.sequence")) if form.get("create.sequence") else ''
+        count = str(form.get("create.count")) if form.get("create.count") else ''
+
+        otherfields = '''
+            <tr><th><span class="cell">year:</span></th>
+            <th><input id="create.year" class="cell" type="text" size="40" name="create.year" value="''' + year + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">accession:</span></th>
+            <th><input id="create.accession" class="cell" type="text" size="40" name="create.accession" value="''' + accession + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">sequence:</span></th>
+            <th><input id="create.sequence" class="cell" type="text" size="40" name="create.sequence" value="''' + sequence + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">count:</span></th>
+            <th><input id="create.count" class="cell" type="text" size="40" name="create.count" value="''' + count + '''" class="xspan"></th></tr>'''
+
     elif updateType == 'movecrate':
         crate = str(form.get("lo.crate")) if form.get("lo.crate") else ''
         otherfields = '''
@@ -2989,6 +3277,23 @@ def starthtml(form, config):
         otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
+
+
+    elif updateType == 'grpmove':
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
+        location = str(form.get("lo.location")) if form.get("lo.location") else ''
+
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
+
+
+        otherfields = '''
+            <tr><th><span class="cell">group:</span></th>
+            <th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+            <th><span class="cell">to location:</span></th>
+            <th><input id="lo.location" class="cell" type="text" size="40" name="lo.location" value="''' + location + '''" class="xspan"></th></tr>
+            <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+            <th><span class="cell">contact:</span></th><th>''' + handlers + '''</th></tr>'''
 
 
     elif updateType == 'powermove':
@@ -3074,6 +3379,7 @@ def starthtml(form, config):
 
     elif updateType == 'barcodeprint':
         printers, selected, printerlist = cswaConstants.getPrinters(form)
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         otherfields += '''
@@ -3081,8 +3387,11 @@ def starthtml(form, config):
 <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
+<tr><th><span class="cell">group:</span></th>
+<th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+<th colspan="4"><i>NB: object number range supersedes location range, if entered;</i><br/></th>
 <tr><th><span class="cell">printer cluster:</span></th><th>''' + printers + '''</th>
-<th colspan="4"><i>NB: object number range supersedes location range, if entered.</i></th>
+<th colspan="4"><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group identifier supercedes both, if entered.</i></th>
 </tr>'''
 
     elif updateType == 'inventory':

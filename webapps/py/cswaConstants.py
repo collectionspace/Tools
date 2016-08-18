@@ -4,6 +4,8 @@
 import csv, sys, time, os, datetime
 import ConfigParser
 
+BASE_DIR = '/var/www'
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -126,7 +128,7 @@ def infoHeaders(fieldSet):
       <th>Object Type</th>
       <th>Collection Manager</th>
       <th>Field Collection Place</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif fieldSet == 'collection':
         return """
@@ -772,7 +774,7 @@ def getHeader(updateType, institution):
       <th>Field Collection Place</th>
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif updateType == 'packinglistbyculture':
         return """
@@ -782,7 +784,7 @@ def getHeader(updateType, institution):
       <th>Count</th>
       <th width="150px;">Location</th>
       <th>Field Collection Place</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif updateType == 'moveobject':
         return """
