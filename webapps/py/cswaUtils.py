@@ -1687,7 +1687,7 @@ def doBarCodes(form, config):
     print """<tr><td align="center" colspan="4"><hr/><td></tr>"""
     print """<tr><td align="center" colspan="4">"""
     if totalobjects != 0:
-        if form.get('ob.objno1'):
+        if form.get('ob.objno1') or form.get('gr.group'):
             print "<b>%s object barcode(s) printed." % totalobjects
         else:
             print "<b>%s object(s)</b> found in %s locations." % (totalobjects, rowcount)
