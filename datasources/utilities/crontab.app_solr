@@ -15,7 +15,8 @@
 ##################################################################################
 01 3 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
 21 3 * * * /home/app_solr/solrdatasources/bampfa/solrETL-public.sh           bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_public.log  2>&1
-41 3 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract4BAM.log  2>&1
+41 3 * * * /home/app_solr/solrdatasources/bampfa/bampfa_collectionitems_vw.sh bampfa    >> /home/app_solr/solrdatasources/bampfa/solr_extract_BAM.log  2>&1
+51 3 * * 6 /home/app_solr/solrdatasources/bampfa/piction_extract.sh          bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_Piction.log  2>&1
 #
 15 3 * * * /home/app_solr/solrdatasources/botgarden/solrETL-public.sh        botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_public.log  2>&1
 31 4 * * * /home/app_solr/solrdatasources/botgarden/solrETL-internal.sh      botgarden  >> /home/app_solr/solrdatasources/botgarden/solr_extract_internal.log  2>&1
