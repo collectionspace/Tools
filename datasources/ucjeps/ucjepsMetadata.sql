@@ -4,7 +4,7 @@ select
     case when (tig.taxon is not null and tig.taxon <> '')
                 then regexp_replace(regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
     end as determination_s,
-    ttg.termformatteddisplayname as termformatteddisplayname_s,
+    regexp_replace(ttg.termformatteddisplayname,E'[\\t\\n\\r]+', ' ', 'g') as termformatteddisplayname_s,
     regexp_replace(regexp_replace(tnh.family, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') as family_s,
     tnh.taxonbasionym as taxonbasionym_s,
     tu.taxonmajorgroup as majorgroup_s,
