@@ -7,6 +7,7 @@ import copy
 
 # for log
 import csv
+import json
 import codecs
 import ConfigParser
 import collections
@@ -19,6 +20,10 @@ import re
 
 from cswaConstants import BASE_DIR
 import cswaSMBclient
+
+from dirq.QueueSimple import QueueSimple
+DIRQ = QueueSimple('/tmp/cswa')
+WHEN2POST = 'queue'
 
 MAXLOCATIONS = 1000
 
@@ -2845,6 +2850,21 @@ def getxml(uri, realm, hostname, username, password, getItems):
 
 
 def postxml(requestType, uri, realm, hostname, username, password, payload):
+    if WHEN2POST == 'now':
+        return post2xml(requestType, uri, realm, hostname, username, password, payload)
+    else:
+        return post2queue(requestType, uri, realm, hostname, username, password, payload)
+
+
+def post2queue(requestType, uri, realm, hostname, username, password, payload):
+    # relations records have dependencies -- these are handled by the queue consumer
+    if uri != 'relations':
+        element = json.dumps((requestType, uri, realm, hostname, username, password, payload))
+        DIRQ.add(element)
+    return ('url', 'data', 'queued', 0.00)
+
+
+def post2xml(requestType, uri, realm, hostname, username, password, payload):
     port = ''
     protocol = 'https'
     server = protocol + "://" + hostname + port
