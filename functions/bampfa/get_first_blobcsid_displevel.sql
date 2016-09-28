@@ -37,8 +37,8 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
-GRANT EXECUTE ON FUNCTION utils.get_first_blobcsid (title VARCHAR) TO reader_bampfa;
-GRANT EXECUTE ON FUNCTION utils.get_first_blobcsid (title VARCHAR) TO GROUP reporters_bampfa;
+GRANT EXECUTE ON FUNCTION utils.get_first_blobcsid_displevel (title VARCHAR, returnvar VARCHAR) TO reader_bampfa;
+GRANT EXECUTE ON FUNCTION utils.get_first_blobcsid_displevel (title VARCHAR, returnvar VARCHAR) TO GROUP reporters_bampfa;
 
 /* test query in dev:
 select get_first_blobcsid_displevel('f7fe16a5-0ec8-4749-b32f-89d6e219991e', 'both');
