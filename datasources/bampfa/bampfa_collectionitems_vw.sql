@@ -5,8 +5,10 @@
 -- CRH 11/25/2014 Added artistDisplayOverride
 -- CRH 04/25/2015 Added several fields; see Jira BAMPFA-402
 -- CRH 7/30/2015 Added Acquisition Method BAMPFA-446
+-- LKV 9/28/2016 BAMPFA-507; Added call to new function utils.get_first_blobcsid_displevel to get
+--     first image blob csid (image1blobcsid) and website display level (image1displevel) for all images.
 
-create view utils.bampfa_collectionitems_vw as
+create or replace view utils.bampfa_collectionitems_vw as
 SELECT
    h1.name objectCSID,
    co.objectnumber idNumber,
@@ -65,7 +67,8 @@ SELECT
    utils.getdispl(ps4.item) periodstyle4,
    utils.getdispl(ps5.item) periodstyle5,
    utils.getdispl(cb.legalstatus) legalstatus,
-   utils.get_first_blobcsid(h1.name) image1blobcsid,
+   utils.get_first_blobcsid_displevel(h1.name, 'blobcsid') image1blobcsid,
+   utils.get_first_blobcsid_displevel(h1.name, 'displevel') image1displevel,
    utils.getdispl(cb.acquisitionmethod) acquisitionmethod
 from
    hierarchy h1
