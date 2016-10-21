@@ -58,6 +58,8 @@ def dbtransaction(form):
         srchindex = 'longplace2'
     elif srchindex in ['pc']:
         srchindex = 'person'
+    elif srchindex in ['or']:
+        srchindex = 'organization'
     else:
         srchindex = 'concept'
 
@@ -94,7 +96,13 @@ def dbtransaction(form):
             ORDER BY termdisplayname LIMIT 30
             """
         elif srchindex == 'group':
-            template = makeTemplate('grouptermgroup', 'termdisplayname', "like '%s%%'")
+            template = """SELECT title
+            FROM groups_common gc
+            JOIN misc ON misc.id=gc.id AND misc.lifecyclestate <> 'deleted'
+            WHERE title like '%s%%'
+            ORDER BY title LIMIT 30
+            """
+
         elif srchindex == 'place':
             template = makeTemplate('placetermgroup', 'termname', "ilike '%%%s%%' and termtype='descriptor'")
         elif srchindex == 'longplace':
@@ -107,6 +115,8 @@ def dbtransaction(form):
             template = makeTemplate('placetermgroup', 'termdisplayname', "like '%s%%'")
         elif srchindex == 'person':
             template = makeTemplate('persontermgroup', 'termdisplayname', "like '%s%%'")
+        elif srchindex == 'organization':
+            template = makeTemplate('orgtermgroup', 'termdisplayname', "like '%s%%'")
         elif srchindex == 'taxon':
             template = makeTemplate('taxontermgroup', 'termdisplayname', "like '%s%%'")
         else:

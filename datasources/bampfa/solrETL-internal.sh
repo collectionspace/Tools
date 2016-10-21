@@ -27,12 +27,12 @@ export NUMCOLS=38
 ##############################################################################
 # NB: unlike the other ETL processes, we're still using the default | delimiter here
 ##############################################################################
-time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata.sql -o d1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata_internal.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
 time perl -ne " \$x = \$_ ;s/[^\|]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > d4.csv
 time perl -ne " \$x = \$_ ;s/[^\|]//g; unless (length eq \$ENV{NUMCOLS}) { print \$x;}" d3.csv > errors.csv &
-time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media.sql -o m1.csv
+time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f media_internal.sql -o m1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv 
 time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f blobs.sql -o b1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' b1.csv > blobs.csv

@@ -1,3 +1,15 @@
+#
+# this script will deploy all reports in GitHub for a tenant.
+#
+# if must be run on the CSpace server in question
+#
+# NB: this only works for the UCB tenant, using the Tools repo.
+#     it could, of course be customized to be more general
+#
+if [ $# -ne 1 ]; then
+    echo "Usage: deployReports.sh tenant"
+    exit
+fi
 TENANT=$1
 cd ~
 rm -rf Tools

@@ -212,7 +212,8 @@
     <copyField source="objfcptree_s" dest="objfcptree_txt"/>
     <copyField source="currentlocation_s" dest="currentlocation_txt"/>
     <copyField source="computedcrate_s" dest="computedcrate_txt"/>
-    <copyField source="donor_s" dest="donor_txt"/>
+    <copyField source="donor_ss" dest="donor_txt"/>
+    <copyField source="anonymousdonor_ss" dest="anonymousdonor_txt"/>
     <copyField source="condition_s" dest="condition_txt"/>
     <copyField source="objaltnum_ss" dest="objaltnum_txt"/>
     <copyField source="objfilecode_ss" dest="objfilecode_txt"/>

@@ -4,7 +4,7 @@ SELECT DISTINCT
   STRING_AGG(DISTINCT
              CASE WHEN adg.donoranon = TRUE
                THEN '(anonymous)'
-             ELSE REGEXP_REPLACE(adg.donor, '^.*\)''(.*)''$', '\1') END, '␥') AS donor_ss,
+             ELSE REGEXP_REPLACE(adg.donor, '^.*\)''(.*)''$', '\1') END, '␥') AS anonymousdonor_ss,
   STRING_AGG(DISTINCT sad1.datedisplaydate, '␥')                              AS objaccdate_ss,
   STRING_AGG(DISTINCT sad2.datedisplaydate, '␥')                              AS objacqdate_ss
 FROM collectionobjects_common cc
