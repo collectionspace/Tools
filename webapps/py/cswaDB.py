@@ -991,15 +991,15 @@ def getCSID(argType, arg, config):
     if argType == 'objectnumber':
         query = """SELECT h.name from collectionobjects_common cc
 JOIN hierarchy h on h.id=cc.id
-WHERE objectnumber = '%s'""" % arg
+WHERE objectnumber = '%s'""" % arg.replace("'", "''")
     elif argType == 'crateName':
         query = """SELECT h.name FROM collectionobjects_anthropology ca
 JOIN hierarchy h on h.id=ca.id
-WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg.replace("'", "''")
     elif argType == 'placeName':
         query = """SELECT h.name from places_common pc
 JOIN hierarchy h on h.id=pc.id
-WHERE pc.refname ILIKE '%""" + arg + "%%'"
+WHERE pc.refname ILIKE '%""" + arg.replace("'", "''") + "%%'"
 
     objects.execute(query)
     return objects.fetchone()
@@ -1013,7 +1013,7 @@ def getCSIDs(argType, arg, config):
     if argType == 'crateName':
         query = """SELECT h.name FROM collectionobjects_anthropology ca
 JOIN hierarchy h on h.id=ca.id
-WHERE computedcrate ILIKE '%%''%s''%%'""" % arg
+WHERE computedcrate ILIKE '%%''%s''%%'""" % arg.replace("'", "''")
 
     objects.execute(query)
     # return objects.fetchall()
@@ -1140,7 +1140,7 @@ JOIN places_common pc ON (pc.refname = fcp.item)
 JOIN misc ms ON (ms.id = pc.id AND ms.lifecyclestate <> 'deleted')
 JOIN hierarchy h1 ON (h1.parentid = pc.id AND h1.name = 'places_anthropology:anthropologyPlaceOwnerGroupList')
 JOIN anthropologyplaceownergroup pog ON (pog.id = h1.id)
-WHERE pog.anthropologyplaceowner LIKE '%%""" + owner + """%%'
+WHERE pog.anthropologyplaceowner LIKE '%%""" + owner.replace("'", "''") + """%%'
 ORDER BY REGEXP_REPLACE(fcp.item, '^.*\)''(.*)''$', '\\1')"""
     objects.execute(query)
     # return objects.fetchall()
