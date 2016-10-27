@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION utils.get_object_image_count(objcsid VARCHAR)
-RETURNS VARCHAR
+RETURNS INTEGER
 AS
 $$
 
