@@ -20,6 +20,7 @@ SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5310 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
+CONTACT="andrewdoran@berkeley.edu"
 export NUMCOLS=57
 ##############################################################################
 # extract and massage the metadata from CSpace
@@ -95,7 +96,8 @@ curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<commit/
 time curl -S -s 'http://localhost:8983/solr/ucjeps-public/update/csv?commit=true&header=true&trim=true&separator=%09&f.comments_ss.split=true&f.comments_ss.separator=%7C&f.collector_ss.split=true&f.collector_ss.separator=%7C&f.previousdeterminations_ss.split=true&f.previousdeterminations_ss.separator=%7C&f.otherlocalities_ss.split=true&f.otherlocalities_ss.separator=%7C&f.associatedtaxa_ss.split=true&f.associatedtaxa_ss.separator=%7C&f.typeassertions_ss.split=true&f.typeassertions_ss.separator=%7C&f.alllocalities_ss.split=true&f.alllocalities_ss.separator=%7C&f.othernumber_ss.split=true&f.othernumber_ss.separator=%7C&f.blob_ss.split=true&f.blob_ss.separator=,&f.card_ss.split=true&f.card_ss.separator=,&encapsulator=\' --data-binary @4solr.ucjeps.public.csv -H 'Content-type:text/plain; charset=utf-8'
 # send the errors off to be dealt with
 tar -czf errors.tgz errors*.csv
-echo "`wc -l errors*.csv`" | mail -a errors.tgz -s "UCJEPS Solr refresh errors `date`" jblowe@berkeley.edu
+./make_error_report.sh | mail -a errors.tgz -s "UCJEPS Solr Refresh Errors `date`" ${CONTACT}
+./make_error_report.sh | mail -a errors.tgz -s "UCJEPS Solr Refresh Errors `date`" cspace-app-logs@lists.berkeley.edu
 # get rid of intermediate files
 rm d?.csv m?.csv metadata.csv media.csv
 # zip up .csvs, save a bit of space on backups

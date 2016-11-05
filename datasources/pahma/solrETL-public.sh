@@ -26,6 +26,7 @@ SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
+CONTACT="mtblack@berkeley.edu"
 FCPCOL=35
 export PUBLICCOLS=38
 # the internal dataset has 7 more columns than the public one
@@ -152,7 +153,8 @@ time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=t
 ##############################################################################
 # send the errors off to be dealt with
 tar -czf errors.tgz errors*.csv
-echo "`wc -l errors*.csv`" | mail -a errors.tgz -s "PAHMA Solr refresh errors `date`" jblowe@berkeley.edu
+./make_error_report.sh | mail -a errors.tgz -s "PAHMA Solr Refresh Errors `date`" ${CONTACT}
+./make_error_report.sh | mail -a errors.tgz -s "PAHMA Solr Refresh Errors `date`" cspace-app-logs@lists.berkeley.edu
 # get rid of intermediate files
 rm d?.csv d6?.csv m?.csv part*.csv temp.*.csv basic*.csv errors*.csv header4Solr.csv
 # zip up .csvs, save a bit of space on backups
