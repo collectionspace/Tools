@@ -26,10 +26,10 @@ perl -ne 's/\\/x/g; next if / rows/; print $_' newmedia.csv > 4solr.${TENANT}.me
 # clear out the existing data
 ##############################################################################
 curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ##############################################################################
 # load the csv file into Solr using the csv DIH
 ##############################################################################
-curl -S -s "http://localhost:8983/solr/${TENANT}-media/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 time curl -S -s "http://localhost:8983/solr/${TENANT}-media/update/csv?commit=true&header=true&trim=true&separator=%09&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.media.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm newmedia.csv
