@@ -36,7 +36,7 @@ def parse(out, inp, mark, museum):
 						  
 if __name__ == "__main__":
 	args = sys.argv
-	if (len(args) > 1 and rgs[1] == "help"):
+	if (len(args) > 1 and args[1] == "help"):
 		print ("To run the file, use the inputs: \n -m <museum_name> \n -i <input_file> \n -o <output_file> \n -d <domain_instance_vocab>")
 		sys.exit()
 	elif len(args) < 9:
