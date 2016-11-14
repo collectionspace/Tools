@@ -8,9 +8,10 @@
 #
 # currently runs under pseudo user app_solr on cspace-prod and cspace-dev
 #
-# 1. run the 11 solr4 updates
+# 1. run the 9 solr4 updates
 # 2. monitor solr datastore contents (email contents)
 # 3. export and mail BAMPFA view for Orlando
+# 4. export and mail Piction view for MCQ
 #
 ##################################################################################
 01 3 * * * /home/app_solr/solrdatasources/bampfa/solrETL-internal.sh         bampfa     >> /home/app_solr/solrdatasources/bampfa/solr_extract_internal.log  2>&1
@@ -33,3 +34,4 @@
 # monitor solr datastores
 ##################################################################################
 0  8 * * * /home/app_solr/checkstatus.sh | mail -s "solr refresh nightly status" -- cspace-app-logs@lists.berkeley.edu
+

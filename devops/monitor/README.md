@@ -29,8 +29,12 @@ the Apache logs, they assume that some other cron job will make those available 
 At the moment, I have 2 cron jobs running under my developer account that run nightly to
 make these files available in /tmp for user app_webapps.
 
+```bash
 01 07-20 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-error_log > /tmp/apache_errors.log
 30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep html | grep ${t} > /tmp/${t}.access.log ; done
+```
+
+(these may be found in the file in this directory called "crontab.special.user"
 
 To set up on a managed server (very schematic instructions follow!):
 
@@ -44,8 +48,10 @@ cp ~/Tools/devops/monitor/* .
 # set up cron jobs -- see examples above
 crontab -e
 
-Here are the monitoring cron jobs running as app_webapps on Prod
+Here are the monitoring cron jobs running as app_webapps on Prod. They may be found in
+crontab.app_webapps in this directory
 
+```bash
 ##################################################################################
 # monitor webapp use
 ##################################################################################
@@ -63,13 +69,14 @@ Here are the monitoring cron jobs running as app_webapps on Prod
 # monitor image caches
 ##################################################################################
 0 4 * * * cd ~ ; ./monitorImageCache.sh "/tmp/image_cache/"  > report.txt 2>&1 ; cat report.txt | mail -s "ucjeps cache status" -- jblowe@berkeley.edu
-
+```
 
 Now pretty much defunct, checkCache.py writes a single line with 5 values. It counts files, directories, and total size in bytes in the specified
 directory.  Useful for gathering a historical record on the the contents of a directory like a cache.
 
 It can also be run via cron using something like the following:
 
+```bash
 0 5 * * * cd ~ ; python checkCache.py /images/cache/ >> imagecache.log
 
 The results look like:
@@ -79,7 +86,5 @@ The results look like:
 2015-02-24 05:00:01 files 50088, dirs 36137, size 42848851839
 2015-02-25 05:00:01 files 50100, dirs 36142, size 42858752500
 2015-02-26 05:00:01 files 50206, dirs 36185, size 42894830120
-
-
-
+```
 

@@ -38,6 +38,7 @@
 1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t | mail -s "Prod image tempdir cleanup" cspace-app-logs@lists.berkeley.edu ; done
 ##################################################################################
 # run the tricoder upload job (with locks) weekdays 9am-6pm, 3 mins after the hour
+# clean up temp files that sometime get left behind.
 ##################################################################################
 3 9-18 * * 1-5 /home/app_webapps/batch_barcode/tricoderlock.sh
 ##################################################################################
@@ -64,7 +65,7 @@
 # refresh the denormalized hierarchies
 ##################################################################################
 01 1 * * * ~/hierarchies/refresh.sh pahma
-15 1 * * * cd ~/hierarchies ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
+15 1 * * * cd ~/hierarchies ; ./docounts.sh ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
 ##################################################################################
 # run the cinefiles month qc report
 ##################################################################################
