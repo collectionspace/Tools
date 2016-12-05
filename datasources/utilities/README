@@ -1,0 +1,38 @@
+This directory contains the components of the Solr4 system supporting
+the CSpace "Portals"
+
+The crontab for the app_solr pseudo-user is now one line:
+
+[app_solr@cspace-prod-01 ~]$ crontab -l
+01 3 * * * /home/app_solr/one_job.sh >> /home/app_solr/refresh.log
+
+The rationale for running all the solr refreshes (and some other processes) as a single script
+is that it minimizes the total elapsed time and eliminates any chance of the jobs overlapping.
+
+NB: as of Dec 2016, the 13 process take about 3.5 hours to run sequentially.
+
+tS.py is a short script to test the (local) installation of the Python solr
+client module and operation of the (local) solr server. To run:
+
+$ python tS.py pahma-public
+pahma-public, records found: 735314
+
+(NB: solr must be running on localhost:8983 and have a core with the specified name)
+
+
+Other contents of the app_solr working directory (which includes the content of this
+GitHub directory):
+
+archive - junk. anything that might be needed for debugging or other purposes.
+checkstatus.sh - a script to display the contents of the UCB solr4 portals
+                 and the status of the last refresh jobs.
+one_job.sh - script to run all solr refresh and other extract processes.
+optimize.log - output of optimize.sh (overwritten each time).
+optimize.sh - runs the "optimize" process on each solr core. Not strictly
+              necessary, but solr performs better.
+solrdatasources - the ETL code (i.e. nightly scripts) to refresh the Portals.
+solr4 - the UCB solr4 cores.
+Tools - optional clone of the Tools repo. Needed for updates.
+README - this file.
+refresh.log - cumulative log of refreshes.
+Tools - optional clone of the Tools repo. Needed for updates.
