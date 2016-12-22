@@ -38,7 +38,7 @@
 ##################################################################################
 # clean up the BMU temp directorys (erase images more than 48 hours old)
 ##################################################################################
-1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t | mail -s "Prod image tempdir cleanup" cspace-app-logs@lists.berkeley.edu ; done
+1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t >> ~/monitor/${t}.imagedircleanup.log ; done
 ##################################################################################
 # run the tricoder upload job (with locks) weekdays 9am-6pm, 3 mins after the hour
 # clean up temp files that sometime get left behind.
@@ -55,7 +55,8 @@
 ##################################################################################
 # monitor imageserver caches
 ##################################################################################
-0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- cspace-app-logs@lists.berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
+0 4 * * 1 cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- cspace-app-logs@lists.berkeley.edu ; done
+0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
 # run the UCJEPS jobs weekly
 ##################################################################################
