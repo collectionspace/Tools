@@ -1,6 +1,6 @@
 Several scripts useful for monitoring webapps, both Legacy and Django
 
-These scripts all run out of ~/monitor, and currently ~ is app_webapps
+These scripts all run out of ~/monitor, and currently ~ is app_webapps.
 
 The scripts:
 
@@ -24,7 +24,7 @@ There is one cron job that maintains a list of all the images ever uploaded usin
 just a bash one-liner and there is no code associated with this process
 
 Fuerthermore, since on the managed servers these scripts, running as user app_webapps, cannot access
-the Apache logs, they assume that some other cron job will make those available /tmp.
+the Apache logs, they assume that some other cron job will make an extract of those logs available /tmp.
 
 At the moment, I have 2 cron jobs running under my developer account that run nightly to
 make these files available in /tmp for user app_webapps.
@@ -38,6 +38,9 @@ make these files available in /tmp for user app_webapps.
 
 To set up on a managed server (very schematic instructions follow!):
 
+```bash
+# we should be in the homedir for user app_webapps
+cd
 # make a directory for monitoring code
 mkdir ~/monitor
 cd monitor
@@ -47,9 +50,10 @@ cp ~/Tools/devops/monitor/* .
 ./mkdir
 # set up cron jobs -- see examples above
 crontab -e
+```
 
 Here are the monitoring cron jobs running as app_webapps on Prod. They may be found in
-crontab.app_webapps in this directory
+crontab.app_webapps in this directory.
 
 ```bash
 ##################################################################################
