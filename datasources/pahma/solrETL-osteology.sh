@@ -36,8 +36,8 @@ sort o2.csv > o1.csv
 python join.py o1.csv 4solr.${TENANT}.internal.csv > o2.csv
 # csid_s is both files, let's keep only one in this file
 cut -f1,3- o2.csv > o1.csv
-grep csid o1.csv > header4Solr.csv
-grep -v csid o1.csv > o2.csv
+grep -P "^id\t" o1.csv > header4Solr.csv
+grep -v -P "^id\t" o1.csv > o2.csv
 cat header4Solr.csv o2.csv > o1.csv
 rm o2.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if     (length eq \$ENV{NUMCOLS}) { print \$x;}" o1.csv | perl -pe 's/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;' > 4solr.pahma.osteology.csv &

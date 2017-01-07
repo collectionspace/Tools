@@ -49,8 +49,8 @@ cut -f1-5,10-14 m3.sort.csv > m4.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid m4.csv > header4Solr.csv
-grep -v csid m4.csv > m5.csv
+grep -P "^id\t" m4.csv > header4Solr.csv
+grep -v -P "^id\t" m4.csv > m5.csv
 cat header4Solr.csv m5.csv > m4.csv
 rm m5.csv m3.sort.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if (length eq 8) { print \$x;}" m4.csv > 4solr.${TENANT}.locations.csv

@@ -126,13 +126,13 @@ time perl -i -pe 's/\r//g;s/\\/\//g;s/\t"/\t/g;s/"\t/\t/g;s/\"\"/"/g' d7.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-time grep csid d7.csv > header4Solr.csv &
-time grep -v csid d7.csv > d8.csv &
+time grep -P "^id\t" d7.csv > header4Solr.csv &
+time grep -v -P "^id\t" d7.csv > d8.csv &
 wait
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.public.csv
 #
-time grep csid d6b.csv > header4Solr.csv &
-time grep -v csid d6b.csv > d8.csv &
+time grep -P "^id\t" d6b.csv > header4Solr.csv &
+time grep -v -P "^id\t" d6b.csv > d8.csv &
 wait
 cat header4Solr.csv d8.csv | perl -pe 's/␥/|/g' > 4solr.$TENANT.internal.csv
 #
