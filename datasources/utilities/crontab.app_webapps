@@ -83,4 +83,5 @@
 # monitor webapp use
 ##################################################################################
 5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > ~/monitor/currappuse.csv ; cat ~/monitor/currappuse.csv ~/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 ~/monitor/webappuse.csv ; perl ~/monitor/monitorWebapps.pl ~/monitor/webappuse.csv > /var/www/static/webappuse.html
-5 04 * * * cd ~/monitor ; ./analyze.sh
+# analyze and summarize the django logs, keep a copy of an extract of the other vhost logs
+5 04 * * * cd ~/monitor ; ./analyze.sh ; ./keep.apache.logs.sh

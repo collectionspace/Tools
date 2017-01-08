@@ -6,4 +6,4 @@
 # pseudouser app_webapps can get access to them.
 01 07-20 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-error_log > /tmp/apache_errors.log
 40 00 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-access_log > /tmp/webapps.access.log
-30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep html | grep ${t} > /tmp/${t}.access.log ; done
+30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep -P '(cspace|collectionspace)' > /tmp/${t}.access.log ; done

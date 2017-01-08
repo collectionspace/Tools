@@ -31,7 +31,7 @@ make these files available in /tmp for user app_webapps.
 
 ```bash
 01 07-20 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-error_log > /tmp/apache_errors.log
-30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep html | grep ${t} > /tmp/${t}.access.log ; done
+30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep -P '(cspace|collectionspace)' > /tmp/${t}.access.log ; done
 ```
 
 (these may be found in the file in this directory called "crontab.special.user"
@@ -43,11 +43,11 @@ To set up on a managed server (very schematic instructions follow!):
 cd
 # make a directory for monitoring code
 mkdir ~/monitor
-cd monitor
+cd ~/monitor
 # copy the scripts (stored in the ucjeps directory at the moment)
 cp ~/Tools/devops/monitor/* .
 # make some directories for logs, etc.
-./mkdir
+./mkdirs.sh
 # set up cron jobs -- see examples above
 crontab -e
 ```
