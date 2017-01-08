@@ -69,10 +69,10 @@ python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv gbi
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep -P "^id\t" metadata+parsednames.csv | head -1 > header4Solr.csv
+grep -P "^1\tid\t" metadata+parsednames.csv | head -1 > header4Solr.csv
 perl -i -pe 's/^1\tid/id\tobjcsid_s/' header4Solr.csv
 perl -i -pe 's/$/\tblob_ss/' header4Solr.csv
-grep -v -P "^id\t" metadata+parsednames.csv > d7.csv
+grep -v -P "^1\tid\t" metadata+parsednames.csv > d7.csv
 python fixfruits.py d7.csv > d8.csv
 ##############################################################################
 # add the blob csids to the rest of the internal

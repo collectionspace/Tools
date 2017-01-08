@@ -97,7 +97,7 @@ time curl -S -s 'http://localhost:8983/solr/ucjeps-public/update/csv?commit=true
 # send the errors off to be dealt with
 tar -czf errors.tgz errors*.csv
 ./make_error_report.sh | mail -a errors.tgz -s "UCJEPS Solr Refresh Errors `date`" ${CONTACT}
-./make_error_report.sh | mail -a errors.tgz -s "UCJEPS Solr Refresh Errors `date`" cspace-app-logs@lists.berkeley.edu
+# ./make_error_report.sh | mail -a errors.tgz -s "UCJEPS Solr Refresh Errors `date`" cspace-app-logs@lists.berkeley.edu
 # get rid of intermediate files
 rm d?.csv m?.csv metadata.csv media.csv
 # zip up .csvs, save a bit of space on backups
