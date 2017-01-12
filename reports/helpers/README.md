@@ -32,14 +32,14 @@ you have the credentials for from one place.
 
 ## THE SCRIPTS
 
- set-config-default.sh  ::  basic environment var setting script
- load-report.sh report  "report name" "forDocType" "note":: create a report record in CSpace server
- delete-report.sh report-csid  ::  deletes report having specified csid (deletes config only!)
- list-reports.sh > reports.csv  :: lists the reports installed
- list-report-details.sh report-csid  :: xml payload showing details of installed report
- delete-all-reports.sh reports.csv :: deletes all the reports listed in reports.csv
- delete-report.sh report-csid  :: delete a single report record
- fetch-report.sh report-csid context-csid doctype :: fetches a report from the server
+* set-config-default.sh  ::  basic environment var setting script
+* load-report.sh report  "report name" "forDocType" "note":: create a report record in CSpace server
+* delete-report.sh report-csid  ::  deletes report having specified csid (deletes config only!)
+* list-reports.sh > reports.csv  :: lists the reports installed
+* list-report-details.sh report-csid  :: xml payload showing details of installed report
+* delete-all-reports.sh reports.csv :: deletes all the reports listed in reports.csv
+* delete-report.sh report-csid  :: delete a single report record
+* fetch-report.sh report-csid context-csid doctype :: fetches a results of a report from the server
 
 EXAMPLES
 
