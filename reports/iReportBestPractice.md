@@ -96,24 +96,21 @@ Note that this workflow presumes you use git from the command line. If you are u
 
 Example monologue: install a new report for PAHMA on Production; you can cut and paste these commands
 
-```
+```bash
 # assuming all the changes to .jrxml files are already committed to GitHub...
 $
 # ssh to Prod
 $ ssh cspace-prod.cspace.berkeley.edu
 # ... then we become the appropriate CSpace pseudo-user
 -sh-4.1$ sudo su - app_pahma
-# ... then update the repot. It does not (should not!) hurt to recopy all of them
-[app_pahma@cspace-prod-01 ~]$ cd ~/src/cspace-deployment/Tools ; git pull -v ; cd
-Fast-forward
- datasources/ucjeps/solrETL-public.sh |    2 +-
- reports/pahma/GroupWithImages.jrxml  |  257 ++++++++++++++++++++++++++++++++++
- 2 files changed, 258 insertions(+), 1 deletions(-)
- create mode 100644 reports/pahma/GroupWithImages.jrxml
-# ... then we invoke the deployment scripts
+# issue the magic command
 [app_pahma@cspace-prod-01 ~]$ csdeployreports
+Updating reports...
+[snip]
+Deploying reports...
+Reports for ucjeps deployed
 # go back to being ourselves again
--sh-4.1$ exit
+[app_pahma@cspace-prod-01 ~]$ exit
 # we're done here!
 -sh-4.1$ exit
 $
