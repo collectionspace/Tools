@@ -20,8 +20,8 @@ grep -v nationality artist.extract > artist.tmp
 cat artist.header artist.tmp > ${TENANT}_website_artists_extract.tab
 # BAMPFA-351 CRH
 grep objectcsid ${TENANT}_website_objects_extract.tab > objhdr.tsv
-awk -v oldest=`date --date="7 days ago" +%Y-%m-%d` -F'\t' '(NR>1) && ($28 > oldest)' ${TENANT}_website_objects_extract.tab > 7day.tsv
-awk -v oldest=`date --date="30 days ago" +%Y-%m-%d` -F'\t' '(NR>1) && ($28 > oldest)' ${TENANT}_website_objects_extract.tab > 30day.tsv
+awk -v oldest=`date --date="7 days ago" +%Y-%m-%d` -F'\t' '(NR>1) && ($29 > oldest)' ${TENANT}_website_objects_extract.tab > 7day.tsv
+awk -v oldest=`date --date="30 days ago" +%Y-%m-%d` -F'\t' '(NR>1) && ($29 > oldest)' ${TENANT}_website_objects_extract.tab > 30day.tsv
 cat objhdr.tsv 7day.tsv > ${TENANT}_website_objects_extract_7day.tab
 cat objhdr.tsv 30day.tsv > ${TENANT}_website_objects_extract_30day.tab 
 #
