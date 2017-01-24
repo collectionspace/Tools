@@ -78,7 +78,7 @@
 ##################################################################################
 # run the nightly bampfa extract for the drupal website
 ##################################################################################
-01 05 * * * cd ~/extracts/bampfa ; /home/app_webapps/extracts/bampfa/bampfa_website_extract.sh bampfa
+01 05 * * * cd ~/extracts/bampfa ; /home/app_webapps/extracts/bampfa/bampfa_website_extract.sh bampfa >> bampfa_website_extract.log 2>&1
 ##################################################################################
 # monitor webapp use
 ##################################################################################
