@@ -185,7 +185,7 @@ do
   #			<forDocType>Acquisition</forDocType>
   #		</forDocTypes>
   #		<supportsNoContext>true</supportsNoContext>
-  #		<forSingleDoc>true</forSingleDoc>
+  #		<supportsSingleDoc>true</supportsSingleDoc>
   #		<createsNewFocus>true</createsNewFocus>
   #		<className>org.collectionspace.services.batch.nuxeo.UpdateObjectLocationBatchJob</className>
   #	</ns2:batch_common>
@@ -218,7 +218,7 @@ do
       <forDocType>$BATCHXML_DOCTYPE</forDocType>
     </forDocTypes>
     <supportsNoContext>$BATCHXML_SUPPORTS_NO_CONTEXT</supportsNoContext>
-    <forSingleDoc>$BATCHXML_SUPPORTS_SINGLE_DOC</forSingleDoc>
+    <supportsSingleDoc>$BATCHXML_SUPPORTS_SINGLE_DOC</supportsSingleDoc>
     <createsNewFocus>$BATCHXML_CREATES_NEW_FOCUS</createsNewFocus>
 	<className>$BATCHXML_CLASSNAME</className>
   </ns2:batch_common>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ns2:invocationContext xmlns:ns2="http://collectionspace.org/services/common/invocable">
+	<mode>single</mode>
+	<docType>CollectionObject</docType>
+	<singleCSID>ee346048-1ab4-41d9-b3e2</singleCSID>
+	<groupCSID>groupCSID0</groupCSID>
+	<listCSIDs>
+		<csid>123</csid>
+		<csid>456</csid>
+	</listCSIDs>
+	<params> 
+		<param>
+			<key>cow</key>
+			<value>moo</value>
+		</param>
+		<param>
+			<key>bird</key>
+			<value>tweet</value>
+		</param>
+	</params>
+</ns2:invocationContext>
