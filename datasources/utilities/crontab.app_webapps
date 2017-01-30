@@ -43,7 +43,7 @@
 # run the tricoder upload job (with locks) weekdays 9am-6pm, 3 mins after the hour
 # clean up temp files that sometime get left behind.
 ##################################################################################
-3 9-18 * * 1-5 /home/app_webapps/batch_barcode/tricoderlock.sh
+3 9-18 * * 1-5 /home/app_webapps/batch_barcode/tricoderlock.sh > /dev/null 2>&1
 ##################################################################################
 # update BAMPFA's materialized view for Piction
 ##################################################################################
