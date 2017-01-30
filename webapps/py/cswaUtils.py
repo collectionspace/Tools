@@ -1954,7 +1954,7 @@ def writeLog(updateItems, uri, httpAction, username, config):
         csvlogfh = csv.writer(codecs.open(auditFile, 'a', 'utf-8'), delimiter="\t")
         logrec = [ httpAction, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), updateType, uri, username ]
         for item in updateItems.keys():
-            logrec.append("%s=%s" % (item,updateItems[item]))
+            logrec.append("%s=%s" % (item, updateItems[item].replace('\n','#')))
         csvlogfh.writerow(logrec)
     except:
         raise
@@ -1963,19 +1963,18 @@ def writeLog(updateItems, uri, httpAction, username, config):
 
 
 def writeInfo2log(request, form, config, elapsedtime):
-    checkServer = form.get('check')
     location1 = str(form.get("lo.location1"))
-    location2 = str(form.get("lo.location2"))
     action = str(form.get("action"))
     serverlabel = config.get('info', 'serverlabel')
     apptitle = config.get('info', 'apptitle')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info', 'institution')
     checkServer = form.get('check')
     # override updateType if we are just checking the server
     if checkServer == 'check server':
         updateType = checkServer
-    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel, location1, location2))
-    updateItems = {'app': apptitle, 'server': serverlabel, 'elapsedtime': '%8.2f' % elapsedtime, 'action': action}
+    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel))
+    updateItems = {'app': apptitle, 'server': serverlabel, 'institution': institution, 'elapsedtime': '%8.2f' % elapsedtime, 'action': action}
     writeLog(updateItems, '', request, '', config)
 
 def uploadFile(actualform, form, config):
