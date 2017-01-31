@@ -58,7 +58,7 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
     # perform_counts(counts, counts_after)
     
 # def perform_counts(counts_file, counts_output_name):
-the 
+
 #     # uses the counts_file and generates a file "counts_before/after.txt" 
 #     pass
 
