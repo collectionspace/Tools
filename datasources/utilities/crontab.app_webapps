@@ -64,7 +64,7 @@
 00 6 * * 5 /home/app_webapps/bin/cch_extract.sh
 00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
 00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
-30 8 * * * /home/app_webapps/bin/rsync2herbaria4.sh
+30 8 * * * /home/app_webapps/bin/rsync2herbaria4.sh > /dev/null 2>&1
 ##################################################################################
 # refresh the denormalized hierarchies
 ##################################################################################
