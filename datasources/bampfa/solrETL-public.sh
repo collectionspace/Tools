@@ -27,6 +27,8 @@ export NUMCOLS=38
 ##############################################################################
 # NB: unlike the other ETL processes, we're still using the default | delimiter here
 ##############################################################################
+# note this query included current location and current crate, which are
+# removed later. The values are needed, however, to calculate viewing status
 time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING"  -f metadata_public.sql -o d1.csv
 # some fix up required, alas: data from cspace is dirty: contain csv delimiters, newlines, etc. that's why we used @@ as temporary record separator
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' d1.csv > d3.csv 
@@ -51,7 +53,8 @@ wc -l *.csv
 # clear out the existing data
 curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl -S -s "http://localhost:8983/solr/${TENANT}-public/update" --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
-time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
+# note: we skip current location and current crate in loading Solr...
+time curl -S -s "http://localhost:8983/solr/${TENANT}-public/update/csv?commit=true&header=true&trim=true&separator=%7C&f.othernumbers_ss.split=true&f.othernumbers_ss.separator=;&f.blob_ss.split=true&f.blob_ss.separator=,&skip=currentlocation_s,currentcrate_s&encapsulator=\\" --data-binary @4solr.$TENANT.public.csv -H 'Content-type:text/plain; charset=utf-8'
 # get rid of intermediate files
 rm d?.csv m?.csv b?.csv media.csv metadata.csv
 # zip up .csvs, save a bit of space on backups

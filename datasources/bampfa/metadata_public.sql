@@ -46,6 +46,7 @@ select
    utils.getdispl(st3.item) SubjectThree,
    utils.getdispl(st4.item) SubjectFour,
    utils.getdispl(st5.item) SubjectFive,
+   -- these values are included here, but eliminated during the loading process
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate
 from
