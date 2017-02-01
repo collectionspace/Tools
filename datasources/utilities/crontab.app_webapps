@@ -51,11 +51,11 @@
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
-5 6 * * *  for t in bampfa botgarden cinefiles pahma ucjeps; do  cp -p /tmp/image_upload_cache_${t}/*.csv  /home/app_webapps/monitor/image_upload_cache_${t}/  ; cp -p /tmp/image_upload_cache_${t}/*.trace.log  /home/app_webapps/monitor/image_upload_cache_${t}/ ; done
+5 6 * * *  for t in bampfa botgarden cinefiles pahma ucjeps; do cp -p /tmp/image_upload_cache_${t}/*.csv /home/app_webapps/monitor/image_upload_cache_${t}/ > /dev/null 2>&1 ; cp -p /tmp/image_upload_cache_${t}/*.trace.log /home/app_webapps/monitor/image_upload_cache_${t}/ > /dev/null 2>&1 ; done
 ##################################################################################
 # monitor imageserver caches
 ##################################################################################
-0 4 * * 1 cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- cspace-app-logs@lists.berkeley.edu ; done
+0 4 * * 1 cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do ./monitorImageCache.sh ~/cache/$t > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- cspace-app-logs@lists.berkeley.edu ; done
 0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
 # run the UCJEPS jobs weekly
@@ -69,7 +69,7 @@
 # refresh the denormalized hierarchies
 ##################################################################################
 01 1 * * * ~/hierarchies/refresh.sh pahma
-15 1 * * * cd ~/hierarchies ; ./docounts.sh ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
+15 1 * * * cd ~/hierarchies ; ./docounts.sh > /dev/null 2>&1 ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
 ##################################################################################
 # run the cinefiles month qc report
 ##################################################################################
@@ -84,4 +84,4 @@
 ##################################################################################
 5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > ~/monitor/currappuse.csv ; cat ~/monitor/currappuse.csv ~/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 ~/monitor/webappuse.csv ; perl ~/monitor/monitorWebapps.pl ~/monitor/webappuse.csv > /var/www/static/webappuse.html
 # analyze and summarize the django logs, keep a copy of an extract of the other vhost logs
-5 04 * * * cd ~/monitor ; ./analyze.sh ; ./keep.apache.logs.sh
+5 04 * * * cd ~/monitor ; ./analyze.sh > /dev/null 2>&1 ; ./keep.apache.logs.sh > /dev/null 2>&1
