@@ -4,4 +4,4 @@ HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="nuxeo_${TENANT}"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE password=xxxx"
-time psql -U $USERNAME -d "$CONNECTSTRING" -f checkstatus.sql
+psql -U $USERNAME -d "$CONNECTSTRING" -f checkstatus.sql

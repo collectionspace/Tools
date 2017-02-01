@@ -68,13 +68,13 @@
 ##################################################################################
 # refresh the denormalized hierarchies
 ##################################################################################
-01 1 * * * ~/hierarchies/refresh.sh pahma
+01 1 * * * ~/hierarchies/refresh.sh pahma > /dev/null 2>&1
 15 1 * * * cd ~/hierarchies ; ./docounts.sh > /dev/null 2>&1 ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
 ##################################################################################
 # run the cinefiles month qc report
 ##################################################################################
-00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu
-10 03 1 * * /home/app_webapps/bin/qc/monthly.sh cspace-app-logs@lists.berkeley.edu
+00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu > /dev/null 2>&1
+10 03 1 * * /home/app_webapps/bin/qc/monthly.sh cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
 ##################################################################################
 # run the nightly bampfa extract for the drupal website
 ##################################################################################
