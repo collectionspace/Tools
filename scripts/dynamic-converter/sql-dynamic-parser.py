@@ -6,7 +6,7 @@ valid_tokens = ["-m", "-i", "-o", "-d"]
 museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
 
-def parse(inp, mark, museum, connect_string):
+def parse(inp, mark, museum, connect_string, dry_run):
     counts_sql = "count.sql"
     out = "%s.out.txt" % museum
     outfile = open(out, "w")
@@ -50,7 +50,7 @@ def parse(inp, mark, museum, connect_string):
     markup.close()
     counts.close()
     
-    execute(update_sqlstatements, count_sqlstatements, connect_string, museum)
+    execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
     
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
@@ -65,7 +65,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     return total_changes
 
 
-def execute(update_sqlstatements, count_sqlstatements, connect_string, museum):
+def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
@@ -89,7 +89,10 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum):
     
     # Second: Perform the changes
     for update_statement in update_sqlstatements:
-        dbcursor.execute(update_statement)
+        if not dry_run:
+	    dbcursor.execute(update_statement)
+	else:
+	    print(update_statement)
     
     counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     if (len(args) > 1 and args[1] == "help"):
         print ("To run the file, use the inputs: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes>")
     elif len(args) != 5:
-        print ("One or more inputs missing: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes> \nPlease fix or run with 'help' for more info.")
+        print ("One or more inputs missing: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes> <dry_run> \nPlease fix or run with 'help' for more info.")
     else:
         museum = args[1]
         if museum not in museums:
@@ -117,7 +120,11 @@ if __name__ == "__main__":
             infile = args[2]
             markup = args[3]
             connect_string = args[4]
-            parse(infile, markup, museum, connect_string)
+	    if (len(args) > 5):
+		dry_run = True		
+	    else:
+		dry_run = False
+            parse(infile, markup, museum, connect_string, dry_run)
 
 
 
