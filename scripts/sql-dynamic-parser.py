@@ -145,6 +145,5 @@ if __name__ == "__main__":
         parse(infile, markup, museum, pwd, port, user, dbname)
 
 
-y = Ae^((1 + sqrt(5))/2) + Be^((1 - sqrt(5))/ 2)
 
 
