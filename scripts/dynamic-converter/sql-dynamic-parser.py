@@ -8,9 +8,6 @@ museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
 def parse(inp, mark, museum, pwd, port, user, dbname):
     counts_sql = "count.sql"
-    counts_before = "%s.counts.before.txt" % museum
-    counts_after = "%s.counts.after.txt" % museum
-    counts_results = "%s.counts.results.txt" % museum
     out = "%s.out.txt" % museum
     outfile = open(out, "w")
     counts = open(counts_sql, "w")
@@ -54,7 +51,7 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
     counts.close()
     
     # perform_counts(counts, counts_before)
-    execute(update_sqlstatements, count_sqlstatements, pwd, port, user, dbname)
+    execute(update_sqlstatements, count_sqlstatements, pwd, port, user, dbname, museum)
     # perform_counts(counts, counts_after)
     
 # def perform_counts(counts_file, counts_output_name):
@@ -64,7 +61,7 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
 
 
 
-def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, database_name):
+def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, database_name, museum):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
@@ -76,9 +73,12 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
         counts the items to update, performs updates in the database, and confirms counts before and after are the same
     """
     
-    dbconn = ps2.connect(dbname=database_name, user=usr, password=dbpassword, host="localhost", port=dbport)
-    dbcursor = dbconn.cursor()
-    
+    # dbconn = ps2.connect(dbname=database_name, user=usr, password=dbpassword, host="localhost", port=dbport)
+    # dbcursor = dbconn.cursor()
+    counts_before = "%s.counts.before.txt" % museum
+    counts_after = "%s.counts.after.txt" % museum
+    counts_results = "%s.counts.results.txt" % museum
+
     # First: Do the counts before any changes
     counts_before_file = open(counts_before, "w")
     total_to_change = 0 
