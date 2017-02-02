@@ -1,6 +1,8 @@
 ##################################################################################
 #
-# CRON TABLE (crontab) for CSpace webapps (BMU, tricoder, CCH, QC, etc.)
+# CRON TABLE (crontab) for CSpace Tricoder and BMU-related jobs
+# Also: Piction interfact maintenance, UCJEPS CCH, Cinefiles QC
+# BAMPFA Drupal extract push, and other monitoring tasks
 #
 ##################################################################################
 #
@@ -9,14 +11,17 @@
 ##################################################################################
 # BMU monitoring / report (i.e. send nightly emails)
 ##################################################################################
-10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
 10   5 * * * perl /home/app_webapps/pahma/uploadmedia/checkRuns.pl  jobs /tmp/image_upload_cache_pahma  | expand -12 | mail -s "recent PAHMA BMU jobs" pahma-cspace-bmu@lists.berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+# NB: BAM no longer uses the BMU: derivatives from Piction are pushed to CSpace
+#10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
 #10  5 * * * perl /home/app_webapps/bampfa/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_bampfa | expand -12 | mail -s "recent BAMPFA BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
-10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
 10   5 * * * perl /home/app_webapps/ucjeps/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_ucjeps | expand -12 | mail -s "recent UCJEPS BMU jobs" herb_cspace_reports@lists.berkeley.edu > /dev/null 2>&1
-#10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" jblowe@berkeley.edu > /dev/null 2>&1
-#10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
+10  5 * * * perl /home/app_webapps/cinefiles/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_cinefiles | expand -12 | mail -s "recent Cinefiles BMU jobs" bampfacspaceuploader@lists.berkeley.edu > /dev/null 2>&1
+10   5 * * * perl /home/app_webapps/botgarden/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_botgarden | expand -12 | mail -s "recent UCBG BMU jobs" cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
+# 10  5 * * * perl /home/app_webapps/botgarden/uploadmedia/checkRuns.pl jobs /tmp/image_upload_cache_botgarden | expand -12 | mail -s "recent UCBG BMU jobs" tadditon@lists.berkeley.edu > /dev/null 2>&1
 ##################################################################################
 # run BMU batch jobs (nightly or twice a day depending)
 ##################################################################################
@@ -33,23 +38,25 @@
 ##################################################################################
 # clean up the BMU temp directorys (erase images more than 48 hours old)
 ##################################################################################
-1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t | mail -s "Prod image tempdir cleanup" jblowe@berkeley.edu ; done
+1 5 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do ~/bin/cleanBMUtempdir.sh $t >> ~/monitor/${t}.imagedircleanup.log ; done
 ##################################################################################
-# run the tricoder upload job weekdays 9am-6pm, 10 mins after the hour
+# run the tricoder upload job (with locks) weekdays 9am-6pm, 3 mins after the hour
+# clean up temp files that sometime get left behind.
 ##################################################################################
-#10 9-18 * * 1-5 /home/app_webapps/batch_barcode/import_barcode_typeR.sh &> /home/app_webapps/batch_barcode/log/all_barcode_typeR.msg
+3 9-18 * * 1-5 /home/app_webapps/batch_barcode/tricoderlock.sh > /dev/null 2>&1
 ##################################################################################
 # update BAMPFA's materialized view for Piction
 ##################################################################################
-15 12,20 * * * psql -d "host=dba-postgres-prod-32.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" | mail -s "Piction mv updated on Prod" -c "lkv@berkeley.edu" chris.hoffman@berkeley.edu
+0 18 * * * psql -d "host=dba-postgres-prod-42.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" 2>&1 | mail -s "Piction mv update status on Prod" cspace-app-logs@lists.berkeley.edu
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
-5 6 * * *  for t in bampfa botgarden cinefiles pahma ucjeps; do  cp -p /tmp/image_upload_cache_${t}/*.csv  /home/app_webapps/monitor/image_upload_cache_${t}/  ; cp -p /tmp/image_upload_cache_${t}/*.trace.log  /home/app_webapps/monitor/image_upload_cache_${t}/ ; done
+5 6 * * *  for t in bampfa botgarden cinefiles pahma ucjeps; do cp -p /tmp/image_upload_cache_${t}/*.csv /home/app_webapps/monitor/image_upload_cache_${t}/ > /dev/null 2>&1 ; cp -p /tmp/image_upload_cache_${t}/*.trace.log /home/app_webapps/monitor/image_upload_cache_${t}/ > /dev/null 2>&1 ; done
 ##################################################################################
 # monitor imageserver caches
 ##################################################################################
-0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do  ./monitorImageCache.sh ~/cache/$t  > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- jblowe@berkeley.edu ; python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
+0 4 * * 1 cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do ./monitorImageCache.sh ~/cache/$t > report.txt 2>&1 ; cat report.txt | mail -s "image cache status" -- cspace-app-logs@lists.berkeley.edu ; done
+0 4 * * * cd /home/app_webapps/monitor ; for t in bampfa botgarden cinefiles pahma ucjeps; do python checkCache.py ~/cache/$t >> $t.imagecache.log ; done
 ##################################################################################
 # run the UCJEPS jobs weekly
 ##################################################################################
@@ -57,13 +64,24 @@
 00 6 * * 5 /home/app_webapps/bin/cch_extract.sh
 00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon
 00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified
-30 8 * * 5 /home/app_webapps/bin/rsync2herbaria4.sh
+30 8 * * * /home/app_webapps/bin/rsync2herbaria4.sh > /dev/null 2>&1
 ##################################################################################
 # refresh the denormalized hierarchies
 ##################################################################################
-01 1 * * * ~/hierarchies/refresh.sh pahma
-15 1 * * * cd ~/hierarchies ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
+01 1 * * * ~/hierarchies/refresh.sh pahma > /dev/null 2>&1
+15 1 * * * cd ~/hierarchies ; ./docounts.sh > /dev/null 2>&1 ; ./checkstatus.sh pahma | mail -s "hierarchies refresh" mtblack@berkeley.edu
 ##################################################################################
 # run the cinefiles month qc report
 ##################################################################################
-00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu
+00 03 1 * * /home/app_webapps/bin/qc/monthly.sh cinefiles_reports@lists.berkeley.edu > /dev/null 2>&1
+10 03 1 * * /home/app_webapps/bin/qc/monthly.sh cspace-app-logs@lists.berkeley.edu > /dev/null 2>&1
+##################################################################################
+# run the nightly bampfa extract for the drupal website
+##################################################################################
+01 05 * * * cd ~/extracts/bampfa ; /home/app_webapps/extracts/bampfa/bampfa_website_extract.sh bampfa >> bampfa_website_extract.log 2>&1
+##################################################################################
+# monitor webapp use
+##################################################################################
+5 07-20 * * * cat /tmp/apache_errors.log | grep '::' | grep ' end ' | perl -pe 's/^.*?\[... (.*?)\].*client (.*?)\]/\1\t\2\t/;s/ *:: */\t/g;s/, refer.*webapp=/\t/;' > ~/monitor/currappuse.csv ; cat ~/monitor/currappuse.csv ~/monitor/webappuse.csv | sort -u > /tmp/tmp2 ; mv /tmp/tmp2 ~/monitor/webappuse.csv ; perl ~/monitor/monitorWebapps.pl ~/monitor/webappuse.csv > /var/www/static/webappuse.html
+# analyze and summarize the django logs, keep a copy of an extract of the other vhost logs
+5 04 * * * cd ~/monitor ; ./analyze.sh > /dev/null 2>&1 ; ./keep.apache.logs.sh > /dev/null 2>&1

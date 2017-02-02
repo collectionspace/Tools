@@ -7,9 +7,11 @@ open MEDIA,$ARGV[0] || die "couldn't open media file $ARGV[0]";
 my %blobs ;
 my %seen;
 my $restricted = '59a733dd-d641-4e1a-8552';
-my $ispublic = 'public';
-my $imagetype = 'image';
 my $runtype = $ARGV[2]; # generate media for public or internal
+
+my $fcpcol = 35;
+my $contextofusecol = 13;
+my $objectnamecol = 8;
 
 while (<MEDIA>) {
   $count{'media'}++;
@@ -17,23 +19,27 @@ while (<MEDIA>) {
   my ($objectcsid,$objectnumber,$mediacsid,$description,$name,$creatorrefname,$creator,$blobcsid,$copyrightstatement,$identificationnumber,$rightsholderrefname,$rightsholder,$contributor,$approvedforweb,$pahmatmslegacydepartment,$objectstatus,$primarydisplay) = split /$delim/;
   #print "$blobcsid $objectcsid\n";
   # skip this blob if we've already seen it
-  #next if $seen{$mediacsid}++;
-  $imagetype = 'image';
+  next if $seen{$blobcsid}++;
+  my $imagetype = 'images';
   # mark catalog card images as such
-  $imagetype = 'card' if $description =~ /(catalog card|HSR Datasheet)/i;
-  $imagetype = 'card' if $description =~ /^Index/i ;
-  $ispublic = 'public';
+  $imagetype = 'cards' if $description =~ /(catalog card|HSR Datasheet)/i;
+  $imagetype = 'cards' if $description =~ /^Index/i ;
+  my $ispublic = 'public';
   # we don't need to match a pattern here, it's a vocabulary. But just in case...
   $ispublic = 'notpublic' if ($pahmatmslegacydepartment =~ /Human Remains/i) ;
   $ispublic = 'notpublic' if ($pahmatmslegacydepartment =~ /NAGPRA-associated Funerary Objects/i) ;
   $ispublic = 'notpublic' if ($objectstatus =~ /culturally/i) ;
   # NB: the test 'burial' in context of use occurs below -- we only mask if the FCP is in North America
-  $ispublic = 'notapprovedforweb' if ($approvedforweb eq 'f') ;
+  $ispublic = 'notpublic' unless ($approvedforweb eq 't') ;
+  #$ispublic = 'notapprovedforweb' unless ($approvedforweb eq 't') ;
+  $ispublic = 'public' if ($imagetype eq 'cards') ;
   # warn $ispublic . $imagetype;
   $count{$imagetype}++;
   $count{$ispublic}++;
-  if ($imagetype eq 'card') {
-    $blobs{$objectcsid}{'card'} .= $blobcsid   . ',' ;
+  # start by assuming no images for this object
+  #$blobs{$objectcsid}{'hasimages'} = 'no';
+  if ($imagetype eq 'cards') {
+    $blobs{$objectcsid}{'cards'} .= $blobcsid   . ',' ;
   }
   else {
     $blobs{$objectcsid}{'hasimages'} = 'yes';
@@ -44,46 +50,54 @@ while (<MEDIA>) {
     if ($primarydisplay eq 't') {
       $blobs{$objectcsid}{'primary'} = $blobcsid;
     }
-    else {
+    do {
       # add this blob to the list of blobs, unless we somehow already have it (no dups allowed!)
-      $blobs{$objectcsid}{'image'} .= $blobcsid . ',' unless $blobs{$objectcsid}{'image'} =~ /$blobcsid/;
+      $blobs{$objectcsid}{'images'} .= $blobcsid . ',' unless $blobs{$objectcsid}{'images'} =~ /$blobcsid/;
     }
   }
   $blobs{$objectcsid}{'type'} .= $imagetype  . ',' unless $blobs{$objectcsid}{'type'} =~ /$imagetype/;
-  $blobs{$objectcsid}{'type'} .= $ispublic   . ',' unless $blobs{$objectcsid}{'type'} =~ /$ispublic/;
+  $blobs{$objectcsid}{'restrictions'} .= $ispublic   . ',' unless $blobs{$objectcsid}{'restrictions'} =~ /$ispublic/;
 }
 
 open METADATA,$ARGV[1] || die "couldn't open metadata file $ARGV[1]";
 while (<METADATA>) {
   chomp;
-  my ($id, $objectid, @rest) = split /$delim/;
+  my ($id, $objectcsid, @rest) = split /$delim/;
   # handle header line
   if ($id eq 'id') {
-    print $_ . $delim . join($delim,qw(blob_ss card_ss primaryimage_s imagetype_ss hasimages_s)) . "\n";
+    print $_ . $delim . join($delim,qw(blob_ss card_ss primaryimage_s imagetype_ss restrictions_ss hasimages_s)) . "\n";
     next;
   }
   $count{'metadata'}++;
   my $mediablobs;
-  my $foundobject = $blobs{$objectid};
-  if ($foundobject) {
-    # if context of use field contains the word burial
-    $blobs{$objectcsid}{'image'} = $restricted if (@rest[12] =~ /burial/i && @rest[33] =~ /United States/i);
-    # if object name contains something like "charm stone"
-    $blobs{$objectcsid}{'image'} = $restricted if ($name =~ /charm.*stone/i && @rest[33] =~ /United States/i);
-
-    # insert list of blobs, etc. as final columns
-    $blobs{$objectid}{'type'} =~ s/,$//;
-    $blobs{$objectid}{'type'} = join(',', sort(split(',', $blobs{$objectid}{'type'})));
-    $blobs{$objectid}{'hasimages'} = 'no' unless $blobs{$objectid}{'hasimages'} eq 'yes';;
-    for my $column (qw(image card primary type hasimages)) {
-      $mediablobs .= $delim . $blobs{$objectid}{$column};
+  if ($blobs{$objectcsid}{'type'}) {
+    if ($runtype eq 'public') {
+      # if context of use field contains the word burial
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[$contextofusecol] =~ /burial/i
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
+      # if object name contains something like "charm stone"
+      $blobs{$objectcsid}{'images'} = $restricted if (@rest[$objectnamecol] =~ /charm.*stone/i
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
+      # belt-and-suspenders: restrict if charm stone or NAGPRA appear anywhere in USA records...
+      $blobs{$objectcsid}{'images'} = $restricted if ($_ =~ /(charm.*stone|NAGPRA-associated Funerary Objects)/i
+      && @rest[$fcpcol] =~ /United States/i && $blobs{$objectcsid}{'images'});
     }
-    $count{'object: ' . $blobs{$objectid}{'type'}}++;
-    $count{'matched'}++;
+    # insert list of blobs, etc. as final columns
+    $blobs{$objectcsid}{'restrictions'} =~ s/,$//;
+    $blobs{$objectcsid}{'type'} =~ s/,$//;
+    $blobs{$objectcsid}{'type'} = join(',', sort(split(',', $blobs{$objectcsid}{'type'})));
+    $blobs{$objectcsid}{'hasimages'} = 'no' unless $blobs{$objectcsid}{'hasimages'} eq 'yes';
+    $count{'hasimages: ' . $blobs{$objectcsid}{'hasimages'}}++;
+    for my $column (qw(images cards primary type restrictions hasimages)) {
+      $mediablobs .= $delim . $blobs{$objectcsid}{$column};
+    }
+    $count{'object type: ' . $blobs{$objectcsid}{'type'}}++;
+    $count{'object restrictions: ' . $blobs{$objectcsid}{'restrictions'}}++;
+    $count{'matched: yes'}++;
   }
   else {
-    $count{'unmatched'}++;
-    $mediablobs = $delim x 5;
+    $count{'matched: no'}++;
+    $mediablobs = $delim x 6;
   }
   $mediablobs =~ s/,$delim/$delim/g; # get rid of trailing commas
   print $_ . $mediablobs . "\n";

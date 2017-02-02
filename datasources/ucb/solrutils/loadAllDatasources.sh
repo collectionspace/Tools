@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env bash
 #
 # These are the cURL commands to reload all the UCB solr datasources
 # (these clean out the cores and reload them)

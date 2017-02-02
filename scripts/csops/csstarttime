@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Print the time the CollectionSpace tomcat service was started.
+
+PID=`cspid`
+
+if [ -n "$PID" ]; then
+	START_TIME=`ps -o lstart= -p $PID`
+	date -d "$START_TIME" "$@"
+fi

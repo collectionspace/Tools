@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Clean up log files
+
+# Rotate catalina.out
+
+LOG_DIR=~/log
+LOGROTATE_CONFIG_FILE=$LOG_DIR/logrotate.conf
+LOGROTATE_STATE_FILE=$LOG_DIR/logrotate.status
+
+TOMCAT_DIR=~/`~/bin/csservname`
+TOMCAT_LOG_DIR=$TOMCAT_DIR/logs
+
+cat <<CONFIG > $LOGROTATE_CONFIG_FILE
+$TOMCAT_LOG_DIR/catalina.out {
+	copytruncate
+	size 5M
+	rotate 10
+	missingok
+}
+CONFIG
+
+/usr/sbin/logrotate -s $LOGROTATE_STATE_FILE $LOGROTATE_CONFIG_FILE
+
+# Delete catalina.*, host-manager.*, localhost.*, and manager.* logs from the month before last
+
+cd $TOMCAT_LOG_DIR
+YEAR_MONTH=`date -d '-2 months' +%Y-%m`
+
+rm catalina.$YEAR_MONTH-*.log
+rm host-manager.$YEAR_MONTH-*.log
+rm localhost.$YEAR_MONTH-*.log
+rm manager.$YEAR_MONTH-*.log
+
+# Archive access logs from the month before last
+
+ACCESS_LOG_FILEGLOB=localhost_access_log.$YEAR_MONTH-*.txt
+ARCHIVE_FILE=localhost_access_log.$YEAR_MONTH.tar.gz
+
+if [ `ls -1 $ACCESS_LOG_FILEGLOB | wc -l` -gt 0 ]; then
+	if tar -czf $ARCHIVE_FILE $ACCESS_LOG_FILEGLOB ; then
+		chmod 444 $ARCHIVE_FILE
+		rm $ACCESS_LOG_FILEGLOB
+	fi
+fi
+
+# TODO: Transfer tarballed access logs to Box.

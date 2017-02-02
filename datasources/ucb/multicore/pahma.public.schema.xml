@@ -210,6 +210,7 @@
     <copyField source="objfcp_s" dest="objfcp_txt"/>
     <copyField source="objfcpelevation_s" dest="objfcpelevation_txt"/>
     <copyField source="objfcptree_s" dest="objfcptree_txt"/>
+    <copyField source="anonymousdonor_ss" dest="anonymousdonor_txt"/>
     <copyField source="condition_s" dest="condition_txt"/>
     <copyField source="objaltnum_ss" dest="objaltnum_txt"/>
     <copyField source="objfilecode_ss" dest="objfilecode_txt"/>

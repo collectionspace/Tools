@@ -94,7 +94,7 @@ left outer join hierarchy hlg
 	and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
-and lg.fieldlocstate = 'CA'
+and (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC');
 
 \copy (select * from tmp_cch_accessions order by AccessionNumber) to '$CCH_DIR/cch_accessions.txt' with null as ''
@@ -127,7 +127,7 @@ left outer join hierarchy hlg
 	and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
 left outer join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
-and lg.fieldlocstate = 'CA'
+and (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1') != 'no name';
 
@@ -153,7 +153,7 @@ inner join hierarchy hlg
 	and hlg.name = 'collectionobjects_naturalhistory:localityGroupList')
 inner join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
-and lg.fieldlocstate = 'CA'
+and (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and tsg.typespecimenkind is not null;
 
@@ -178,7 +178,7 @@ inner join hierarchy hlg
 	and hlg.pos = 0)
 inner join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
-and lg.fieldlocstate = 'CA'
+and (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and (ag.annotationtype is not null or ag.annotationnote is not null)
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 union
@@ -199,7 +199,7 @@ inner join hierarchy hlg
 	and hlg.pos = 0)
 inner join localitygroup lg on (lg.id = hlg.id)
 where misc.lifecyclestate <> 'deleted'
-and lg.fieldlocstate = 'CA'
+and (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and o.numbervalue is not null
 and o.numbervalue != ''
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC');
@@ -220,7 +220,7 @@ inner join hierarchy hlg
 	and hlg.pos = 0)
 inner join localitygroup lg on lg.id = hlg.id
 inner join collectionobjects_common_comments cc on cc.id = co.id
-where lg.fieldlocstate = 'CA'
+where (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and item <> '' and item is not null
 union
@@ -237,7 +237,7 @@ inner join hierarchy hlg
 	and hlg.pos = 0)
 inner join localitygroup lg on lg.id = hlg.id
 inner join collectionobjects_common_briefdescriptions cb on cb.id = co.id
-where lg.fieldlocstate = 'CA'
+where (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and item <> '' and item is not null
 union
@@ -253,7 +253,7 @@ inner join hierarchy hlg
 	and hlg.name = 'collectionobjects_naturalhistory:localityGroupList'
 	and hlg.pos = 0)
 inner join localitygroup lg on lg.id = hlg.id
-where lg.fieldlocstate = 'CA'
+where (lg.fieldlocstate = 'CA' or lg.fieldlocstate = 'Baja California')
 and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'GOD', 'UCSB', 'UCSC')
 and fieldcollectionnote <> ''
 and fieldcollectionnote is not null;

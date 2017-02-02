@@ -7,6 +7,7 @@ import copy
 
 # for log
 import csv
+import json
 import codecs
 import ConfigParser
 import collections
@@ -16,6 +17,13 @@ import httplib, urllib2
 import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re
+
+from cswaConstants import BASE_DIR
+import cswaSMBclient
+
+from dirq.QueueSimple import QueueSimple
+DIRQ = QueueSimple('/tmp/cswa')
+WHEN2POST = 'queue'
 
 MAXLOCATIONS = 1000
 
@@ -59,7 +67,10 @@ def cgiFieldStorageToDict(fieldStorage):
     params = {}
     for key in fieldStorage.keys():
         #sys.stderr.write('%-13s:: %s' % ('key:',key))
-        params[key] = fieldStorage[key].value
+        try:
+            params[key] = fieldStorage[key].value
+        except:
+            sys.stderr.write('%-13s:: %s\n' % ('problem key:',str(key)))
     return params
 
 
@@ -67,7 +78,7 @@ def getConfig(form):
     try:
         fileName = form.get('webapp') + '.cfg'
         config = ConfigParser.RawConfigParser()
-        config.read(os.path.join('../cfgs',fileName))
+        config.read(os.path.join(BASE_DIR, 'cfgs', fileName))
         # test to see if it seems like it is really a config file
         updateType = config.get('info', 'updatetype')
         return config
@@ -431,13 +442,15 @@ def listSearchResults(authority, config, displaytype, form, rows):
         if displaytype == 'select': rowtype = 'select'
         duplicates = []
         for r in rows:
+	    #print "<b>r = </b>",r
             if r[1] in duplicates:
                 hasDups = True
-                r.append('')
+                #r.append('')
                 # r.append('Duplicate!')
             else:
-                r.append('')
-                duplicates.append(r[1])
+                #r.append('')
+                #duplicates.append(r[1])
+                pass
             print formatRow({'boxtype': authority, 'rowtype': rowtype, 'data': r}, form, config)
 
     elif displaytype == 'nolist':
@@ -485,6 +498,49 @@ def getTableFooter(config, displaytype, msg):
             print "<td></td>"
         print "</tr>"
     print "</table><hr/>"
+
+
+def doGroupSearch(form, config, displaytype):
+    if not validateParameters(form, config): return
+    updateType = config.get('info', 'updatetype')
+
+    if form.get('gr.group') == '':
+        print '<h3>Please enter group identifier!</h3><hr>'
+        return
+
+    if updateType == "barcodeprint":
+        updateType = 'packinglist'
+    else:
+        updateType = 'objinfo'
+    institution = config.get('info','institution')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        #sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        rows = cswaDB.getgrouplist(form.get("gr.group"), 3000, config)
+        #sys.stderr.write('group result: %s\n' % len(rows))
+    except:
+        #sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        raise
+    #[sys.stderr.write('group member : %s\n' % x[2]) for x in rows]
+
+    if len(rows) == 0:
+        print '<span style="color:red;">No objects in this group! Sorry!</span>'
+    else:
+        totalobjects = 0
+        if updateType == 'objinfo':
+            print cswaConstants.infoHeaders(form.get('fieldset'))
+        else:
+            print cswaConstants.getHeader(updateType,institution)
+        for r in rows:
+            totalobjects += 1
+            print formatRow({'rowtype': updateType, 'data': r}, form, config)
+
+        print '\n</table><hr/><table width="100%"'
+        print """<tr><td align="center" colspan="3">"""
+        msg = "Caution: clicking on the button at left will update <b>ALL %s objects</b> shown on this page!" % totalobjects
+        print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+        print "\n</table><hr/>"
 
 
 def doEnumerateObjects(form, config):
@@ -649,6 +705,62 @@ def doCheckMove(form, config):
     print '<input type="hidden" name="toLocAndCrate" value="%s: %s">' % (toLocation, crate)
 
 
+def doCheckGroupMove(form, config):
+    updateactionlabel = config.get('info', 'updateactionlabel')
+    #updateType = config.get('info', 'updatetype')
+    institution = config.get('info', 'institution')
+
+    if form.get('gr.group') == '':
+        print '<h3>Please enter group identifier!</h3><hr>'
+        return
+
+    toLocation = verifyLocation(form.get("lo.location"), form, config)
+    toRefname = cswaDB.getrefname('locations_common', toLocation, config)
+
+    if toLocation is None:
+        print '<h3>Please enter a valid storage location!</h3><hr>'
+        return
+
+    updateType = 'powermove'
+    institution = config.get('info','institution')
+    updateactionlabel = config.get('info', 'updateactionlabel')
+
+    try:
+        objects = cswaDB.getgrouplist(form.get("gr.group"), 3000, config)
+    except:
+        raise
+
+    locations = []
+    if len(objects) == 0:
+        print '<span style="color:red;">No objects found for this group! Sorry!</span>'
+        return
+
+    totalobjects = 0
+
+    # sys.stderr.write('%-13s:: %s :: %-18s:: %s\n' % (updateType, crate, 'objects', len(objects)))
+    for r in objects:
+        # sys.stderr.write('%-13s:: %-18s:: %s\n' % (updateType,  r[3],  r[0]))
+        # swap these two elements: getgrouplist and getlocations return slightly different sets.
+        x = r[4]
+        r[4] = r[5]
+        r[5] = x
+        totalobjects += 1
+        locations.append(formatRow({'rowtype': 'powermove', 'data': r}, form, config))
+
+    print cswaConstants.getHeader('powermove', institution)
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print '\n'.join(locations)
+    print """<tr><td align="center" colspan="6"><hr><td></tr>"""
+    print """<tr><td align="center" colspan="3">"""
+    msg = "Caution: clicking on the button at left will move <b>ALL %s objects</b> shown for this group!" % totalobjects
+    print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td  colspan="3">%s</td></tr>''' % msg
+
+    print "\n</table><hr/>"
+    print '<input type="hidden" name="toRefname" value="%s">' % toRefname
+    print '<input type="hidden" name="toLocAndCrate" value="%s">' % (toLocation)
+    print '<input type="hidden" name="toCrate" value="%s">' % ''
+
+
 def doCheckPowerMove(form, config):
     updateactionlabel = config.get('info', 'updateactionlabel')
     updateType = config.get('info', 'updatetype')
@@ -810,6 +922,10 @@ def doBulkEditForm(form, config, displaytype):
 
     totalobjects = len(objs)
 
+    if totalobjects == 0:
+        print '<span style="color:red;">No objects found! Sorry!</span>'
+        return
+
     print '''<table width="100%" cellpadding="8px"><tbody><tr class="smallheader">
       <td width="250px">Field</td>
       <td>Value to Set</td></tr>'''
@@ -827,6 +943,95 @@ def doBulkEditForm(form, config, displaytype):
 
     print '</table>'
     print "<hr/>"
+
+
+def getints(var,form):
+    value = ''
+    try:
+        value = form.get(var)
+        value = int(value)
+        return value,''
+    except:
+        return 'x','invalid value for %s: %s' % (var.replace('create.',''),value)
+
+def doCreateObjects(form, config):
+        # print form
+        #if not validateParameters(form, config): return
+
+        updateType = config.get('info', 'updatetype')
+        updateactionlabel = config.get('info', 'updateactionlabel')
+        msgs = []
+
+        print '''<table width="100%" cellpadding="8px"><tbody><tr class="smallheader">
+          <td>Item</td><td>Value</td>'''
+
+        year, msg = getints('create.year', form)
+        if msg != '': msgs.append(msg)
+        accession, msg = getints('create.accession', form)
+        if msg != '': msgs.append(msg)
+        sequence, msg = getints('create.sequence', form)
+        if msg != '': msgs.append(msg)
+        count, msg = getints('create.count', form)
+        if msg != '': msgs.append(msg)
+
+        try:
+            startsortobject = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence)
+            startobject = '%s.%s.%s' % (year, accession, sequence)
+        except:
+            startobject = 'invalid'
+            msgs.append('start object value invalid')
+
+        try:
+            endsortobject = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence + count - 1)
+            endobject = '%s.%s.%s' % (year, accession, sequence + count - 1)
+        except:
+            endobject = 'invalid'
+            msgs.append('end object value invalid')
+
+        try:
+            objs = cswaDB.getlistofobjects('range', startsortobject, endsortobject, 100, config)
+            totalobjects = len(objs)
+            if totalobjects != 0:
+                msgs.append('there are already %s objects in this range!' % totalobjects)
+                msgs.append('(%s to %s)' % (startobject, endobject))
+                for o in objs:
+                    msgs.append(o[0])
+        except:
+            msgs.append('problem checking object range')
+            totalobjects = -1
+
+        if count > 100:
+            msgs.append('Maximum objects you can create at one time is 100.')
+            msgs.append('Consider breaking your work into chunks of 100.')
+
+        if len(msgs) == 0:
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('first object', startobject)
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('last object', endobject)
+            print "<tr><td>%s</td><td>%s</td></tr>" % ('objects requested', count)
+
+            if form.get('action') == config.get('info', 'updateactionlabel'):
+                # create objects here
+                for seq in range(count):
+                    objectNumber = '%s.%s.%s' % (year, accession, sequence + seq)
+                    sortableobjectnumber = '%0.10d.%0.10d.%0.10d' % (year, accession, sequence + seq)
+                    objectinfo = {'objectNumber': objectNumber}
+                    objectinfo['sortableObjectNumber'] = sortableobjectnumber
+                    message,csid = createObject(objectinfo, config, form)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (objectNumber, csid)
+                print "<tr><td>%s</td><td>%s</td></tr>" % ('created objects', count)
+            else:
+                # list objects to be created
+                msg = "Caution: clicking on the button at left will create <b> %s empty objects</b>!" % count
+                print """<tr><td align="center" colspan="3"><hr></tr>"""
+                print """<tr><td align="center" colspan="2">"""
+                print '''<input type="submit" class="save" value="''' + updateactionlabel + '''" name="action"></td><td colspan="1">%s</td></tr>''' % msg
+
+        else:
+            for m in msgs:
+                print '<tr><td class="error">%s</td><td></td></tr>' % m
+
+        print '</table>'
+        print "<hr/>"
 
 
 def doSetupIntake(form, config):
@@ -1087,18 +1292,21 @@ def doNothing(form, config):
 def doUpdateLocations(form, config):
 
     institution = config.get('info','institution')
+    updateType = config.get('info', 'updatetype')
     #notlocated = config.get('info','notlocated')
     if institution == 'bampfa':
         notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x781)'Not Located'"
     else:
         notlocated = "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl23524)'Not located'"
-    updateValues = [form.get(i) for i in form if 'r.' in i]
+    updateValues = [form.get(i) for i in form if 'r.' in i and not 'gr.' in i]
 
     # if reason is a refname (e.g. bampfa), extract just the displayname
     reason = form.get('reason')
     reason = re.sub(r"^urn:.*'(.*)'", r'\1', reason)
 
     Now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Now = midnight local time for locations...
+    # Now = datetime.datetime.utcnow().strftime("%Y-%m-%dT00:00:00Z")
 
     print cswaConstants.getHeader('inventoryResult',institution)
 
@@ -1123,18 +1331,17 @@ def doUpdateLocations(form, config):
         # ugh...this logic is in fact rather complicated...
         msg = 'location updated.'
         # if we are moving a crate, use the value of the toLocation's refname, which is stored hidden on the form.
-        if config.get('info', 'updatetype') == 'movecrate':
+        if updateType == 'movecrate':
             updateItems['locationRefname'] = form.get('toRefname')
             msg = 'crate moved to %s.' % form.get('toLocAndCrate')
 
-        if config.get('info', 'updatetype') in ['moveobject', 'powermove']:
+        if updateType in ['moveobject', 'powermove', 'grpmove']:
             if updateItems['objectStatus'] == 'do not move':
                 msg = "not moved."
             else:
                 updateItems['locationRefname'] = form.get('toRefname')
                 updateItems['crate'] = form.get('toCrate')
                 msg = 'object moved to %s.' % form.get('toLocAndCrate')
-
 
 
         if updateItems['objectStatus'] == 'not found':
@@ -1148,7 +1355,7 @@ def doUpdateLocations(form, config):
                 updateLocations(updateItems, config, form)
                 numUpdated += 1
         except:
-            msg = '<span style="color:red;">problem updating</span>'
+            msg = '<span style="color:red;">location update failed!</span>'
         print ('<tr>' + (4 * '<td class="ncell">%s</td>') + '</tr>\n') % (
             updateItems['objectNumber'], updateItems['objectStatus'], updateItems['inventoryNote'], msg)\
 
@@ -1422,8 +1629,18 @@ def doBarCodes(form, config):
         print cswaConstants.getHeader(updateType,institution)
 
     totalobjects = 0
+    #If the group field has input, use that
+    if form.get("gr.group") != '':
+        sys.stderr.write('group: %s\n' % form.get("gr.group"))
+        objs = cswaDB.getgrouplist(form.get("gr.group"), 5000, config)
+        if action == 'Create Labels for Objects':
+            totalobjects += len(objs)
+            o = [o[0:8] + [o[9]] for o in objs]
+            labelFilename = writeCommanderFile('objectrange', form.get("printer"), 'objectLabels', 'objects', o, config)
+            print '<tr><td>%s</td><td>%s</td><tr><td colspan="4"><i>%s</i></td></tr>' % (
+                'objectrange', len(o), labelFilename)
     #If the museum number field has input, print by object
-    if form.get('ob.objno1') != '':
+    elif form.get('ob.objno1') != '':
         try:
             if form.get('ob.objno2'):
                 objs = cswaDB.getobjlist('range', form.get("ob.objno1"), form.get("ob.objno2"), 1000, config)
@@ -1475,7 +1692,7 @@ def doBarCodes(form, config):
     print """<tr><td align="center" colspan="4"><hr/><td></tr>"""
     print """<tr><td align="center" colspan="4">"""
     if totalobjects != 0:
-        if form.get('ob.objno1'):
+        if form.get('ob.objno1') or form.get('gr.group'):
             print "<b>%s object barcode(s) printed." % totalobjects
         else:
             print "<b>%s object(s)</b> found in %s locations." % (totalobjects, rowcount)
@@ -1712,36 +1929,13 @@ def doListGovHoldings(form, config):
     print '<h4>', len(sites), ' sites listed.</h4>'
 
 def writeCommanderFile(location, printerDir, dataType, filenameinfo, data, config):
-    auditFile = config.get('files', 'cmdrauditfile')
     # slugify the location
     slug = re.sub('[^\w-]+', '_', location).strip().lower()
     barcodeFile = config.get('files', 'cmdrfmtstring') % (
-        config.get('files', 'cmdrfileprefix'), dataType, printerDir, slug,
+        dataType, printerDir, slug,
         datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"), filenameinfo)
 
-    try:
-        barcodeFh = codecs.open(barcodeFile, 'w', 'utf-8-sig')
-        alogFh = codecs.open(auditFile, 'a', 'utf-8')
-        csvlogfh = csv.writer(barcodeFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        audlogfh = csv.writer(alogFh, delimiter=",", quoting=csv.QUOTE_ALL)
-        if dataType == 'locationLabels':
-            csvlogfh.writerow('termdisplayname'.split(','))
-            for d in data:
-                csvlogfh.writerow((d[0],))  # writerow needs a tuple or array
-                audlogfh.writerow(d)
-        elif dataType == 'objectLabels':
-            csvlogfh.writerow(
-                'MuseumNumber,ObjectName,PieceCount,FieldCollectionPlace,AssociatedCulture,EthnographicFileCode'.split(','))
-            for d in data:
-                csvlogfh.writerow(d[3:9])
-                audlogfh.writerow(d)
-        barcodeFh.close()
-        alogFh.close()
-        newName = barcodeFile.replace('.tmp', '.txt')
-        os.rename(barcodeFile, newName)
-    except:
-        #raise
-        newName = '<span style="color:red;">could not write to %s</span>' % barcodeFile
+    newName = cswaSMBclient.uploadCmdrWatch(barcodeFile, dataType, data, config)
 
     return newName
 
@@ -1760,7 +1954,7 @@ def writeLog(updateItems, uri, httpAction, username, config):
         csvlogfh = csv.writer(codecs.open(auditFile, 'a', 'utf-8'), delimiter="\t")
         logrec = [ httpAction, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), updateType, uri, username ]
         for item in updateItems.keys():
-            logrec.append("%s=%s" % (item,updateItems[item]))
+            logrec.append("%s=%s" % (item, updateItems[item].replace('\n','#')))
         csvlogfh.writerow(logrec)
     except:
         raise
@@ -1769,19 +1963,18 @@ def writeLog(updateItems, uri, httpAction, username, config):
 
 
 def writeInfo2log(request, form, config, elapsedtime):
-    checkServer = form.get('check')
     location1 = str(form.get("lo.location1"))
-    location2 = str(form.get("lo.location2"))
     action = str(form.get("action"))
     serverlabel = config.get('info', 'serverlabel')
     apptitle = config.get('info', 'apptitle')
     updateType = config.get('info', 'updatetype')
+    institution = config.get('info', 'institution')
     checkServer = form.get('check')
     # override updateType if we are just checking the server
     if checkServer == 'check server':
         updateType = checkServer
-    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel, location1, location2))
-    updateItems = {'app': apptitle, 'server': serverlabel, 'elapsedtime': '%8.2f' % elapsedtime, 'action': action}
+    sys.stderr.write('%-13s:: %-18s:: %-6s::%8.2f :: %-15s :: %s :: %s\n' % (updateType, action, request, elapsedtime, serverlabel))
+    updateItems = {'app': apptitle, 'server': serverlabel, 'institution': institution, 'elapsedtime': '%8.2f' % elapsedtime, 'action': action}
     writeLog(updateItems, '', request, '', config)
 
 def uploadFile(actualform, form, config):
@@ -2239,6 +2432,56 @@ def updateKeyInfo(fieldset, updateItems, config, form):
     #print "<h3>Done w update!</h3>"
 
 
+def createObject(objectinfo, config, form):
+
+    message = ''
+
+    realm = config.get('connect', 'realm')
+    hostname = config.get('connect', 'hostname')
+    username, password = getCreds(form)
+    #sys.stderr.write('%-13s:: %s %s\n' % ('creds:',username,password))
+
+    uri = 'collectionobjects'
+
+    # get the XML for this object
+    content = '''<document name="collectionobjects">
+<ns2:collectionobjects_common xmlns:ns2="http://collectionspace.org/services/collectionobject" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<objectNameList>
+<objectNameGroup>
+<objectName/>
+</objectNameGroup>
+</objectNameList>
+<objectNumber/>
+</ns2:collectionobjects_common>
+</document>'''
+
+    x = '''
+<ns2:collectionobjects_omca xmlns:ns2="http://collectionspace.org/services/collectionobject/local/omca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<sortableObjectNumber/>
+</ns2:collectionobjects_omca>
+'''
+
+    root = etree.fromstring(content)
+    for elementname in objectinfo:
+        if elementname in objectinfo:
+            element = root.find('.//' + elementname)
+            element.text = objectinfo[elementname]
+
+    uri = 'collectionobjects'
+    payload = '<?xml version="1.0" encoding="UTF-8"?>\n' + etree.tostring(root,encoding='utf-8')
+    # update collectionobject..
+    sys.stderr.write("post new object %s to REST API..." % objectinfo['objectNumber'])
+    #sys.stderr.write(etree.tostring(root))
+    (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
+    sys.stderr.write("created new object with csid %s to REST API..." % csid)
+    writeLog(objectinfo, uri, 'POST', username, config)
+    # message = 'succeeded'
+
+    return message, csid
+
+    #print "<h3>Done w update!</h3>"
+
+
 def updateLocations(updateItems, config, form):
     realm = config.get('connect', 'realm')
     hostname = config.get('connect', 'hostname')
@@ -2288,7 +2531,8 @@ def formatRow(result, form, config):
         return """<tr><td colspan="7" class="subheader">%s</td></tr>""" % result['data'][0]
     elif result['rowtype'] == 'location':
         return '''<tr><td class="objno"><a href="#" onclick="formSubmit('%s')">%s</a> <span style="color:red;">%s</span></td><td/></tr>''' % (
-            result['data'][0], result['data'][0], result['data'][-1])
+            result['data'][0], result['data'][0], '')
+            #result['data'][0], result['data'][0], result['data'][-1])
     elif result['rowtype'] == 'select':
         rr = result['data']
         boxType = result['boxtype']
@@ -2605,6 +2849,21 @@ def getxml(uri, realm, hostname, username, password, getItems):
 
 
 def postxml(requestType, uri, realm, hostname, username, password, payload):
+    if WHEN2POST == 'now':
+        return post2xml(requestType, uri, realm, hostname, username, password, payload)
+    else:
+        return post2queue(requestType, uri, realm, hostname, username, password, payload)
+
+
+def post2queue(requestType, uri, realm, hostname, username, password, payload):
+    # relations records have dependencies -- these are handled by the queue consumer
+    if uri != 'relations':
+        element = json.dumps((requestType, uri, realm, hostname, username, password, payload))
+        DIRQ.add(element)
+    return ('url', 'data', 'queued', 0.00)
+
+
+def post2xml(requestType, uri, realm, hostname, username, password, payload):
     port = ''
     protocol = 'https'
     server = protocol + "://" + hostname + port
@@ -2866,7 +3125,7 @@ def starthtml(form, config):
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a target="help" href="%s">Help</a>
     ''' % ('switchapp', programName + 'switchapp', 'switch app',
-           'https://dev.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
+           'https://webapps.cspace.berkeley.edu/webappmanual/%s-webappmanual.html' % institution)
 
     #groupbyelement = '''
     #      <th><span class="cell">group by:</span></th>
@@ -2987,6 +3246,40 @@ def starthtml(form, config):
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>
         '''
 
+    elif updateType == 'grpinfo':
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
+        fieldset, selected = cswaConstants.getFieldset(form, institution)
+
+        otherfields = '''
+            <tr><th><span class="cell">group:</span></th>
+            <th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+        <th><th><span class="cell">set:</span></th><th>''' + fieldset + '''</th></tr>'''
+        otherfields += '''
+        <tr></tr>'''
+
+    elif updateType == 'createobjects':
+
+        year = str(form.get("create.year")) if form.get("create.year") else ''
+        accession = str(form.get("create.accession")) if form.get("create.accession") else ''
+        sequence = str(form.get("create.sequence")) if form.get("create.sequence") else ''
+        count = str(form.get("create.count")) if form.get("create.count") else ''
+
+        otherfields = '''
+            <tr><th><span class="cell">year:</span></th>
+            <th><input id="create.year" class="cell" type="text" size="40" name="create.year" value="''' + year + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">accession:</span></th>
+            <th><input id="create.accession" class="cell" type="text" size="40" name="create.accession" value="''' + accession + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">sequence:</span></th>
+            <th><input id="create.sequence" class="cell" type="text" size="40" name="create.sequence" value="''' + sequence + '''" class="xspan"></th></tr>'''
+
+        otherfields += '''
+            <tr><th><span class="cell">count:</span></th>
+            <th><input id="create.count" class="cell" type="text" size="40" name="create.count" value="''' + count + '''" class="xspan"></th></tr>'''
+
     elif updateType == 'movecrate':
         crate = str(form.get("lo.crate")) if form.get("lo.crate") else ''
         otherfields = '''
@@ -3003,6 +3296,23 @@ def starthtml(form, config):
         otherfields += '''
           <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
           <th><span class="cell">handler:</span></th><th>''' + handlers + '''</th></tr>'''
+
+
+    elif updateType == 'grpmove':
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
+        location = str(form.get("lo.location")) if form.get("lo.location") else ''
+
+        handlers, selected = cswaConstants.getHandlers(form, institution)
+        reasons, selected = cswaConstants.getReasons(form, institution)
+
+
+        otherfields = '''
+            <tr><th><span class="cell">group:</span></th>
+            <th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+            <th><span class="cell">to location:</span></th>
+            <th><input id="lo.location" class="cell" type="text" size="40" name="lo.location" value="''' + location + '''" class="xspan"></th></tr>
+            <tr><th><span class="cell">reason:</span></th><th>''' + reasons + '''</th>
+            <th><span class="cell">contact:</span></th><th>''' + handlers + '''</th></tr>'''
 
 
     elif updateType == 'powermove':
@@ -3088,6 +3398,7 @@ def starthtml(form, config):
 
     elif updateType == 'barcodeprint':
         printers, selected, printerlist = cswaConstants.getPrinters(form)
+        grpinfo = str(form.get("gr.group")) if form.get("gr.group") else ''
         objno1 = str(form.get("ob.objno1")) if form.get("ob.objno1") else ''
         objno2 = str(form.get("ob.objno2")) if form.get("ob.objno2") else ''
         otherfields += '''
@@ -3095,8 +3406,11 @@ def starthtml(form, config):
 <th><input id="ob.objno1" class="cell" type="text" size="40" name="ob.objno1" value="''' + objno1 + '''" class="xspan"></th>
 <th><span class="cell">last museum number:</span></th>
 <th><input id="ob.objno2" class="cell" type="text" size="40" name="ob.objno2" value="''' + objno2 + '''" class="xspan"></tr>
+<tr><th><span class="cell">group:</span></th>
+<th><input id="gr.group" class="cell" type="text" size="40" name="gr.group" value="''' + grpinfo + '''" class="xspan"></th>
+<th colspan="4"><i>NB: object number range supersedes location range, if entered;</i><br/></th>
 <tr><th><span class="cell">printer cluster:</span></th><th>''' + printers + '''</th>
-<th colspan="4"><i>NB: object number range supersedes location range, if entered.</i></th>
+<th colspan="4"><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group identifier supercedes both, if entered.</i></th>
 </tr>'''
 
     elif updateType == 'inventory':
@@ -3355,7 +3669,7 @@ $('[name]').map(function() {
         $(this).autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: "../cgi-bin/autosuggest.py?connect_string=''' + connect_string + '''",
+                    url: "../cgi-bin/autosuggest.py?webapp=''' + urllib2.quote(form['webapp']) + '''",
                     dataType: "json",
                     data: {
                         q : request.term,
@@ -3439,270 +3753,3 @@ def lmiPayload(f,institution):
             f['handlerRefName'])
 
     return payload
-
-
-if __name__ == "__main__":
-
-    # to test this module on the command line you have to pass in two cgi values:
-    # $ python cswaUtils.py "lo.location1=Hearst Gym, 30, L 12,  2&lo.location2=Hearst Gym, 30, L 12,  7"
-    # $ python cswaUtils.py "lo.location1=X&lo.location2=Y"
-
-    # this will load the config file and attempt to update some records in server identified
-    # in that config file!
-
-
-    updateItems = {}
-
-    if True:
-
-        print "starting keyinfo update"
-
-        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
-                'fieldset': 'placeanddate',
-                'csusername': 'import@pahma.cspace.berkeley.edu',
-                'cspassword': 'lash428!puck',
-                #'fieldset': 'registration',
-                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
-                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
-                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
-                'vfcp.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'yyy',
-                'cd.70d40782-6d11-4346-bb9b-2f85f1e00e91': '11/3/15',
-        }
-
-        config = getConfig(form)
-
-        doUpdateKeyinfo(form, config)
-
-
-    if False:
-
-        print "starting keyinfo update"
-
-        form = {'webapp': 'pahma_Keyinfo_Dev', 'action': 'Update Object Information',
-                'fieldset': 'namedesc',
-                'csusername': 'import@pahma.cspace.berkeley.edu',
-                'cspassword': 'lash428!puck',
-                #'fieldset': 'registration',
-                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
-                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
-                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
-                'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
-                'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-                'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-                'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
-        }
-
-        config = getConfig(form)
-
-        doUpdateKeyinfo(form, config)
-
-
-    if False:
-
-        form = {'webapp': 'keyinfoDev', 'action': 'Update Object Information',
-                'fieldset': 'namedesc',
-                #'fieldset': 'registration',
-                'onm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Cradle',
-                'oox.70d40782-6d11-4346-bb9b-2f85f1e00e91': '1-1',
-                'csid.70d40782-6d11-4346-bb9b-2f85f1e00e91': '70d40782-6d11-4346-bb9b-2f85f1e00e91',
-                'bdx.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'brief description 999 888 777',
-                'anm.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-                'ant.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'xxx',
-                'pc.70d40782-6d11-4346-bb9b-2f85f1e00e91': 'Dr. Philip Mills Jones',
-        }
-
-        form = {'webapp': 'ucbgLocationReportDev', 'dora': 'alive'}
-        config = getConfig(form)
-
-        starthtml(form, config)
-        print setFilters(form)
-
-        doUpdateKeyinfo(form, config)
-
-        #sys.exit()
-
-    if False:
-
-        form = {'webapp': 'bamInventoryDev'}
-        config = getConfig(form)
-
-        realm = config.get('connect', 'realm')
-        hostname = config.get('connect', 'hostname')
-        username = 'import@bampfa.cspace.berkeley.edu'
-        password = 'bjeScwj2'
-        institution = config.get('info', 'institution')
-
-        #print relationsPayload(f)
-
-        updateItems = {'objectStatus': 'found',
-              'subjectCsid': '41568668-00a7-439b-8a09-8525578e5df4',
-              'objectCsid': '41568668-00a7-439b-8a09-8525578e5df4',
-              'inventoryNote': 'inventory note',
-              'crate': '',
-              'handlerRefName': "JW",
-              'reason': "urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'",
-              'computedSummary': 'systematic inventory test',
-              'locationRefname': "urn:cspace:bampfa.cspace.berkeley.edu:locationauthorities:name(location):item:name(x793)'Print Storage, Bin 02 Lower'",
-              'locationDate': '2014-10-23T05:45:30Z',
-              'objectNumber': '9-12689'}
-
-        #updateLocations(f2,config)
-        #print "updateLocations succeeded..."
-        #sys.exit(0)
-
-        uri = 'movements'
-
-        print "<br>posting to movements REST API..."
-        payload = lmiPayload(updateItems,institution)
-        print payload
-        #sys.exit(0)
-
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        updateItems['subjectCsid'] = csid
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "movements REST API post succeeded..."
-
-        uri = 'relations'
-
-        print "<br>posting inv2obj to relations REST API..."
-        updateItems['subjectDocumentType'] = 'Movement'
-        updateItems['objectDocumentType'] = 'CollectionObject'
-        payload = relationsPayload(updateItems)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "relations REST API post succeeded..."
-
-        # reverse the roles
-        print "<br>posting obj2inv to relations REST API..."
-        temp = updateItems['objectCsid']
-        updateItems['objectCsid'] = updateItems['subjectCsid']
-        updateItems['subjectCsid'] = temp
-        updateItems['subjectDocumentType'] = 'CollectionObject'
-        updateItems['objectDocumentType'] = 'Movement'
-        payload = relationsPayload(updateItems)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "relations REST API post succeeded..."
-
-        print "<h3>Done w update!</h3>"
-
-        #sys.exit()
-
-
-    if False:
-
-        form = {'webapp': 'bamInventoryDev'}
-        config = getConfig(form)
-
-        realm = config.get('connect', 'realm')
-        hostname = config.get('connect', 'hostname')
-        username = config.get('connect', 'username')
-        password = config.get('connect', 'password')
-        institution = config.get('info', 'institution')
-
-        #print lmiPayload(f)
-        #print relationsPayload(f)
-
-        f2 = {'objectStatus': 'found',
-              'subjectCsid': '',
-              'inventoryNote': '',
-              'crate': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(crate):item:name(cr2113)'Faunal Box 421'",
-              'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(999)'Michael T. Black'",
-              'objectCsid': '35d1e048-e803-4e19-81de-ac1079f9bf47',
-              'reason': 'Inventory',
-              'computedSummary': 'systematic inventory test',
-              'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl12158)'Kroeber, 20A, AA 1, 2'",
-              'locationDate': '2012-07-24T05:45:30Z',
-              'objectNumber': '9-12689'}
-
-        #updateLocations(f2,config)
-        #print "updateLocations succeeded..."
-        #sys.exit(0)
-
-        uri = 'movements'
-
-        print "<br>posting to movements REST API..."
-        payload = lmiPayload(updateItems)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        updateItems['subjectCsid'] = csid
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "movements REST API post succeeded..."
-
-        uri = 'relations'
-
-        print "<br>posting inv2obj to relations REST API..."
-        updateItems['subjectDocumentType'] = 'Movement'
-        updateItems['objectDocumentType'] = 'CollectionObject'
-        payload = relationsPayload(updateItems)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "relations REST API post succeeded..."
-
-        # reverse the roles
-        print "<br>posting obj2inv to relations REST API..."
-        temp = updateItems['objectCsid']
-        updateItems['objectCsid'] = updateItems['subjectCsid']
-        updateItems['subjectCsid'] = temp
-        updateItems['subjectDocumentType'] = 'CollectionObject'
-        updateItems['objectDocumentType'] = 'Movement'
-        payload = relationsPayload(updateItems)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, hostname, username, password, payload)
-        print 'got csid', csid, '. elapsedtime', elapsedtime
-        print "relations REST API post succeeded..."
-
-        print "<h3>Done w update!</h3>"
-
-        #sys.exit()
-
-    if False:
-
-        print cswaDB.getplants('Velleia rosea', '', 1, config, 'locreport', 'dead')
-        #sys.exit()
-
-        endhtml(form, config, 0.0)
-
-
-    if False:
-        #print "starting packing list"
-        #doPackingList(form,config)
-        #sys.exit()
-        print '\nlocations\n'
-        for loc in cswaDB.getloclist('range', '1001, Green House 1', '1003, Tropical House', 1000, config):
-            print loc
-
-        print '\nlocations\n'
-        for loc in cswaDB.getloclist('set', 'Kroeber, 20A, W B', '', 10, config):
-            print loc
-
-        print '\nlocations\n'
-        for loc in cswaDB.getloclist('set', 'Kroeber, 20A, CC  4', '', 3, config):
-            print loc
-
-        print '\nobjects\n'
-        rows = cswaDB.getlocations('Kroeber, 20A, CC  4', '', 3, config, 'keyinfo','pahma')
-        for r in rows:
-            print r
-
-        #urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl31520)'Regatta, A150, RiveTier 1, B'
-        f = {'objectCsid': '242e9ee7-983a-49e9-b3b5-7b49dd403aa2',
-             'subjectCsid': '250d75dc-c704-4b3b-abaa',
-             'locationRefname': "urn:cspace:pahma.cspace.berkeley.edu:locationauthorities:name(location):item:name(sl284)'Kroeber, 20Mez, 53 D'",
-             'locationDate': '2000-01-01T00:00:00Z',
-             'computedSummary': 'systematic inventory test',
-             'inventoryNote': 'this is a test inventory note',
-             'objectDocumentType': 'CollectionObject',
-             'subjectDocumentType': 'Movement',
-             'reason': 'Inventory',
-             'handlerRefName': "urn:cspace:pahma.cspace.berkeley.edu:personauthorities:name(person):item:name(7412)'Madeleine W. Fang'"
-
-        }
-
-        #print lmiPayload(f)
-        #print relationsPayload(f)
-
-        form = {'webapp': 'barcodeprintDev', 'ob.objectnumber': '1-504', 'action': 'Create Labels for Objects'}
-
-        config = getConfig(form)
-
-        print doBarCodes(form, config)
-        #sys.exit()

@@ -19,7 +19,7 @@ while (<METADATA>) {
   chomp;
   my ($id, $objectid, @rest) = split /$delim/;
   # botgarden is special here: csid got buried in the record...
-  $objectid = $rest[38];
+  $objectid = $rest[39];
   # insert list of blobs as final column
   my $mediablobs = $media{$objectid};
   if ($mediablobs) {

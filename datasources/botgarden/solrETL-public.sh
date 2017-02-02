@@ -16,7 +16,7 @@ mv 4solr.*.csv.gz /tmp
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-SERVER="dba-postgres-prod-32.ist.berkeley.edu port=5313 sslmode=prefer"
+SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5313 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
@@ -69,10 +69,10 @@ python gbif/parseAndInsertGBIFparts.py metadata.csv metadata+parsednames.csv gbi
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid metadata+parsednames.csv | head -1 > header4Solr.csv
+grep -P "^1\tid\t" metadata+parsednames.csv | head -1 > header4Solr.csv
 perl -i -pe 's/^1\tid/id\tobjcsid_s/' header4Solr.csv
 perl -i -pe 's/$/\tblob_ss/' header4Solr.csv
-grep -v csid metadata+parsednames.csv > d7.csv
+grep -v -P "^1\tid\t" metadata+parsednames.csv > d7.csv
 python fixfruits.py d7.csv > d8.csv
 ##############################################################################
 # add the blob csids to the rest of the internal

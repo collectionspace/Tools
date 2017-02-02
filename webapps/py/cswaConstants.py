@@ -4,6 +4,8 @@
 import csv, sys, time, os, datetime
 import ConfigParser
 
+BASE_DIR = '/var/www'
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -126,7 +128,7 @@ def infoHeaders(fieldSet):
       <th>Object Type</th>
       <th>Collection Manager</th>
       <th>Field Collection Place</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif fieldSet == 'collection':
         return """
@@ -246,13 +248,14 @@ def getReasons(form, institution):
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(2015MoveStaging1423179160443)'2015 Move Staging'">2015 Move Staging</option>
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(2015Packing1422385332220)'2015 Packing'">2015 Packing</option>
         <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason001)'Conservation'">Conservation</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(DataCleanUp1416598052252)'Data Clean Up'">Data Clean Up</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason003)'Inventory'">Inventory</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason004)'Loan'">Loan</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason005)'New Storage Location'">New Storage Location</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason006)'Photography'">Photography</option>
-		<option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason007)'Research'">Research</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(DataCleanUp1416598052252)'Data Clean Up'">Data Clean Up</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason002)'Exhibition'">Exhibition</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason003)'Inventory'">Inventory</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason004)'Loan'">Loan</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason005)'New Storage Location'">New Storage Location</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason006)'Photography'">Photography</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(Reconciled1458582185744)'Reconciled'">Reconciled</option>
+        <option value="urn:cspace:bampfa.cspace.berkeley.edu:vocabularies:name(movereason):item:name(movereason007)'Research'">Research</option>
         </options>
         </select>
 
@@ -387,14 +390,13 @@ def selectWebapp(form):
 
 
 <html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">''' + getStyle('lightblue') + '''
-<style type="text/css">
-/*<![CDATA[*/
-@import "../css/jquery-ui-1.8.22.custom.css";
-@import "../css/blue/style.css";
-@import "../css/jqtree.css";
-/*]]>*/
-</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="../css/base.css">
+    <meta name="robots" content="NONE,NOARCHIVE">
+</head>
+<body class="">
+<div id="container">
 <script type="text/javascript" src="../js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="../js/jquery-ui-1.8.22.custom.min.js"></script>
 <script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
@@ -406,13 +408,15 @@ def selectWebapp(form):
 </head>
 <body>
 <form id="ucbwebapp" method="post">
-<h1>UC Berkeley CollectionSpace Deployments: Available Webapps</h1>
+<h2>Legacy Webapps</h2>
 <table cellpadding="4px"><tr>
-<p>The following table lists the webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
-        "%Y-%m-%dT%H:%M:%SZ") + '''.</p>'''
+<p>The following table lists the legacy webapps available on this server as of ''' + datetime.datetime.utcnow().strftime(
+        "%Y-%m-%dT%H:%M:%SZ") + '''.<br/>
+We call them <i>legacy</i> because the are written in an ancient web framework called "CGI". <br/>Someday they will be rewritten and
+improved in a more modern framework. In the meantime -- Enjoy!</p>'''
 
     for museum in sorted(webapps.keys()):
-        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2>%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
+        line += '<td valign="top"><table><tr style="height:130px; vertical-align:top"><td colspan="3"><h2 style="background-color: tomato;">%s</h2><img style="max-height:60px; padding:8px" src="%s"></td></tr><tr><th colspan="3"><hr/></th></tr>\n' % (museum,webapps[museum]['logo'])
         listOfWebapps = sorted(webapps[museum]['apps'].keys())
         for webapp in listOfWebapps:
             apptitle = apptitles[webapp] if apptitles.has_key(webapp) else webapp
@@ -433,7 +437,7 @@ def selectWebapp(form):
     line += '''
 </tr></table>
 <hr/>
-<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 14 January 2015</h4>''' + payload + '''
+<h4>jblowe@berkeley.edu   7 Feb 2013, last revised 8 March 2016</h4>''' + payload + '''
 </form>
 </body>
 </html>'''
@@ -445,8 +449,8 @@ def getPrinters(form):
     selected = form.get('printer')
 
     printerlist = [
-        ("Hearst Gym Basement", "cluster1"),
-        ("Marchant", "cluster2")
+        ("Kroeber Hall", "cluster1"),
+        ("Regatta", "cluster2")
     ]
 
     printers = '''
@@ -502,7 +506,8 @@ def getHierarchies(form):
         ("Archaeological Culture", "archculture"),
         ("Ethnographic File Codes", "ethusecode"),
         ("Materials", "material_ca"),
-        ("Taxonomy", "taxonomy")
+        ("Taxonomy", "taxonomy"),
+        ("Object Name", "objectname")
     ]
 
     authorities = '''
@@ -769,7 +774,7 @@ def getHeader(updateType, institution):
       <th>Field Collection Place</th>
       <th>Cultural Group</th>
       <th>Ethnographic File Code</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif updateType == 'packinglistbyculture':
         return """
@@ -779,7 +784,7 @@ def getHeader(updateType, institution):
       <th>Count</th>
       <th width="150px;">Location</th>
       <th>Field Collection Place</th>
-      <th>P?</th>
+      <th></th>
     </tr>"""
     elif updateType == 'moveobject':
         return """
