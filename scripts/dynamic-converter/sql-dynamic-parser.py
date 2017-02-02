@@ -50,15 +50,19 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
     markup.close()
     counts.close()
     
-    # perform_counts(counts, counts_before)
     execute(update_sqlstatements, count_sqlstatements, pwd, port, user, dbname, museum)
-    # perform_counts(counts, counts_after)
     
-# def perform_counts(counts_file, counts_output_name):
-
-#     # uses the counts_file and generates a file "counts_before/after.txt" 
-#     pass
-
+def do_counts(counts_file, dbcursor, count_sqlstatements):
+    total_changes = 0
+    for count_statement in count_sqlstatements:
+        dbcursor.execute(count_statement)
+        results = dbcursor.fetchall()
+        counts_file.write(str(results))
+        for result in results:
+            total_changes += str(result[1])
+    counts_file.write(total_changes)
+    counts_file.write("\n")
+    return total_changes
 
 
 def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, database_name, museum):
@@ -73,75 +77,47 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
         counts the items to update, performs updates in the database, and confirms counts before and after are the same
     """
     
-    # dbconn = ps2.connect(dbname=database_name, user=usr, password=dbpassword, host="localhost", port=dbport)
-    # dbcursor = dbconn.cursor()
-    counts_before = "%s.counts.before.txt" % museum
-    counts_after = "%s.counts.after.txt" % museum
-    counts_results = "%s.counts.results.txt" % museum
+    dbconn = ps2.connect(connect_string)   
+    dbcursor = dbconn.cursor()
 
+    counts_file = open("%s.counts.txt" % museum, "w")
+    counts_file.write("Counts before: ")
     # First: Do the counts before any changes
-    counts_before_file = open(counts_before, "w")
-    total_to_change = 0 
-    for count_statement in count_sqlstatements:
-        dbcursor.execute(count_statement)
-        results = dbcursor.fetchall()
-        counts_before_file.write(results)
-        for result in results:
-            total_to_change += result[1]  
-    counts_before_file.write(total_to_change)            
-    counts_before_file.close()
+    # counts_before_file = open(counts_before, "w")
+
+    total_to_change = do_counts(counts_file, dbcursor, count_sqlstatements)
     
     # Second: Perform the changes
     for update_statement in update_sqlstatements:
         dbcursor.execute(update_statement)
     
-    
+    counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
-    counta_after_file = open(counts_after, "w")
-    total_changed = 0
-    for count_statement in count_sqlstatements:
-        dbcursor.execute(count_statement)
-        results = dbcursor.fetchall()
-        counts_after_file.write(results)
-        for result in results:
-            total_changed += result[1]
-    counts_after_file.write(total_changed)
-    counts_after_file.close()
-    
-    
-    # Fourth: Make sure that all the counts match up
-    #
-    # um... i think commit only works within a "transaction"
-    # and you have not started the transaction anywhere...
-    # it's a good idea, however! 
-    # you'll want to make a "BEGIN" somewhere earlier!
+    total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
+
     if total_changed == total_to_change:
-    	db.commit()
+    	dbconn.commit()
     	return 1
-    return -1
+    else:
+        dbconn.rollback()
+        return -1
 
 
-                          
 if __name__ == "__main__":
     args = sys.argv
     if (len(args) > 1 and args[1] == "help"):
-        print ("To run the file, use the inputs: \n -m <museum_name> \n -i <input_file> \n -d <domain_instance_vocab>")
-        sys.exit()
-    elif len(args) < 15:
-        print ("One or more inputs missing: -m <museum_name> -i <input_file> -d <domain_instance_vocab> -pwd <db password> -prt <port number> -u <user> -db <database name>. \n Fix or run with 'help' for more info.")
-        sys.exit(-1)
+        print ("To run the file, use the inputs: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes>")
+    elif len(args) != 5:
+        print ("One or more inputs missing: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes> \nPlease fix or run with 'help' for more info.")
     else:
-        museum = args[args.index("-m") + 1]
+        museum = args[1]
         if museum not in museums:
             print ("Unknown museum %s" % museum)
-            sys.exit()
-        infile = args[args.index("-i") + 1]
-        markup = args[args.index("-d") + 1]
-        pwd = args[args.index("-pwd") + 1]
-        port = args[args.index("-prt") + 1]
-        user = args[args.index("-u") + 1]
-        dbname = args[args.index("-db") + 1]
-        parse(infile, markup, museum, pwd, port, user, dbname)
+        else:
+            infile = args[2]
+            markup = args[3]
+            connect_string = args[4]
+            parse(infile, markup, museum, connect_string)
 
 
 
