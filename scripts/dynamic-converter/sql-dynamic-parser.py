@@ -59,8 +59,8 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
         results = dbcursor.fetchall()
         counts_file.write(str(results))
         for result in results:
-            total_changes += str(result[1])
-    counts_file.write(total_changes)
+            total_changes +=result[1]
+    counts_file.write(str(total_changes))
     counts_file.write("\n")
     return total_changes
 
