@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -o verbose
 # note the assumptions made by this script:
+# - virtual environment is set up in /var/www/venv
 # - it will run in ~/bin/qc
-# - it will run at the beginning of a month and report on the previous month
-# - monthly reports will be retained forever..this script does not groom them
+# - it will run at the beginning of a month and report on the previous month.
+# - monthly reports will be retained forever..this script does not groom them.
 # - config file cinefilesProd.cfg exists with the needed paramaters.
+# - a single argument is required: the email to send the report to.
 #
 cd ~/bin/qc
 rdate=`date --date="last month" +%Y-%m`

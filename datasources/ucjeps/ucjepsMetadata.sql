@@ -4,7 +4,7 @@ select
     case when (tig.taxon is not null and tig.taxon <> '')
                 then regexp_replace(regexp_replace(tig.taxon, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g')
     end as determination_s,
-    ttg.termformatteddisplayname as termformatteddisplayname_s,
+    regexp_replace(ttg.termformatteddisplayname,E'[\\t\\n\\r]+', ' ', 'g') as termformatteddisplayname_s,
     regexp_replace(regexp_replace(tnh.family, '^.*\)''(.*)''$', '\1'),E'[\\t\\n\\r]+', ' ', 'g') as family_s,
     tnh.taxonbasionym as taxonbasionym_s,
     tu.taxonmajorgroup as majorgroup_s,
@@ -153,10 +153,16 @@ select
         where h5int.name=h1.name order by hlg2.pos), '␥', '') as alllocalities_ss,
   CASE WHEN (tsg.typespecimenbasionym IS NOT NULL AND tsg.typespecimenbasionym <>'') THEN 'yes' ELSE 'no' END as hastypeassertions_s,
   tig.qualifier as determinationqualifier_s,
-  com.item AS comments_ss
+  array_to_string(array
+      (SELECT com.item
+       FROM collectionobjects_common cc
+       inner join hierarchy h6int on cc.id = h6int.id
+       JOIN collectionobjects_common_comments com ON (com.id=cc.id AND com.pos IS NOT NULL)
+       where h6int.name = h1.name),
+       '␥', '') AS comments_ss
 
 from collectionobjects_common co
-inner join misc on co.id = misc.id
+inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
 inner join hierarchy h1 on co.id = h1.id
 inner join collectionspace_core cc on co.id=cc.id
 left outer join collectionobjects_common_fieldCollectors fc
@@ -178,10 +184,11 @@ left outer join hierarchy httg on (
     tc.id = httg.parentid
     and httg.name = 'taxon_common:taxonTermGroupList'
     and httg.pos = 0)
-join collectionobjects_common_comments com ON (com.id = cc.id AND (com.pos = 0))
+left outer join collectionobjects_common_comments com ON (com.id = cc.id and com.pos = 0)
 
 inner join hierarchy h2int on co.id = h2int.id and h2int.name = h1.name
-left outer join hierarchy htsg on (co.id = htsg.parentid and htsg.name = 'collectionobjects_naturalhistory:typeSpecimenGroupList')
+left outer join hierarchy htsg on (co.id = htsg.parentid and htsg.pos = 0
+    and htsg.name = 'collectionobjects_naturalhistory:typeSpecimenGroupList')
 left outer join typespecimengroup tsg on (tsg.id = htsg.id)
 
 left outer join taxontermgroup ttg on (ttg.id = httg.id)
@@ -192,12 +199,10 @@ left outer join collectionobjects_naturalhistory conh on (co.id = conh.id)
 left outer join hierarchy hlng on (co.id = hlng.parentid and hlng.primarytype = 'localNameGroup' and hlng.pos = 0)
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join collectionobjects_common_briefdescriptions cocbd on (co.id = cocbd.id and cocbd.pos = 0)
-where misc.lifecyclestate <> 'deleted'
+where substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'UCSB', 'UCSC')
 -- and h1.name = '3380bad9-5bea-4eed-860e' -- UCcrhtest on ucjeps-dev
 -- and h1.name = '338075de-821c-49b3-8f34-969cc666a61e' -- JEPS46872
 -- and h1.name = '291d85e2-06dc-4fc2-9364' -- UC1300355
 -- and h1.name = '33803cfe-e6a8-4025-bf53-a3814cf4da82'	-- JEPS105623
 -- and h1.name like '3380%'
 -- and h1.name = '0ad96db0-be78-4a0b-8f99-9fb229222ffb'	-- JEPS70526
-and substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'UCSB', 'UCSC')
-order by co.objectnumber

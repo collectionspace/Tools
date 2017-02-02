@@ -21,7 +21,7 @@ regexp_replace(mum.item, '^.*\)''(.*)''$', '\1') AS morphologycategory_s,
 mu.majorcategory AS majorcategoryrefname_s,
 regexp_replace(mu.majorcategory, '^.*\)''(.*)''$', '\1') AS majorcategory_s,
 mct.item AS typeofmedia_s,
-mu.locality AS locality_s,
+regexp_replace(lg.fieldlocverbatim,E'[\\t\\n\\r]+', ' ', 'g') as locality_s,
 dg.datedisplaydate as mediadate_s,
 mu.posttopublic AS posttopublic_s,
 mu.handwritten AS handwritten_s,
@@ -48,6 +48,10 @@ LEFT OUTER JOIN media_ucjeps_morphologycategories mum on (mum.id = mc.id and mum
 LEFT OUTER JOIN taxon_common tc on (mu.scientifictaxonomy = tc.refname)
 LEFT OUTER JOIN taxon_ucjeps tu on (tu.id = tc.id)
 LEFT OUTER JOIN taxon_naturalhistory tnh on (tnh.id = tc.id)
+LEFT OUTER JOIN hierarchy hlg
+        on (mu.id = hlg.parentid and hlg.pos = 0
+        and hlg.name = 'media_ucjeps:localityGroupList')
+LEFT OUTER JOIN localitygroup lg on (lg.id = hlg.id)
 
 JOIN hierarchy h3 ON (mc.blobcsid = h3.name)
 LEFT OUTER JOIN blobs_common b on (h3.id = b.id)

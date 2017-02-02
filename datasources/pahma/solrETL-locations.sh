@@ -22,13 +22,13 @@ cd /home/app_solr/solrdatasources/pahma
 # eases maintainance. ergo, the TENANT parameter
 ##############################################################################
 TENANT=$1
-HOSTNAME="dba-postgres-prod-32.ist.berkeley.edu port=5307 sslmode=prefer"
+HOSTNAME="dba-postgres-prod-42.ist.berkeley.edu port=5307 sslmode=prefer"
 USERNAME="reporter_pahma"
 DATABASE="pahma_domain_pahma"
 CONNECTSTRING="host=$HOSTNAME dbname=$DATABASE"
 export NUMCOLS=36
 ##############################################################################
-# extract media info from CSpace
+# extract locations, past and present, from CSpace
 ##############################################################################
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f locations1.sql -o m1.csv
 time psql -F $'\t' -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f locations2.sql -o m2.csv
@@ -49,8 +49,8 @@ cut -f1-5,10-14 m3.sort.csv > m4.csv
 ##############################################################################
 # we want to recover and use our "special" solr-friendly header, which got buried
 ##############################################################################
-grep csid m4.csv > header4Solr.csv
-grep -v csid m4.csv > m5.csv
+grep -P "^csid_s\t" m4.csv > header4Solr.csv
+grep -v -P "^csid_s\t" m4.csv > m5.csv
 cat header4Solr.csv m5.csv > m4.csv
 rm m5.csv m3.sort.csv
 time perl -ne " \$x = \$_ ;s/[^\t]//g; if (length eq 8) { print \$x;}" m4.csv > 4solr.${TENANT}.locations.csv

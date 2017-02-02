@@ -3,10 +3,10 @@ import hashlib
 import math
 import sys
 
-hashkey_column = 33
-fieldCollectionTree_column = 36
+hashkey_column = 34
+fieldCollectionTree_column = 37
 objecttype_column = 5
-latlong_column = 34
+latlong_column = 35
 
 
 def pol2cart(rho, phi):
@@ -21,7 +21,8 @@ with open(sys.argv[2], "wb") as out:
         reader = csv.reader(original, delimiter="\t")
         for row in reader:
             try:
-                if "United States" in row[fieldCollectionTree_column] and row[objecttype_column] == "archaeology" and row[latlong_column] != '':
+                # *all* archeology sites worldwide are obscured
+                if row[objecttype_column] == "archaeology" and row[latlong_column] != '':
                     # obfuscate lat-long
 
                     # first, get the actual values...

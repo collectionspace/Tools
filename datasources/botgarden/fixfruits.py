@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     for i,line in enumerate(fileinput.input()):
         datacolumns = line.split('\t')
-        datacolumns[54] = rpl(datacolumns[54],['t',])
-        datacolumns[55] = rpl(datacolumns[55],['Some','Many'])
+        datacolumns[55] = rpl(datacolumns[55],['t',])
+        datacolumns[56] = rpl(datacolumns[56],['Some','Many'])
         print '\t'.join(datacolumns),
 
 

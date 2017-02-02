@@ -68,6 +68,22 @@ csidletime
 ##### Description
 Shows the amount of time elapsed since the last user activity in CollectionSpace. The time is printed to standard output, in seconds.  The time of last user activity is heuristically determined using log files, and therefore may not be accurate. For example, requests do not appear in certain logs until they have completed, so a long running request that is still in progress may not be detected. If no idle time can be determined (for example, if no logs exist), nothing is printed.
 
+### csstarttime - show when CollectionSpace started
+##### Synopsis
+```
+csstarttime [+FORMAT]
+```
+##### Description
+Shows the date/time the CollectionSpace server was started. The time is printed to standard output, using the format specified. If CollectionSpace is not running, nothing is printed. The format string is interpreted by the `date` program. Note that the format must start with a plus sign.
+
+### cspid - show the PID of the CollectionSpace process
+##### Synopsis
+```
+cspid
+```
+##### Description
+Shows the process ID of the CollectionSpace server. The pid is printed to standard output. If CollectionSpace is not running, nothing is printed.
+
 ### csver - show the installed CollectionSpace version number
 ##### Synopsis
 ```
@@ -112,10 +128,26 @@ cscleantemp
 ##### Description
 Removes old files from the CollectionSpace temporary file directory. Files with names matching the pattern `*-*-*-*-*`, and that have not been modified for some amount of time are removed. The minimum time since last modification may be specified in the `CS_TEMP_MMIN` environment variable, in minutes. If `CS_TEMP_MMIN` is not set, a default of 60 minutes (1 hour) is used.
 
-### csdeployreports - (re)deploy reports from this repo
+### cscleanlog - rotate log files
+##### Synopsis
+```
+cscleanlog
+```
+##### Description
+Rotates log files. Currently, this script only rotates tomcat's catalina.out log. In the future, this script may also rotate and/or remove additional log files.
+
+### cscheckjava - check for Java updates
+##### Synopsis
+```
+cscheckjava
+```
+##### Description
+Checks if the Java installation used by CollectionSpace has been updated. If an update to Java is detected that occurred after the start time of the running CollectionSpace server, the CollectionSpace server is restarted using the `csbounce` program. This ensures that CollectionSpace is using the newest version of Java. This program should be run shortly after the scheduled OS update times.
+
+### csdeployreports - (re)deploy reports for this deployment
 ##### Synopsis
 ```
 csdeployreports
 ```
 ##### Description
-Copies the JRXML files from this repo into the reports directory cleans out the existing compiled versions. CollectionSpace will recompile them as needed.
+Copies the JRXML files for this deployment into the reports directory, and cleans out the existing compiled reports. CollectionSpace will recompile them as needed.

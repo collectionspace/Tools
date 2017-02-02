@@ -32,7 +32,11 @@
     case when coc.fieldcollectionnumber is null or coc.fieldcollectionnumber = '' then ''
         else '; ' || coc.fieldcollectionnumber end ||
     case when sdg.datedisplaydate is null or sdg.datedisplaydate = '' then ''
-        else '<br><b>Date:</b> ' || sdg.datedisplaydate end as Concat_Data,
+        else '<br><b>Date:</b> ' || sdg.datedisplaydate end ||
+    case when nps.numbervalue is null or nps.numbervalue = '' then ''
+        else '<br><b>' || nps.numbertype || ':</b> ' || nps.numbervalue end ||
+    case when onps.numbervalue is null or onps.numbervalue = '' then ''
+        else '<br><b>' || onps.numbertype || ':</b> ' || onps.numbervalue end as Concat_Data,
     case
         when conh.labelfooter is null or conh.labelfooter = '' then ''
         when conh.labelfooter like 'urn:%' then '<b>' || getdispl(conh.labelfooter) || '</b>'
@@ -41,7 +45,7 @@
     case
         when conh.objectcountnumber is null and coc.numberofobjects is null then ''
         else '<br>Sheet ' || coalesce(conh.objectcountnumber::text, ' ') ||
-	' of ' || coalesce(coc.numberofobjects::text, ' ')
+        ' of ' || coalesce(coc.numberofobjects::text, ' ')
     end as Label_Footer,
     case
         when conh.objectcountnumber is null and coc.numberofobjects is null then ''
@@ -82,6 +86,18 @@ left outer join structuredDateGroup sdg on (hsdg.id = sdg.id)
 left outer join collectionobjects_common_briefdescriptions cocbd on (
     coc.id = cocbd.id
     and cocbd.pos = 0)
+left outer join (
+    select h.parentid, o.numbertype, o.numbervalue
+    from othernumber o, hierarchy h
+    where h.id = o.id
+    and h.primarytype = 'otherNumber'
+    and o.numbertype = 'National Park Service Accession Number') nps on (coc.id = nps.parentid)
+left outer join (
+    select h.parentid, o.numbertype, o.numbervalue
+    from othernumber o, hierarchy h
+    where h.id = o.id
+    and h.primarytype = 'otherNumber'
+    and o.numbertype = 'Old NPS catalog number') onps on (coc.id = onps.parentid)
 where hgc.name = $P{csid}]]>
 	</queryString>
 	<field name="id" class="java.lang.String"/>

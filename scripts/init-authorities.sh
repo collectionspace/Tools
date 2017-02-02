@@ -13,11 +13,11 @@
 # set -x verbose
 
 # Set a space-separated list of tenant identifiers below:
-TENANTS+=(core lifesci)
+TENANTS+=(core lifesci fcart)
 
 # Set a space-separated list of tenant domain names that correspond,
 # in exact 1:1 order, to the identifiers in the TENANTS list above
-TENANT_DOMAINS+=(core.collectionspace.org lifesci.collectionspace.org)
+TENANT_DOMAINS+=(core.collectionspace.org lifesci.collectionspace.org fcart.collectionspace.org)
 
 # This script assumes that each tenant's default administrator
 # username follows a consistent pattern:
@@ -43,7 +43,7 @@ do
 done
 
 CURL_EXECUTABLE=`which curl`
-if [ "xCURL_EXECUTABLE" == "x" ]
+if [ -z "$CURL_EXECUTABLE" ]
   then
     echo "Could not find 'curl' application"
     exit 1
@@ -109,7 +109,7 @@ do
   done
       
   # If we got a session cookie, then initialize authorities using that cookie
-  if [ "xcookie" != "x" ]
+  if [ -n "$cookie" ]
     then
         echo "Initializing authorities in the '$tenant' tenant ..."
 

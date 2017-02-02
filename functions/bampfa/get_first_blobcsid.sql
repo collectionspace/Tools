@@ -15,7 +15,7 @@ from collectionobjects_common co
    JOIN hierarchy hmc on (rimg.subjectcsid = hmc.name)
    JOIN media_common mc on (mc.id=hmc.id)
    JOIN misc m on (mc.id=m.id and m.lifecyclestate<>'deleted')
-   JOIN media_bampfa mb on (mc.id=mb.id and mb.imagenumber='1')
+   JOIN media_bampfa mb on (mc.id=mb.id and mb.imagenumber='1' and mb.websitedisplaylevel != 'No public display')
 where hrel.name=$1;
 
 RETURN blobcsid;

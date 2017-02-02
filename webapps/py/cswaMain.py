@@ -1,8 +1,5 @@
-#!/usr/bin/env /usr/bin/python
+#!/usr/bin/env /var/www/venv/bin/python
 
-import sys
-import time
-import cgi
 import traceback
 import cgitb; cgitb.enable()  # for troubleshooting
 from cswaConstants import selectWebapp
@@ -69,11 +66,14 @@ try:
             if   updateType == 'packinglist':  doPackingList(form,config)
             elif updateType == 'movecrate':    doUpdateLocations(form,config)
             elif updateType == 'powermove':    doUpdateLocations(form,config)
+            elif updateType == 'grpmove':      doUpdateLocations(form,config)
             elif updateType == 'barcodeprint': doBarCodes(form,config)
             elif updateType == 'inventory':    doUpdateLocations(form,config)
             elif updateType == 'moveobject':   doUpdateLocations(form,config)
             elif updateType == 'objinfo':      doUpdateKeyinfo(form,config)
             elif updateType == 'keyinfo':      doUpdateKeyinfo(form,config)
+            elif updateType == 'grpinfo':      doUpdateKeyinfo(form,config)
+            elif updateType == 'createobjects': doCreateObjects(form,config)
             elif updateType == 'bulkedit':     doBulkEdit(form,config)
             elif updateType == 'bedlist':      doBedList(form,config)
             elif updateType == 'advsearch':    doAdvancedSearch(form,config)
@@ -95,9 +95,12 @@ try:
         elif action == "Search":
             if   updateType == 'packinglist':  doLocationSearch(form,config,'nolist')
             elif updateType == 'movecrate':    doCheckMove(form,config)
+            elif updateType == 'grpmove':      doCheckGroupMove(form,config)
             elif updateType == 'powermove':    doCheckPowerMove(form,config)
             elif updateType == 'barcodeprint':
-                if form.get('ob.objno1'):
+                if form.get('gr.group'):
+                    doGroupSearch(form, config, 'list')
+                elif form.get('ob.objno1'):
                     doOjectRangeSearch(form, config)
                 else:
                     doLocationSearch(form, config, 'nolist')
@@ -109,6 +112,8 @@ try:
             elif updateType == 'inventory':    doLocationSearch(form,config,'list')
             elif updateType == 'keyinfo':      doLocationSearch(form,config,'list')
             elif updateType == 'objinfo':      doObjectSearch(form,config,'list')
+            elif updateType == 'grpinfo':      doGroupSearch(form,config,'list')
+            elif updateType == 'createobjects': doCreateObjects(form,config)
             elif updateType == 'moveobject':   doObjectSearch(form,config,'list')
             elif updateType == 'objdetails':   doObjectDetails(form,config)
             elif updateType == 'editrel':      doRelationsSearch(form,config)

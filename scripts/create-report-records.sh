@@ -17,7 +17,7 @@
 # set -x verbose
 
 # Set a space-separated list of tenant identifiers below:
-TENANTS+=(core lifesci)
+TENANTS+=(core)
 
 # Set space-separated lists of MIME types and their corresponding
 # MIME type labels, below:
@@ -36,9 +36,42 @@ MIMETYPE_LABELS+=(
     'MS Excel' \
     'MS Word' \
     'PDF' )
-    
-REPORT_NAME="Acquisition Summary"
+
+#<document name="reports">
+#	<ns2:reports_common xmlns:ns2="http://collectionspace.org/services/report">
+#		<supportsDocList>false</supportsDocList>
+#		<supportsNoContext>true</supportsNoContext>
+#		<outputMIME>application/pdf</outputMIME>
+#		<name>The name of the report shown in the UI</name>
+#		<filename>reportname.jrxml</filename>
+#		<supportsGroup>false</supportsGroup>
+#		<supportsSingleDoc>true</supportsSingleDoc>
+#		<notes>Just a few fields about the report</notes>
+#		<forDocTypes>
+#			<forDocType>Acquisition</forDocType>
+#		</forDocTypes>
+#	</ns2:reports_common>
+#</document>
+	
+# Name shown in report output
+REPORTXML_NAME="$1"
+# Notes for the report
+REPORTXML_NOTES="$2"
+# Document type for the report
+REPORTXML_DOCTYPE="$3"
+# Supports single document?
+REPORTXML_SUPPORTS_SINGLE_DOC="$4"
+# Supports
+REPORTXML_SUPPORTS_DOC_LIST="$5"
+# Supports
+REPORTXML_SUPPORTS_GROUP="$6"
+# Supports
+REPORTXML_SUPPORTS_NO_CONTEXT="$7"
+# Name of report file to match in a keyword search
+REPORTXML_FILENAME="$8"
+
 REPORT_NAME_REGEX="(PDF)"
+
     
 # Each item in each of the two lists above should correspond 1:1 with
 # its counterpart in the other list. (Associative/hash-style arrays would
@@ -75,14 +108,23 @@ if [ "xCURL_EXECUTABLE" == "x" ]
 fi
 
 LIST_ITEM_REGEX="list-item"
-# Name of report file to match in a keyword search
-REPORT_FILENAME="acq_basic.jasper"
+
 # FIXME: It may be prudent to add code to verify that any '401'
 # response lines, not followed by 'Unauthorized', are truly
 # response codes and not random occurrences of that number.
 AUTHENTICATION_FAILURE_REGEX="^401 Unauthorized|^401"
 
-let TENANT_COUNTER=0
+# FIXME: It may be prudent to add code to verify that any '40x' or '50x'
+# response lines are truly response codes and not random occurrences of that number.
+POST_FAILURE_REGEX="^40[0-9]|^50[0-9]"
+
+declare -i WARNINGS_COUNTER=0
+declare -a WARNINGS_MSGS
+
+declare -i ERRORS_COUNTER=0
+declare -a ERRORS_MSGS
+
+declare -i TENANT_COUNTER=0
 for tenant in ${TENANTS[*]}
 do
 
@@ -93,17 +135,19 @@ do
   # temporary file name, under at least one or more Linux OSes
   READ_LIST_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
 
-  # As an admin user within this tenant, perform a keyword search
+  # As an admin user within this tenant, perform field-level search on the report name
   # to find all existing records, if any, referring to this report
   
-  echo "Checking for an Acquisition Summary report record in the '$tenant' tenant ..."
+  echo "Checking for an $REPORTXML_NAME report record in the '$tenant' tenant ..."
 
   $CURL_EXECUTABLE \
+  --get \
   --include \
   --silent \
   --show-error \
   --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
-  --url http://$HOST:$PORT/cspace-services/reports?kw=$REPORT_FILENAME \
+  --url http://$HOST:$PORT/cspace-services/reports \
+  --data-urlencode "as=reports_common:name ILIKE '$REPORTXML_NAME%'" \
   > $READ_LIST_TMPFILE
   
   # Read the response from that file
@@ -119,10 +163,11 @@ do
       break
     fi
   done
-  
+    
   if [ $authentication_failure_flag == 1 ]; then
-    echo "ERROR: Failed to authenticate successfully to the '$tenant' tenant."
-    echo "(Suggestion: check username, password, tenant identifier, host and port.)"
+    msg="ERROR: Failed to authenticate successfully to the '$tenant' tenant."
+	ERRORS_MSGS[$ERRORS_COUNTER]="$msg"
+	ERRORS_COUNTER+=1
     continue
   fi
   
@@ -149,8 +194,10 @@ do
       done
   fi
   if [ $at_least_one_matching_report_record_exists == 1 ]; then
-    echo "Found an Acquisition Summary report record in the '$tenant' tenant."
-    echo "Will NOT create a new record."
+	echo
+    msg="WARNING: Found an existing '$REPORTXML_NAME' report record in the '$tenant' tenant.  No new record created."
+	WARNINGS_MSGS[$WARNINGS_COUNTER]="$msg"
+	WARNINGS_COUNTER+=1
     continue
   fi
   
@@ -163,65 +210,97 @@ do
   let MIMETYPE_COUNTER=0
   for mimetype in ${MIMETYPES[*]}
   do
-
-    echo "Creating a new Acquisition Summary report record for"
-    echo "MIME type ${MIMETYPES[MIMETYPE_COUNTER]} in the '$tenant' tenant ..."
-
+	QUALIFIED_REPORTXML_NAME="$REPORTXML_NAME (${MIMETYPE_LABELS[MIMETYPE_COUNTER]})"
+	MIMETYPE=${MIMETYPES[MIMETYPE_COUNTER]}
+	echo
+    echo "Creating a new '$QUALIFIED_REPORTXML_NAME' report record for MIME type '$MIMETYPE' in the '$tenant' tenant..."
+	
+	PAYLOAD=`mktemp -t ${tempfilename}.XXXXX` || exit 1	
+	echo XML Payload is: $PAYLOAD
+	echo \
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<document name=\"reports\">
+  <ns2:reports_common xmlns:ns2=\"http://collectionspace.org/services/report\"
+  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+    <supportsDocList>$REPORTXML_SUPPORTS_DOC_LIST</supportsDocList>
+    <supportsNoContext>$REPORTXML_SUPPORTS_NO_CONTEXT</supportsNoContext>
+    <outputMIME>$MIMETYPE</outputMIME>
+    <name>$QUALIFIED_REPORTXML_NAME</name>
+    <filename>$REPORTXML_FILENAME</filename>
+    <supportsGroup>${REPORTXML_SUPPORTS_GROUP}</supportsGroup>
+    <supportsSingleDoc>$REPORTXML_SUPPORTS_SINGLE_DOC</supportsSingleDoc>
+    <notes>$REPORTXML_NOTES</notes>
+    <forDocTypes>
+      <forDocType>$REPORTXML_DOCTYPE</forDocType>
+    </forDocTypes>
+  </ns2:reports_common>
+</document>"\
+	> $PAYLOAD
+	
     CREATE_RECORD_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
-    
-    # 'data @- << END_OF_PAYLOAD', below, reads the data that is to be sent in a POST
-    # request from standard input. This data, in turn, is read from a 'here document'
-    # directly inline within the script, ending with the last line prior to the
-    # 'END_OF_PAYLOAD' line.
-    
+	echo "curl result file: $CREATE_RECORD_TMPFILE"
+	        
     $CURL_EXECUTABLE \
     --include \
-    --silent \
     --show-error \
+    --silent \
     --user "${DEFAULT_ADMIN_ACCTS[TENANT_COUNTER]}:$DEFAULT_ADMIN_PASSWORD" \
     --header "Content-Type: application/xml" \
     --url http://$HOST:$PORT/cspace-services/reports \
-    --data @- << END_OF_PAYLOAD
-<?xml version="1.0" encoding="utf-8"?>
-<document name="reports">
-  <ns2:reports_common xmlns:ns2="http://collectionspace.org/services/report"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <supportsDocList>false</supportsDocList>
-    <supportsNoContext>true</supportsNoContext>
-    <outputMIME>${MIMETYPES[MIMETYPE_COUNTER]}</outputMIME>
-    <name>$REPORT_NAME (${MIMETYPE_LABELS[MIMETYPE_COUNTER]})</name>
-    <filename>${REPORT_FILENAME}</filename>
-    <supportsGroup>false</supportsGroup>
-    <supportsSingleDoc>true</supportsSingleDoc>
-    <notes>Just a few fields about a single acquisition</notes>
-    <forDocTypes>
-      <forDocType>Acquisition</forDocType>
-    </forDocTypes>
-  </ns2:reports_common>
-</document>
-END_OF_PAYLOAD
-    > $CREATE_RECORD_TMPFILE
+    --data @$PAYLOAD > $CREATE_RECORD_TMPFILE
 
+	let MIMETYPE_COUNTER++
     # Read the response from that file
     create_record_results=( $( < $CREATE_RECORD_TMPFILE ) )
-    rm $CREATE_RECORD_TMPFILE
-
-    # Echo the response to the create request to the console
+		
+    # Check for possible failure
+    post_failure_flag=0
     for results_item in ${create_record_results[*]}
     do
-      echo results_item
+	  if [[ $results_item =~ $POST_FAILURE_REGEX ]]; then
+	  	echo "HTTP Status code was: $results_item."
+	    post_failure_flag=1
+	    break
+	  fi
     done
-    
+  
+    if [ $post_failure_flag == 1 ]; then
+  	  msg="ERROR: Failed to successfully create the report '$QUALIFIED_REPORTXML_NAME' to the '$tenant' tenant."
+  	  ERRORS_MSGS[$ERRORS_COUNTER]="$msg"
+	  ERRORS_COUNTER+=1
+	  continue
+    fi
+	    
     # Help probabilistically ensure that reports are listed
     # in reverse order of creation - in list results and in
     # the UI's 'run rports dropdown menu - by waiting at least
     # 1 second before creating each report
     sleep 1s
-    
-    let MIMETYPE_COUNTER++
-    
+        
   done # End of per-MIME type 'do' loop
     
 done # End of per-tenant 'do' loop
 
+if [ $WARNINGS_COUNTER -gt 0 ]; then
+	echo
+	echo "### Warnings Summary: $WARNINGS_COUNTER warning(s)."
+	declare -i count=0
+	while [ $count -lt $WARNINGS_COUNTER ]
+	do
+		echo ${WARNINGS_MSGS[count]} >&2
+		count+=1
+	done
+	exit 0
+fi
 
+if [ $ERRORS_COUNTER -gt 0 ]; then
+	echo
+	echo "### Errors Summary: $ERRORS_COUNTER error(s)."
+	declare -i count=0
+	while [ $count -lt $ERRORS_COUNTER ]
+	do
+		echo ${ERRORS_MSGS[count]} >&2
+		count+=1
+	done
+	exit 1
+fi
