@@ -110,7 +110,7 @@ if __name__ == "__main__":
     args = sys.argv
     if (len(args) > 1 and args[1] == "help"):
         print ("To run the file, use the inputs: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes>")
-    elif len(args) != 5:
+    elif len(args) < 5:
         print ("One or more inputs missing: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes> <dry_run> \nPlease fix or run with 'help' for more info.")
     else:
         museum = args[1]
