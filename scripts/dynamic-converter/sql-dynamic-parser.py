@@ -6,7 +6,7 @@ valid_tokens = ["-m", "-i", "-o", "-d"]
 museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
 
-def parse(inp, mark, museum, pwd, port, user, dbname):
+def parse(inp, mark, museum, connect_string):
     counts_sql = "count.sql"
     out = "%s.out.txt" % museum
     outfile = open(out, "w")
@@ -50,7 +50,7 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
     markup.close()
     counts.close()
     
-    execute(update_sqlstatements, count_sqlstatements, pwd, port, user, dbname, museum)
+    execute(update_sqlstatements, count_sqlstatements, connect_string, museum)
     
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
@@ -65,7 +65,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     return total_changes
 
 
-def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, database_name, museum):
+def execute(update_sqlstatements, count_sqlstatements, connect_string, museum):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
