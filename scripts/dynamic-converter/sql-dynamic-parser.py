@@ -96,8 +96,8 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
     total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
 
     if total_changed == total_to_change:
-    	dbconn.commit()
-    	return 1
+        dbconn.commit()
+        return 1
     else:
         dbconn.rollback()
         return -1
