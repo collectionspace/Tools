@@ -1,0 +1,1 @@
+SELECT item, COUNT(*) FROM collectionobjects_common_contentpositions GROUP BY item
