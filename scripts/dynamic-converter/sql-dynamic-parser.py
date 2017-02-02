@@ -39,7 +39,7 @@ def parse(inp, mark, museum, pwd, port, user, dbname):
         for each in option_tags:
             vocab_id = each['id']
             field_name = each.contents[0]
-
+		
             # print(vocab_id, field_name)
             new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)''%s''" % (museum, vocab_list, vocab_id, field_name)
             select_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, field_name)
@@ -73,8 +73,8 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
         counts the items to update, performs updates in the database, and confirms counts before and after are the same
     """
     
-    # dbconn = ps2.connect(dbname=database_name, user=usr, password=dbpassword, host="localhost", port=dbport)
-    # dbcursor = dbconn.cursor()
+    dbconn = ps2.connect(dbname=database_name, user=usr, password=dbpassword, host="localhost", port=dbport)
+    dbcursor = dbconn.cursor()
     counts_before = "%s.counts.before.txt" % museum
     counts_after = "%s.counts.after.txt" % museum
     counts_results = "%s.counts.results.txt" % museum
@@ -85,10 +85,15 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
     for count_statement in count_sqlstatements:
         dbcursor.execute(count_statement)
         results = dbcursor.fetchall()
-        counts_before_file.write(results)
+       
+	
+	counts_before_file.write(str(results))
         for result in results:
-            total_to_change += result[1]  
-    counts_before_file.write(total_to_change)            
+            print (str(type(result)), str(type(result[0] )))
+	    
+	    #[counts_before_file.write(c) for c in result[0]]
+	    total_to_change += result[1]  
+    counts_before_file.write(str(total_to_change))            
     counts_before_file.close()
     
     # Second: Perform the changes
@@ -102,10 +107,12 @@ def execute(update_sqlstatements, count_sqlstatements, dbpassword, dbport, usr, 
     for count_statement in count_sqlstatements:
         dbcursor.execute(count_statement)
         results = dbcursor.fetchall()
-        counts_after_file.write(results)
+        
+	counts_after_file.write(str(results))
         for result in results:
-            total_changed += result[1]
-    counts_after_file.write(total_changed)
+            #[counts_after_file.write(c) for c in result[0]]
+	    total_changed += result[1]
+    counts_after_file.write(str(total_changed))
     counts_after_file.close()
     
     
