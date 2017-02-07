@@ -26,15 +26,15 @@
 # run BMU batch jobs (nightly or twice a day depending)
 ##################################################################################
 # run PAHMA BMU (one minute after 7pm)
-01 19   * * * shopt -s nullglob; for f in /tmp/image_upload_cache_pahma/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/pahma/uploadmedia/postblob.sh pahma $f pahma_Uploadmedia_Prod >> /tmp/image_upload_cache_pahma/batches.log 2>&1 ; done
+01 19   * * * shopt -s nullglob; for f in /tmp/image_upload_cache_pahma/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; { time /var/www/pahma/uploadmedia/postblob.sh pahma $f pahma_Uploadmedia_Prod ; } >> /tmp/image_upload_cache_pahma/batches.log 2>&1 ; done
 # run UCJEPS BMU (one minute after the hour, noon and 8pm)
-10 12,20 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_ucjeps/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/ucjeps/uploadmedia/postblob.sh ucjeps $f ucjeps_Uploadmedia_Prod >> /tmp/image_upload_cache_ucjeps/batches.log 2>&1 ; done
+10 12,20 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_ucjeps/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; { time /var/www/ucjeps/uploadmedia/postblob.sh ucjeps $f ucjeps_Uploadmedia_Prod ; } >> /tmp/image_upload_cache_ucjeps/batches.log 2>&1 ; done
 # run Cinefiles BMU
-10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/cinefiles/uploadmedia/postblob.sh cinefiles $f cinefiles_Uploadmedia_Prod >> /tmp/image_upload_cache_cinefiles/batches.log 2>&1 ; done
+10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_cinefiles/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; { time /var/www/cinefiles/uploadmedia/postblob.sh cinefiles $f cinefiles_Uploadmedia_Prod ; } >> /tmp/image_upload_cache_cinefiles/batches.log 2>&1 ; done
 # run BAMPFA BMU (currently a no-op -- they now use Piction)
-#30 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_bampfa/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/bampfa/uploadmedia/postblob.sh $f >> /tmp/image_upload_cache_bampfa/batches.log 2>&1 ; done
+#30 * * * * shopt -s nullglob; for f in /tmp/image_upload_cache_bampfa/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; { time /var/www/bampfa/uploadmedia/postblob.sh $f ; } >> /tmp/image_upload_cache_bampfa/batches.log 2>&1 ; done
 # run UCBG BMU
-10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_botgarden/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; time /var/www/botgarden/uploadmedia/postblob.sh botgarden $f botgarden_Uploadmedia_Prod >> /tmp/image_upload_cache_botgarden/batches.log 2>&1 ; done
+10 15,22 * * * shopt -s nullglob; for f in /tmp/image_upload_cache_botgarden/*.step1.csv; do f=$(echo $f | sed -e 's/\.step1.csv//') ; { time /var/www/botgarden/uploadmedia/postblob.sh botgarden $f botgarden_Uploadmedia_Prod ; } >> /tmp/image_upload_cache_botgarden/batches.log 2>&1 ; done
 ##################################################################################
 # clean up the BMU temp directorys (erase images more than 48 hours old)
 ##################################################################################
