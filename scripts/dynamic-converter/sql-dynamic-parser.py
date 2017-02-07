@@ -1,3 +1,4 @@
+import codecs
 import sys
 import psycopg2 as ps2
 from bs4 import BeautifulSoup
@@ -5,11 +6,13 @@ from bs4 import BeautifulSoup
 valid_tokens = ["-m", "-i", "-o", "-d"]
 museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
+UTF8Writer = codecs.getwriter('utf8')
+sys.stdout = UTF8Writer(sys.stdout)
 
 def parse(inp, mark, museum, connect_string, dry_run):
     counts_sql = "count.sql"
     out = "%s.out.txt" % museum
-    outfile = open(out, "w")
+    outfile = UTF8Writer(open(out, "w"))
     counts = open(counts_sql, "w")
     infile = open(inp)
     markup = open(mark)
