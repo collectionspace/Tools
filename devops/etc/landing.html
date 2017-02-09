@@ -1,8 +1,6 @@
 <html lang="en-us">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="css/reset.css">
-    <link rel="stylesheet" type="text/css" href="css/base.css">
     <meta name="robots" content="NONE,NOARCHIVE">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -10,6 +8,7 @@
     <!-- link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.22.custom.css"/>
     <script type="text/javascript" src="js/jquery-1.10.0.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script -->
+    <link rel="stylesheet" type="text/css" href="css/base.css">
     <style>
     li {margin: 10px 0;}
     .likeabutton {
@@ -17,13 +16,15 @@
         -moz-appearance: button;
         -webkit-appearance: button;
         text-decoration: none; font: menu; color: ButtonText;
-        display: inline-block; padding: 4px 10px;
+        display: inline-block;
     }
+    p.landing { padding: 2px; }
+    h3, h4 { padding: 0px; margin-bottom: 6px; margin-top: 6px; color: #4d4d4d; }
     </style>
 </head>
 <body class="">
 <div id="container">
-    <div id="content-main" style="max-width: 1080px">
+    <div id="content-main" style="max-width: 900px">
         <div>
             <img height="40px" src="http://www.collectionspace.org/wp-content/uploads/2014/11/CSpaceLogo.png">
             <span style="font-size: 28px;vertical-align: 35%;">@</span>
@@ -31,8 +32,9 @@
         </div>
          <div id="tabs">
             <ul>
-                <li><a href="#prodtab">Production</a></li>
-                <li><a href="#devtab">Development</a></li>
+                <li><a href="#prodtab">Production Apps</a></li>
+                <li><a href="#devtab">Development Apps</a></li>
+                <li><a href="#documentstab">Help!</a></li>
                 <li><a href="#analyticstab">Analytics</a></li>
                 <li><a href="#newstab">News</a></li>
             </ul>
@@ -45,7 +47,6 @@
                         <th>Public Portal</th>
                         <th>Other Public Endpoints</th>
                         <th>Internal Endpoints</th>
-                        <th>"Legacy" Apps</th>
                     </tr>
                     </tbody>
                 </table>
@@ -60,7 +61,6 @@
                         <th>Public Portal</th>
                         <th>Other Public Endpoints</th>
                         <th>Internal Endpoints</th>
-                        <th>"Legacy" Apps</th>
                     </tr>
                     </tbody>
                 </table>
@@ -79,6 +79,26 @@
                      </div>
                  </div>
              </div>
+             <div id="documentstab">
+                 <h3>Hello!</h3>
+                 <p>There is no one single place to find information and links to the various services and websites
+                 associated with CollectionSpace@UCB.  This is probably as close as you will get to such a place.</p>
+                 <p>This webpage and its various panes provide links to web-accessible CSpace applications at UCB.</p>
+                 <p>For each set of applications, are two "deployments" (i.e. installations) of the code:</p>
+                 <ul>
+                     <li>The <span style="color: red">Production</span> deployment, where "real work" should be done;</li>
+                     <li>The <span style="color: green">Development</span>  deployment, where testing, experimentation, and training should be done.</li>
+                 </ul>
+                 The first two tabs (above left) show what is available for each deployment.</p>
+                 <p>
+                     <b>Make sure you are working with the deployment you should be working with!</b></b>
+                 </p>
+                 <p>There are two basic types of applications:</p>
+                 <ul>
+                 <li>Webapps written using the <a target="new" href="https://github.com/cspace-deployment/cspace_django_project/blob/master/README.md">CollectionSpace Django Project</a></li>
+                 <li>The <a target="new" href="">"regular UIs"</a>, which require authentication.</li>
+                </ul>
+            </div>
              <div id="newstab">
             </div>
         </div>
@@ -93,11 +113,11 @@
     $(function () {
 
         var museums = [
-            ['UC Botanical Garden', 'botgarden', '7d54623a-ac9a-4165-980e', ['searchmedia', 'uploadtricoder', 'eloan', 'imaginator']],
-            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan']],
-            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator']],
-            ['PAHMA', 'pahma', '884e47c2-4e6c-42ed-b410', ['searchmedia', 'eloan']],
-            ['UCJEPS', 'ucjeps', '1c18cf1e-4826-4f33-b047', ['uploadtricoder', 'ireports', 'internal']]
+            ['UC Botanical Garden', 'botgarden', '13d90c7c-60cc-4f13-9985', ['searchmedia', 'uploadtricoder', 'eloan', 'imaginator']],
+            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan', 'toolbox']],
+            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator', 'toolbox']],
+            ['PAHMA', 'pahma', 'c8055214-50e7-49b1-b15b', ['searchmedia', 'eloan']],
+            ['UCJEPS', 'ucjeps', '1c18cf1e-4826-4f33-b047', ['uploadtricoder', 'ireports', 'internal', 'toolbox']]
         ];
 
 
@@ -111,13 +131,14 @@
             'internal': [
                 ["internal", "Internal Portal"],
                 ["ireports", "iReports"],
-                ["uploadmedia", "Bulk Media Uploader"],
-                ["uploadtricoder", "Tricoder File Uploader"]
+                ["uploadmedia", "Bulk Media Upload"],
+                ["uploadtricoder", "Tricoder File Upload"],
+                ["toolbox", "Toolbox"]
             ]
         };
 
-        var rowh = '100px';
-        var roww = '280px';
+        var rowh = '80px';
+        var roww = '200px';
         museums.forEach(function (item) {
             ['prod', 'dev'].forEach(function (sys) {
                 var system = '';
@@ -130,18 +151,23 @@
                 newtr.style.height = rowh;
                 var regularui = "https://" + item[1] + system + ".cspace.berkeley.edu";
                 var webapps = "https://webapps" + system + ".cspace.berkeley.edu/" + item[1];
-                var img = '<img style="max-height: ' + rowh + '" alt="' + item[0] + '" src="https://webapps' + system + '.cspace.berkeley.edu/' + item[1] + '_static/cspace_django_site/images/header-logo.png">';
+                var img = '<img style="max-width: 310px ; max-height: ' + rowh + '" alt="' + item[0] + '" src="https://webapps' + system + '.cspace.berkeley.edu/' + item[1] + '_static/cspace_django_site/images/header-logo.png">';
                 var newtd = document.createElement("td");
                 newtd.style.width = "310px";
-                var title = '<h4 style="padding-bottom: 10px;">' + item[0] + "</h4>";
+                var title = '<h4>' + item[0] + "</h4>";
                 newtd.innerHTML = '<a target="_blank" href="' + regularui + '">' + title + img + '</a>';
                 $(newtr).append(newtd);
                 var url = 'https://webapps.cspace.berkeley.edu/' + item[1] + '/imageserver/blobs/' + item[2] + '/derivatives/Medium/content';
-                var img = '<img height="' + rowh + '"; alt="' + item[0] + '" src="' + url + '">';
+                var img = '<img width="' + rowh + '"; alt="' + item[0] + '" src="' + url + '">';
                 var newtd = document.createElement("td");
-                newtd.style.width = "200px";
+                newtd.style.width = "120px";
                 // newtd.style.textAlign = 'center';
-                newtd.innerHTML = '<a href="' + webapps + '/search">' + img + '</a>';
+                if (item[1] === 'cinefiles') {
+                    newtd.innerHTML = '<a target="new" href="https://cinefiles.bampfa.berkeley.edu">' + img + '</a>';
+                }
+                else {
+                    newtd.innerHTML = '<a target="new" href="' + webapps + '/search">' + img + '</a>';
+                }
                 $(newtr).append(newtd);
 
                 ['public', 'internal'].forEach(function (apptype) {
@@ -151,39 +177,15 @@
                     $.each(obj[apptype], function (appindex) {
                         if (item[3].indexOf(this[0]) === -1) {
                             var newp = document.createElement("p");
-                            newp.style.padding = "6px 0px 6px 0px";
-                            newp.innerHTML += '<a style="color: white;" class="prettyBtn" target="_blank" href="' + webapp + '/' + this[0] + '">' + this[1] + '</a>';
+                            // newp.style.padding = "6px 0px 6px 0px";
+                            newp.className = "landing";
+                            newp.innerHTML += '<a class="likeabutton" target="_blank" href="' + webapp + '/' + this[0] + '">' + this[1] + '</a>';
                             $(newtd).append(newp);
                         }
                     });
                     $(newtr).append(newtd);
                     $("#" + sys).append(newtr);
                 });
-                if (item[1] === 'botgarden') {
-                    var newtd = document.createElement("td");
-                    newtd.style.backgroundColor = "lemonchiffon";
-                    newtd.innerHTML = '<p style="padding: 6px 0px;"><a style="color: white;" class="prettyBtn" target="_blank" href="https://webapps' + system + '.cspace.berkeley.edu/cgi-bin/cswaMain.py">Click Here</a></p>';
-                    newtd.innerHTML += '<br/><br/>The legacy webapps for all tenants all reside together:' +
-                            '<br/><br/><ul style="list-style-type: circle; padding-left: 20px;">' +
-                            "<li>Barcode Label Generator</li>" +
-                            "<li>Bed List Report</li>" +
-                            "<li>Bulk Object Edit</li>" +
-                            "<li>Collection Holdings</li>" +
-                            "<li>Government Holdings</li>" +
-                            "<li>Hierarchy Viewer</li>" +
-                            "<li>Key Information Review</li>" +
-                            "<li>Location Report</li>" +
-                            "<li>Move Crate</li>" +
-                            "<li>Move Object Range</li>" +
-                            "<li>Object Details</li>" +
-                            "<li>Object Info Review</li>" +
-                            "<li>Packing List Report</li>" +
-                            "<li>Power Move</li>" +
-                            "<li>Systematic Inventory</li>" +
-                            "</ul>";
-                    newtd.rowSpan = 5;
-                    $(newtr).append(newtd);
-                }
             });
         });
         $('#tabs').tabs({active: 0});

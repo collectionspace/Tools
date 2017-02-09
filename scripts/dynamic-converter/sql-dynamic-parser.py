@@ -1,3 +1,4 @@
+import codecs
 import sys
 import psycopg2 as ps2
 from bs4 import BeautifulSoup
@@ -5,11 +6,13 @@ from bs4 import BeautifulSoup
 valid_tokens = ["-m", "-i", "-o", "-d"]
 museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
+UTF8Writer = codecs.getwriter('utf8')
+sys.stdout = UTF8Writer(sys.stdout)
 
 def parse(inp, mark, museum, connect_string, dry_run):
     counts_sql = "count.sql"
     out = "%s.out.txt" % museum
-    outfile = open(out, "w")
+    outfile = UTF8Writer(open(out, "w"))
     counts = open(counts_sql, "w")
     infile = open(inp)
     markup = open(mark)
@@ -40,9 +43,14 @@ def parse(inp, mark, museum, connect_string, dry_run):
             vocab_id = each['id']
             field_name = each.contents[0]
 
+            if 'from-static-id' in each.attrs:
+                search_id = each['from-static-id']
+            else:
+                search_id = field_name
+
             # print(vocab_id, field_name)
             new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)''%s''" % (museum, vocab_list, vocab_id, field_name)
-            select_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, field_name)
+            select_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
             outfile.write(select_statement)
             update_sqlstatements.append(select_statement)
 
@@ -90,9 +98,9 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, d
     # Second: Perform the changes
     for update_statement in update_sqlstatements:
         if not dry_run:
-	    dbcursor.execute(update_statement)
-	else:
-	    print(update_statement)
+       		dbcursor.execute(update_statement)
+    	else:
+        	print(update_statement)
     
     counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
@@ -120,12 +128,8 @@ if __name__ == "__main__":
             infile = args[2]
             markup = args[3]
             connect_string = args[4]
-	    if (len(args) > 5):
-		dry_run = True		
-	    else:
-		dry_run = False
-            parse(infile, markup, museum, connect_string, dry_run)
-
-
-
-
+        if (len(args) > 5):
+	        dry_run = True
+        else:
+        	dry_run = False
+        parse(infile, markup, museum, connect_string, dry_run)
