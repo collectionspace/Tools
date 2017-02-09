@@ -19,7 +19,8 @@ def parse(inp, mark, museum, connect_string, dry_run):
     soup = BeautifulSoup(markup, "html.parser")
     update_sqlstatements = []
     count_sqlstatements = []
-    
+    verify_all_urns_count = []
+
     lines = [line.rstrip('\n') for line in infile]
 
     for line in lines:
@@ -27,10 +28,11 @@ def parse(inp, mark, museum, connect_string, dry_run):
         
         # Write the count statements into file
         count_statement = "SELECT %s, COUNT(*) FROM %s GROUP BY %s" % (db_column, db_table, db_column)
+        urn_count_statement = "SELECT COUNT(DISTINCT %s) FROM %s WHERE %s not like '%s'" % (db_column, db_table, db_column, 'urn:%') 
         # print (count_statement)
         counts.write(count_statement)
+        verify_all_urns_count.append(urn_count_statement)
         count_sqlstatements.append(count_statement)
-        
         vocab_search = "vocab-" + vocab_list
         option_tags = soup.find(id=vocab_search).find_all("option")
         
@@ -58,7 +60,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
     markup.close()
     counts.close()
     
-    execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
+    execute(verify_all_urns_count, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
     
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
@@ -73,7 +75,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     return total_changes
 
 
-def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
+def execute(urn_sqlcountstatements, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
@@ -98,21 +100,29 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, d
     # Second: Perform the changes
     for update_statement in update_sqlstatements:
         if not dry_run:
-       		dbcursor.execute(update_statement)
-    	else:
-        	print(update_statement)
+            dbcursor.execute(update_statement)
+        else:
+            print(update_statement)
     
     counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
     total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
+    
 
     if total_changed == total_to_change:
-        dbconn.commit()
+        for statement in urn_sqlcountstatements:
+            dbcursor.execute(statement) 
+            results = dbcursor.fetchall()
+            if (results[0][0] != 0):
+                print ("Something went wrong... aborting, some record did not change: %s" % (statement))
+                dbconn.rollback()
+                return -1
+        dbconn.commit() 
         return 1
-    else:
-        dbconn.rollback()
-        return -1
-
+    
+    dbconn.rollback()
+    return -1
+    
 
 if __name__ == "__main__":
     args = sys.argv
@@ -129,7 +139,7 @@ if __name__ == "__main__":
             markup = args[3]
             connect_string = args[4]
         if (len(args) > 5):
-	        dry_run = True
+            dry_run = True
         else:
-        	dry_run = False
+            dry_run = False
         parse(infile, markup, museum, connect_string, dry_run)
