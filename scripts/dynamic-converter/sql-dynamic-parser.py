@@ -98,9 +98,9 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, d
     # Second: Perform the changes
     for update_statement in update_sqlstatements:
         if not dry_run:
-        dbcursor.execute(update_statement)
-    else:
-        print(update_statement)
+            dbcursor.execute(update_statement)
+        else:
+            print(update_statement)
     
     counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             markup = args[3]
             connect_string = args[4]
         if (len(args) > 5):
-        dry_run = True
+            dry_run = True
         else:
-        dry_run = False
-            parse(infile, markup, museum, connect_string, dry_run)
+            dry_run = False
+        parse(infile, markup, museum, connect_string, dry_run)
