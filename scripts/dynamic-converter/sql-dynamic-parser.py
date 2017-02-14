@@ -19,26 +19,28 @@ def parse(inp, mark, museum, connect_string, dry_run):
     soup = BeautifulSoup(markup, "html.parser")
     update_sqlstatements = []
     count_sqlstatements = []
-    
+    verify_all_urns_count = []
+
     lines = [line.rstrip('\n') for line in infile]
 
     for line in lines:
         (vocab_list, db_table, db_column) = line.split(',')
-        
-        # Write the count statements into file
-        count_statement = "SELECT %s, COUNT(*) FROM %s GROUP BY %s" % (db_column, db_table, db_column)
-        # print (count_statement)
-        counts.write(count_statement)
-        count_sqlstatements.append(count_statement)
-        
         vocab_search = "vocab-" + vocab_list
         option_tags = soup.find(id=vocab_search).find_all("option")
         
-        # NOTE ERROR HERE IF VOCAB DOES NOT EXIST, BUT CONTINUE
+        # NOTE: Error here if term list cannot be found, but continue
         if option_tags == None or len(option_tags) == 0:
-            print ("no option tags for %s" % vocab_list)
+            print ("ERROR: cannot find terms list for %s. It will be ignored." % vocab_list)
             continue
 
+        # Write the SQL count statements into file
+        count_statement = "SELECT %s, COUNT(*) FROM %s GROUP BY %s" % (db_column, db_table, db_column)
+        urn_count_statement = "SELECT COUNT(DISTINCT %s) FROM %s WHERE %s not like '%s'" % (db_column, db_table, db_column, 'urn:%') 
+        counts.write(count_statement)
+        verify_all_urns_count.append(urn_count_statement)
+        count_sqlstatements.append(count_statement)
+
+        # Make SQL statements to change each database entry.
         for each in option_tags:
             vocab_id = each['id']
             field_name = each.contents[0]
@@ -48,7 +50,6 @@ def parse(inp, mark, museum, connect_string, dry_run):
             else:
                 search_id = field_name
 
-            # print(vocab_id, field_name)
             new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)''%s''" % (museum, vocab_list, vocab_id, field_name)
             select_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
             outfile.write(select_statement)
@@ -58,7 +59,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
     markup.close()
     counts.close()
     
-    execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
+    execute(verify_all_urns_count, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
     
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
@@ -73,7 +74,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     return total_changes
 
 
-def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
+def execute(urn_sqlcountstatements, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
@@ -88,11 +89,9 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, d
     dbconn = ps2.connect(connect_string)   
     dbcursor = dbconn.cursor()
 
+    # First: Do the counts before any changes
     counts_file = open("%s.counts.txt" % museum, "w")
     counts_file.write("Counts before: ")
-    # First: Do the counts before any changes
-    # counts_before_file = open(counts_before, "w")
-
     total_to_change = do_counts(counts_file, dbcursor, count_sqlstatements)
     
     # Second: Perform the changes
@@ -102,17 +101,26 @@ def execute(update_sqlstatements, count_sqlstatements, connect_string, museum, d
         else:
             print(update_statement)
     
-    counts_file.write("Counts after: ")
     # Third: Do the counts after all the changes
+    counts_file.write("Counts after: ")
     total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
+    
 
     if total_changed == total_to_change:
-        dbconn.commit()
+        for statement in urn_sqlcountstatements:
+            dbcursor.execute(statement) 
+            results = dbcursor.fetchall()
+            if (results[0][0] != 0):
+                print ("Something went wrong... aborting, undoing database changes because some record did not change: %s" % (statement))
+                dbconn.rollback()
+                return -1
+        dbconn.commit() 
         return 1
-    else:
-        dbconn.rollback()
-        return -1
 
+    print ("Looks like there are either more or less records than what we started with. Undoing changes. Check counts log for numbers.")
+    dbconn.rollback()
+    return -1
+    
 
 if __name__ == "__main__":
     args = sys.argv
