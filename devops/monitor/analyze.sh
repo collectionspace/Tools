@@ -16,6 +16,7 @@ do
     #echo "<a target=\"blobs\" href=\"${t}.blobs.html\">Top 100 Blobs for ${t}</a>" >> summary.html
 done
 ./maketable.sh
+perl -i -pe 's/^aa//' combined.txt
 perl -pe 'print "<tr><th>";s/\t/<td>/g;' combined.txt >> summary.html
 head -1 combined.txt |perl -pe 'print "<tr><th>";s/(\w+)/<a target="blobs" href="\1.blobs.html">top images<\/a>/g;s/\t/<td>/g;' >> summary.html
 echo '</table><html>' >> summary.html

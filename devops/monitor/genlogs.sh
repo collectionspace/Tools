@@ -4,13 +4,10 @@ grep -h DEBUG ~/${t}/logs/logfile.txt* | grep -v 'could not authenticate' | perl
 cat ${t}.temp1 ${t}.django.log | perl -ne 'print unless /text:\(\+(rotogravure|Monterey|prominent|preserve|glazed)\)/' | sort -u > ${t}.temp2
 mv ${t}.temp2 ${t}.django.log
 rm ${t}.temp*
-cut -f5 ${t}.django.log | perl -pe 's/:\d+//;s/.(views|authn|utils)//' | sort |uniq -c | sort -rn | head -20 > ${t}.logsummary.txt
+cut -f5 ${t}.django.log | perl -pe 's/:\d+//;s/.(views|authn|utils)//' | sort |uniq -c | sort -rn | head -20 > ${t}.logsummary.txt &
 echo "	${t}" > ${t}.temp.txt
+echo -e "aafirst log date\t`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | head -1`" >> ${t}.temp.txt
+echo -e "aalast log date\t`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | tail -1`" >> ${t}.temp.txt
+echo -e "aandays of activity\t`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | wc -l`" >> ${t}.temp.txt
+wait
 perl -ne 's/^ *(\d+) (.*)$/\2\t\1/;print unless (length > 25)' ${t}.logsummary.txt | sort >> ${t}.temp.txt
-#echo "<hr/><h3>${t}</h3><hr/><pre>" >> summary.html
-#echo "`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | wc -l` days have activity" >> summary.html
-#echo "`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | head -1` start" >> summary.html
-#echo "`cut -f2 ${t}.django.log | sort -u | perl -pe 's/\// /g' | sort -k3 -k2M -k1 | tail -1` end" >> summary.html
-#echo "" >> summary.html
-#cat ${t}.logsummary.txt >> summary.html
-#echo "</pre>" >> summary.html
