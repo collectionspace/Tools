@@ -32,14 +32,6 @@ public class ExtractDisplayName {
 
 	int bgn_quote = refName.indexOf("'");
 	int end_quote = refName.lastIndexOf("'");
-	
-	System.out.println("bgn_quote="+bgn_quote);
-	System.out.println("end_quote="+end_quote);
-	
-	if (refName.length() < end_quote)
-	{
-		return "";			// Error condition
-	}
 	String fullDisplayName = refName.substring(bgn_quote+1, end_quote);
 	String displayName;
 	int bgn_paren = fullDisplayName.indexOf("(");
@@ -64,8 +56,6 @@ public class ExtractDisplayName {
 	else {		// no '(' or '['
 		pos_end = fullDisplayName.length();
 	}
-	System.out.println("pos_end="+pos_end);
-	
 	displayName = fullDisplayName.substring(0, pos_end);
 
 	return displayName.trim();
