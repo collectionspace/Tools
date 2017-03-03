@@ -31,8 +31,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -788,6 +790,13 @@ public class JSONObject {
         boolean includeSuperClass = klass.getClassLoader() != null;
 
         Method[] methods = (includeSuperClass) ? klass.getMethods() : klass.getDeclaredMethods();
+        
+        Field[] fields = (includeSuperClass) ? klass.getFields() : klass.getDeclaredFields();
+        Set<String> fieldNames = new HashSet<String>(); 
+        for(Field field : fields) {
+        	fieldNames.add(field.getName());
+        }
+        
         for (int i = 0; i < methods.length; i += 1) {
             try {
                 Method method = methods[i];
@@ -806,10 +815,8 @@ public class JSONObject {
                     // key = name.substring(2);
                     // }
                     if (key.length() > 0 && Character.isUpperCase(key.charAt(0)) && method.getParameterTypes().length == 0) {
-                        if (key.length() == 1) {
-                            key = key.toLowerCase();
-                        } else if (!Character.isUpperCase(key.charAt(1))) {
-                            key = key.substring(0, 1).toLowerCase() + key.substring(1);
+                        if(!fieldNames.contains(key)) {
+                        	key = Character.toLowerCase(key.charAt(0)) + key.substring(1);
                         }
 
                         Object result = method.invoke(bean, (Object[]) null);
@@ -1337,10 +1344,10 @@ public class JSONObject {
      */
     static Object wrap(Object object) {
         try {
-            if (object == null) {
+            if (object == null ) {
                 return NULL;
             }
-            if (object instanceof JSONObject || object instanceof JSONArray || object instanceof Byte
+            if (object instanceof routines.system.Document || object instanceof JSONObject || object instanceof JSONArray || object instanceof Byte
                     || object instanceof Character || object instanceof Short || object instanceof Integer
                     || object instanceof Long || object instanceof Boolean || object instanceof Float || object instanceof Double
                     || object instanceof String || NULL.equals(object)) {
