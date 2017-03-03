@@ -23,7 +23,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
     count_sqlstatements = []
     verify_all_urns_count = []
 
-    update_statement_params = [] # [(1, 2, 3, 4, 5, 6) ... ()] list of six-plets
+    update_statement_params = [] 
 
     lines = [line.rstrip('\n') for line in infile]
 
@@ -37,7 +37,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
             print ("ERROR: cannot find terms list for %s. It will be ignored." % vocab_list)
             continue
         
-        # Check that the the column and table names are valid and nothing sketchy is going on 
+        # NOTE: Check that the the column and table names are valid and nothing sketchy is going on 
         if sanity_check(db_table) == False or sanity_check(db_column) == False:
             print ("ERROR: The table " + db_table + " and column " + db_column + " will be ignored. Sanity check failed.")
             continue 
@@ -61,7 +61,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
 
             new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)'%s'" % (museum, vocab_list, vocab_id, field_name)
 
-            # update_statement is only used to write the future queries into a file, it will NOT be used as the acqual query. The parameters will be used to parameterize the queries. 
+            # update_statement is only used to write the future queries into a file
             update_statement_params.append((db_table, db_column, new_value, db_column, search_id))
             update_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
             outfile.write(update_statement)
@@ -120,22 +120,17 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
     # Second: Perform the changes
     for i in range(0, len(update_statement_params)):
         params = update_statement_params[i]
-
-        # interpolate the column and table names, which have already been checked
         query = "UPDATE {0} SET {1}=(%s) WHERE {1}=(%s);".format(params[0], params[1]) 
-
         if not dry_run:
-            # pass in parameters to parameterize the query
             dbcursor.execute(query, (params[2], params[4])) 
         else:
-            # build string for dry run
             print(query % (parms[2], params[4]))
     
     # Third: Do the counts after all the changes
     counts_file.write("Counts after: ")
     total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
     
-
+    # Fourth: Verify counts and either rollback or commit 
     if total_changed == total_to_change:
         for statement in urn_sqlcountstatements:
             dbcursor.execute(statement)
