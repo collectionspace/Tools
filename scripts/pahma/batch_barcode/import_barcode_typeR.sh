@@ -1,5 +1,6 @@
 #!/bin/bash -xv
 
+# 2/20/2017 updated java calls for new version of Talend jobs; see PAHMA-1545
 #
 # 2/17/2016 refactored a good deal for managed servers and parameterization
 #
@@ -213,19 +214,19 @@ do
         cd ${ROOT_PATH}/TMSlocation_barcode_5fld
         TALEND5_PATH=${ROOT_PATH}/TMSlocation_barcode_5fld
         # java -Xms256M -Xmx1024M -cp classpath.jar: pahma_etl.tmslocation_barcode_5fld_1_0.TMSlocation_barcode_5fld --context=Default --context_param infile_min="${TIME}" 
-        java -Xms256M -Xmx1024M -cp $TALEND5_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALEND5_PATH/../lib/commons-collections-3.2.jar:$TALEND5_PATH/../lib/dom4j-1.6.1.jar:$TALEND5_PATH/../lib/external_sort.jar:$TALEND5_PATH/../lib/jaxen-1.1.1.jar:$TALEND5_PATH/../lib/jboss-serialization.jar:$TALEND5_PATH/../lib/log4j-1.2.15.jar:$TALEND5_PATH/../lib/talendcsv.jar:$TALEND5_PATH/../lib/talend_file_enhanced_20070724.jar:$TALEND5_PATH/../lib/trove.jar:$TALEND5_PATH:$TALEND5_PATH/../lib/systemRoutines.jar:$TALEND5_PATH/../lib/userRoutines.jar::.:$TALEND5_PATH/tmslocation_barcode_5fld_1_1.jar: pahma_etl.tmslocation_barcode_5fld_1_1.TMSlocation_barcode_5fld --context=Default --context_param infile_min="${TIME}" 
+        java -Xms256M -Xmx1024M -cp $TALEND5_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALEND5_PATH/../lib/commons-collections-3.2.jar:$TALEND5_PATH/../lib/dom4j-1.6.1.jar:$TALEND5_PATH/../lib/external_sort.jar:$TALEND5_PATH/../lib/jaxen-1.1.1.jar:$TALEND5_PATH/../lib/jboss-serialization.jar:$TALEND5_PATH/../lib/log4j-1.2.15.jar:$TALEND5_PATH/../lib/talendcsv.jar:$TALEND5_PATH/../lib/talend_file_enhanced_20070724.jar:$TALEND5_PATH/../lib/trove.jar:$TALEND5_PATH:$TALEND5_PATH/../lib/systemRoutines.jar:$TALEND5_PATH/../lib/userRoutines.jar::.:$TALEND5_PATH/tmslocation_barcode_5fld_1_2.jar: pahma.tmslocation_barcode_5fld_1_2.TMSlocation_barcode_5fld --context=Default --context_param infile_min="${TIME}" 
 
         echo "----- Running Talend job (type 'C')..."
         cd ${ROOT_PATH}/TMSlocation_barcode_6fld
         TALEND6_PATH=${ROOT_PATH}/TMSlocation_barcode_6fld
         # java -Xms256M -Xmx1024M -cp classpath.jar: pahma_etl.tmslocation_barcode_6fld_1_0.TMSlocation_barcode_6fld --context=Default --context_param infile_min="${TIME}"
-        java -Xms256M -Xmx1024M -cp $TALEND6_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALEND6_PATH/../lib/commons-collections-3.2.jar:$TALEND6_PATH/../lib/dom4j-1.6.1.jar:$TALEND6_PATH/../lib/external_sort.jar:$TALEND6_PATH/../lib/jaxen-1.1.1.jar:$TALEND6_PATH/../lib/jboss-serialization.jar:$TALEND6_PATH/../lib/log4j-1.2.15.jar:$TALEND6_PATH/../lib/talendcsv.jar:$TALEND6_PATH/../lib/talend_file_enhanced_20070724.jar:$TALEND6_PATH/../lib/trove.jar:$TALEND6_PATH:$TALEND6_PATH/../lib/systemRoutines.jar:$TALEND6_PATH/../lib/userRoutines.jar::.:$TALEND6_PATH/tmslocation_barcode_6fld_1_1.jar: pahma_etl.tmslocation_barcode_6fld_1_1.TMSlocation_barcode_6fld --context=Default --context_param infile_min="${TIME}"
+        java -Xms256M -Xmx1024M -cp $TALEND6_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALEND6_PATH/../lib/commons-collections-3.2.jar:$TALEND6_PATH/../lib/dom4j-1.6.1.jar:$TALEND6_PATH/../lib/external_sort.jar:$TALEND6_PATH/../lib/jaxen-1.1.1.jar:$TALEND6_PATH/../lib/jboss-serialization.jar:$TALEND6_PATH/../lib/log4j-1.2.15.jar:$TALEND6_PATH/../lib/talendcsv.jar:$TALEND6_PATH/../lib/talend_file_enhanced_20070724.jar:$TALEND6_PATH/../lib/trove.jar:$TALEND6_PATH:$TALEND6_PATH/../lib/systemRoutines.jar:$TALEND6_PATH/../lib/userRoutines.jar::.:$TALEND6_PATH/tmslocation_barcode_6fld_1_2.jar: pahma.tmslocation_barcode_6fld_1_2.TMSlocation_barcode_6fld --context=Default --context_param infile_min="${TIME}"
 
         echo "----- Running Talend job (type 'R')..."
         cd ${ROOT_PATH}/TMSlocation_barcode_mvCrate
         TALENDMVCRATE_PATH=${ROOT_PATH}/TMSlocation_barcode_mvCrate
         echo "---- START Talend on type R file --- `date +%H%M%S`" | tee -a $LOGFILE $TMPLOG
- java -Xms256M -Xmx1536M -cp $TALENDMVCRATE_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALENDMVCRATE_PATH/../lib/commons-collections-3.2.jar:$TALENDMVCRATE_PATH/../lib/dom4j-1.6.1.jar:$TALENDMVCRATE_PATH/../lib/external_sort.jar:$TALENDMVCRATE_PATH/../lib/jaxen-1.1.1.jar:$TALENDMVCRATE_PATH/../lib/jboss-serialization.jar:$TALENDMVCRATE_PATH/../lib/log4j-1.2.15.jar:$TALENDMVCRATE_PATH/../lib/talendcsv.jar:$TALENDMVCRATE_PATH/../lib/talend_file_enhanced_20070724.jar:$TALENDMVCRATE_PATH/../lib/trove.jar:$TALENDMVCRATE_PATH:$TALENDMVCRATE_PATH/../lib/systemRoutines.jar:$TALENDMVCRATE_PATH/../lib/userRoutines.jar::.:$TALENDMVCRATE_PATH/tmslocation_barcode_mvcrate_1_1.jar: pahma_etl.tmslocation_barcode_mvcrate_1_1.TMSlocation_barcode_mvCrate --context=Default --context_param infile_min="${TIME}"
+ java -Xms256M -Xmx1536M -cp $TALENDMVCRATE_PATH/../lib/advancedPersistentLookupLib-1.0.jar:$TALENDMVCRATE_PATH/../lib/commons-collections-3.2.jar:$TALENDMVCRATE_PATH/../lib/dom4j-1.6.1.jar:$TALENDMVCRATE_PATH/../lib/external_sort.jar:$TALENDMVCRATE_PATH/../lib/jaxen-1.1.1.jar:$TALENDMVCRATE_PATH/../lib/jboss-serialization.jar:$TALENDMVCRATE_PATH/../lib/log4j-1.2.15.jar:$TALENDMVCRATE_PATH/../lib/talendcsv.jar:$TALENDMVCRATE_PATH/../lib/talend_file_enhanced_20070724.jar:$TALENDMVCRATE_PATH/../lib/trove.jar:$TALENDMVCRATE_PATH:$TALENDMVCRATE_PATH/../lib/systemRoutines.jar:$TALENDMVCRATE_PATH/../lib/userRoutines.jar::.:$TALENDMVCRATE_PATH/tmslocation_barcode_mvcrate_1_2.jar: pahma.tmslocation_barcode_mvcrate_1_2.TMSlocation_barcode_mvCrate --context=Default --context_param infile_min="${TIME}"
         echo "---- END Talend on type R file --- `date +%H%M%S`" | tee -a $LOGFILE $TMPLOG
 
         echo "done."

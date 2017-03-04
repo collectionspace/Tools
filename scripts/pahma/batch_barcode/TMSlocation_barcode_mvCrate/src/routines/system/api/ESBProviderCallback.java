@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2011 Talend Inc. - www.talend.com
+ *  Copyright (c) 2011-2013 Talend Inc. - www.talend.com
  *  All rights reserved.
  *
  *  This program and the accompanying materials are made available
@@ -16,6 +16,12 @@ package routines.system.api;
  * and to write a response back to ESB.
  */
 public interface ESBProviderCallback {
+
+    String HEADERS_SOAP = "HEADERS_SOAP";
+
+    String HEADERS_HTTP = "HEADERS_HTTP";
+
+    String REQUEST = "REQUEST";
 
     /**
      * Returns a request to the Job.
