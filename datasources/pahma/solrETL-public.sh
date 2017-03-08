@@ -155,7 +155,7 @@ tar -czf errors.tgz errors*.csv
 ./make_error_report.sh | mail -a errors.tgz -s "PAHMA Solr Refresh Errors `date`" ${CONTACT}
 # ./make_error_report.sh | mail -a errors.tgz -s "PAHMA Solr Refresh Errors `date`" cspace-app-logs@lists.berkeley.edu
 # get rid of intermediate files
-#rm d?.csv d6?.csv m?.csv part*.csv temp.*.csv basic*.csv errors*.csv header4Solr.csv
+rm d?.csv d6?.csv m?.csv part*.csv temp.*.csv basic*.csv errors*.csv header4Solr.csv
 # zip up .csvs, save a bit of space on backups
-#gzip -f *.csv
+gzip -f *.csv
 date
