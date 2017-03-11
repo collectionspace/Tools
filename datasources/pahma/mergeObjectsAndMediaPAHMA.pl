@@ -18,8 +18,6 @@ while (<MEDIA>) {
   chomp;
   my ($objectcsid,$objectnumber,$mediacsid,$description,$name,$creatorrefname,$creator,$blobcsid,$copyrightstatement,$identificationnumber,$rightsholderrefname,$rightsholder,$contributor,$approvedforweb,$pahmatmslegacydepartment,$objectstatus,$primarydisplay) = split /$delim/;
   #print "$blobcsid $objectcsid\n";
-  # skip this blob if we've already seen it
-  next if $seen{$blobcsid}++;
   my $imagetype = 'images';
   # mark catalog card images as such
   $imagetype = 'cards' if $description =~ /(catalog card|HSR Datasheet)/i;
