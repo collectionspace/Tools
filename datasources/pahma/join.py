@@ -9,6 +9,7 @@ f1 = csv.reader(open(inputFile1, 'rb'), delimiter=delim, quotechar="\r")
 f2 = csv.reader(open(inputFile2, 'rb'), delimiter=delim, quotechar="\r")
 
 file1 = {}
+alreadyseen = {}
 counts = {}
 max = 0
 
@@ -16,6 +17,7 @@ counts['file1'] = 0
 counts['file2'] = 0
 counts['unmatched'] = 0
 counts['matched'] = 0
+counts['duplicates'] = 0
 
 for lineno, ci in enumerate(f1):
     counts['file1'] += 1
@@ -25,9 +27,14 @@ for lineno, ci in enumerate(f2):
     #print lineno,"\t",ci
     counts['file2'] += 1
     if ci[0] in file1:
-        file1[ci[0]] = file1[ci[0]] + ci[1:]
-        max = len(file1[ci[0]])
-	counts['matched'] += 1
+        if ci[0] in alreadyseen:
+            print '%s already seen, not added' % ci[0]
+            counts['duplicates'] += 1
+        else:
+            alreadyseen[ci[0]] = ci
+            file1[ci[0]] = file1[ci[0]] + ci[1:]
+            max = len(file1[ci[0]])
+	    counts['matched'] += 1
     else:
 	# non matching lines in file to go into the bit bucket
 	counts['unmatched'] += 1
