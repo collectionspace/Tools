@@ -1,0 +1,14 @@
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_back)''back''' where item='back';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_base)''base''' where item='base';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_bottom)''bottom''' where item='bottom';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_front)''front''' where item='front';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_inside)''inside''' where item='inside';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_left)''left''' where item='left';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_obverse)''obverse''' where item='obverse';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_outside)''outside''' where item='outside';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_recto)''recto''' where item='recto';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_reverse)''reverse''' where item='reverse';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_right)''right''' where item='right';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_rim)''rim''' where item='rim';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_top)''top''' where item='top';
+update collectionobjects_common_contentpositions set item='urn:cspace:pahma.cspace.berkeley.edu:vocabularies:name(contentposition):item:name(cp_verso)''verso''' where item='verso';

@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 valid_tokens = ["-m", "-i", "-o", "-d"]
 museums = ["pahma", "bampfa", "ucjeps", "botgarden", "cinefiles"]
 
+URN = 'urn:%'
+
 UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
 
@@ -21,6 +23,8 @@ def parse(inp, mark, museum, connect_string, dry_run):
     count_sqlstatements = []
     verify_all_urns_count = []
 
+    update_statement_params = [] 
+
     lines = [line.rstrip('\n') for line in infile]
 
     for line in lines:
@@ -32,10 +36,15 @@ def parse(inp, mark, museum, connect_string, dry_run):
         if option_tags == None or len(option_tags) == 0:
             print ("ERROR: cannot find terms list for %s. It will be ignored." % vocab_list)
             continue
+        
+        # NOTE: Check that the the column and table names are valid and nothing sketchy is going on 
+        if sanity_check(db_table) == False or sanity_check(db_column) == False:
+            print ("ERROR: The table " + db_table + " and column " + db_column + " will be ignored. Sanity check failed.")
+            continue 
 
         # Write the SQL count statements into file
         count_statement = "SELECT %s, COUNT(*) FROM %s GROUP BY %s" % (db_column, db_table, db_column)
-        urn_count_statement = "SELECT COUNT(DISTINCT %s) FROM %s WHERE %s not like '%s'" % (db_column, db_table, db_column, 'urn:%') 
+        urn_count_statement = "SELECT COUNT(DISTINCT %s) FROM %s WHERE %s not like '%s'" % (db_column, db_table, db_column, URN)
         counts.write(count_statement)
         verify_all_urns_count.append(urn_count_statement)
         count_sqlstatements.append(count_statement)
@@ -50,17 +59,31 @@ def parse(inp, mark, museum, connect_string, dry_run):
             else:
                 search_id = field_name
 
-            new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)''%s''" % (museum, vocab_list, vocab_id, field_name)
-            select_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
-            outfile.write(select_statement)
-            update_sqlstatements.append(select_statement)
+            new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)'%s'" % (museum, vocab_list, vocab_id, field_name)
+
+            # update_statement is only used to write the future queries into a file
+            update_statement_params.append((db_table, db_column, new_value, db_column, search_id))
+            update_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
+            outfile.write(update_statement)
+
 
     outfile.close()
     markup.close()
     counts.close()
     
-    execute(verify_all_urns_count, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run)
-    
+    execute(verify_all_urns_count, update_statement_params, count_sqlstatements, connect_string, museum, dry_run)
+
+def sanity_check(identifier):
+    if (len(identifier.split()) != 1): 
+        print ("Warning: table names are not allowed to have spaces. This item will be skipped.")
+        return False
+    if (not identifier[0].isalpha and identifier[0] != 0):
+        return False
+    for c in identifier:
+        if not c.isalpha() and not c.isdigit() and c != "_":
+                return False
+    return True
+
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
     for count_statement in count_sqlstatements:
@@ -74,7 +97,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     return total_changes
 
 
-def execute(urn_sqlcountstatements, update_sqlstatements, count_sqlstatements, connect_string, museum, dry_run):
+def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements, connect_string, museum, dry_run):
     """
         @param update_sqlstatements  list of statements used to update a record
         @param count_sqlstatements   list of statements used to perform counts
@@ -95,32 +118,33 @@ def execute(urn_sqlcountstatements, update_sqlstatements, count_sqlstatements, c
     total_to_change = do_counts(counts_file, dbcursor, count_sqlstatements)
     
     # Second: Perform the changes
-    for update_statement in update_sqlstatements:
+    for i in range(0, len(update_statement_params)):
+        params = update_statement_params[i]
+        query = "UPDATE {0} SET {1}=(%s) WHERE {1}=(%s);".format(params[0], params[1]) 
         if not dry_run:
-            dbcursor.execute(update_statement)
+            dbcursor.execute(query, (params[2], params[4])) 
         else:
-            print(update_statement)
+            print(query % (parms[2], params[4]))
     
     # Third: Do the counts after all the changes
     counts_file.write("Counts after: ")
     total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
     
-
+    # Fourth: Verify counts and either rollback or commit 
     if total_changed == total_to_change:
         for statement in urn_sqlcountstatements:
-            dbcursor.execute(statement) 
+            dbcursor.execute(statement)
             results = dbcursor.fetchall()
             if (results[0][0] != 0):
                 print ("Something went wrong... aborting, undoing database changes because some record did not change: %s" % (statement))
                 dbconn.rollback()
                 return -1
-        dbconn.commit() 
+        dbconn.commit()
         return 1
 
     print ("Looks like there are either more or less records than what we started with. Undoing changes. Check counts log for numbers.")
     dbconn.rollback()
     return -1
-    
 
 if __name__ == "__main__":
     args = sys.argv
@@ -131,7 +155,8 @@ if __name__ == "__main__":
     else:
         museum = args[1]
         if museum not in museums:
-            print ("Unknown museum %s" % museum)
+            print ("Unknown museum %s" % (museum))
+            sys.exit(-1)
         else:
             infile = args[2]
             markup = args[3]
