@@ -41,7 +41,7 @@ The shell script monthly.sh does the following:
    The report is called image_qc_report-yyy-mm.csv
  - extracts a list of the images that failed the QC checks, named image_qc_report-yyy-mm.problems.csv
  - compresses the monthly report, and emails both documents to the email address specified in the first argument.
- - invoke as: ./monthly recipient-list@berkeley.edu
+ - invoke as: ./monthly.sh recipient-list@berkeley.edu
 
 Notes:
 
