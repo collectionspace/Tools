@@ -1,0 +1,6 @@
+numbertype,othernumber,numbertype
+numbertype,mediaothernumber,numbertype
+taxonrank,taxon_common,taxonrank
+objectphase,collectionobjects_common,phase
+georefsource,localitygroup,georefsource
+georefsource,placegeorefgroup,georefsource
