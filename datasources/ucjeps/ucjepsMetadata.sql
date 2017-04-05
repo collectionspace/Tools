@@ -113,10 +113,10 @@ select
        order by htsg.pos), '␥', '') as typeassertions_ss,
     case when conh.cultivated is null or conh.cultivated = '' then null else conh.cultivated end as Cultivated_s,
     case when co.sex is null or co.sex = '' then null else co.sex end as sex_s,
-    co.phase as phase_s,
+    regexp_replace(co.phase, '^.*\)''(.*)''$', '\1') as phase_s,
     array_to_string(array
       (SELECT CASE WHEN (ong.numbervalue IS NOT NULL AND ong.numbervalue<>'') THEN (ong.numbervalue
-	||CASE WHEN (ong.numbertype IS NOT NULL AND ong.numbertype <>'') THEN ' (' || ong.numbertype||')' ELSE '' END) ELSE '' END
+	||CASE WHEN (ong.numbertype IS NOT NULL AND ong.numbertype <>'') THEN ' (' || regexp_replace(ong.numbertype, '^.*\)''(.*)''$', '\1')||')' ELSE '' END) ELSE '' END
        from collectionobjects_common co3
        inner join hierarchy h3int on co3.id = h3int.id
        left outer join hierarchy hong on (co3.id = hong.parentid
