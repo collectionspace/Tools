@@ -6,26 +6,26 @@
 	<queryString>
 		<![CDATA[select
         tc.displayname,
-        tc.taxonrank,
+        getdispl(tc.taxonrank) as taxonrank,
         tu.taxonmajorgroup,
         case
-                when tc.taxonrank = 'kingdom' then 0
-                when tc.taxonrank = 'division' then 1
-                when tc.taxonrank = 'class' then 2
-                when tc.taxonrank = 'order' then 3
-                when tc.taxonrank = 'family' then 4
-                when tc.taxonrank = 'tribe' then 5
-                when tc.taxonrank = 'genus' then 6
-                when tc.taxonrank = 'section' then 7
-                when tc.taxonrank = 'series' then 8
-                when tc.taxonrank = 'species' then 9
-                when tc.taxonrank = 'subspecies' then 10
-                when tc.taxonrank = 'variety' then 11
-                when tc.taxonrank = 'subvariety' then 12
-                when tc.taxonrank = 'form' then 13
-                when tc.taxonrank = 'subform' then 14
-                when tc.taxonrank = 'cultivar' then 15
-                when tc.taxonrank = 'unknown' then 16
+                when getdispl(tc.taxonrank) = 'kingdom' then 0
+                when getdispl(tc.taxonrank) = 'division' then 1
+                when getdispl(tc.taxonrank) = 'class' then 2
+                when getdispl(tc.taxonrank) = 'order' then 3
+                when getdispl(tc.taxonrank) = 'family' then 4
+                when getdispl(tc.taxonrank) = 'tribe' then 5
+                when getdispl(tc.taxonrank) = 'genus' then 6
+                when getdispl(tc.taxonrank) = 'section' then 7
+                when getdispl(tc.taxonrank) = 'series' then 8
+                when getdispl(tc.taxonrank) = 'species' then 9
+                when getdispl(tc.taxonrank) = 'subspecies' then 10
+                when getdispl(tc.taxonrank) = 'variety' then 11
+                when getdispl(tc.taxonrank) = 'subvariety' then 12
+                when getdispl(tc.taxonrank) = 'form' then 13
+                when getdispl(tc.taxonrank) = 'subform' then 14
+                when getdispl(tc.taxonrank) = 'cultivar' then 15
+                when getdispl(tc.taxonrank) = 'unknown' then 16
                 else 17
         end as taxonrank_order
 from taxon_common tc
