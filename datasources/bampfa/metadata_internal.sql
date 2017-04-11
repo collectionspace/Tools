@@ -48,6 +48,7 @@ select
    utils.getdispl(st5.item) SubjectFive,
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate,
+   TRIM(cb.objectProductionDateCentury || ' ' || regexp_replace(cb.objectProductionDateEra, '^.*\)''(.*)''$', '\1')) as century,
    array_to_string(array
       (SELECT CASE WHEN (gc.title IS NOT NULL AND gc.title <> '') THEN (gc.title) END
        from collectionobjects_common co2

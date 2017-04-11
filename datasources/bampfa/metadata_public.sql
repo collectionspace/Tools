@@ -49,6 +49,7 @@ select
    -- these values are included here, but eliminated during the loading process
    utils.getdispl(co.computedcurrentlocation) currentlocation,
    utils.getdispl(cb.computedcrate) currentcrate,
+   TRIM(cb.objectProductionDateCentury || ' ' || regexp_replace(cb.objectProductionDateEra, '^.*\)''(.*)''$', '\1')) as century,
    'not yet available' as grouptitle_ss
 from
    hierarchy h1
