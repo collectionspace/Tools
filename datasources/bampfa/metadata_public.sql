@@ -48,7 +48,8 @@ select
    utils.getdispl(st5.item) SubjectFive,
    -- these values are included here, but eliminated during the loading process
    utils.getdispl(co.computedcurrentlocation) currentlocation,
-   utils.getdispl(cb.computedcrate) currentcrate
+   utils.getdispl(cb.computedcrate) currentcrate,
+   'not yet available' as grouptitle_ss
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co

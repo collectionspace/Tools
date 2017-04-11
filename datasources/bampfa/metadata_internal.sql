@@ -47,7 +47,16 @@ select
    utils.getdispl(st4.item) SubjectFour,
    utils.getdispl(st5.item) SubjectFive,
    utils.getdispl(co.computedcurrentlocation) currentlocation,
-   utils.getdispl(cb.computedcrate) currentcrate
+   utils.getdispl(cb.computedcrate) currentcrate,
+   array_to_string(array
+      (SELECT CASE WHEN (gc.title IS NOT NULL AND gc.title <> '') THEN (gc.title) END
+       from collectionobjects_common co2
+       inner join hierarchy h2int on co2.id = h2int.id
+       join relations_common rc ON (h2int.name = rc.subjectcsid AND rc.objectdocumenttype = 'Group')
+       join hierarchy h16 ON (rc.objectcsid = h16.name)
+       left outer join groups_common gc ON (h16.id = gc.id)
+       join misc mm ON (gc.id=mm.id AND mm.lifecyclestate <> 'deleted')
+       where h2int.name = h1.name), ';', '') as grouptitle_ss
 from
    hierarchy h1
    INNER JOIN collectionobjects_common co
@@ -114,4 +123,3 @@ from
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st3 ON (st3.id=co.id and st3.pos=2)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st4 ON (st4.id=co.id and st4.pos=3)
    LEFT OUTER JOIN collectionobjects_bampfa_subjectthemes st5 ON (st5.id=co.id and st5.pos=4)
-
