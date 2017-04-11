@@ -124,7 +124,7 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
         if not dry_run:
             dbcursor.execute(query, (params[2], params[4])) 
         else:
-            print(query % (parms[2], params[4]))
+            print(query % (params[2], params[4]))
     
     # Third: Do the counts after all the changes
     counts_file.write("Counts after: ")

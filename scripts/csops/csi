@@ -172,8 +172,8 @@ if [[ ${rebuild_needed[application]} == true ]]; then
 			exit 1
 		fi
 
-		rm /tmp/*.properties
-		rm /tmp/*.xml
+		rm /tmp/merged*.properties
+		rm /tmp/merged*.xml
 	fi
 else
 	echo "No change in application, skipping build"
@@ -219,8 +219,8 @@ if [[ ${rebuild_needed[services]} == true ]]; then
 		exit 1
 	fi
 
-	rm /tmp/*.properties
-	rm /tmp/*.xml
+	rm /tmp/merged*.properties
+	rm /tmp/merged*.xml
 fi
 
 # Start tomcat
