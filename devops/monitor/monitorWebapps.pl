@@ -22,20 +22,23 @@ my %labels = (
  'bulkedit' => 'bulk edit',
  'check' => 'server check',
  'collectionstats' => 'coll stats',
- 'governmentholdings' => 'govt holdings',
- 'hierarchyviewer' => 'hierarchy viewer',
+ 'createobjects' => 'create objs',
+ 'governmentholdings' => 'govt hldngs',
+ 'hierarchyviewer' => 'hrrchy viewer',
  'holdings' => 'hold ings',
  'inventory' => 'invent ory',
  'keyinfo' => 'key info',
- 'locreport' => 'location report',
+ 'grpinfo' => 'group info',
+ 'grpmove' => 'group move',
+ 'locreport' => 'loc report',
  'movecrate' => 'move crate',
- 'moveobject' => 'move objects',
- 'objdetails' => 'object details',
+ 'moveobject' => 'move objs',
+ 'objdetails' => 'obj dets',
  'objinfo' => 'object info',
  'objnamecleaning' => 'name cleaning',
- 'packinglist' => 'packing list',
+ 'packinglist' => 'pckng list',
  'powermove' => 'power move',
- 'upload' => 'tricoder upload'
+ 'upload' => 'tricdr upload'
 );
 
 open APPDATA,"<@ARGV[0]";
@@ -44,7 +47,8 @@ while (<APPDATA>) {
   $count++;
   s/ *\t */\t/g;
   my ($date,$ip,$app,$action,$end,$sec,$sys,$loc1,$loc2,$parms) = split "\t";
-  $date = fixDate($date);
+  #$date = fixDate($date);
+  $sys = 'production'; # override what was in the log
   $app =~ s/check server/check/;
   $app =~ s/'//g;
   next if $sys =~ /PROTOTYPE/;
@@ -84,6 +88,7 @@ foreach my $sys (sort keys %stats) {
     $myapps{$app}+=$usage{$app}{uses};
     my $appuses = $usage{$app}{uses};
     $totaluse += $appuses;
+    $labels{$app} = $app unless $labels{$app};
     my $avgtime = $appuses > 0 ? $usage{$app}{'time'}/$appuses : 0;
     # printf "<tr><td>%s</td><td>%s</td><td>%.1f</td><td>%.1f</td>\n",$app,$usage{$app}{uses},$usage{$app}{time},$avgtime; 
     printf "<tr><td>%s</td><td>%s</td><td>%.1f</td>\n",$labels{$app},$usage{$app}{uses},$avgtime; 
