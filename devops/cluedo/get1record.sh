@@ -35,9 +35,8 @@ curl -S --stderr curl2.tmp -X GET "$CSPACEURL/$SERVICE$ITEMS?pgSz=1" --basic -u 
 perl -pe 's/<list/\n<list/g' curl.tmp | perl -ne 'while (s/<list\-item>.*?<csid>(.*?)<.*?<$ENV{EXTRACT}.*?>(.*?)<.*?<\/list\-item>//) { print "$1\n" }' >> csid.tmp
 CSID=`cat csid.tmp`
 curl -S --stderr curl.junk -X GET "$CSPACEURL/$SERVICE/$CSID" --basic -u "$CSPACEUSER" -H "$CONTENT_TYPE" > $1.tmp
-#xmllint --format $1.tmp | perl -pe 's/<(\w+)>.*?<\//<\1>{\1}<\//' | sed -n '/collectionspace_core/q;p'> $1.xml
-xmllint --format $1.tmp | perl -pe 's/<(\w+)>.*?<\//<\1>{\1}<\//' > $1.xml
-#echo "</document>" >> $1.xml
-rm curl.tmp curl2.tmp csid.tmp $1.tmp
+xmllint --format $1.tmp | perl -pe 's/<(\w+)>.*?<\//<\1>#\1#<\//' > $1.template.xml
+xmllint --format $1.tmp > $1.xml
+rm -f curl.tmp curl.junk curl2.tmp csid.tmp $1.tmp
 
 
