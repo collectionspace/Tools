@@ -2,6 +2,7 @@
 ####
 echo Loading Cluedo Museum...
 date
+
 # AUTHORITYINPUT PREFIX AUTHORITY CSID TEMPLATE CSPACEURL LOGIN PASSWORD
 time ./loadAuthority.sh persons.csv  PERSONS personauthorities "$CSID" xml/persons.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
 time ./loadAuthority.sh storagelocations.csv  LOCATIONS locationauthorities "$CSID" xml/locationsWithoutShortID.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"

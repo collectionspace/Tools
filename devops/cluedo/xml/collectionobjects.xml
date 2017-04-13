@@ -1,41 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document name="collectionobjects">
-  <ns2:collectionspace_core xmlns:ns2="http://collectionspace.org/collectionspace_core/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <tenantId>#tenantId#</tenantId>
-    <updatedAt>#updatedAt#</updatedAt>
-    <workflowState>#workflowState#</workflowState>
-    <createdBy>#createdBy#</createdBy>
-    <createdAt>#createdAt#</createdAt>
-    <refName>#refName#</refName>
-    <uri>#uri#</uri>
-    <updatedBy>#updatedBy#</updatedBy>
-  </ns2:collectionspace_core>
   <ns2:collectionobjects_common xmlns:ns2="http://collectionspace.org/services/collectionobject" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <objectProductionDateGroupList>
       <objectProductionDateGroup>
-        <dateEarliestSingleQualifier/>
-        <scalarValuesComputed>#scalarValuesComputed#</scalarValuesComputed>
-        <dateLatestDay/>
-        <dateLatestYear/>
-        <dateAssociation/>
-        <dateEarliestSingleEra/>
         <dateDisplayDate/>
-        <dateEarliestSingleCertainty/>
-        <dateLatestEra/>
-        <dateEarliestSingleQualifierValue/>
-        <dateLatestCertainty/>
-        <dateEarliestSingleYear/>
-        <dateLatestQualifier/>
-        <dateLatestQualifierValue/>
-        <dateEarliestSingleQualifierUnit/>
-        <datePeriod/>
-        <dateEarliestScalarValue/>
-        <dateLatestMonth/>
-        <dateNote/>
-        <dateLatestScalarValue/>
-        <dateLatestQualifierUnit/>
-        <dateEarliestSingleDay/>
-        <dateEarliestSingleMonth/>
       </objectProductionDateGroup>
     </objectProductionDateGroupList>
     <fieldCollectionMethods>
@@ -43,15 +11,7 @@
     </fieldCollectionMethods>
     <titleGroupList>
       <titleGroup>
-        <title/>
-        <titleType/>
-        <titleTranslationSubGroupList>
-          <titleTranslationSubGroup>
-            <titleTranslationLanguage>#titleTranslationLanguage#</titleTranslationLanguage>
-            <titleTranslation/>
-          </titleTranslationSubGroup>
-        </titleTranslationSubGroupList>
-        <titleLanguage>#titleLanguage#</titleLanguage>
+        <title>#title#</title>
       </titleGroup>
     </titleGroupList>
     <assocEventPeoples>
@@ -504,4 +464,4 @@
     </account>
   </ns2:account_permission>
 </document>
-</document>
+

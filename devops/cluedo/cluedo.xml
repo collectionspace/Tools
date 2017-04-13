@@ -53,7 +53,7 @@
         </weapon>
         <weapon>
             <object>Dagger</object>
-            <note>(A <weapon><object>Knife</object></weapon> in North American editions, each
+            <note>(A <alias>Knife</alias> in North American editions, each
                 represented by a respective depiction)</note>
         </weapon>
         <weapon>
@@ -74,12 +74,13 @@
         </weapon>
         <weapon>
             <object>Spanner</object>
-            <note>(called <weapon><object>Wrench</object></weapon> in North American editions and
+            <note>(called <alias>Wrench</alias> in North American editions and
                 depicted as a Monkey wrench, it may also be shown as an Open-ended spanner in some
                 traditional UK versions)</note>
         </weapon>
     </Weapons>
     <Rooms>
+        <floor>
         <note>There are nine rooms in the mansion where the murder can take place, laid out in a
             circular fashion on the game board, separated by pathways overlaid by playing spaces.
             Each of the four corner rooms contains a secret passage that leads to the room on the
@@ -99,5 +100,6 @@
         <room>Lounge</room>
         <room>Study</room>
         <note>there are secret passages to opposite corners.</note>
+        </floor>
     </Rooms>
 </Cluedo>

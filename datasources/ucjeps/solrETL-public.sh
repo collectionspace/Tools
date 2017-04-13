@@ -20,7 +20,7 @@ SERVER="dba-postgres-prod-42.ist.berkeley.edu port=5310 sslmode=prefer"
 USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
-CONTACT="andrewdoran@berkeley.edu"
+CONTACT="jason_alexander@berkeley.edu"
 export NUMCOLS=57
 ##############################################################################
 # extract and massage the metadata from CSpace
@@ -82,6 +82,12 @@ perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss$/; s/_ss
 ##############################################################################
 perl -pe 's/\t/\n/g' header4Solr.csv| perl -ne 'chomp; next unless /_ss/; next if /blob/; print "f.$_.split=true&f.$_.separator=%7C&"' > uploadparms.txt
 ##############################################################################
+# mark duplicate accession numbers
+##############################################################################
+cut -f3 4solr.ucjeps.public.csv | sort | uniq -c | sort -rn |perl -ne 'print unless / 1 / ' > duplicates.txt
+cut -c9- duplicates.txt | perl -ne 'chomp; print "s/\\t$_\\t/\\t$_ (duplicate)\\t/;\n"' > fix_dups.sh
+perl -i -p fix_dups.sh 4solr.ucjeps.public.csv
+##############################################################################
 #rm d?.csv m?.csv
 ##############################################################################
 wc -l *.csv
@@ -102,4 +108,6 @@ tar -czf errors.tgz errors*.csv
 rm d?.csv m?.csv metadata.csv media.csv
 # zip up .csvs, save a bit of space on backups
 gzip -f *.csv
+# hack to zap latlong errors and load the records anyway.
+./zapCoords.sh
 date

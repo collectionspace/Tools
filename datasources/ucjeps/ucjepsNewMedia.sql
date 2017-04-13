@@ -25,7 +25,11 @@ regexp_replace(lg.fieldlocverbatim,E'[\\t\\n\\r]+', ' ', 'g') as locality_s,
 dg.datedisplaydate as mediadate_s,
 mu.posttopublic AS posttopublic_s,
 mu.handwritten AS handwritten_s,
-mu.collector AS collector_s
+mu.collector AS collector_s,
+lg.fieldLocState_s,
+lg.fieldLocCountry_s,
+lg.fieldLocCounty_s
+
 
 FROM media_common mc
 
