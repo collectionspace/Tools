@@ -26,10 +26,9 @@ dg.datedisplaydate as mediadate_s,
 mu.posttopublic AS posttopublic_s,
 mu.handwritten AS handwritten_s,
 mu.collector AS collector_s,
-lg.fieldLocState_s,
-lg.fieldLocCountry_s,
-lg.fieldLocCounty_s
-
+lg.fieldLocState AS fieldLocState_s,
+lg.fieldLocCountry AS fieldLocCountry_s,
+lg.fieldLocCounty AS fieldLocCounty_s
 
 FROM media_common mc
 
