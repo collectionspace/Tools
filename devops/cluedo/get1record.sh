@@ -5,6 +5,16 @@ if [ "$CSPACEURL" == "" ] || [ "$CSPACEUSER" == "" ]; then
     exit
 fi
 
+if [ $# -eq 0 ]; then
+    echo
+    echo "Gets the first record of the specified type and tries to 'templatize' it."
+    echo
+    echo "Usage: $0 <recordtype> <optional-authority-csid>"
+    echo "e.g. : $0 personauthorities "
+    exit
+fi
+
+
 SERVICE="cspace-services/$1"
 AUTHORITY=$2
 
