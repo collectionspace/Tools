@@ -25,8 +25,8 @@
         else '<br><b>Reference:</b> ' || rg.reference end ||
     case when cocbd.item is null or cocbd.item = '' then ''
         else '<br>' || cocbd.item end ||
-    case when coc.phase is null or coc.phase = '' then ''
-        else '<br>' || coc.phase end ||
+    case when getdispl(coc.phase) is null or getdispl(coc.phase) = '' then ''
+        else '<br>' || getdispl(coc.phase) end ||
     case when coc.sex is null or coc.sex = '' then ''
         else '; ' || coc.sex end ||
     coalesce('<br><b>Collector(s):</b> ' || concat_collectors(coc.id), '')  ||
