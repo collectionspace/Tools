@@ -16,9 +16,8 @@
     getdispl(tig.taxon) as Scientific_Name,
     ttg.termformatteddisplayname as Sci_Name_Fmt,
     lng.localname as Local_Name,
-    coalesce('<b>Locality:</b> ' || concat_locality(coc.id), '') ||
-    case when lg.fieldlocverbatim is null or lg.fieldlocverbatim = '' then ''
-        else '<br><b>Location Verbatim:</b> ' || lg.fieldlocverbatim end ||
+    coalesce('<b>Locality Verbatim:</b> ' || lg.fieldlocverbatim, '') ||
+    coalesce('<br><b>Locality:</b> ' || concat_localitynote(coc.id), '') ||
     case when coc.fieldcollectionnote is null or coc.fieldcollectionnote = '' then ''
         else '<br><b>Habitat:</b> ' || coc.fieldcollectionnote end ||
     coalesce('<br><b>Associated Taxa:</b> ' || concat_assoctaxa(coc.id), '') ||
@@ -84,8 +83,8 @@ left outer join hierarchy hlng on (
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join hierarchy hlg on (
     coc.id = hlg.parentid
-    and hlng.primarytype = 'localityGroup'
-    and hlng.pos = 0)
+    and hlg.primarytype = 'localityGroup'
+    and hlg.pos = 0)
 left outer join localityGroup lg on (hlg.id = lg.id)
 left outer join hierarchy hsdg on (
     coc.id = hsdg.parentid
@@ -128,14 +127,14 @@ where hgc.name = $P{csid}]]>
 				<textFieldExpression><![CDATA[$F{label_header}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="18f328a1-d3e3-41de-8613-f18fa516d371" positionType="Float" stretchType="RelativeToTallestObject" x="10" y="142" width="270" height="30" isRemoveLineWhenBlank="true"/>
+				<reportElement uuid="18f328a1-d3e3-41de-8613-f18fa516d371" positionType="Float" stretchType="RelativeToTallestObject" x="10" y="155" width="270" height="20" isRemoveLineWhenBlank="true"/>
 				<textElement textAlignment="Center" markup="html">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{label_footer}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="66"/>
+				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="80"/>
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>
