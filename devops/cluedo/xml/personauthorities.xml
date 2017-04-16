@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="locations">
+  <ns2:persons_common xmlns:ns2="http://collectionspace.org/services/person" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <shortIdentifier>{shortIdentifier}</shortIdentifier>
+    <inAuthority>{authority}</inAuthority>
+    <personTermGroupList>
+    <personTermGroup>
+        <termName>{person}</termName>
+        <termDisplayName>{person}</termDisplayName>
+    </personTermGroup>
+    </personTermGroupList>
+  </ns2:persons_common>
+</document>

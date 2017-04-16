@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document name="locations">
   <ns2:locations_common xmlns:ns2="http://collectionspace.org/services/location" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <inAuthority>#authority#</inAuthority>
+    <inAuthority>{authority}</inAuthority>
     <locTermGroupList>
     <locTermGroup>
-        <termName>#displayName#</termName>
+        <termName>{displayName}</termName>
         <termStatus>accepted</termStatus>
-        <termDisplayName>#displayName#</termDisplayName>
+        <termDisplayName>{displayName}</termDisplayName>
     </locTermGroup>
     </locTermGroupList>
   </ns2:locations_common>
