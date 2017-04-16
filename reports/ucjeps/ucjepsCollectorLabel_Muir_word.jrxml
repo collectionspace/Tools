@@ -16,9 +16,8 @@
     getdispl(tig.taxon) as Scientific_Name,
     ttg.termformatteddisplayname as Sci_Name_Fmt,
     lng.localname as Local_Name,
-    coalesce('<b>Locality:</b> ' || concat_locality(coc.id), '') ||
-    case when lg.fieldlocverbatim is null or lg.fieldlocverbatim = '' then ''
-        else '<br><b>Location Verbatim:</b> ' || lg.fieldlocverbatim end ||
+    coalesce('<b>Locality Verbatim:</b> ' || lg.fieldlocverbatim, '') ||
+    coalesce('<br><b>Locality:</b> ' || concat_localitynote(coc.id), '') ||
     case when coc.fieldcollectionnote is null or coc.fieldcollectionnote = '' then ''
         else '<br><b>Habitat:</b> ' || coc.fieldcollectionnote end ||
     coalesce('<br><b>Associated Taxa:</b> ' || concat_assoctaxa(coc.id), '') ||
@@ -26,8 +25,8 @@
         else '<br><b>Reference:</b> ' || rg.reference end ||
     case when cocbd.item is null or cocbd.item = '' then ''
         else '<br>' || cocbd.item end ||
-    case when coc.phase is null or coc.phase = '' then ''
-        else '<br>' || coc.phase end ||
+    case when getdispl(coc.phase) is null or getdispl(coc.phase) = '' then ''
+        else '<br>' || getdispl(coc.phase) end ||
     case when coc.sex is null or coc.sex = '' then ''
         else '; ' || coc.sex end ||
     coalesce('<br><b>Collector(s):</b> ' || concat_collectors(coc.id), '')  ||
@@ -37,9 +36,9 @@
         else '<br><b>Date:</b> ' || get_fieldcolldate_range(coc.id) ||
              '<br><b>Date Verbatim:</b> ' || sdg.datedisplaydate end ||
     case when nps.numbervalue is null or nps.numbervalue = '' then ''
-        else '<br><b>' || nps.numbertype || ':</b> ' || nps.numbervalue end ||
+        else '<br><b>' || getdispl(nps.numbertype) || ':</b> ' || nps.numbervalue end ||
     case when onps.numbervalue is null or onps.numbervalue = '' then ''
-        else '<br><b>' || onps.numbertype || ':</b> ' || onps.numbervalue end as Concat_Data,
+        else '<br><b>' || getdispl(onps.numbertype) || ':</b> ' || onps.numbervalue end as Concat_Data,
     case
         when conh.labelfooter is null or conh.labelfooter = '' then ''
         when conh.labelfooter like 'urn:%' then '<b>' || getdispl(conh.labelfooter) || '</b>'
@@ -84,8 +83,8 @@ left outer join hierarchy hlng on (
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join hierarchy hlg on (
     coc.id = hlg.parentid
-    and hlng.primarytype = 'localityGroup'
-    and hlng.pos = 0)
+    and hlg.primarytype = 'localityGroup'
+    and hlg.pos = 0)
 left outer join localityGroup lg on (hlg.id = lg.id)
 left outer join hierarchy hsdg on (
     coc.id = hsdg.parentid
@@ -95,17 +94,17 @@ left outer join collectionobjects_common_briefdescriptions cocbd on (
     coc.id = cocbd.id
     and cocbd.pos = 0)
 left outer join (
-    select h.parentid, o.numbertype, o.numbervalue
+    select h.parentid, getdispl(o.numbertype) numbertype, o.numbervalue
     from othernumber o, hierarchy h
     where h.id = o.id
     and h.primarytype = 'otherNumber'
-    and o.numbertype = 'National Park Service Accession Number') nps on (coc.id = nps.parentid)
+    and getdispl(o.numbertype) = 'National Park Service Accession Number') nps on (coc.id = nps.parentid)
 left outer join (
-    select h.parentid, o.numbertype, o.numbervalue
+    select h.parentid, getdispl(o.numbertype) numbertype, o.numbervalue
     from othernumber o, hierarchy h
     where h.id = o.id
     and h.primarytype = 'otherNumber'
-    and o.numbertype = 'Old NPS catalog number') onps on (coc.id = onps.parentid)
+    and getdispl(o.numbertype) = 'Old NPS catalog number') onps on (coc.id = onps.parentid)
 where hgc.name = $P{csid}]]>
 	</queryString>
 	<field name="id" class="java.lang.String"/>
@@ -128,14 +127,14 @@ where hgc.name = $P{csid}]]>
 				<textFieldExpression><![CDATA[$F{label_header}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="18f328a1-d3e3-41de-8613-f18fa516d371" positionType="Float" stretchType="RelativeToTallestObject" x="10" y="142" width="270" height="30" isRemoveLineWhenBlank="true"/>
+				<reportElement uuid="18f328a1-d3e3-41de-8613-f18fa516d371" positionType="Float" stretchType="RelativeToTallestObject" x="10" y="155" width="270" height="20" isRemoveLineWhenBlank="true"/>
 				<textElement textAlignment="Center" markup="html">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{label_footer}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="66"/>
+				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="80"/>
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>

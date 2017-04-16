@@ -24,8 +24,8 @@
         else '<br><b>Reference:</b> ' || rg.reference end ||
     case when cocbd.item is null or cocbd.item = '' then ''
         else '<br>' || cocbd.item end ||
-    case when coc.phase is null or coc.phase = '' then ''
-        else '<br>' || coc.phase end ||
+    case when getdispl(coc.phase) is null or getdispl(coc.phase) = '' then ''
+        else '<br>' || getdispl(coc.phase) end ||
     case when coc.sex is null or coc.sex = '' then ''
         else '; ' || coc.sex end ||
     coalesce('<br><b>Collector(s):</b> ' || concat_collectors(coc.id), '')  ||
@@ -34,9 +34,9 @@
     case when sdg.datedisplaydate is null or sdg.datedisplaydate = '' then ''
         else '<br><b>Date:</b> ' || sdg.datedisplaydate end ||
     case when nps.numbervalue is null or nps.numbervalue = '' then ''
-        else '<br><b>' || nps.numbertype || ':</b> ' || nps.numbervalue end ||
+        else '<br><b>' || getdispl(nps.numbertype) || ':</b> ' || nps.numbervalue end ||
     case when onps.numbervalue is null or onps.numbervalue = '' then ''
-        else '<br><b>' || onps.numbertype || ':</b> ' || onps.numbervalue end as Concat_Data,
+        else '<br><b>' || getdispl(onps.numbertype) || ':</b> ' || onps.numbervalue end as Concat_Data,
     case
         when conh.labelfooter is null or conh.labelfooter = '' then ''
         when conh.labelfooter like 'urn:%' then '<b>' || getdispl(conh.labelfooter) || '</b>'
@@ -87,17 +87,17 @@ left outer join collectionobjects_common_briefdescriptions cocbd on (
     coc.id = cocbd.id
     and cocbd.pos = 0)
 left outer join (
-    select h.parentid, o.numbertype, o.numbervalue
+    select h.parentid, getdispl(o.numbertype) numbertype, o.numbervalue
     from othernumber o, hierarchy h
     where h.id = o.id
     and h.primarytype = 'otherNumber'
-    and o.numbertype = 'National Park Service Accession Number') nps on (coc.id = nps.parentid)
+    and getdispl(o.numbertype) = 'National Park Service Accession Number') nps on (coc.id = nps.parentid)
 left outer join (
-    select h.parentid, o.numbertype, o.numbervalue
+    select h.parentid, getdispl(o.numbertype) numbertype, o.numbervalue
     from othernumber o, hierarchy h
     where h.id = o.id
     and h.primarytype = 'otherNumber'
-    and o.numbertype = 'Old NPS catalog number') onps on (coc.id = onps.parentid)
+    and getdispl(o.numbertype) = 'Old NPS catalog number') onps on (coc.id = onps.parentid)
 where hgc.name = $P{csid}]]>
 	</queryString>
 	<field name="id" class="java.lang.String"/>
