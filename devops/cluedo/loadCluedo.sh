@@ -3,17 +3,28 @@
 echo Loading Cluedo Museum...
 date
 
-# AUTHORITYINPUT PREFIX AUTHORITY CSID TEMPLATE CSPACEURL LOGIN PASSWORD
-time ./loadAuthority.sh persons.csv  PERSONS personauthorities "$CSID" xml/persons.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
-time ./loadAuthority.sh storagelocations.csv  LOCATIONS locationauthorities "$CSID" xml/locationsWithoutShortID.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
-time ./loadAuthority.sh materials.csv  MATERIALS conceptauthorites "$CSID" xml/materials.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
+# extract goodies to load from XML source file
+python makeCSV.py cluedo.xml
 
-time ./loadEntities.sh collectionobjects.csv  OBJECTS collectionobjects xml/collectionobjects.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
-time ./loadEntities.sh media.csv  MEDIA media xml/media.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
-time ./loadEntities.sh movements.csv  MOVEMENTS movements xml/minMovements.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
+# these are values for nightly.collectionspace.org
+personauthorities=49d792ea-585b-4d38-b591
+locationauthorities=2105d470-0d15-47e5-88ed
 
-time ./loadRelations.sh media2objects.csv  MEDIA2OBJECTS "$AUTHORITY" "$CSID" xml/media2objects.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
-time ./loadRelations.sh movements2objects.csv  OBJECTS2LOCATIONS "$AUTHORITY" "$CSID" xml/movements2objects.xml "$CSPACEURL" "$LOGIN" "$PASSWORD"
+time python loadCSpace.py $1 person personauthorities $personauthorities
+time python loadCSpace.py $1 storagelocation locationauthorities $locationauthorities
+#time python loadCSpace.py $1 material conceptauthorites
+
+time python loadCSpace.py $1 collectionobject collectionobjects
+time python loadCSpace.py $1 movement movements
+
+# load blobs, create MH records, relate to objects (i.e. BMU)
+time python loadMedia.py $1 media
+
+# move objects to locations
+time python loadRelations.py $1 objects2locations
+
+# fill in details in records
+time python fillEntitles.py $1
 
 date
 

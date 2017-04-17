@@ -2,7 +2,7 @@
 <document name="movements">
   <ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <normalLocation>{normalLocation}</normalLocation>
-    <movementReferenceNumber>{movementReferenceNumber}</movementReferenceNumber>
+    <movementReferenceNumber>movement-{sequencenumber}</movementReferenceNumber>
     <inventoryContactList/>
     <movementMethods>
       <movementMethod>{movementMethod}</movementMethod>

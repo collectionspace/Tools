@@ -4,19 +4,7 @@ import sys, csv
 tree = ET.parse(sys.argv[1])
 root = tree.getroot()
 
-mapping = {
-    'victim': 'person',
-    'suspect': 'person',
-    'floor': 'room',
-    'weapon': 'object',
-    'media': 'image'
-}
-
-cluedo2cspace = {
-    'person': 'person',
-    'room': 'storagelocation',
-    'object': 'collectionobject'
-}
+from constants import *
 
 relations = ['collectionobjects2storagelocations', 'collectionobjects2people']
 
@@ -33,9 +21,11 @@ for cluedoElement, cspaceElement in mapping.items():
             cspaceCSV.writerow([cluedo2cspace[c.tag], c.tag, c.text])
             cspaceCSV.writerow(['media', c.text, slug + '_Full.jpg'])
 
-
-for locations in [entities[x] for x in entities.keys() if entities[x] == 'storagelocation']:
-    for objects in [entities[x] for x in entities.keys() if entities[x] == 'object']:
-        pass
+for object in [x for x in entities.keys() if entities[x] == 'collectionobject']:
+    for location in [x for x in entities.keys() if entities[x] == 'storagelocation']:
+        cspaceCSV.writerow(['movement', 'movement', '%s :: %s' % (location, object) ])
+        print location, object
+        del entities[location]
+        break
 
 

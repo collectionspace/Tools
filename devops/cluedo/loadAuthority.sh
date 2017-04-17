@@ -1,41 +1,27 @@
-#!/bin/bash -x
-#
-# load some authority records...
-#
-#
-AUTHORITYINPUT=$1
-MODE=$2
-AUTHORITY=$3
-CSID=$4
-TEMPLATE=$5
-CSPACEURL=$6
-LOGIN=$7
-PASSWORD=$8
+import xml.etree.ElementTree as ET
+import sys, csv
+from
 
-wc -l $AUTHORITYINPUT
+from constants import *
 
-if [ "$CSPACEURL" == "" ] || [ "$CSPACEUSER" == "" ]; then
-    echo "CSPACEURL and/or CSPACEUSER environment variables are not set. Did you edit set-config.sh and 'source set-config.sh'?"
-    exit
-fi
+relations = ['collectionobjects2storagelocations', 'collectionobjects2people']
 
-if [ "$MODE" == "" ] ; then
-    echo "$MODE is not set, setting it to PRODUCTION for this run"
-    MODE="PRODUCTION"
-    exit
-fi
+cspaceCSV = csv.writer(open('entities.csv', 'wb'), delimiter='\t')
+entities = {}
+for cluedoElement, cspaceElement in mapping.items():
+    print 'looking for Cluedo %s elements' % cluedoElement
+    for e in root.findall('.//' + cluedoElement):
+        for c in e.findall('.//' + cspaceElement):
+            print '   ', cluedoElement, c.tag, c.text
+            slug = c.text.replace('.', '').replace(' ', '')
+            print '   ', 'media', c.tag, slug + '_Full.jpg'
+            entities[c.text] = cluedo2cspace[c.tag]
+            cspaceCSV.writerow([cluedo2cspace[c.tag], c.tag, c.text])
+            cspaceCSV.writerow(['media', c.text, slug + '_Full.jpg'])
 
-#
-# Load authority records:
-#
-perl post2CSpace.pl "$CSPACEURL" "$LOGIN" "$PASSWORD" "$CSID" "$AUTHORITY" "$TEMPLATE.xml" "$AUTHORITYINPUT" > $MODE.load.$TEMPLATE.report.txt
-grep "Location:" $MODE.load.$TEMPLATE.report.txt | perl -pe "s/^Location: +//" > $MODE.load.$TEMPLATE.urls
-wc -l $MODE.load*.urls
-#
-# 5. Create list of termDisplayNames, refNames & CSIDs:
-#
-./helper.sh list "$LOGIN:$PASSWORD" "$CSID" "$URL" $AUTHORITY
-perl -pe 's/<list/\n<list/g' curl.items | perl -ne 'while (s/<list\-item>.*?<csid>(.*?)<.*?<(termDisplayName|refName)>(.*?)<.*?<(termDisplayName|refName)>(.*?)<.*?<\/list\-item>//) { print "$1\t$3\t$5\n" }' > $MODE.$AUTHORITY.items
-#
-curl -i -S --stderr - --basic -u $LOGIN:$PASSWORD -X GET -H "Content-Type:application/xml" $URL/cspace-services/$AUTHORITY/$CSID/items | perl -ne 's/<totalItems>(\d+)<\/totalItems>// && (print "$1 $AUTHORITY\n")'
-#
+
+for location in [x for x in entities.keys() if entities[x] == 'storagelocation']:
+    for object in [x for x in entities.keys() if entities[x] == 'collectionobject']:
+        print location, object
+
+

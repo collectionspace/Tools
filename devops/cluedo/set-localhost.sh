@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-export HOSTNAME="localhost:8180"
-export CSPACEURL="$HOSTNAME"
+export HOSTNAME="nightly.collectionspace.org"
+export CSPACEURL="https://$HOSTNAME"
 export URL="$CSPACEURL"
 
 export CONTENT_TYPE="Content-Type: application/xml"

@@ -16,14 +16,18 @@
     <assocActivityGroupList/>
     <objectProductionReasons/>
     <assocPlaceGroupList/>
-    <objectNameList/>
+    <objectNameList>
+    <objectNameGroup>
+    <objectName>{collectionobject}</objectName>
+    </objectNameGroup>
+    </objectNameList>
     <styles/>
     <materialGroupList/>
     <assocObjectGroupList/>
     <fieldCollectors/>
     <responsibleDepartments/>
     <textualInscriptionGroupList/>
-    <objectNumber>{objectnumber}</objectNumber>
+    <objectNumber>object-{sequencenumber}</objectNumber>
     <fieldColEventNames/>
     <colors/>
     <contentScripts/>

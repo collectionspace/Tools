@@ -1,16 +1,23 @@
 #!/bin/bash
 
-COMMAND=$1
-USER=$2
-AUTHORITY=$3
-URL=$4
-SERVICE="cspace-services/$5"
+if [ $# -ne 3 ]; then
+    echo Usage:
+    echo $0 COMMAND AUTHORITY RECORDTYPE
+    echo e.g.
+    echo nohup time $0 delete 49d792ea-585b-4d38-b591 personauthorities &
+    exit
+fi
 
-echo COMMAND=$1
-echo USER=$2
-echo AUTHORITY=$3
-echo URL=$4
-echo SERVICE="cspace-services/$5"
+COMMAND=$1
+USER=$CSPACEUSER
+AUTHORITY=$2
+URL=$URL
+SERVICE="cspace-services/$3"
+
+echo COMMAND=$COMMAND
+echo AUTHORITY=$2
+echo URL=$URL
+echo SERVICE="cspace-services/$3"
 
 CONTENT_TYPE="Content-Type: application/xml"
 HTTP="HTTP/1.1"
@@ -36,8 +43,8 @@ case "$COMMAND" in
 	
 	while read CSID
         do
-	    echo "${count}: curl -S --stderr - -X DELETE $URL/$SERVICE$ITEMS/$CSID --basic -u \"$USER\" -H \"$CONTENT_TYPE\"" >> $LOG
-	    curl -S --stderr - -X DELETE $URL/$SERVICE$ITEMS/$CSID --basic -u "$USER" -H "$CONTENT_TYPE" >> curl.delete
+	    echo "curl -S --stderr - -X DELETE $URL/$SERVICE$ITEMS/$CSID --basic -u \"$USER\" -H \"$CONTENT_TYPE\""
+	    curl -S --stderr - -X DELETE $URL/$SERVICE$ITEMS/$CSID --basic -u "$USER" -H "$CONTENT_TYPE" > /dev/null
 	done
     ;;
 
@@ -48,7 +55,7 @@ case "$COMMAND" in
 	
 	for count in {0..1}
 	do
-	    echo "${count}: curl -S --stderr curl.junk -X \"GET $URL/$SERVICE$ITEMS?pgSz=1000&pgNum=$count\" --basic -u \"$USER\" -H \"$CONTENT_TYPE\"" >> $LOG
+	    echo "curl -S --stderr curl.junk -X \"GET $URL/$SERVICE$ITEMS?pgSz=1000&pgNum=$count\" --basic -u \"$USER\" -H \"$CONTENT_TYPE\"" >> $LOG
 	    curl -S --stderr curl.${count}.items -X GET "$URL/$SERVICE$ITEMS?pgSz=1000&pgNum=$count" --basic -u "$USER" -H "$CONTENT_TYPE" >> $XMLFILE
 	done
      ;;
