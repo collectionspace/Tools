@@ -32,15 +32,24 @@ First, you'll need to set environment variables for the server and credentials.
 An example script is provided for this purpose. You will need to customized it.
 
 A version already customized for the existing, publicly accessible 
-CollectionSpace QA server is provide.
+CollectionSpace "nightly" server is provide.
 
 The another script runs the rest of the suite.
 
 ```
 # set up server and credentials
-source set-qa.sh 
+source set-nightly.sh 
 # generate the various .csv file for authorities, objects, etc.
-python makeCSV.py cluedo.xml 
-# load them, in order, into CSpace
+# and load them, in order, into CSpace
 ./loadCluedo.sh 
 ```
+
+Afew notes:
+
+* If you run this on nightly, please run the cleanup script to remove the records you created:
+
+```
+./cleanup.sh
+```
+
+* `loadCluedo.sh` assume that nightly is the target. You'll need to edit this script to point to different authorities in different deployments.
