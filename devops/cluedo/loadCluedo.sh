@@ -3,22 +3,33 @@
 echo Loading Cluedo Museum...
 date
 
-# extract goodies to load from XML source file
+# 1. extract goodies to load from the XML source file, cluedo.xml
+# the hardcoded output .CSV file is 'entities.csv'
 python makeCSV.py cluedo.xml
 
+# 2. we need to create our authority records first
+#
 # these are values for nightly.collectionspace.org
-personauthorities=49d792ea-585b-4d38-b591
-locationauthorities=2105d470-0d15-47e5-88ed
+personauthorities=`./getauthoritycsid.sh personauthorities`
+locationauthorities=`./getauthoritycsid.sh locationauthorities`
 
 time python loadCSpace.py entities.csv person personauthorities $personauthorities
 time python loadCSpace.py entities.csv storagelocation locationauthorities $locationauthorities
 #time python loadCSpace.py entities.csv material conceptauthorites
 
+# 3. now we can make some object records, and some movement records that
+# will later specify the locations of these objects
 time python loadCSpace.py entities.csv collectionobject collectionobjects
 time python loadCSpace.py entities.csv movement movements
 
-# load blobs, create MH records, relate to objects (i.e. BMU)
-time python loadMedia.py entities.csv media
+# 4. load blobs, create MH records, relate to objects
+# (the BMU is used to do this, and the user will have to have copied the code here to use)
+if [ -e uploadMedia.py ]; then
+  cut -f3 entities.csv > media.csv
+  time python uploadMedia.py media.csv media.cfg
+else
+  echo "BMU not configured, please follow instructions"
+fi
 
 # move objects to locations
 time python loadRelations.py entities.csv objects2locations
