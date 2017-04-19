@@ -25,7 +25,7 @@ time python loadCSpace.py entities.csv movement movements
 # 4. load blobs, create MH records, relate to objects
 # (the BMU is used to do this, and the user will have to have copied the code here to use)
 if [ -e uploadMedia.py ]; then
-  cut -f3 entities.csv > media.csv
+  cut -f3 entities.csv | grep jpg > media.csv
   time python uploadMedia.py media.csv media.cfg
 else
   echo "BMU not configured, please follow instructions"
