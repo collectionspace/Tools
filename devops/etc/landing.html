@@ -36,6 +36,7 @@
                 <li><a href="#devtab">Development Apps</a></li>
                 <li><a href="#documentstab">Help!</a></li>
                 <li><a href="#analyticstab">Analytics</a></li>
+                <li><a href="#otheruserstab">Other Public Portals</a></li>
                 <li><a href="#newstab">News</a></li>
             </ul>
             <div id="prodtab">
@@ -69,12 +70,12 @@
                  <div id="analyticspages">
                      <ul>
                          <li><a href="#djangotab">Django Webapp Usage</a></li>
-                         <li><a href="#legacytab">Legacy Webapp Usage</a></li>
+                         <li><a href="#toolboxtab">Toolbox Webapp Usage</a></li>
                      </ul>
                      <div id="djangotab">
                          <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/summary.html"></iframe>
                      </div>
-                     <div id="legacytab">
+                     <div id="toolboxtab">
                          <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/webappuse.html"></iframe>
                      </div>
                  </div>
@@ -101,6 +102,15 @@
             </div>
              <div id="newstab">
             </div>
+             <div id="otheruserstab">
+                 <h3>Other Public Portals</h3>
+                 <p>The following is a list of other deployments of the Search Portal software that we know about.</p>
+                 <p>Please let us know if you find others:</p>
+                 <ul>
+                     <li>Bolinas Museum <a target="_new" href="http://collection.bolinasmuseum.org/webapp/search">http://collection.bolinasmuseum.org/webapp/search</a></li>
+                     <li>Watermill Center <a target="_new" href="http://collection.watermillcenter.org/search">http://collection.watermillcenter.org/search</a></li>
+                 </ul>
+            </div>
         </div>
     </div>
     <br class="clear">
@@ -113,9 +123,9 @@
     $(function () {
 
         var museums = [
-            ['UC Botanical Garden', 'botgarden', '13d90c7c-60cc-4f13-9985', ['searchmedia', 'uploadtricoder', 'eloan', 'imaginator']],
-            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan', 'toolbox']],
-            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator', 'toolbox']],
+            ['UC Botanical Garden', 'botgarden', '13d90c7c-60cc-4f13-9985', ['searchmedia', 'uploadtricoder', 'eloan']],
+            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan']],
+            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator', 'toolbox', 'grouper']],
             ['PAHMA', 'pahma', 'c8055214-50e7-49b1-b15b', ['searchmedia', 'eloan']],
             ['UCJEPS', 'ucjeps', '1c18cf1e-4826-4f33-b047', ['uploadtricoder', 'ireports', 'internal', 'toolbox']]
         ];
@@ -129,6 +139,7 @@
                 ["searchmedia", "Media Search"]
             ],
             'internal': [
+                ["grouper", "Grouper"],
                 ["internal", "Internal Portal"],
                 ["ireports", "iReports"],
                 ["uploadmedia", "Bulk Media Upload"],
