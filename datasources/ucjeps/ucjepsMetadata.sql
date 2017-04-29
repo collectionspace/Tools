@@ -163,7 +163,7 @@ select
   co.numberOfObjects AS numberofobjects_s,
   conh.objectCountNumber AS objectcount_s,
   CASE WHEN (co.numberOfObjects > 0 and conh.objectCountNumber > 0) THEN
-    (to_char(co.objectCountNumber,'FM999') || ' of ' || to_char(conh.numberOfObjects,'FM999'))
+    (to_char(conh.objectCountNumber,'FM999') || ' of ' || to_char(co.numberOfObjects,'FM999'))
   ELSE '' END AS sheet_s
 
 from collectionobjects_common co
