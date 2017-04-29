@@ -159,7 +159,12 @@ select
        inner join hierarchy h6int on cc.id = h6int.id
        JOIN collectionobjects_common_comments com ON (com.id=cc.id AND com.pos IS NOT NULL)
        where h6int.name = h1.name),
-       '␥', '') AS comments_ss
+       '␥', '') AS comments_ss,
+  co.numberOfObjects AS numberofobjects_s,
+  conh.objectCountNumber AS objectcount_s,
+  CASE WHEN (co.numberOfObjects > 0 and conh.objectCountNumber > 0) THEN
+    (to_char(co.objectCountNumber,'FM999') || ' of ' || to_char(conh.numberOfObjects,'FM999'))
+  ELSE '' END AS sheet_s
 
 from collectionobjects_common co
 inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
