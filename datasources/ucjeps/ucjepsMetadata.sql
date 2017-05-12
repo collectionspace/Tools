@@ -164,7 +164,10 @@ select
   conh.objectCountNumber AS objectcount_s,
   CASE WHEN (co.numberOfObjects > 0 and conh.objectCountNumber > 0) THEN
     (to_char(conh.objectCountNumber,'FM999') || ' of ' || to_char(co.numberOfObjects,'FM999'))
-  ELSE '' END AS sheet_s
+  ELSE '' END AS sheet_s,
+  cc.createdat as createdat_dt,
+  cj.postToPublic as posttopublic_s,
+  '' as references_ss
 
 from collectionobjects_common co
 inner join misc on (co.id = misc.id and misc.lifecyclestate <> 'deleted')
@@ -201,6 +204,7 @@ left outer join taxon_ucjeps tu on (tu.id = tc.id)
 left outer join taxon_naturalhistory tnh on (tnh.id = tc.id)
 left outer join localitygroup lg on (lg.id = hlg.id)
 left outer join collectionobjects_naturalhistory conh on (co.id = conh.id)
+left outer join collectionobjects_ucjeps cj on (co.id = cj.id)
 left outer join hierarchy hlng on (co.id = hlng.parentid and hlng.primarytype = 'localNameGroup' and hlng.pos = 0)
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join collectionobjects_common_briefdescriptions cocbd on (co.id = cocbd.id and cocbd.pos = 0)

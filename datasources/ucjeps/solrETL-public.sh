@@ -21,7 +21,7 @@ USERNAME="reporter_$TENANT"
 DATABASE="${TENANT}_domain_${TENANT}"
 CONNECTSTRING="host=$SERVER dbname=$DATABASE"
 CONTACT="jason_alexander@berkeley.edu"
-export NUMCOLS=60
+export NUMCOLS=63
 ##############################################################################
 # extract and massage the metadata from CSpace
 ##############################################################################
