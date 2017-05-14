@@ -1,5 +1,5 @@
 while (<STDIN>) {
-    @cell = split /\t/;
+    @cell = split /\|/;
     $location = $cell[@ARGV[0]];
     # BAMPFA-412
     # "Asian Study"* => "located in Asian Study Center"
@@ -12,10 +12,9 @@ while (<STDIN>) {
     $status = "located in Art Study Center" if $location =~ /.*Study Center.*/i;
     $status = "located in Asian Study Center" if $location =~ /.*Asian Study.*/i;
     $status = "On View" if $location =~ /.*(Gallery|Reading Room|Community Gallery).*/i;
-    $status = "Not on view";
     $i++;
     $status = "status" if $i == 1;
-    # add to tail end of record, vertical bar is delimiter here.
-    s/$/\t$status/;
+    # add to tail end of record.
+    s/$/\|$status/;
     print;
 }

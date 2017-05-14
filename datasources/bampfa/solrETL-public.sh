@@ -39,7 +39,7 @@ time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' m1.csv > media.csv
 time psql -R"@@" -A -U $USERNAME -d "$CONNECTSTRING" -f blobs.sql -o b1.csv
 time perl -pe 's/[\r\n]/ /g;s/\@\@/\n/g' b1.csv > blobs.csv
 # NB: addStatus uses tabs as a delimiter, but the extract has vertical bar. Fix this someday! :-(
-time perl addStatus.pl 37 < d4.csv | perl -pe 's/\t/|/' > metadata.csv
+time perl addStatus.pl 37 < d4.csv > metadata.csv
 # make the header
 head -1 metadata.csv > header4Solr.csv
 # add the blob field name to the header (the header already ends with a tab); rewrite objectcsid_s to id (for solr id...)
