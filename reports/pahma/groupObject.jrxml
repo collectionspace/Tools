@@ -35,7 +35,7 @@ LEFT OUTER JOIN objectnamegroup ong ON (ong.id=h3.id)
 
 LEFT OUTER JOIN collectionobjects_common_briefdescriptions bd ON (bd.id=co.id and bd.pos=0)
 
-left outer join hierarchy h4 on (h2.id = h4.parentid and h4.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList')
+left outer join hierarchy h4 on (h2.id = h4.parentid and h4.name = 'collectionobjects_pahma:pahmaFieldCollectionDateGroupList' and h4.pos=0)
 left outer join structureddategroup sd on (h4.id = sd.id)
 
 join collectionspace_core core on core.id=co.id
