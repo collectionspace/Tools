@@ -48,6 +48,57 @@ def getConfig(form):
     except:
         return False
 
+def make_get_request(realm, uri, hostname, protocol, port, username, password):
+    """
+        Makes HTTP GET request to a URL using the supplied username and password credentials.
+    :rtype : a 3-tuple of the target URL, the data of the response, and an error code
+    :param realm:
+    :param uri:
+    :param hostname:
+    :param protocol:
+    :param port:
+    :param tenant:
+    :param username:
+    :param password:
+    """
+
+    elapsedtime = time.time()
+    if port == '':
+        server = protocol + "://" + hostname
+    else:
+        server = protocol + "://" + hostname + ":" + port
+
+    # this is a bit elaborate because otherwise
+    # the urllib2 approach to basicauth is to first try the request without the credentials, get a 401
+    # then retry the request with the credentials... who know why...
+    passMgr = urllib2.HTTPPasswordMgr()
+    passMgr.add_password(realm, server, username, password)
+    authhandler = urllib2.HTTPBasicAuthHandler(passMgr)
+    opener = urllib2.build_opener(authhandler)
+    unencoded_credentials = "%s:%s" % (username, password)
+    auth_value = 'Basic %s' % base64.b64encode(unencoded_credentials).strip()
+    opener.addheaders = [('Authorization', auth_value)]
+    urllib2.install_opener(opener)
+    url = "%s/%s" % (server, uri)
+
+    try:
+        f = urllib2.urlopen(url)
+        statusCode = f.getcode()
+        data = f.read()
+        result = (url, data, statusCode)
+    except urllib2.HTTPError, e:
+        print 'The server (%s) couldn\'t fulfill the request.' % server
+        print 'Error code: ', e.code
+        result = (url, None, e.code)
+    except urllib2.URLError, e:
+        print 'We failed to reach the server (%s).' % server
+        print 'Reason: ', e.reason
+        result = (url, None, e.reason)
+    except:
+        raise
+
+    return result + ((time.time() - elapsedtime),)
+
 
 def postxml(requestType, uri, realm, server, username, password, payload):
     passman = urllib2.HTTPPasswordMgr()
