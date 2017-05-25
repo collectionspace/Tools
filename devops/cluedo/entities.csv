@@ -1,0 +1,59 @@
+collectionobject	object	Walther PP
+media	Walther PP	WaltherPP_Full.jpg
+collectionobject	object	Candlestick
+media	Candlestick	Candlestick_Full.jpg
+collectionobject	object	Dagger
+media	Dagger	Dagger_Full.jpg
+collectionobject	object	Lead Pipe
+media	Lead Pipe	LeadPipe_Full.jpg
+collectionobject	object	Revolver
+media	Revolver	Revolver_Full.jpg
+collectionobject	object	Rope
+media	Rope	Rope_Full.jpg
+collectionobject	object	Spanner
+media	Spanner	Spanner_Full.jpg
+person	person	Miss Scarlett
+media	Miss Scarlett	MissScarlett_Full.jpg
+person	person	Colonel Mustard
+media	Colonel Mustard	ColonelMustard_Full.jpg
+person	person	Mrs. White
+media	Mrs. White	MrsWhite_Full.jpg
+person	person	Reverend Green
+media	Reverend Green	ReverendGreen_Full.jpg
+person	person	Mrs. Peacock
+media	Mrs. Peacock	MrsPeacock_Full.jpg
+person	person	Professor Plum
+media	Professor Plum	ProfessorPlum_Full.jpg
+person	person	Dr. Black
+media	Dr. Black	DrBlack_Full.jpg
+storagelocation	room	Cellar
+media	Cellar	Cellar_Full.jpg
+storagelocation	room	Stairs
+media	Stairs	Stairs_Full.jpg
+storagelocation	room	Ballroom
+media	Ballroom	Ballroom_Full.jpg
+storagelocation	room	Kitchen
+media	Kitchen	Kitchen_Full.jpg
+storagelocation	room	Conservatory
+media	Conservatory	Conservatory_Full.jpg
+storagelocation	room	Dining Room
+media	Dining Room	DiningRoom_Full.jpg
+storagelocation	room	Cellar
+media	Cellar	Cellar_Full.jpg
+storagelocation	room	Billiard Room
+media	Billiard Room	BilliardRoom_Full.jpg
+storagelocation	room	Library
+media	Library	Library_Full.jpg
+storagelocation	room	Hall
+media	Hall	Hall_Full.jpg
+storagelocation	room	Lounge
+media	Lounge	Lounge_Full.jpg
+storagelocation	room	Study
+media	Study	Study_Full.jpg
+movement	movement	Lounge :: Revolver
+movement	movement	Dining Room :: Spanner
+movement	movement	Cellar :: Candlestick
+movement	movement	Ballroom :: Rope
+movement	movement	Stairs :: Dagger
+movement	movement	Hall :: Walther PP
+movement	movement	Kitchen :: Lead Pipe
