@@ -8,6 +8,7 @@ import ConfigParser
 import time
 import urllib2
 import re
+import base64
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -48,7 +49,7 @@ def getConfig(form):
     except:
         return False
 
-def make_get_request(realm, uri, hostname, protocol, port, username, password):
+def make_get_request(realm, uri, server, username, password):
     """
         Makes HTTP GET request to a URL using the supplied username and password credentials.
     :rtype : a 3-tuple of the target URL, the data of the response, and an error code
@@ -63,10 +64,10 @@ def make_get_request(realm, uri, hostname, protocol, port, username, password):
     """
 
     elapsedtime = time.time()
-    if port == '':
-        server = protocol + "://" + hostname
-    else:
-        server = protocol + "://" + hostname + ":" + port
+    # if port == '':
+    #     server = protocol + "://" + hostname
+    # else:
+    #     server = protocol + "://" + hostname + ":" + port
 
     # this is a bit elaborate because otherwise
     # the urllib2 approach to basicauth is to first try the request without the credentials, get a 401
@@ -79,7 +80,7 @@ def make_get_request(realm, uri, hostname, protocol, port, username, password):
     auth_value = 'Basic %s' % base64.b64encode(unencoded_credentials).strip()
     opener.addheaders = [('Authorization', auth_value)]
     urllib2.install_opener(opener)
-    url = "%s/%s" % (server, uri)
+    url = "%s/cspace-services/%s" % (server, uri)
 
     try:
         f = urllib2.urlopen(url)
@@ -96,8 +97,8 @@ def make_get_request(realm, uri, hostname, protocol, port, username, password):
         result = (url, None, e.reason)
     except:
         raise
-
-    return result + ((time.time() - elapsedtime),)
+    
+    return result #+ ((time.time() - elapsedtime),)
 
 
 def postxml(requestType, uri, realm, server, username, password, payload):
