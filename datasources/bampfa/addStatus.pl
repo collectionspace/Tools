@@ -9,9 +9,10 @@ while (<STDIN>) {
     #
     # ok, ok, yes there is an implied if-then-else hidden here...I think it's fine, at least for now.
     $status = "Not on view";
-    $status = "located in Art Study Center" if $location =~ /Study Center/i;
+    $status = "On View" if $location =~ /Gallery/i;
+    $status = "On View" if $location =~ /Oxford, Lobby/i;
     $status = "located in Asian Study Center" if $location =~ /Asian Study/i;
-    $status = "On View" if $location =~ /^(Gallery|Reading Room|Oxford).*/i;
+    $status = "located in Art Study Center" if $location =~ /^Study\b/i;
     $i++;
     $status = "status" if $i == 1;
     # add to tail end of record.
