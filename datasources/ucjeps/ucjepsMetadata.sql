@@ -209,6 +209,7 @@ left outer join hierarchy hlng on (co.id = hlng.parentid and hlng.primarytype = 
 left outer join localNameGroup lng on (hlng.id = lng.id)
 left outer join collectionobjects_common_briefdescriptions cocbd on (co.id = cocbd.id and cocbd.pos = 0)
 where substring(co.objectnumber from '^[A-Z]*') not in ('DHN', 'UCSB', 'UCSC')
+      and cj.posttopublic = 'yes'
 -- and h1.name = '3380bad9-5bea-4eed-860e' -- UCcrhtest on ucjeps-dev
 -- and h1.name = '338075de-821c-49b3-8f34-969cc666a61e' -- JEPS46872
 -- and h1.name = '291d85e2-06dc-4fc2-9364' -- UC1300355
