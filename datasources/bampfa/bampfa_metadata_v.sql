@@ -14,6 +14,7 @@ create view piction.bampfa_metadata_v as
         END AS artistcalc,
         CASE
             WHEN pc.birthplace IS NULL OR pc.birthplace::text = ''::text THEN pcn.item::text
+            WHEN (pcn.item::text = pc.birthplace::text) then pcn.item::text
             ELSE (pcn.item::text || ', born '::text) || pc.birthplace::text
         END AS artistorigin,
     bt.bampfatitle AS title,
