@@ -4,7 +4,7 @@
 -- 8/7/2016 incorporated Lam's changes per BAMPFA-465 and fix to artistorigin per BAMPFA-495
 
 
-create view piction.bampfa_metadata_v as
+create or replace view piction.bampfa_metadata_v as
  SELECT h1.name AS objectcsid,
     co.objectnumber AS idnumber,
     cb.sortableeffectiveobjectnumber AS sortobjectnumber,
