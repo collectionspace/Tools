@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, csv, re, os
 from xml.sax.saxutils import escape
-from cswaExtras import postxml, make_get_request
+from cswaExtras import postxml, make_get_request, make_request
 
 from constants import *
 
@@ -59,11 +59,10 @@ for row in cspaceCSVin:
     if row[0] == entity:
         sequencenumber += 1
         payload = substitute({'authority': authoritycsid, entity: row[2], 'sequencenumber': '%03d' % sequencenumber},template)
-        (url, data, csid, elapsedtime) = postxml('POST', uri, realm, server, username, password, payload)
-        
+        (url, data, csid) = make_request("POST", uri, realm, server, username, password, payload)
         get_uri = '%s/%s/items/%s' % (authority, authoritycsid, csid)
-        (url, get_xml, scode) = make_get_request(realm, uri, server, username, password)
-        # def make_get_request(realm, uri, hostname, protocol, port, username, password):
+        (url, get_xml, scode) = make_request("GET", uri, realm, server, username, password)
+
 
         tree = ET.fromstring(get_xml)
         refname = tree.find(".//refName").text
@@ -75,4 +74,6 @@ for row in cspaceCSVin:
         cspaceCSVout.writerow(row)
 
 
-        
+        #create a program that creates the relations between objects, which will take
+        # the name of the CSV file, and it will contain the refnames of the elements
+        # that must be related/listed
