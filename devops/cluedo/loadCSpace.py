@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, csv, re, os
 from xml.sax.saxutils import escape
-from cswaExtras import postxml, make_get_request, make_request
+from cswaExtras import make_request
 
 from constants import *
 
