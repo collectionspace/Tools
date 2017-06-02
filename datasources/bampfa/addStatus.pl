@@ -1,6 +1,9 @@
+$runtype = @ARGV[0];
+$location_column = @ARGV[1];
+$crate_column = @ARGV[2];
 while (<STDIN>) {
     @cell = split /\|/;
-    $location = $cell[@ARGV[0]];
+    $location = $cell[$location_column];
     # BAMPFA-412
     # "Asian Study"* => "located in Asian Study Center"
     # "Study Center*" => "located in Art Study Centers"
@@ -14,7 +17,16 @@ while (<STDIN>) {
     $status = "located in Asian Study Center" if $location =~ /Asian Study/i;
     $status = "located in Art Study Center" if $location =~ /^Study\b/i;
     $i++;
-    $status = "status" if $i == 1;
+    if $i == 1 {
+        $status = "status";
+    }
+    else {
+        if $runtype eq 'public' {
+            @cell[$crate_column] = '-REDACTED-';
+            @cell[$location_column] = '-REDACTED-';
+        }
+    }
+    $_ = join(@cell,'|');
     # add to tail end of record.
     s/$/\|$status/;
     print;
