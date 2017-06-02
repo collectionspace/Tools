@@ -3,7 +3,7 @@ $location_column = @ARGV[1];
 $crate_column = @ARGV[2];
 while (<STDIN>) {
     chomp;
-    @cell = split /\|/;
+    @cell = split '\|',$_,-1;
     # BAMPFA-412
     # "Asian Study"* => "located in Asian Study Center"
     # "Study Center*" => "located in Art Study Centers"
