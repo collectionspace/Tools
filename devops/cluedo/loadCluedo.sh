@@ -20,7 +20,7 @@ time python loadCSpace.py entities.csv storagelocation locationauthorities $loca
 # 3. now we can make some object records, and some movement records that
 # will later specify the locations of these objects
 time python loadCSpace.py entities.csv collectionobject collectionobjects
-time python loadCSpace.py entities.csv movement movements
+# time python loadCSpace.py entities.csv movement movements
 
 # 4. load blobs, create MH records, relate to objects
 # (the BMU is used to do this, and the user will have to have copied the code here to use)
@@ -37,5 +37,7 @@ time python loadRelations.py entities.csv objects2locations
 # fill in details in records
 time python fillEntities.py entities.csv
 
+# create the relatiions between the different objects
+time python create_object_relations.py
 date
 
