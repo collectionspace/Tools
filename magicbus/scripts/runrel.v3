@@ -1,0 +1,13 @@
+#!/bin/bash -x
+RUNDATE=$1
+SEQUENCE=$2
+SAVEDIR=$3
+# $4 is not used (vestige from previous script which used deltas...)
+EXTRA=$4
+PREFIX=$5
+SYS="rel"
+time ./ok2run.v2        ${RUNDATE} ${SEQUENCE} ${SAVEDIR} >> magicbus.${PREFIX}.log
+time ./import${SYS}.v3  ${PREFIX}.${RUNDATE}${SEQUENCE}.xml
+time ./cleanup.v2       ${RUNDATE} ${SEQUENCE} ${SAVEDIR}
+time ./count${SYS}.v2  ${RUNDATE} ${SEQUENCE} ${SYS} >> magicbus.${PREFIX}.log
+

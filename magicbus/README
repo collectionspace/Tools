@@ -1,0 +1,43 @@
+The "Magic Bus" is a cascade of shell scripts which load TMS data into PAHMA CSpace vi IMPORT and REST
+
+Included here for posterity are the scripts which made up the Bus and were used to load 
+the majority of the migrated data into PAHMA.
+
+They are provided as is, without warranty, to provide an example of how to chain groups of import scripts 
+together into a continuous process.
+
+Besides this README, there is little document of the actual ETL process we used. 
+
+In essence, the load process requires:
+
+- exporting the target data from the original legacy database (in this case TMS).
+- massaging this data into an (XML) format suitable to be POSTed to the IMPORT service.
+- chunking these data into 5K chunks, since this is about the limit of a single POST.
+- POSTing each of these chunks (there are many thousands) to the IMPORT service, and verifying that they posted OK.
+
+Of course, these need to be done in order for a variety of record types.
+
+The Magic Bus only handles the last of these procedures, which, for PAHMA, required
+ almost a week of continuous loading.
+
+(The process of extracting the legacy data and preparing the XML is done using Talend and is
+not described here.)
+
+The Magic Bus process simply takes these thousands of XML files and POSTs them sequentially to the
+service they belong.
+
+The bus works like this:
+
+- low-level script take a single XML file and parameters and POST the data to the service using Curl.
+- another script, at the next level up, loops over a set of XML filenames, calling the low-level script
+- the XML files are batched into sets of 10-20, and are zipped up for transport. Therefore, another
+  higher-level script loops over the batches, unzipping each one, calling the lower-level script, and
+  moving the logs and intermediate files out of the way in preparation for the next run.
+- Other scripts called by these script do things like check out, do last minute prep (e.g. TMSmerge), etc.
+- A single top-level script (e.g. magicbus.lmi.sh) is used to launch the process.
+
+Deployment staff can monitor the Bus uses top and ps aux | grep ...". Stopping and restarting the Bus is
+a hassle. Kill the top process and work down -- if you kill a low-level process, the Bus will cascade into
+the next chunk to do, further complicating things. Restarting the Bus is not hard but requires 
+some concentration and am I'm going to describe it right now.
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="movements">
+  <ns2:movements_common xmlns:ns2="http://collectionspace.org/services/movement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <normalLocation>{normalLocation}</normalLocation>
+    <movementReferenceNumber>movement-{sequencenumber}</movementReferenceNumber>
+    <inventoryContactList/>
+    <movementMethods>
+      <movementMethod>{movementMethod}</movementMethod>
+    </movementMethods>
+    <reasonForMove>{reasonForMove}</reasonForMove>
+    <currentLocation>{currentLocation}</currentLocation>
+    <movementContact>{movementContact}</movementContact>
+    <currentLocationFitness>{currentLocationFitness}</currentLocationFitness>
+    <removalDate>{removalDate}</removalDate>
+    <locationDate>{locationDate}</locationDate>
+    <plannedRemovalDate>{plannedRemovalDate}</plannedRemovalDate>
+    <movementNote>{movementNote}</movementNote>
+    <currentLocationNote>{currentLocationNote}</currentLocationNote>
+  </ns2:movements_common>
+</document>

@@ -1,0 +1,9 @@
+# this two cron processes need to be run by a "regular user" in order for the
+# webapp monitoring at webapps.cspace.berkeley.edu to work.
+# 
+# at the moment, only "regular users" have access to the log files in /var/log/httpd
+# so by copying them periodically /tmp the metrics scripts running under
+# pseudouser app_webapps can get access to them.
+01 07-20 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-error_log > /tmp/apache_errors.log
+40 00 * * * cat /var/log/httpd/webapps.cspace.berkeley.edu_443-access_log > /tmp/webapps.access.log
+30 00 * * * for t in bampfa botgarden cinefiles pahma ucjeps; do cat /var/log/httpd/${t}.cspace.berkeley.edu_443-access_log | grep -P '(cspace|collectionspace)' > /tmp/${t}.access.log ; done

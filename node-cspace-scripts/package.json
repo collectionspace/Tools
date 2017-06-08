@@ -1,0 +1,20 @@
+{
+  "name": "pahma-cspace-scripts",
+  "version": "1.0.0",
+  "description": "Node.js scripts for PAHMA-CSpace.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ray Lee <rhlee@berkeley.edu>",
+  "license": "ECL-2.0",
+  "dependencies": {
+    "bunyan": "^1.5.1",
+    "collectionspace": "^0.0.1",
+    "csv": "^0.4.6",
+    "csv-stringify": "0.0.8",
+    "datejs": "1.0.0-rc3",
+    "extend": "^3.0.0",
+    "q": "^1.4.1"
+  }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="relations">
+  <ns2:relations_common xmlns:ns2="http://collectionspace.org/services/relation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <subjectDocumentType>CollectionObject</subjectDocumentType>
+    <relationshipType>affects</relationshipType>
+    <objectCsid>{movementCsid}</objectCsid>
+    <subjectCsid>{objectCsid}</subjectCsid>
+    <subjectUri>/collectionobjects/#objectCsid}</subjectUri>
+    <objectUri>/movements/#movementCsid}</objectUri>
+    <objectDocumentType>Movement</objectDocumentType>
+  </ns2:relations_common>
+</document>

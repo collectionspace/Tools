@@ -1,0 +1,50 @@
+#!/bin/bash
+
+TOP="/home/tomcat/bin/cron"
+LOG="$TOP/clean_temp.log"
+LOGS="/home/tomcat/bin/cron/logs"
+
+CATALINA_HOME="/usr/local/share/tomcat"
+TEMP="$CATALINA_HOME/temp"
+
+MMIN=60
+
+[ -f $LOG ] || echo "Creating log file at `date`" > $LOG
+
+cd "$TEMP" 
+
+echo "" >> $LOG
+echo "Cleaning up files in `pwd` : `date`" >> $LOG
+
+cnt=0
+
+while read F
+do
+   echo "Removing $F" >> $LOG
+   /bin/rm -fr "$F"
+   if [ -d $F ]
+   then
+     echo "Unable to remove $F" >> $LOG
+   else
+     cnt=$((cnt+1))
+   fi
+done < <(find . -maxdepth 1 -type d -name '*-*-*-*-*' -mmin +${MMIN})
+
+echo "Removed $cnt temp files from `pwd`" >> $LOG
+
+H=`date +'%H'`
+M=`date +'%M'`
+D=`date +'%y%m%d'`
+
+echo "DONE: `date`" >> $LOG
+
+if [ "$H" -eq 0 ] && [ "$M" -eq 26 ]
+then
+  mv $LOG ${LOG}.$D
+  gzip ${LOG}.$D
+  mv ${LOG}.$D.gz $LOGS
+mail -s Clean_TMP glen@berkeley.edu <<EOM
+log file gzipped
+EOM
+fi
+

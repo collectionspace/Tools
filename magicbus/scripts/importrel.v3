@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# DATA=import.xml
+if [ $# -lt 1 ]; then
+    echo "Usage: csimport XML-filename"
+    exit
+fi
+
+URL="http://pahma.cspace.berkeley.edu:8180/cspace-services/imports"
+CONTENT_TYPE="Content-Type: application/xml"
+USER="import@pahma.cspace.berkeley.edu:zzzpasswordzzz"
+
+m=`date +"%m"`
+d=`date +"%d"`
+y=`date +"%Y"`
+LOGFILE=pahma_curl_log.$y$m$d
+
+n=0
+while [ $# -gt 0 ]; do
+    DATA=$1
+    echo "Sending $DATA"
+    echo "to $URL"
+    echo "with content type $CONTENT_TYPE"
+    echo "as $USER"
+
+#    curl -X POST $URL -i -u "$USER" -H "$CONTENT_TYPE" -T $DATA -o curl.out.${DATA}
+    attempts=0
+    while [ $attempts -le 2 ]
+    do
+        curl -s -i -u "$USER" ${URL}?impTimout=600 -X POST -H "$CONTENT_TYPE" -T $DATA -o pahma_curl.out.${DATA}
+        #if [ "" -ne `grep "Unable to commit/rollback" pahma_curl.out.${DATA}` ]; then
+        if grep -q "Unable to commit/rollback" pahma_curl.out.${DATA}
+        then
+            echo "PAHMA commit error detected; retrying ${DATA} ---" >> $LOGFILE
+            attempts=$(( $attempts + 1 ))
+        else
+            # assume succcess, or other unrecoverable error; bail out.
+            attempts=10
+        fi
+    done
+    # Cout number of import records read by "curl" and append to a log file.
+    echo "PAHMA Production 2.4 --- Counting $DATA ---" >> $LOGFILE
+    grep READ pahma_curl.out.${DATA} | wc -l >> $LOGFILE
+
+    shift
+    n=`expr $n + 1`
+
+#   mv $DATA ${DATA}.done
+
+done
+echo "$n file(s) processed"
