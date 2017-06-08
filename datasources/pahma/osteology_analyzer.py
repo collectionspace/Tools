@@ -22,6 +22,7 @@ skip_columns = ["id",
                 "notes_dentalpathology_s",
                 "notes_nhtaphonomicalterations_s",
                 "notes_curatorialsuffixing_s",
+                "notes_onelementinventory_s",
                 "notes_culturalmodifications_s"]
 
 

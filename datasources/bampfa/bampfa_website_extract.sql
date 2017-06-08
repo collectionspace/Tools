@@ -8,8 +8,11 @@ SELECT
    cb.sortableEffectiveObjectNumber sortObjectNumber,
    case when (cb.artistdisplayoverride is null or cb.artistdisplayoverride='') then utils.concat_artists(h1.name)
      else cb.artistdisplayoverride end as artistCalc,
-   case when (pc.birthplace is null or pc.birthplace='') then pcn.item 
-     else pcn.item||', born '||pc.birthplace end as artistorigin,
+   case
+     when (pc.birthplace is null or pc.birthplace='') then pcn.item
+     when (pcn.item = pc.birthplace) then pcn.item
+     else pcn.item||', born '||pc.birthplace end
+   as artistorigin,
    concat_ws('-', sdgpb.datedisplaydate, case when sdgpd.datedisplaydate='' then NULL else sdgpd.datedisplaydate end) artistdates,
    sdgpb.datedisplaydate as startdate,
    sdgpd.datedisplaydate as enddate,

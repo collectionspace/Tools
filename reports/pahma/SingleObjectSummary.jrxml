@@ -42,7 +42,7 @@ left outer join collectionobjects_common_briefdescriptions bd on (co.id = bd.id)
 inner join misc on misc.id = co.id
 inner join collectionspace_core core on core.id=co.id
 
-left outer join hierarchy h3 on (co.id = h3.parentid and h3.name='collectionobjects_common:objectNameList')
+left outer join hierarchy h3 on (co.id = h3.parentid and h3.name='collectionobjects_common:objectNameList' and h3.pos=0)
 left outer join objectnamegroup ong on (ong.id=h3.id)
 
 left outer join hierarchy h4 on (co.id=h4.parentid and h4.pos=0 and h4.name='collectionobjects_common:assocPeopleGroupList')

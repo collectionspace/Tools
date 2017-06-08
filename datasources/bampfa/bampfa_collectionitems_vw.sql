@@ -20,8 +20,11 @@ SELECT
    utils.getdispl(cb.itemclass) itemclass,
    case when (cb.artistdisplayoverride is null or cb.artistdisplayoverride='') then utils.concat_artists(h1.name)
      else cb.artistdisplayoverride end as artistCalc,
-   case when (pc.birthplace is null or pc.birthplace='') then pcn.item 
-     else pcn.item||', born '||pc.birthplace end as artistorigin,
+   case
+     when (pc.birthplace is null or pc.birthplace='') then pcn.item
+     when (pcn.item = pc.birthplace) then pcn.item
+     else pcn.item||', born '||pc.birthplace end
+   as artistorigin,
    sdgpb.datedisplaydate artistbirthdate,
    sdgpd.datedisplaydate artistdeathdate,
    pb.datesactive,

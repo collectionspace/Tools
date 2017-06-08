@@ -21,9 +21,13 @@ for cluedoElement, cspaceElement in mapping.items():
             cspaceCSV.writerow([cluedo2cspace[c.tag], c.tag, c.text])
             cspaceCSV.writerow(['media', c.text, slug + '_Full.jpg'])
 
+
+cspaceRel = csv.writer(open('relations.csv', 'wb'), delimiter='\t')
 for object in [x for x in entities.keys() if entities[x] == 'collectionobject']:
     for location in [x for x in entities.keys() if entities[x] == 'storagelocation']:
-        cspaceCSV.writerow(['movement', 'movement', '%s :: %s' % (location, object) ])
+        movement = '%s :: %s' % (location, object)
+        cspaceCSV.writerow(['movement', 'movement', movement ])
+        cspaceRel.writerow(['relation', 'Movement', movement, 'CollectionObject', object ])
         print location, object
         del entities[location]
         break

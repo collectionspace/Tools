@@ -6,8 +6,11 @@ select
    utils.getdispl(cb.itemclass) itemclass,
    utils.concat_artists(h1.name) artistCalc,
 --   getdispl(ba.bampfaobjectproductionperson) artist,
-   case when (pc.birthplace is null or pc.birthplace='') then pcn.item 
-     else pcn.item||', born '||pc.birthplace end as artistorigin,
+   case
+     when (pc.birthplace is null or pc.birthplace='') then pcn.item
+     when (pcn.item = pc.birthplace) then pcn.item
+     else pcn.item||', born '||pc.birthplace end
+   as artistorigin,
    sdgpb.datedisplaydate artistbirthdate,
    sdgpd.datedisplaydate artistdeathdate,
    pb.datesactive,
