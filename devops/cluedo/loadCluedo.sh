@@ -35,7 +35,7 @@ fi
 time python loadRelations.py entities.csv objects2locations
 
 # fill in details in records
-time python fillEntitles.py entities.csv
+time python fillEntities.py entities.csv
 
 date
 

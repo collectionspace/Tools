@@ -49,101 +49,6 @@ def getConfig(form):
     except:
         return False
 
-def make_get_request(realm, uri, server, username, password):
-    """
-        Makes HTTP GET request to a URL using the supplied username and password credentials.
-    :rtype : a 3-tuple of the target URL, the data of the response, and an error code
-    :param realm:
-    :param uri:
-    :param hostname:
-    :param protocol:
-    :param port:
-    :param tenant:
-    :param username:
-    :param password:
-    """
-
-    elapsedtime = time.time()
-    # if port == '':
-    #     server = protocol + "://" + hostname
-    # else:
-    #     server = protocol + "://" + hostname + ":" + port
-
-    # this is a bit elaborate because otherwise
-    # the urllib2 approach to basicauth is to first try the request without the credentials, get a 401
-    # then retry the request with the credentials... who know why...
-    passMgr = urllib2.HTTPPasswordMgr()
-    passMgr.add_password(realm, server, username, password)
-    authhandler = urllib2.HTTPBasicAuthHandler(passMgr)
-    opener = urllib2.build_opener(authhandler)
-    unencoded_credentials = "%s:%s" % (username, password)
-    auth_value = 'Basic %s' % base64.b64encode(unencoded_credentials).strip()
-    opener.addheaders = [('Authorization', auth_value)]
-    urllib2.install_opener(opener)
-    url = "%s/cspace-services/%s" % (server, uri)
-
-    try:
-        f = urllib2.urlopen(url)
-        statusCode = f.getcode()
-        data = f.read()
-        result = (url, data, statusCode)
-    except urllib2.HTTPError, e:
-        print 'The server (%s) couldn\'t fulfill the request.' % server
-        print 'Error code: ', e.code
-        result = (url, None, e.code)
-    except urllib2.URLError, e:
-        print 'We failed to reach the server (%s).' % server
-        print 'Reason: ', e.reason
-        result = (url, None, e.reason)
-    except:
-        raise
-    
-    return result #+ ((time.time() - elapsedtime),)
-
-
-def postxml(requestType, uri, realm, server, username, password, payload):
-    passman = urllib2.HTTPPasswordMgr()
-    passman.add_password(realm, server, username, password)
-    authhandler = urllib2.HTTPBasicAuthHandler(passman)
-    opener = urllib2.build_opener(authhandler)
-    urllib2.install_opener(opener)
-    url = "%s/cspace-services/%s" % (server, uri)
-    elapsedtime = 0.0
-
-    elapsedtime = time.time()
-    request = urllib2.Request(url, payload, {'Content-Type': 'application/xml'})
-    # default method for urllib2 with payload is POST
-    if requestType == 'PUT':
-        request.get_method = lambda: 'PUT'
-    else:
-        request.get_method = lambda: 'POST'
-    try:
-        f = urllib2.urlopen(request)
-    except urllib2.URLError, e:
-        if hasattr(e, 'reason'):
-            sys.stderr.write('We failed to reach a server.\n')
-            sys.stderr.write('Reason: ' + str(e.reason) + '\n')
-        if hasattr(e, 'code'):
-            sys.stderr.write('The server couldn\'t fulfill the request.\n')
-            sys.stderr.write('Error code: ' + str(e.code) + '\n')
-        if True:
-            #print 'Error in POSTing!'
-            sys.stderr.write("Error in POSTing!\n")
-            sys.stderr.write("%s\n" % url)
-            sys.stderr.write(payload)
-            raise
-
-    data = f.read()
-    info = f.info()
-    # if a POST, the Location element contains the new CSID
-    if info.getheader('Location'):
-        csid = re.search(uri + '/(.*)', info.getheader('Location'))
-        csid = csid.group(1)
-    else:
-        csid = ''
-    elapsedtime = time.time() - elapsedtime
-    return (url, data, csid, elapsedtime)
-
 
 def relationsPayload(f):
     payload = """<?xml version="1.0" encoding="UTF-8"?>
@@ -159,4 +64,55 @@ def relationsPayload(f):
 """
     payload = payload % (f['objectCsid'], f['objectDocumentType'], f['subjectCsid'], f['subjectDocumentType'])
     return payload
+
+def make_request(request_type, uri, realm, server, username, password, payload=None):
+    passman = urllib2.HTTPPasswordMgr()
+    passman.add_password(realm, server, username, password)
+    authhandler = urllib2.HTTPBasicAuthHandler(passman)
+    opener = urllib2.build_opener(authhandler)
+    url = "%s/cspace-services/%s" % (server, uri)
+
+    # Stuff only in the GET requests
+    unencoded_credentials = "%s:%s" % (username, password)
+    auth_value = 'Basic %s' % base64.b64encode(unencoded_credentials).strip()
+    opener.addheaders = [('Authorization', auth_value)]
+
+    urllib2.install_opener(opener)
+
+    if request_type == "PUT" or request_type == "POST":
+        request = urllib2.Request(url, payload, {'Content-Type': 'application/xml'})
+        if request_type == 'PUT':
+            request.get_method = lambda: 'PUT'
+        else:
+            request.get_method = lambda: 'POST'
+
+    elif request_type == "GET":
+        request = url 
+    
+    try:
+        f = urllib2.urlopen(request)
+        statusCode = f.getcode()
+        data = f.read()
+        info = f.info() 
+        if request_type == "POST" or "PUT":
+            if info.getheader('Location'):
+                csid = re.search(uri + '/(.*)', info.getheader('Location'))
+                csid = csid.group(1)
+            else:
+                csid = ""
+            result = (url, data, csid)
+        else:
+            result = (url, data, statusCode)
+    except urllib2.URLError, e:
+        if hasattr(e, 'reason'):
+            sys.stderr.write('We failed to reach a server.\n')
+            sys.stderr.write('Reason: ' + str(e.reason) + '\n')
+        if hasattr(e, 'code'):
+            sys.stderr.write('The server couldn\'t fulfill the request.\n')
+            sys.stderr.write('Error code: ' + str(e.code) + '\n')
+        if True:
+            sys.stderr.write('ERROR IN %s-ing' % request_type)
+            raise 
+    return result
+        
 

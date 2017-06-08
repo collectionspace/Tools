@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, csv, re, os
 from xml.sax.saxutils import escape
-from cswaExtras import postxml
+from cswaExtras import make_request
 
 from constants import *
 
@@ -37,7 +37,7 @@ for row in cspaceCSVin:
     if row[0] == 'update':
         template = ''
         payload = substitute({'objectnumber': '99'},template)
-        # (url, data, csid, elapsedtime) = postxml('POST', uri, realm, server, username, password, payload)
+        # (url, data, csid, elapsedtime) = make_request('POST', uri, realm, server, username, password, payload)
         csid = 'xxxx'
         row.append(csid)
         cspaceCSVout.writerow(row)
