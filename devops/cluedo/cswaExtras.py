@@ -151,6 +151,9 @@ def relationsPayload(f):
     return payload
 
 def make_request(request_type, uri, realm, server, username, password, payload=None):
+    # print ("THIS IS IT " , request_type, uri, realm, server, username, password)
+    # print (payload)
+    
     passman = urllib2.HTTPPasswordMgr()
     passman.add_password(realm, server, username, password)
     authhandler = urllib2.HTTPBasicAuthHandler(passman)
@@ -179,7 +182,7 @@ def make_request(request_type, uri, realm, server, username, password, payload=N
         statusCode = f.getcode()
         data = f.read()
         info = f.info() 
-        if request_type == "POST" or "PUT":
+        if request_type == "POST" or request_type == "PUT":
             if info.getheader('Location'):
                 csid = re.search(uri + '/(.*)', info.getheader('Location'))
                 csid = csid.group(1)

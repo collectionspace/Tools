@@ -5,6 +5,7 @@ from cswaExtras import make_request
 
 from constants import *
 
+
 inputfile = sys.argv[1]
 entity = sys.argv[2]
 authority = sys.argv[3]
@@ -54,19 +55,24 @@ entities = {}
 print '%s/%s' % (server, uri)
 
 sequencenumber = 0
+no_items = ["collectionobjects", "movements"]
 for row in cspaceCSVin:
     print row
     if row[0] == entity:
         sequencenumber += 1
         payload = substitute({'authority': authoritycsid, entity: row[2], 'sequencenumber': '%03d' % sequencenumber},template)
         (url, data, csid) = make_request("POST", uri, realm, server, username, password, payload)
-        get_uri = '%s/%s/items/%s' % (authority, authoritycsid, csid)
-        (url, get_xml, scode) = make_request("GET", uri, realm, server, username, password)
 
+        if authority in no_items:
+            get_uri = '%s/%s' % (authority, csid)
+        else:
+            get_uri = get_uri = '%s/%s/items/%s' % (authority, authoritycsid, csid)
+        get_uri = get_uri.replace("//", "/")
+
+        (url, get_xml, scode) = make_request("GET", get_uri, realm, server, username, password)    
 
         tree = ET.fromstring(get_xml)
         refname = tree.find(".//refName").text
-        
 
         row.append(csid)
         row.append(authoritycsid)

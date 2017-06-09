@@ -5,8 +5,6 @@
     <relationshipType>affects</relationshipType>
     <objectCsid>{movementCsid}</objectCsid>
     <subjectCsid>{objectCsid}</subjectCsid>
-    <subjectUri>/collectionobjects/#objectCsid}</subjectUri>
-    <objectUri>/movements/#movementCsid}</objectUri>
     <objectDocumentType>Movement</objectDocumentType>
   </ns2:relations_common>
 </document>

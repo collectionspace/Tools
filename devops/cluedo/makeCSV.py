@@ -31,5 +31,3 @@ for object in [x for x in entities.keys() if entities[x] == 'collectionobject']:
         print location, object
         del entities[location]
         break
-
-
