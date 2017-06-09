@@ -53,16 +53,20 @@ def pair_ids_from_csv():
     HTTP requests.
     """
     location_ids = {}
+    location_refnames = {}
     with open(locations_file, "rb") as loccsv:
         reader = csv.reader(loccsv, delimiter="\t")
         for row in reader:
             location_ids[row[2]] = row[3]
+            location_refnames[row[2]] = row[5]
 
     object_ids = {}
+    object_refnames = {}
     with open(objects_file, "rb") as objcsv:
         reader = csv.reader(objcsv, delimiter="\t")
         for row in reader:
             object_ids[row[2]] = row[3]
+            object_refnames[row[2]] = row[5]
 
     pairedCSV = csv.writer(open("paired_entities.csv", "wb"), delimiter="\t")
     
@@ -80,8 +84,10 @@ def pair_ids_from_csv():
         # pairedCSV.writerow([location, loc_id, obj, object_id])
         locations_queue.put(location)
 
+    return (location_refnames, object_refnames)
+
 def pair_ids_from_request():
-    pass
+    return {}, {}
 
 def substitute(mh,payload):
     for m in mh.keys():
@@ -92,9 +98,9 @@ def substitute(mh,payload):
     return payload
 
 if request_csids:
-    pair_ids_from_request()
+    location_refnames, object_refnames = pair_ids_from_request()
 else:
-    pair_ids_from_csv()
+    location_refnames, object_refnames = pair_ids_from_csv()
 
 
 
@@ -108,6 +114,7 @@ realm = 'org.collectionspace.services'
 uri = 'movements'
 relations_uri = 'relations'
 
+movementscreated = csv.writer(open("movements.created.csv", "wb"), delimiter="\t")
 
 # load file from paired_entities.csv [obj, obj_id, loc, loc_id]
 sequence_number = 0
@@ -118,26 +125,31 @@ obj2mov_template = open("xml/obj2mov.xml").read()
 
 with open("paired_entities.csv", "rb") as entity_pairs:
     reader = csv.reader(entity_pairs, delimiter="\t")
-    # if sequence_number == 1:
-    #     sys.exit(1)
     for row in reader:
         sequence_number += 1
         obj = row[0]
         obj_id = row[1]
         loc = row[2]
         loc_id = row[3]
+        loc_refname = location_refnames[loc]
 
         # 1. Create a new movement record, link the movement location
-        payload = substitute({"authority": "", "sequencenumber":"%03d" % sequence_number,"currentLocation":loc}, template)
+        payload = substitute({"authority": "", "sequencenumber":"%03d" % sequence_number,"currentLocation":loc_refname}, template)
         (url, data, movement_id) = make_request("POST", uri, realm, server, username, password, payload)
 
 
         # 2. Link the movement record and the object record
         payload = substitute({"objectCsid": obj_id, "movementCsid":movement_id}, mov2obj_template)
-        (url, data, relation_id1) = make_request("POST", uri, realm, server, username, password, payload)
+        (url, data, relation_id1) = make_request("POST", relations_uri, realm, server, username, password, payload)
 
         # 3. Link object and movement
         payload = substitute({"objectCsid": obj_id, "movementCsid": movement_id}, obj2mov_template)
-        (url, data, relation_id2) = make_request("POST", uri, realm, server, username, password, payload)
+        (url, data, relation_id2) = make_request("POST", relations_uri, realm, server, username, password, payload)
 
-    
+        x = ("curl -S --stderr - -X DELETE https://nightly.collectionspace.org/cspace-services/movements/%s --basic -u \"admin@core.collectionspace.org:Administrator\" -H \"Content-Type: application/xml\"" % movement_id)
+        y = ("curl -S --stderr - -X DELETE https://nightly.collectionspace.org/cspace-services/relations/%s --basic -u \"admin@core.collectionspace.org:Administrator\" -H \"Content-Type: application/xml\"" % relation_id1)
+        z = ("curl -S --stderr - -X DELETE https://nightly.collectionspace.org/cspace-services/relations/%s --basic -u \"admin@core.collectionspace.org:Administrator\" -H \"Content-Type: application/xml\"" % relation_id2)
+
+        movementscreated.writerow([x])
+        movementscreated.writerow([y])
+        movementscreated.writerow([z])

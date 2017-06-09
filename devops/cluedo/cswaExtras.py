@@ -67,7 +67,7 @@ def relationsPayload(f):
 
 def make_request(request_type, uri, realm, server, username, password, payload=None):
     # print ("THIS IS IT " , request_type, uri, realm, server, username, password)
-    print (payload)
+    # print (payload)
     
     passman = urllib2.HTTPPasswordMgr()
     passman.add_password(realm, server, username, password)
