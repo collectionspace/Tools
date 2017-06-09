@@ -51,9 +51,8 @@ def getConfig(fileName):
 
 def getCSID(argType, objectnumber, http_parms):
 
-    asquery = '%s?as=%s_common%%3Aobjectnumber%%3D%%27%s%%27&wf_deleted=false&pgSz=%s' % ('collectionobjects', 'collectionobjects', objectnumber, 1)
+    uri = '%s?as=%s_common%%3AobjectNumber%%3D%%27%s%%27&wf_deleted=false&pgSz=%s' % ('collectionobjects', 'collectionobjects', objectnumber, 1)
 
-    uri = "cspace-services/" + asquery
     (objecturl, objectrecord, elapsedtime) = make_get_request(http_parms.realm, uri, http_parms.server, http_parms.username, http_parms.password)
 
     if objectrecord is None:

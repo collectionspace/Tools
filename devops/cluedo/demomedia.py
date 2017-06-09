@@ -8,7 +8,7 @@ from os import path
 from xml.sax.saxutils import escape
 import traceback
 
-from cswaExtras import postxml, relationsPayload, getConfig, getCSID
+from cswaExtras import make_request,relationsPayload, getConfig, getCSID
 
 # NB: this is set in utils, but we cannot import that Django module in this ordinary script due to dependencies
 FIELDS2WRITE = 'name size objectnumber date creator contributor rightsholder imagenumber handling approvedforweb'.split(' ')
@@ -59,31 +59,31 @@ def mediaPayload(mh, institution):
     payload = re.sub(r'\{.*?\}', '', payload)
 
     # institution specific hacks! figure out the right way to handle this someday!
-    if institution == 'bampfa':
-        if 'imagenumber' in mh:
-            payload = payload.replace('#IMAGENUMBERELEMENT#', '<imageNumber>%s</imageNumber>' % mh['imagenumber'])
-
-    elif institution == 'botgarden':
-        if 'imagenumber' in mh:
-            # non-integer image numbers are an error for this tenant
-            int(mh['imagenumber'])
-            payload = payload.replace('#IMAGENUMBERELEMENT#', '<imageNumber>%s</imageNumber>' % mh['imagenumber'])
-        payload = payload.replace('<primaryDisplay>false</primaryDisplay>', '')
-        payload = payload.replace('<approvedForWeb>true</approvedForWeb>','<postToPublic>yes</postToPublic>')
-        payload = payload.replace('<approvedForWeb>false</approvedForWeb>','<postToPublic>no</postToPublic>')
-
-    elif institution == 'cinefiles':
-        if 'imagenumber' in mh:
-            payload = payload.replace('#IMAGENUMBERELEMENT#', '<page>%s</page>' % mh['imagenumber'])
-
-    elif institution == 'ucjeps':
-        payload = payload.replace('<approvedForWeb>true</approvedForWeb>','<postToPublic>yes</postToPublic>')
-        payload = payload.replace('<approvedForWeb>false</approvedForWeb>','<postToPublic>no</postToPublic>')
-        if 'locality' in mh:
-            payload = payload.replace('#LOCALITY#',
-                                      '''<localityGroupList><localityGroup>
-                                      <fieldLocVerbatim>%s</fieldLocVerbatim>
-                                      </localityGroup></localityGroupList>''' % mh['locality'])
+    # if institution == 'bampfa':
+    #     if 'imagenumber' in mh:
+    #         payload = payload.replace('#IMAGENUMBERELEMENT#', '<imageNumber>%s</imageNumber>' % mh['imagenumber'])
+    #
+    # elif institution == 'botgarden':
+    #     if 'imagenumber' in mh:
+    #         # non-integer image numbers are an error for this tenant
+    #         int(mh['imagenumber'])
+    #         payload = payload.replace('#IMAGENUMBERELEMENT#', '<imageNumber>%s</imageNumber>' % mh['imagenumber'])
+    #     payload = payload.replace('<primaryDisplay>false</primaryDisplay>', '')
+    #     payload = payload.replace('<approvedForWeb>true</approvedForWeb>','<postToPublic>yes</postToPublic>')
+    #     payload = payload.replace('<approvedForWeb>false</approvedForWeb>','<postToPublic>no</postToPublic>')
+    #
+    # elif institution == 'cinefiles':
+    #     if 'imagenumber' in mh:
+    #         payload = payload.replace('#IMAGENUMBERELEMENT#', '<page>%s</page>' % mh['imagenumber'])
+    #
+    # elif institution == 'ucjeps':
+    #     payload = payload.replace('<approvedForWeb>true</approvedForWeb>','<postToPublic>yes</postToPublic>')
+    #     payload = payload.replace('<approvedForWeb>false</approvedForWeb>','<postToPublic>no</postToPublic>')
+    #     if 'locality' in mh:
+    #         payload = payload.replace('#LOCALITY#',
+    #                                   '''<localityGroupList><localityGroup>
+    #                                   <fieldLocVerbatim>%s</fieldLocVerbatim>
+    #                                   </localityGroup></localityGroupList>''' % mh['locality'])
             # payload = payload.replace('#LOCALITY#', '<locality>%s</locality>' % mh['locality'])
 
     # clean up anything that might be left
@@ -126,28 +126,29 @@ def uploadmedia(mediaElements, config, http_parms):
         messages = []
         messages.append("posting to media REST API...")
         payload = mediaPayload(mediaElements, http_parms.institution)
-        (url, data, mediaCSID, elapsedtime) = postxml('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
-        # elapsedtimetotal += elapsedtime
+        elapsedtime = time.time()
+        (url, data, mediaCSID) = make_request('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
+        elapsedtime = time.time() - elapsedtime
         messages.append('got mediacsid %s elapsedtime %s ' % (mediaCSID, elapsedtime))
         mediaElements['mediaCSID'] = mediaCSID
         messages.append("media REST API post succeeded...")
-        # for PAHMA, each uploaded image becomes the primary
-        if http_parms.institution == 'pahma':
-            primary_payload = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-            <ns2:invocationContext xmlns:ns2="http://collectionspace.org/services/common/invocable"
-            <mode>single</mode>
-            <docType>""" + mediaCSID + """</docType>
-            <singleCSID></singleCSID>
-            </ns2:invocationContext>
-            """
-
-            try:
-                postxml('POST', 'batch/563d0999-d29e-4888-b58d', http_parms.realm, http_parms.server, http_parms.username, http_parms.password, primary_payload)
-            except:
-                print "batch job to set primary image failed."
-
-        else:
-            pass
+        # # for PAHMA, each uploaded image becomes the primary
+        # if http_parms.institution == 'pahma':
+        #     primary_payload = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        #     <ns2:invocationContext xmlns:ns2="http://collectionspace.org/services/common/invocable"
+        #     <mode>single</mode>
+        #     <docType>""" + mediaCSID + """</docType>
+        #     <singleCSID></singleCSID>
+        #     </ns2:invocationContext>
+        #    """
+        #
+        #     try:
+        #         make_request('POST', 'batch/563d0999-d29e-4888-b58d', http_parms.realm, http_parms.server, http_parms.username, http_parms.password, primary_payload)
+        #     except:
+        #         print "batch job to set primary image failed."
+        #
+        # else:
+        #     pass
 
         # are we supposed to try to link this media record to a collectionobject?
         if mediaElements['handling'] in 'slide borndigital mediaonly'.split(' '):
@@ -160,7 +161,6 @@ def uploadmedia(mediaElements, config, http_parms):
                 mediaElements['objectCSID'] = 'not found'
                 # raise Exception("<span style='color:red'>Object Number not found: %s!</span>" % mediaElements['objectnumber'])
             else:
-                objectCSID = objectCSID[0]
                 mediaElements['objectCSID'] = objectCSID
 
                 uri = 'relations'
@@ -175,9 +175,9 @@ def uploadmedia(mediaElements, config, http_parms):
                 mediaElements['subjectDocumentType'] = 'Media'
 
                 payload = relationsPayload(mediaElements)
-                (url, data, csid, elapsedtime) = postxml('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
+                (url, data, csid) = make_request('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
                 # elapsedtimetotal += elapsedtime
-                messages.append('got relation csid %s elapsedtime %s ' % (csid, elapsedtime))
+                messages.append('got relation csid %s' % csid)
                 mediaElements['media2objCSID'] = csid
                 messages.append("relations REST API post succeeded...")
 
@@ -189,9 +189,9 @@ def uploadmedia(mediaElements, config, http_parms):
                 mediaElements['objectDocumentType'] = 'Media'
                 mediaElements['subjectDocumentType'] = 'CollectionObject'
                 payload = relationsPayload(mediaElements)
-                (url, data, csid, elapsedtime) = postxml('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
+                (url, data, csid) = make_request('POST', uri, http_parms.realm, http_parms.server, http_parms.username, http_parms.password, payload)
                 #elapsedtimetotal += elapsedtime
-                messages.append('got relation csid %s elapsedtime %s ' % (csid, elapsedtime))
+                messages.append('got relation csid %s' % csid)
                 mediaElements['obj2mediaCSID'] = csid
                 messages.append("relations REST API post succeeded...")
 
@@ -208,7 +208,7 @@ def getRecords(rawFile):
     # csvfile = csv.reader(codecs.open(rawFile,'rb','utf-8'),delimiter="\t")
     try:
         f = CleanlinesFile(rawFile, 'rb')
-        csvfile = csv.reader(f, delimiter="|")
+        csvfile = csv.reader(f, delimiter="\t")
     except IOError:
         message = 'Expected to be able to read %s, but it was not found or unreadable' % rawFile
         return message, -1
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 mediaElements['objectnumber'], (time.time() - elapsedtimetotal))
             # delete the blob if we did not manage to make a media record for it...
             try:
-                (url, data, deletedCSID, elapsedtime) = postxml('DELETE', 'blobs/%s' % mediaElements['blobCSID'], http_parms.realm, http_parms.server, http_parms.username,
+                (url, data, deletedCSID, elapsedtime) = make_request('DELETE', 'blobs/%s' % mediaElements['blobCSID'], http_parms.realm, http_parms.server, http_parms.username,
                                                           http_parms.password, '')
                 print "MEDIA: deleted blob %s" % mediaElements['blobCSID']
             except:

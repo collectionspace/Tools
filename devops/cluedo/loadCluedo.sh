@@ -25,7 +25,11 @@ time python loadCSpace.py entities.csv movement movements
 # 4. load blobs, create MH records, relate to objects
 # (the BMU is used to do this, and the user will have to have copied the code here to use)
 if [ -e demomedia.py ]; then
-  cut -f3 entities.csv | grep jpg > media.csv
+  cut -f3,6 collectionobjects.created.csv | perl -pe 's/\t.*?(object\-....*?).*$/\t\1/;' > tempfile1
+  cut -f1 tempfile | perl -ne 'chomp;$x=$_;s/ /_/g;print $x . "\t" . $_ . "_Full.jpg\n"' > tempfile2
+  join -t $'\t' tempfile1 tempfile2 > tempfile3
+  echo -e "objectname\tobjectnumber\tname" | cat - tempfile3 > media.csv
+  # rm tempfile*
   time python demomedia.py media.csv media.cfg
 else
   echo "BMU not configured, please follow instructions"
