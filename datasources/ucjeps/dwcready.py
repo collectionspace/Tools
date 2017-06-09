@@ -31,6 +31,7 @@ def convertunits(value,unit):
 
 with open(sys.argv[2], "wb") as out:
     writer = csv.writer(out, delimiter="\t")
+    writer.writerow(outputcolumns)
     with open(sys.argv[1], "rb") as original:
         reader = csv.reader(original, delimiter="\t")
         for rownum,row in enumerate(reader):
