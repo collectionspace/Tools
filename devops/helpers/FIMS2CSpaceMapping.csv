@@ -1,10 +1,10 @@
+# FIMS field name	Cspace collectionobject tag	context tag	data type
 # FIMS to Cspace field name mapping			
 # being a specification of how to match FIMS fields to UCJEPS Cspace fields			
 # first column is FIMS field name, second is Cspace collectionobject tag			
 # 			
 # v0.9 jbl 2/20/15			
 			
-# FIMS field name	Cspace collectionobject tag	context tag	data type
 # identifying details	##################################		
 barcodenumber	objectNumber		literal
 	numberValue	otherNumber	literal
