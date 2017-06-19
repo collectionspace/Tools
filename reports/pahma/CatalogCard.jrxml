@@ -27,7 +27,7 @@ findcurrentlocation(c.id) currentlocation,
 misc.lifecyclestate lifecyclestate
 from collectionobjects_common c
 left outer join hierarchy h1 on (c.id = h1.id)
-left outer join collectionobjects_common_briefdescriptions bd on (c.id = bd.id)
+left outer join collectionobjects_common_briefdescriptions bd on (c.id = bd.id AND bd.pos = 0)
 inner join misc on misc.id = c.id
 inner join collectionspace_core core on core.id=c.id
 left outer join hierarchy h3 on (c.id = h3.parentid)
