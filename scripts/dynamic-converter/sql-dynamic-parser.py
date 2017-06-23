@@ -134,10 +134,11 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
     for i in range(0, len(update_statement_params)):
         params = update_statement_params[i]
         query = "UPDATE {0} SET {1}=(%s) WHERE {1}=(%s);".format(params[0], params[1]) 
-        if not dry_run:
-            dbcursor.execute(query, (params[2], params[4])) 
-        else:
+        if dry_run:
             print(query % (params[2], params[4]))
+
+        dbcursor.execute(query, (params[2], params[4])) 
+            
     
     # Third: Do the counts after all the changes
     post_convert_counts_file.write("Counts after: \n")
@@ -154,6 +155,7 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
             dbcursor.execute(query)
             results = dbcursor.fetchall()
             [unconverted_terms.write(result[0] + " " + result[1] + "\n") for result in results]
+        dbconn.rollback()
         return 1
 
     # Fourth: Verify counts and either rollback or commit 
