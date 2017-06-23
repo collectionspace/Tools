@@ -38,7 +38,7 @@ left outer join hierarchy h1 on (co.id = h1.id)
 
 left outer join collectionobjects_pahma_pahmafieldcollectionplacelist pfc on (pfc.id=co.id and pfc.pos=0)
 
-left outer join collectionobjects_common_briefdescriptions bd on (co.id = bd.id)
+left outer join collectionobjects_common_briefdescriptions bd on (co.id = bd.id AND bd.pos = 0)
 inner join misc on misc.id = co.id
 inner join collectionspace_core core on core.id=co.id
 

@@ -6,6 +6,7 @@ import re
 
 from dwc_mapping import *
 
+# these input fields need to be created or massaged to be DWC-compatible
 specialhandling = 'collectionCode,eventDate,verbatimDepth,verbatimElevation,coordinateUncertaintyInMeters,associatedMedia'.split(',')
 
 dwc_mapping = [d for d in dwc_mapping if d[1] not in specialhandling]
@@ -21,7 +22,7 @@ staticvalues = [('institutionCode', 'UCJEPS'),
                 ('accessRights', 'http://ucjeps.berkeley.edu/termsofuse.html')
                 ]
 
-
+# make the output header, a bit complicated as the columns come from different sources
 def makeheader(staticvalues, specialhanding, inputcolumns, outputcolumns, header):
     newheader = []
     for i, cell in enumerate(header):
@@ -41,73 +42,72 @@ def convertunits(value,unit):
     except:
         return ''
 
-with open(sys.argv[2], "wb") as out:
-    writer = csv.writer(out, delimiter="\t")
-
+with open(sys.argv[2], "wb") as csvoutput:
+    writer = csv.writer(csvoutput, delimiter="\t")
     with open(sys.argv[1], "rb") as original:
         reader = csv.reader(original, delimiter="\t")
-        for rownum,row in enumerate(reader):
-            if rownum == 0:
-                header = row
-                writer.writerow(makeheader(staticvalues, specialhandling, inputcolumns, outputcolumns, header))
-            try:
-                parsednumber = re.match('([A-Z]+)([0-9]+)',row[accessionnumber_column])
-                if not parsednumber.group(1) in ['UC', 'JEPS', 'GOD']:
-                    #print 'skipping %s' % row[collectioncode]
+        try:
+            for rownum,row in enumerate(reader):
+                if rownum == 0:
+                    header = row
+                    writer.writerow(makeheader(staticvalues, specialhandling, inputcolumns, outputcolumns, header))
                     continue
-                collectioncode = parsednumber.group(1)
-            except:
-                print row
-                print 'could not parse, skipping!!!'
-                continue
+                else:
+                    try:
+                        parsednumber = re.match('([A-Z]+)([0-9]+)',row[accessionnumber_column])
+                        if not parsednumber.group(1) in ['UC', 'JEPS', 'GOD']:
+                            #print 'skipping %s' % row[collectioncode]
+                            continue
+                        collectioncode = parsednumber.group(1)
+                    except:
+                        print row
+                        print 'could not parse accessionnumber, skipping!!!'
+                        continue
 
-            blobs = row[blob_column].split(',')
-            bloblist = []
-            for b in blobs:
-                bloblist.append('https://webapps.cspace.berkeley.edu/ucjeps/imageserver/blobs/%s/derivatives/OriginalJpeg/content' % b)
-            blobs = '|'.join(bloblist)
+                blobs = row[blob_column].split(',')
+                bloblist = []
+                for b in blobs:
+                    bloblist.append('https://webapps.cspace.berkeley.edu/ucjeps/imageserver/blobs/%s/derivatives/OriginalJpeg/content' % b)
+                blobs = '|'.join(bloblist)
 
-            earlycollectiondate_dt = row[earlycollectiondate_column]
-            latestcollectiondate_dt = row[latecollectiondate_column]
+                earlycollectiondate_dt = row[earlycollectiondate_column]
+                latestcollectiondate_dt = row[latecollectiondate_column]
 
-            if latestcollectiondate_dt:
-                eventDate = "%s/%s" % (earlycollectiondate_dt,latestcollectiondate_dt)
-            else:
-                eventDate = earlycollectiondate_dt
+                if latestcollectiondate_dt:
+                    eventDate = "%s/%s" % (earlycollectiondate_dt,latestcollectiondate_dt)
+                else:
+                    eventDate = earlycollectiondate_dt
 
-            elevation_s = row[elevation_column]
-            elevationunit_s = row[elevationunit_column]
+                elevation_s = row[elevation_column]
+                elevationunit_s = row[elevationunit_column]
 
-            verbatimelevation = '%s %s' % (elevation_s, elevationunit_s)
-            verbatimelevation = verbatimelevation.strip()
+                verbatimelevation = '%s %s' % (elevation_s, elevationunit_s)
+                verbatimelevation = verbatimelevation.strip()
 
-            depth_s = row[depth_column]
-            depth_unit_s = row[depthunit_column]
+                depth_s = row[depth_column]
+                depth_unit_s = row[depthunit_column]
 
-            verbatimdepth = '%s %s' % (depth_s, depth_unit_s)
-            verbatimdepth = verbatimdepth.strip()
+                verbatimdepth = '%s %s' % (depth_s, depth_unit_s)
+                verbatimdepth = verbatimdepth.strip()
 
-            coordinateuncertainty_f = row[coordinateuncertainty_column]
-            coordinateuncertaintyunit_s = row[coordinateuncertaintyunit_column]
+                coordinateuncertainty_f = row[coordinateuncertainty_column]
+                coordinateuncertaintyunit_s = row[coordinateuncertaintyunit_column]
 
-            if coordinateuncertainty_f == "0":
-                coordinateuncertainty_f = ''
-            else:
-                coordinateuncertainty_f = str(convertunits(coordinateuncertainty_f,coordinateuncertaintyunit_s))
+                if coordinateuncertainty_f == "0":
+                    coordinateuncertainty_f = ''
+                else:
+                    coordinateuncertainty_f = str(convertunits(coordinateuncertainty_f,coordinateuncertaintyunit_s))
 
-            newrow = []
-            for i,cell in enumerate(row):
-                if header[i] in inputcolumns:
-                    newrow.append(cell)
-            #collectionCode,eventDate,verbatimDepth,verbatimElevation,coordinateUncertaintyInMeters,associatedMedia
-            newrow += [collectioncode, eventDate, verbatimdepth, verbatimelevation, coordinateuncertainty_f, blobs]
-            for columnname,columnvalue in staticvalues:
-                newrow.append(columnvalue)
-            writer.writerow(newrow)
+                newrow = []
+                for i,cell in enumerate(row):
+                    if header[i] in inputcolumns:
+                        newrow.append(cell)
+                #collectionCode,eventDate,verbatimDepth,verbatimElevation,coordinateUncertaintyInMeters,associatedMedia
+                newrow += [collectioncode, eventDate, verbatimdepth, verbatimelevation, coordinateuncertainty_f, blobs]
+                for columnname,columnvalue in staticvalues:
+                    newrow.append(columnvalue)
+                writer.writerow(newrow)
 
-            try:
-                pass
-            except:
-                print 'problem!!!'
-                print row
-                sys.exit()
+        except:
+            print 'problem with row %s!!!' % rownum
+            print row

@@ -9,13 +9,13 @@ from constants import *
 inputfile = sys.argv[1]
 entity = sys.argv[2]
 authority = sys.argv[3]
+xmlfile = sys.argv[4]
 
 username = os.environ['LOGIN']
 password = os.environ['PASSWORD']
 server = os.environ['CSPACEURL']
 realm = 'org.collectionspace.services'
 
-xmlfile = 'xml/%s.xml' % authority
 try:
     template = open(xmlfile).read()
 except:
