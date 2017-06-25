@@ -63,7 +63,7 @@ def parse(inp, mark, museum, connect_string, dry_run):
 
             # update_statement is only used to write the future queries into a file
             update_statement_params.append((db_table, db_column, new_value, db_column, search_id))
-            update_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
+            update_statement = "UPDATE %s SET %s='%s' WHERE %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
             outfile.write(update_statement)
 
 
@@ -94,7 +94,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
         split_statement = str(count_statement).split(" ")
         if len(results) > 0:
             for result in results:
-                counts_file.write(str(result) + "\n")
+                print >>counts_file,'%s\t%s' % (result[0], result[1])
                 if result[0].find("urn") == -1:
                     # result_tokens = result.split(",")
                     rouge_terms_lists.append([split_statement[1].replace(",",""), split_statement[4], result[0][0:len(result[0])]])
@@ -103,8 +103,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
             counts_file.write("* " + split_statement[1] + " on table " + split_statement[4] + " generated 0 results. \n")
         for result in results:
             total_changes +=result[1]
-    counts_file.write("* Total counted = " + str(total_changes))
-    counts_file.write("\n")
+    print >>counts_file,"* Total counted = %s" % total_changes
     return total_changes, rouge_terms_lists
 
 
@@ -139,7 +138,6 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
 
         dbcursor.execute(query, (params[2], params[4])) 
             
-    
     # Third: Do the counts after all the changes
     post_convert_counts_file.write("Counts after: \n")
     total_changed, rougue_terms_lists = do_counts(post_convert_counts_file, dbcursor, count_sqlstatements)
@@ -154,29 +152,33 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
             query = "SELECT id, {0} FROM {1} WHERE {0} like '{2}'".format(col, tbl, term)
             dbcursor.execute(query)
             results = dbcursor.fetchall()
-            [unconverted_terms.write(result[0] + " " + result[1] + "\n") for result in results]
-        dbconn.rollback()
-        return 1
+            [unconverted_terms.write('%s\t%s\t%s\t%s\n' % (tbl,col,result[0],result[1])) for result in results]
 
     # Fourth: Verify counts and either rollback or commit 
+    commit_or_not = True
     if total_changed == total_to_change:
         for statement in urn_sqlcountstatements:
             dbcursor.execute(statement)
             results = dbcursor.fetchall()
             if (results[0][0] != 0):
                 print ("Something went wrong... aborting, undoing database changes because some record did not change: %s" % (statement))
+                commit_or_not = False
+        if commit_or_not == True:
+            # heh. just kidding. if this is a dry run, roll back the changes.
+            if dry_run:
                 dbconn.rollback()
-                return -1
-        dbconn.commit()
-        return 1
+            else: 
+                dbconn.commit()
+            return 1
 
-    print ("Looks like there are either more or less records than what we started with. Undoing changes. Check counts log for numbers.")
+    print ("Looks like before and after record counts differ; or we have stray values in the database.") 
+    print ("Undoing changes. Check counts log for numbers.")
     dbconn.rollback()
     return -1
 
 if __name__ == "__main__":
     args = sys.argv
-    if (len(args) > 1 and args[1] == "help"):
+    if (len(args) >= 1 and args[1] == "help"):
         print ("To run the file, use the inputs: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes>")
     elif len(args) < 5:
         print ("One or more inputs missing: <museum_name> <input_file> <domain_instance_vocab> <dbconnectionstringinquotes> <dry_run> \nPlease fix or run with 'help' for more info.")
@@ -190,7 +192,11 @@ if __name__ == "__main__":
             markup = args[3]
             connect_string = args[4]
         if (len(args) > 5):
-            dry_run = True
+            if args[5] == 'dryrun':
+                dry_run = True
+            else:
+                print "expected 5th parameter to be 'dryrun' and it's not."
+                sys.exit(-1)
         else:
             dry_run = False
         parse(infile, markup, museum, connect_string, dry_run)
