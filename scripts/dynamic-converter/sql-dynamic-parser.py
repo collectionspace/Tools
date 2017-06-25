@@ -12,9 +12,9 @@ UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
 
 def parse(inp, mark, museum, connect_string, dry_run):
-    counts_sql = "count.sql"
-    out = "%s.out.txt" % museum
-    outfile = UTF8Writer(open(out, "w"))
+    counts_sql = "%s.count_statements.sql" % museum # Contains count statements for all the terms we searched for, not just numbers
+    out = "%s.out.txt" % museum    
+    outfile = UTF8Writer(open(out, "w"))  # Contains the update statements that were executed
     counts = open(counts_sql, "w")
     infile = open(inp)
     markup = open(mark)
@@ -43,9 +43,9 @@ def parse(inp, mark, museum, connect_string, dry_run):
             continue 
 
         # Write the SQL count statements into file
-        count_statement = "SELECT %s, COUNT(*) FROM %s GROUP BY %s" % (db_column, db_table, db_column)
+        count_statement = "SELECT %s, COUNT(*) FROM %s WHERE %s is not null GROUP BY %s" % (db_column, db_table, db_column, db_column)
         urn_count_statement = "SELECT COUNT(DISTINCT %s) FROM %s WHERE %s not like '%s'" % (db_column, db_table, db_column, URN)
-        counts.write(count_statement)
+        counts.write(count_statement + " \n")
         verify_all_urns_count.append(urn_count_statement)
         count_sqlstatements.append(count_statement)
 
@@ -86,15 +86,26 @@ def sanity_check(identifier):
 
 def do_counts(counts_file, dbcursor, count_sqlstatements):
     total_changes = 0
+    rouge_terms_lists = []
+
     for count_statement in count_sqlstatements:
         dbcursor.execute(count_statement)
         results = dbcursor.fetchall()
-        counts_file.write(str(results))
+        split_statement = str(count_statement).split(" ")
+        if len(results) > 0:
+            for result in results:
+                counts_file.write(str(result) + "\n")
+                if result[0].find("urn") == -1:
+                    # result_tokens = result.split(",")
+                    rouge_terms_lists.append([split_statement[1].replace(",",""), split_statement[4], result[0][0:len(result[0])]])
+        else:
+            # counts_file.write(str(results) + "\n")
+            counts_file.write("* " + split_statement[1] + " on table " + split_statement[4] + " generated 0 results. \n")
         for result in results:
             total_changes +=result[1]
-    counts_file.write(str(total_changes))
+    counts_file.write("* Total counted = " + str(total_changes))
     counts_file.write("\n")
-    return total_changes
+    return total_changes, rouge_terms_lists
 
 
 def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements, connect_string, museum, dry_run):
@@ -113,23 +124,40 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
     dbcursor = dbconn.cursor()
 
     # First: Do the counts before any changes
-    counts_file = open("%s.counts.txt" % museum, "w")
-    counts_file.write("Counts before: ")
-    total_to_change = do_counts(counts_file, dbcursor, count_sqlstatements)
+    pre_convert_counts_file = open("%s.counts.before.txt" % museum, "w") # will contain counts for all things before they're converted
+    post_convert_counts_file = open("%s.counts.after.txt" % museum, "w") # will contain counts for all things afte   they're been converted
+
+    pre_convert_counts_file.write("Counts before: \n")
+    total_to_change, tmp = do_counts(pre_convert_counts_file, dbcursor, count_sqlstatements)
     
     # Second: Perform the changes
     for i in range(0, len(update_statement_params)):
         params = update_statement_params[i]
         query = "UPDATE {0} SET {1}=(%s) WHERE {1}=(%s);".format(params[0], params[1]) 
-        if not dry_run:
-            dbcursor.execute(query, (params[2], params[4])) 
-        else:
+        if dry_run:
             print(query % (params[2], params[4]))
+
+        dbcursor.execute(query, (params[2], params[4])) 
+            
     
     # Third: Do the counts after all the changes
-    counts_file.write("Counts after: ")
-    total_changed = do_counts(counts_file, dbcursor, count_sqlstatements)
+    post_convert_counts_file.write("Counts after: \n")
+    total_changed, rougue_terms_lists = do_counts(post_convert_counts_file, dbcursor, count_sqlstatements)
     
+    post_convert_counts_file.close()
+    pre_convert_counts_file.close()
+
+    if dry_run: # Generate the report
+        rougue_termslist = []
+        unconverted_terms = open("%s.unconverted_terms.txt" % museum, "w")
+        for col, tbl, term in rougue_terms_lists:
+            query = "SELECT id, {0} FROM {1} WHERE {0} like '{2}'".format(col, tbl, term)
+            dbcursor.execute(query)
+            results = dbcursor.fetchall()
+            [unconverted_terms.write(result[0] + " " + result[1] + "\n") for result in results]
+        dbconn.rollback()
+        return 1
+
     # Fourth: Verify counts and either rollback or commit 
     if total_changed == total_to_change:
         for statement in urn_sqlcountstatements:
