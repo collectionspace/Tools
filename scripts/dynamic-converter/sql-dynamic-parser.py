@@ -11,6 +11,10 @@ URN = 'urn:%'
 UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
 
+vocabs_and_columns = []
+columns_and_tables = []
+vocabs_used = set()
+
 def parse(inp, mark, museum, connect_string, dry_run):
     counts_sql = "%s.count_statements.sql" % museum # Contains count statements for all the terms we searched for, not just numbers
     out = "%s.out.txt" % museum    
@@ -58,14 +62,18 @@ def parse(inp, mark, museum, connect_string, dry_run):
                 search_id = each['from-static-id']
             else:
                 search_id = field_name
+            
 
             new_value = "urn:cspace:%s.cspace.berkeley.edu:vocabularies:name(%s):item:name(%s)'%s'" % (museum, vocab_list, vocab_id, field_name)
-
+        
+            vocabs_and_columns.append((db_column, db_table, search_id)) # to check for stray values later
+            vocabs_used.add(search_id)
             # update_statement is only used to write the future queries into a file
             update_statement_params.append((db_table, db_column, new_value, db_column, search_id))
             update_statement = "update %s set %s='%s' where %s='%s';\n" % (db_table, db_column, new_value, db_column, search_id)
             outfile.write(update_statement)
-
+        
+        columns_and_tables.append((db_column, db_table))
 
     outfile.close()
     markup.close()
@@ -89,15 +97,12 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
     rouge_terms_lists = []
 
     for count_statement in count_sqlstatements:
-        dbcursor.execute(count_statement)
-        results = dbcursor.fetchall()
-        split_statement = str(count_statement).split(" ")
-        if len(results) > 0:
-            for result in results:
-                counts_file.write(str(result) + "\n")
-                if result[0].find("urn") == -1:
-                    # result_tokens = result.split(",")
-                    rouge_terms_lists.append([split_statement[1].replace(",",""), split_statement[4], result[0][0:len(result[0])]])
+        dbcursor.execute(count_statement) # execute the statement
+        results = dbcursor.fetchall() # fetch the results
+        split_statement = str(count_statement).split(" ") # count statement 
+        if len(results) > 0: # if they have > 0 results for this statement,
+            for result in results: # then for each result
+                counts_file.write(str(result) + "\n") # write it into the counts_file 
         else:
             # counts_file.write(str(results) + "\n")
             counts_file.write("* " + split_statement[1] + " on table " + split_statement[4] + " generated 0 results. \n")
@@ -105,7 +110,7 @@ def do_counts(counts_file, dbcursor, count_sqlstatements):
             total_changes +=result[1]
     counts_file.write("* Total counted = " + str(total_changes))
     counts_file.write("\n")
-    return total_changes, rouge_terms_lists
+    return total_changes
 
 
 def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements, connect_string, museum, dry_run):
@@ -128,7 +133,7 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
     post_convert_counts_file = open("%s.counts.after.txt" % museum, "w") # will contain counts for all things afte   they're been converted
 
     pre_convert_counts_file.write("Counts before: \n")
-    total_to_change, tmp = do_counts(pre_convert_counts_file, dbcursor, count_sqlstatements)
+    total_to_change = do_counts(pre_convert_counts_file, dbcursor, count_sqlstatements)
     
     # Second: Perform the changes
     for i in range(0, len(update_statement_params)):
@@ -136,27 +141,46 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
         query = "UPDATE {0} SET {1}=(%s) WHERE {1}=(%s);".format(params[0], params[1]) 
         if dry_run:
             print(query % (params[2], params[4]))
-
-        dbcursor.execute(query, (params[2], params[4])) 
+        else:
+            dbcursor.execute(query, (params[2], params[4])) 
             
     
     # Third: Do the counts after all the changes
     post_convert_counts_file.write("Counts after: \n")
-    total_changed, rougue_terms_lists = do_counts(post_convert_counts_file, dbcursor, count_sqlstatements)
+    total_changed = do_counts(post_convert_counts_file, dbcursor, count_sqlstatements)
     
     post_convert_counts_file.close()
     pre_convert_counts_file.close()
 
     if dry_run: # Generate the report
-        rougue_termslist = []
         unconverted_terms = open("%s.unconverted_terms.txt" % museum, "w")
-        for col, tbl, term in rougue_terms_lists:
-            query = "SELECT id, {0} FROM {1} WHERE {0} like '{2}'".format(col, tbl, term)
-            dbcursor.execute(query)
-            results = dbcursor.fetchall()
-            [unconverted_terms.write(result[0] + " " + result[1] + "\n") for result in results]
+
+        used_terms = set()
+        for col, tbl in columns_and_tables:
+            check_statement = "SELECT DISTINCT({0}), COUNT({0}) AS countOf FROM {1} WHERE {0} is not null GROUP BY {0}".format(col, tbl)
+            # SELECT DISTINCT pahmaaltnumtype, COUNT(pahmaaltnumtype) as countOf FROM pahmaaltnumgroup WHERE pahmaaltnumtype is not null GROUP BY pahmaaltnumtype;
+
+            dbcursor.execute(check_statement)
+            results = dbcursor.fetchall() # should be a list of items
+            [used_terms.add(each[0]) for each in results] # add each result
+
+        for term in used_terms.copy():
+            if term in vocabs_used or term.find("urn:") != -1:
+                used_terms.remove(term)
+    
+
+        [unconverted_terms.write(term + "\n") for term in used_terms]
+        
+        # result[0] + " " + result[1] + "\n") for result in results]  
+
+        # for col, tbl, term in vocabs_and_columns:
+        #     query = "SELECT id, {0} FROM {1} WHERE {0} like '{2}'".format(col, tbl, term)
+        #     dbcursor.execute(query)
+        #     results = dbcursor.fetchall()
+        
         dbconn.rollback()
         return 1
+        
 
     # Fourth: Verify counts and either rollback or commit 
     if total_changed == total_to_change:
