@@ -46,7 +46,7 @@
 ##################################################################################
 # update BAMPFA's materialized view for Piction
 ##################################################################################
-0 18 * * * psql -d "host=dba-postgres-prod-42.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" 2>&1 | mail -s "Piction mv update status on Prod" cspace-app-logs@lists.berkeley.edu
+0 18 * * * foo=`psql -d "host=dba-postgres-prod-42.ist.berkeley.edu dbname=piction_transit port=5415 sslmode=prefer" -U "piction" -c "refresh materialized view piction.bampfa_metadata_mv" 2>&1` ; if [[ $foo != "REFRESH MATERIALIZED VIEW" ]] ; then echo "$foo" | mail -s "PROBLEM with Piction mv update status on Prod" cspace-app-logs@lists.berkeley.edu ; fi
 ##################################################################################
 # keep a set of the BMU log files
 ##################################################################################
