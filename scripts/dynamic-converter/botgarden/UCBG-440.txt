@@ -1,0 +1,15 @@
+fieldlochighergeography,localitygroup,fieldlochighergeography
+propagationhistory,collectionobjects_botgarden,propagationhistory
+usetype,accessionusegroup,usetype
+reasonForMove,movements_common,reasonformove
+labelsize,movements_botgarden,labelsize
+labelstandtype,movements_botgarden,labelstandtype
+proptype,propagations_common,proptype
+propteason,propagations_common,propreason
+scarstrat,scarstratgroup,scarstrat
+cuttingtype,propagations_common,cuttingtype
+objexitmethod,objectexit_common_exitmethods,item
+objexitreason,objectexit_common,exitreason
+objentryreason,intakes_common,entryreason
+placeType,places_common,placetype
+
