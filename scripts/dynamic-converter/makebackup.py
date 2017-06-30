@@ -3,6 +3,7 @@ import sys
 tables_backed_up = {}
 for line in open(sys.argv[1],'rb').readlines():
     (vocab_list, db_table, db_column) = line.strip().split(',')
+    print "select distinct %s from %s;" % (db_column, db_table)
     if db_table in tables_backed_up:
         pass
     else:
