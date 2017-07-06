@@ -1,5 +1,5 @@
 SELECT DISTINCT
-cc.id, STRING_AGG(DISTINCT ang.pahmaaltnum 
+cc.id, STRING_AGG(DISTINCT regexp_replace(ang.pahmaaltnum, '^.*\)''(.*)''$', '\1')
                 ||CASE WHEN (ang.pahmaaltnumtype IS NOT NULL OR ang.pahmaaltnumnote IS NOT NULL) THEN ' (' ELSE '' END
                 ||CASE WHEN (ang.pahmaaltnumtype IS NOT NULL AND ang.pahmaaltnumtype <>'') THEN ang.pahmaaltnumtype ELSE '' END
                 ||CASE WHEN (ang.pahmaaltnumtype IS NOT NULL AND ang.pahmaaltnumnote IS NOT NULL) THEN ', ' ELSE '' END

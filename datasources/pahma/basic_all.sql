@@ -1,6 +1,6 @@
 SELECT cc.id, h1.name  AS "csid_s", cp.sortableobjectnumber AS "objsortnum_s",
 cc.objectnumber AS "objmusno_s", cp.pahmatmslegacydepartment AS "objdept_s",
-cc.collection AS "objtype_s", cc.numberofobjects AS "objcount_s", cp.inventorycount AS "objcountnote_s",
+regexp_replace(cc.collection, '^.*\)''(.*)''$', '\1') AS "objtype_s", cc.numberofobjects AS "objcount_s", cp.inventorycount AS "objcountnote_s",
 cp.portfolioseries AS "objkeelingser_s", cp.pahmafieldlocverbatim AS "objfcpverbatim_s"
 FROM collectionobjects_common cc
 JOIN hierarchy h1 ON (h1.id=cc.id)
