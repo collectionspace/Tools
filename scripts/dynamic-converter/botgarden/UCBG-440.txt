@@ -5,7 +5,7 @@ actionCode,movements_common,reasonformove
 LabelSize,movements_botgarden,labelsize
 standType,movements_botgarden,labelstandtype
 propagationType,propagations_common,proptype
-stratScar,scarstratgroup,scarstrat
+scarStrat,scarstratgroup,scarstrat
 cutType,propagations_common,cuttingtype
 DistributionMethod,objectexit_common_exitmethods,item
 DistributionReason,objectexit_common,exitreason
