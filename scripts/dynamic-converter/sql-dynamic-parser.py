@@ -159,7 +159,7 @@ def execute(urn_sqlcountstatements, update_statement_params, count_sqlstatements
 
             dbcursor.execute(check_statement)
             results = dbcursor.fetchall() # should be a list of items
-            [used_terms.add(each[0]) for each in results] # add each result
+            [used_terms.add(each[0].decode('utf-8')) for each in results] # add each result
 
         for term in used_terms.copy():
             if term in vocabs_used or term.find("urn:") != -1:
