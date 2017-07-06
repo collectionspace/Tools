@@ -9,5 +9,5 @@ scarStrat,scarstratgroup,scarstrat
 cutType,propagations_common,cuttingtype
 DistributionMethod,objectexit_common_exitmethods,item
 DistributionReason,objectexit_common,exitreason
-EntryReason,intakes_xcommon,entryreason
+EntryReason,intakes_common,entryreason
 placetype,places_common,placetype
