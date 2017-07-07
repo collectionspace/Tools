@@ -4,7 +4,7 @@
     <params>
         <param>
             <key>docType</key>
-            <value>Place</value>
+            <value>Placeitem</value>
         </param>
         <param>
             <key>docType</key>
@@ -12,7 +12,7 @@
         </param>
         <param>
             <key>docType</key>
-            <value>Locality</value>
+            <value>Locationauthority</value>
         </param>
         <param>
             <key>docType</key>
