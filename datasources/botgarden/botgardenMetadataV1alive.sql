@@ -70,7 +70,7 @@ case when (cob.deadflag = 'true') then 'yes' else 'no' end as deadflag_s,
 cob.flowercolor as flowercolor_s,
 '' as determinationNoAuth_s,
 -- regexp_replace(tig2.taxon, '^.*\)''(.*)''$', '\1') as determinationNoAuth_s,
-mc.reasonformove as reasonformove_s,
+regexp_replace(mc.reasonformove, '^.*\)''(.*)''$', '\1') as reasonformove_s,
 
 utils.findconserveinfo(tc.refname) as conservationinfo_ss,
 utils.findconserveorg(tc.refname) as conserveorg_ss,
@@ -79,6 +79,7 @@ utils.findconservecat(tc.refname) as conservecat_ss,
 case when (utils.findvoucherinfo(h1.name) is not null)
      then 'yes' else 'no'
 end as vouchers_s,
+-- vouchercount is set further on in the process
 '1' as vouchercount_s,
 utils.findvoucherinfo(h1.name) voucherlist_ss,
 concat_ws('|', fruitsjan,fruitsfeb,fruitsmar,fruitsapr,fruitsmay,fruitsjun,fruitsjul,fruitsaug,fruitssep,fruitsoct,fruitsnov,fruitsdec) fruitingverbatim_ss,

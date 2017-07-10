@@ -29,8 +29,8 @@ pc.concentration,
 pc.germinationdate,
 pc.wounded,
 pc.hormone,
-pc.proptype,
-pc.cuttingtype,
+regexp_replace(pc.proptype, '^.*\)''(.*)''$', '\1') as proptype,
+regexp_replace(pc.cuttingtype, '^.*\)''(.*)''$', '\1') as cuttingtype,
 pc.propreason,
 
 sdg.datedisplaydate as propdate

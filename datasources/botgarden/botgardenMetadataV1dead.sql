@@ -109,20 +109,10 @@ left outer join hierarchy hlg
 left outer join localitygroup lg on (lg.id = hlg.id)
 
 left outer join hierarchy h1 on co.id=h1.id
--- join relations_common r1 on (h1.name=r1.subjectcsid and objectdocumenttype='Movement')
--- left outer join hierarchy h2 on (r1.objectcsid=h2.name and h2.isversion is not true)
--- join movements_common mc on (mc.id=h2.id and mc.reasonformove = 'Dead')
 
 join collectionobjects_naturalhistory con on (co.id = con.id)
 join collectionobjects_botgarden cob on (co.id=cob.id)
 left outer join collectionobjects_common_comments coc  on (co.id = coc.id and coc.pos = 0)
-
--- left outer join hierarchy htig2 -- incorrect for Bot Garden
---      on (co.id = htig2.parentid and htig2.pos = 1 and htig2.name = 'collectionobjects_naturalhistory:taxonomicIdentGroupList')
--- left outer join taxonomicIdentGroup tig2 on (tig2.id = htig2.id)
-
--- join collectionspace_core core on (core.id=co.id and core.tenantid=35) -- not using any fields from core
--- join misc misc2 on (misc2.id = co.id and misc2.lifecyclestate <> 'deleted') -- moved check up to first join to misc
 
 left outer join taxon_common tc on (tig.taxon=tc.refname)
 left outer join taxon_naturalhistory tn on (tc.id=tn.id)
