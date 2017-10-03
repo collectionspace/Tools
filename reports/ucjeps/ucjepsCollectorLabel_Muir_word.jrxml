@@ -119,7 +119,7 @@ where hgc.name = $P{csid}]]>
 	<detail>
 		<band height="180" splitType="Stretch">
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="aba96d0a-6a03-4ea9-a3b2-b76bac5b1f6e" x="10" y="10" width="270" height="30"/>
+				<reportElement uuid="aba96d0a-6a03-4ea9-a3b2-b76bac5b1f6e" x="10" y="10" width="270" height="20"/>
 				<textElement textAlignment="Center" markup="html">
 					<font size="10" isBold="true"/>
 					<paragraph spacingBefore="5"/>
@@ -134,28 +134,28 @@ where hgc.name = $P{csid}]]>
 				<textFieldExpression><![CDATA[$F{label_footer}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="74" width="270" height="80"/>
+				<reportElement uuid="af7a2340-ed99-49d4-93d7-4469c59061a9" stretchType="RelativeToBandHeight" x="10" y="58" width="270" height="96"/>
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{concat_data}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="482a958d-31b0-4a1f-a1b6-105ba1176a46" x="10" y="41" width="270" height="10"/>
+				<reportElement uuid="482a958d-31b0-4a1f-a1b6-105ba1176a46" x="10" y="25" width="270" height="10"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{accession_id}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="b20a04d2-3f65-4b67-b198-40abe4794c3f" x="10" y="52" width="270" height="10"/>
+				<reportElement uuid="b20a04d2-3f65-4b67-b198-40abe4794c3f" x="10" y="36" width="270" height="10"/>
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{sci_name_fmt}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="a409f16f-08b9-46ba-b926-1de80bd62955" positionType="Float" x="10" y="63" width="270" height="10" isRemoveLineWhenBlank="true"/>
+				<reportElement uuid="a409f16f-08b9-46ba-b926-1de80bd62955" positionType="Float" x="10" y="47" width="270" height="10" isRemoveLineWhenBlank="true"/>
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>
