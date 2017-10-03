@@ -1,9 +1,19 @@
-These are the scripts that were in ucjeps:~ucjeps/scr
+Here's what's getting run by cron on that Prod at this moment.
 
-They get run by cron on that system:
+Caveat lector, this may change...
 
-[jblowe@ucjeps ~]$ sudo crontab -l -u ucjeps 
-00 7 * * 5 /home/ucjeps/scr/major_group.sh
-00 8 * * 5 /home/ucjeps/scr/cch_extract.sh
+(venv)[app_webapps@cspace-prod-01 ~]$ crontab -l
 
-There appear to be serveral versions.
+##################################################################################
+# run the UCJEPS jobs weekly
+##################################################################################
+00 5 * * 5 /home/app_webapps/bin/major_group.sh > /dev/null 2>&1
+00 6 * * 5 /home/app_webapps/bin/cch_extract.sh > /dev/null 2>&1
+00 7 * * 5 /home/app_webapps/bin/get_taxonauth.sh taxon > /dev/null 2>&1
+00 8 * * 5 /home/app_webapps/bin/get_taxonauth.sh unverified > /dev/null 2>&1
+30 8 * * * /home/app_webapps/bin/rsync2annie.sh > /dev/null 2>&1
+
+The "get*" scripts seem to be used by the FIMS configuration updating process,
+documented elsewhere.
+
+And note there appear to be several versions of some of these scripts...
