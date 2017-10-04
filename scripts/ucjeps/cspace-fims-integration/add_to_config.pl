@@ -34,6 +34,10 @@ while(<IN>){
 #is there a way to do it besides loading all author_names and noauthor_names into two different arrays?
 #i.e. could the checking be done using the hash files?
 #if so, the hash files would have to differentiate between author_names and noauthor_names
+$author_name =~ s/\s+$//;
+
+$no_author_name =~ s/\s+$//;
+
 	push @authnames, "$author_name";
 	if ("$no_author_name") { #not all entries will have no_author_names
 		push @noauthnames, "$no_author_name";
@@ -87,6 +91,9 @@ close(IN);
 open(IN, "$input_names") || die "could not open name list file $input_names\n";
 while(my $input_name = <IN>){
 	chomp $input_name;
+
+$input_name =~ s/\s+$//;
+
 	print "$input_name\n";
 
 	if ($input_name =~ /^$/){
