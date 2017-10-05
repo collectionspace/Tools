@@ -46,6 +46,8 @@ wc -l $MG_FILE >> $MG_LOG
 
 gzip -c $MG_FILE > $MG_FILE.gz
 
+ls -l *.gz >> $MG_LOG
+
 rm -f $MG_FILE
 
 echo '' >> $MG_LOG
