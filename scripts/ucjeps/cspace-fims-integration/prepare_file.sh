@@ -50,5 +50,5 @@ tail -n +2 taxon_auth.txt > auth_file.txt
 tail -n +2 unverified_auth.txt >> auth_file.txt 
 
 echo "CSpace authority files concatenated into auth_file.txt"
-echo "Did you get the most recent versions of the files from the CSpace extracts (e.g. from herbaria4)?"
+echo "Did you get the most recent versions of the files from the CSpace extracts on h4?"
 

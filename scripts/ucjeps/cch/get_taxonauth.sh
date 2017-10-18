@@ -89,7 +89,9 @@ wc -l $AUTH_FILE >> $AUTH_LOG
 
 rm -f $AUTH_FILE.tmp
 
-gzip $AUTH_FILE
+gzip -f $AUTH_FILE
+
+ls -lt *.gz | head -1 >> $AUTH_LOG
 
 echo '' >> $AUTH_LOG
 
