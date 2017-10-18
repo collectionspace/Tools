@@ -91,17 +91,14 @@ close(IN);
 open(IN, "$input_names") || die "could not open name list file $input_names\n";
 while(my $input_name = <IN>){
 	chomp $input_name;
-
-$input_name =~ s/\s+$//;
-
-	print "$input_name\n";
-
+    $input_name =~ s/\s+$//;
+	#print "$input_name\n";
 	if ($input_name =~ /^$/){
 		print LOG_FILE "blank input names should be changed to \"Unknown\"\n";
 	}
 	
 	elsif ( grep( /^\Q$input_name\E$/, @authnames ) ) { #if the input name exactly matches an item in the authnames array
-		print "is in the authority file: $input_name\n";
+		#print "is in the authority file: $input_name\n";
 		#print nothing; pass the auth_name along to compare to the config file
 	}
 
