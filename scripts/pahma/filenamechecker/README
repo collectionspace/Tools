@@ -1,0 +1,34 @@
+This "suite" checks image filenames, as follows:
+
+* The input (first command line argument) is a .csv file, separated by commas (optionally encapsulated)
+* The second column contains a filename
+* The second argument is the name of a config file (see example checkfilenamesProd.cfg).
+* The third argument is the name of an output file.
+* The forth column is the column in the input file that contains the image filename (starts at 0)
+
+e.g.
+
+   $ python checkFilenames.py test.csv checkfilenamesProd output.csv 0
+
+The script uses the BMU's "object name extraction pattern" for PAHMA, namely:
+
+   objectnumber = filename.split('_')[0]
+
+to extract an objectnumber. (The BAMPFA algorithm is considerably more complicated.)
+
+It then takes this value and searches for the objects CSID against the server configured in checkfilenamesProd.cfg.
+
+It assumes the system you are running this on can connect to the database, perhaps via a tunnel. Checkout the config file.
+
+The result is a file with 3 columns:
+
+* filename
+* exracted object number
+* CSID if the object number was found, '' otherwise
+
+Finally, at the end of the run, the program outputs:
+
+ CSID found   fff 
+ CSID not found nnn 
+ Lines output ooo (= fff + nnn)
+

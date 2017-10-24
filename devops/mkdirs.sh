@@ -1,0 +1,6 @@
+cd ~/monitor
+mkdir image_upload_cache_bampfa
+mkdir image_upload_cache_cinefiles
+mkdir image_upload_cache_pahma
+mkdir image_upload_cache_ucjeps
+mkdir image_upload_cache_botgarden

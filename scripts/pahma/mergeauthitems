@@ -1,0 +1,182 @@
+#!/bin/bash
+
+# Execute the Merge Authority Items batch job.
+
+HOSTNAME=`hostname`
+SERVER_HOSTNAME_PATTERN="^cspace-(.*)-[0-9][0-9]\.ist\.berkeley\.edu$"
+BATCH_URL=""
+
+if [[ "$HOSTNAME" =~ $SERVER_HOSTNAME_PATTERN ]]; then
+	ENV="${BASH_REMATCH[1]}"
+
+	if [[ "$ENV" == "dev" ]]; then
+		BATCH_URL="https://pahma-dev.cspace.berkeley.edu/cspace-services/batch/ce2f3066-b906-48aa-8941"
+	elif [[ "$ENV" == "prod" ]]; then
+		BATCH_URL="https://pahma.cspace.berkeley.edu/cspace-services/batch/ce2f3066-b906-48aa-8941"
+	fi
+fi
+
+if [[ -z "$BATCH_URL" ]]; then
+	# Use localhost:8180 for testing
+	BATCH_URL="http://localhost:8180/cspace-services/batch/ce2f3066-b906-48aa-8941"
+fi
+
+VALID_RECORD_TYPES="
+	Conceptitem
+	Locationitem
+	Organization
+	Person
+	Placeitem
+	Taxon
+	Workitem
+"
+function usage {
+	cat <<-ENDTEXT
+		Usage: `basename -- "$0"` <record_type> <source_csid> <target_csid>
+
+		The record type may be one of the following: $VALID_RECORD_TYPES
+		The source CSID is a GUID that identifies the source record. 
+		The target CSID is a GUID that identifies the target record.
+		
+		The source record is merged into the target record, as follows:
+		
+		Each term in the source record is added to the target as a non-
+		preferred term, if that term does not already exist in the target. If a term
+		in the source already exists in the target, each non-blank term field is
+		copied to the target, if that field is empty in the target. If a field is
+		non-empty in the target, and differs from the source field, a warning is
+		emitted and no action is taken. If the source is successfully merged into the
+		target, all references to the source are transferred to the target, and the
+		source record is soft-deleted. 
+	ENDTEXT
+}
+
+function fail {
+	echo $1
+	exit 1
+}
+
+RECORD_TYPE=$1
+SOURCE_CSID=$2
+TARGET_CSID=$3
+
+if [[ -z "$RECORD_TYPE" || -z "$SOURCE_CSID" || -z "$TARGET_CSID" ]]; then
+	usage
+	exit 1
+fi
+	
+if [[ "$VALID_RECORD_TYPES" != *"	$RECORD_TYPE
+"* ]]; then
+	fail "Invalid record type \"$RECORD_TYPE\""
+fi
+
+CSID_PATTERN="^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}(-[a-f0-9]{12})?$"
+
+if [[ ! "$SOURCE_CSID" =~ $CSID_PATTERN ]]; then
+	fail "The source CSID \"$SOURCE_CSID\" is not a valid CSID"
+fi
+
+if [[ ! "$TARGET_CSID" =~ $CSID_PATTERN ]]; then
+	fail "The target CSID \"$TARGET_CSID\" is not a valid CSID"
+fi
+
+if [[ "$SOURCE_CSID" == "$TARGET_CSID" ]]; then
+	fail "The source CSID may not be the same as the target CSID"
+fi
+
+if [[ (-z $CS_BATCH_USER) || (-z $CS_BATCH_PW) ]]; then
+    echo
+    echo "Enter CollectionSpace login information:"
+    read -e -p "Email: " CS_BATCH_USER
+    read -s -p "Password: " CS_BATCH_PW
+	echo
+fi
+
+echo
+echo "The source $RECORD_TYPE record with CSID $SOURCE_CSID will be deleted, and its terms will be merged into the target record with CSID $TARGET_CSID."
+echo
+read -e -p "Are you sure? (Y/n): " CONFIRM
+
+if [[ -z "$CONFIRM" ]]; then
+	CONFIRM=Y
+fi
+
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+	exit
+fi
+
+echo
+echo -n "Merging authority items... "
+
+read -d '' OUTPUT < <(curl -i -s -u $CS_BATCH_USER:$CS_BATCH_PW -X POST $BATCH_URL -T - <<-ENDTEXT
+	<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+	<ns2:invocationContext xmlns:ns2="http://collectionspace.org/services/common/invocable">
+		<mode>single</mode>
+		<docType>-</docType>
+		<params>
+			<param>
+				<key>docType</key>
+				<value>$RECORD_TYPE</value>
+			</param>
+			<param>
+				<key>sourceCSID</key>
+				<value>$SOURCE_CSID</value>
+			</param>
+			<param>
+				<key>targetCSID</key>
+				<value>$TARGET_CSID</value>
+			</param>
+		</params>
+	</ns2:invocationContext>
+ENDTEXT
+)
+
+if [[ "$OUTPUT" == *"401 Unauthorized"* ]]; then
+	echo "[Unauthorized]"
+	echo
+	echo "Authorization failed. Your CollectionSpace login information may be incorrect."
+	echo
+	exit 401
+fi
+
+if [[ "$OUTPUT" == *"500 Internal Server Error"* ]]; then
+	echo "[Error]"
+	echo
+	echo "An error occurred while attempting to merge the specified items:"
+	echo
+	grep 'POST failed:' <<< "$OUTPUT"
+	echo
+	exit 500
+fi
+
+if [[ "$OUTPUT" == *"200 OK"* ]]; then
+	echo "[OK]"
+	echo
+
+	OUTPUT_PATTERN="<userNote>(.*)</userNote><numAffected>(.*)</numAffected>"
+	
+	if [[ "$OUTPUT" =~ $OUTPUT_PATTERN ]]; then
+		USER_NOTE="${BASH_REMATCH[1]}"
+		NUM_AFFECTED="${BASH_REMATCH[2]}"
+
+		echo "The merge succeeded. $NUM_AFFECTED records were affected:"
+		echo
+		echo "$USER_NOTE"
+		echo
+	else
+		echo "The merge succeeded, but the output could not be parsed:"
+		echo
+		echo "$OUTPUT"
+		echo
+	fi
+	
+	exit 0
+fi
+
+echo "[ERROR]"
+echo
+echo "An unexpected error occurred."
+echo
+echo -e "$OUTPUT"
+echo
+exit 1

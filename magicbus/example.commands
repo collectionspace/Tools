@@ -1,0 +1,33 @@
+#
+# this is just a list of commands and suggestions, NOT an executable script!
+#
+exit
+# make rawdata.csv, the list of all batches run (uses the magicbus log of choice)
+perl ../magicbus/monitorBus.pl magicbus.currentlocations.log > /dev/null
+perl monitorBus.pl > magicbus.html ; sudo cp magicbus.html /usr/local/share/apache-tomcat-6.0.33/webapps/cspace-ui/defaults/html/magicbus.html
+# find the batches that need to be re-run / checked/ evaluated
+perl ../magicbus/recoverBatches.pl > backfill1.sh
+# get the input xml files, a manual process in the moment.
+# look in backfill1.sh to see which batches it suggests need attention
+mkdir ziptempdir
+mkdir retry
+cp zipbatches/move* ziptempdir
+cd ziptempdir
+for i in `ls move*.zip` ; do  unzip $i ; done
+cd ..
+cp ziptempdir/obj_inventory.2012-06-2648.xml retry/
+cp ziptempdir/obj_inventory.2012-06-2649.xml retry/
+cp ziptempdir/obj_inventory.2012-06-2650.xml retry/
+cp ziptempdir/obj_inventory.2012-06-2661.xml retry/
+cp ziptempdir/obj_inventory.2012-06-2662.xml retry/
+cp ziptempdir/obj_inventory.2012-06-26118.xml retry/
+cp ziptempdir/obj_inventory.2012-06-26140.xml retry/
+# get rid of the temporary dir of unzipped files
+rmdir -rf ziptempdir
+# make the files ready
+cp ziptempdir/* .
+# rerun the batches
+nohup time ./backfill1.sh &
+# backfilling started!
+echo backfilling started!
+

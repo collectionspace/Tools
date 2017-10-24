@@ -1,0 +1,10 @@
+About fd.sh and finddiffs.sql:
+
+See PAHMA-916 for details.  These two files find difference between actual and computed locations
+and mail the result to Dr. Black.
+
+It is currently set up to run via cron on pahma.cspace under his account:
+
+[mtblack@pahma ~]$ crontab -l
+* 6 * * * ./fd.sh
+

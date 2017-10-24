@@ -1,0 +1,3 @@
+%~d0
+ cd %~dp0
+ java -Xms256M -Xmx1024M -cp ../lib/systemRoutines.jar;../lib/userRoutines.jar;.;tmslocation_barcode_6fld_1_2.jar;../lib/advancedPersistentLookupLib-1.0.jar;../lib/commons-collections-3.2.jar;../lib/dom4j-1.6.1.jar;../lib/external_sort.jar;../lib/jaxen-1.1.1.jar;../lib/jboss-serialization.jar;../lib/log4j-1.2.15.jar;../lib/talend_file_enhanced_20070724.jar;../lib/talendcsv.jar;../lib/trove.jar; pahma.tmslocation_barcode_6fld_1_2.TMSlocation_barcode_6fld --context=Default %* 
