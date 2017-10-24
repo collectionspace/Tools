@@ -1,0 +1,215 @@
+<html lang="en-us">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="NONE,NOARCHIVE">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <!-- link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.22.custom.css"/>
+    <script type="text/javascript" src="js/jquery-1.10.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script -->
+    <link rel="stylesheet" type="text/css" href="css/base.css">
+    <style>
+    li {margin: 10px 0;}
+    .likeabutton {
+        appearance: button;
+        -moz-appearance: button;
+        -webkit-appearance: button;
+        text-decoration: none; font: menu; color: ButtonText;
+        display: inline-block;
+    }
+    p.landing { padding: 2px; }
+    h3, h4 { padding: 0px; margin-bottom: 6px; margin-top: 6px; color: #4d4d4d; }
+    </style>
+</head>
+<body class="">
+<div id="container">
+    <div id="content-main" style="max-width: 900px">
+        <div>
+            <img height="40px" src="http://www.collectionspace.org/wp-content/uploads/2014/11/CSpaceLogo.png">
+            <span style="font-size: 28px;vertical-align: 35%;">@</span>
+            <img height="60px" src="https://www.berkeley.edu/brand/berkeley-logo.png">
+        </div>
+         <div id="tabs">
+            <ul>
+                <li><a href="#prodtab">Production Apps</a></li>
+                <li><a href="#devtab">Development Apps</a></li>
+                <li><a href="#documentstab">Help!</a></li>
+                <li><a href="#analyticstab">Analytics</a></li>
+                <li><a href="#otheruserstab">Other Public Portals</a></li>
+                <li><a href="#newstab">News</a></li>
+            </ul>
+            <div id="prodtab">
+                <h3>Links to <span style="color: red">Production</span> Systems</h3>
+                <table>
+                    <tbody id="prod">
+                    <tr>
+                        <th></th>
+                        <th>Public Portal</th>
+                        <th>Other Public Endpoints</th>
+                        <th>Internal Endpoints</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="devtab">
+                <h3>Links to <span style="color: green">Development</span> Systems</h3>
+                <table>
+                    <tbody id="dev">
+                    <tr>
+                        <th></th>
+                        <th>Public Portal</th>
+                        <th>Other Public Endpoints</th>
+                        <th>Internal Endpoints</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+             <div id="analyticstab">
+                 <div id="analyticspages">
+                     <ul>
+                         <li><a href="#djangotab">Django Webapp Usage</a></li>
+                         <li><a href="#toolboxtab">Toolbox Webapp Usage</a></li>
+                     </ul>
+                     <div id="djangotab">
+                         <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/summary.html"></iframe>
+                     </div>
+                     <div id="toolboxtab">
+                         <iframe style="width: 100%; height: 1000px;" src="https://webapps.cspace.berkeley.edu/webappuse.html"></iframe>
+                     </div>
+                 </div>
+             </div>
+             <div id="documentstab">
+                 <h3>Hello!</h3>
+                 <p>There is no one single place to find information and links to the various services and websites
+                 associated with CollectionSpace@UCB.  This is probably as close as you will get to such a place.</p>
+                 <p>This webpage and its various panes provide links to web-accessible CSpace applications at UCB.</p>
+                 <p>For each set of applications, are two "deployments" (i.e. installations) of the code:</p>
+                 <ul>
+                     <li>The <span style="color: red">Production</span> deployment, where "real work" should be done;</li>
+                     <li>The <span style="color: green">Development</span>  deployment, where testing, experimentation, and training should be done.</li>
+                 </ul>
+                 The first two tabs (above left) show what is available for each deployment.</p>
+                 <p>
+                     <b>Make sure you are working with the deployment you should be working with!</b></b>
+                 </p>
+                 <p>There are two basic types of applications:</p>
+                 <ul>
+                 <li>Webapps written using the <a target="new" href="https://github.com/cspace-deployment/cspace_django_project/blob/master/README.md">CollectionSpace Django Project</a></li>
+                 <li>The <a target="new" href="">"regular UIs"</a>, which require authentication.</li>
+                </ul>
+            </div>
+             <div id="newstab">
+            </div>
+             <div id="otheruserstab">
+                 <h3>Other Public Portals</h3>
+                 <p>The following is a list of other deployments of the Search Portal software that we know about.</p>
+                 <p>Please let us know if you find others:</p>
+                 <ul>
+                     <li>Bolinas Museum <a target="_new" href="http://collection.bolinasmuseum.org/webapp/search">http://collection.bolinasmuseum.org/webapp/search</a></li>
+                     <li>Watermill Center <a target="_new" href="http://collection.watermillcenter.org/search">http://collection.watermillcenter.org/search</a></li>
+                 </ul>
+            </div>
+        </div>
+    </div>
+    <br class="clear">
+</div>
+<!-- END Content -->
+<div id="footer"></div>
+<!-- END Container -->
+
+<script>
+    $(function () {
+
+        var museums = [
+            ['UC Botanical Garden', 'botgarden', '13d90c7c-60cc-4f13-9985', ['searchmedia', 'uploadtricoder', 'eloan']],
+            ['Berkeley Art Museum', 'bampfa', 'a558ed9e-e4cd-4680-87d3', ['searchmedia', 'uploadtricoder', 'eloan']],
+            ['Pacific File Archive', 'cinefiles', '331dfe82-7877-4484-8f20', ['searchmedia', 'uploadtricoder', 'eloan', 'internal', 'ireports', 'imagebrowser', 'imaginator', 'toolbox', 'grouper']],
+            ['PAHMA', 'pahma', 'c8055214-50e7-49b1-b15b', ['searchmedia', 'eloan']],
+            ['UCJEPS', 'ucjeps', '1c18cf1e-4826-4f33-b047', ['uploadtricoder', 'ireports', 'internal', 'toolbox']]
+        ];
+
+
+        var obj = {
+            'public': [
+                ["imagebrowser", "Image Browser"],
+                ["imaginator", "Imaginator"],
+                ["eloan", "e-Loans"],
+                ["searchmedia", "Media Search"]
+            ],
+            'internal': [
+                ["grouper", "Grouper"],
+                ["internal", "Internal Portal"],
+                ["ireports", "iReports"],
+                ["uploadmedia", "Bulk Media Upload"],
+                ["uploadtricoder", "Tricoder File Upload"],
+                ["toolbox", "Toolbox"]
+            ]
+        };
+
+        var rowh = '80px';
+        var roww = '200px';
+        museums.forEach(function (item) {
+            ['prod', 'dev'].forEach(function (sys) {
+                var system = '';
+                var systemlabel = '<h3 style="color: red">Production</h3>';
+                if (sys === 'dev') {
+                    system = '-dev';
+                    systemlabel = '<h3 style="color: red">Development</h3>';
+                }
+                var newtr = document.createElement("tr");
+                newtr.style.height = rowh;
+                var regularui = "https://" + item[1] + system + ".cspace.berkeley.edu";
+                var webapps = "https://webapps" + system + ".cspace.berkeley.edu/" + item[1];
+                var img = '<img style="max-width: 310px ; max-height: ' + rowh + '" alt="' + item[0] + '" src="https://webapps' + system + '.cspace.berkeley.edu/' + item[1] + '_static/cspace_django_site/images/header-logo.png">';
+                var newtd = document.createElement("td");
+                newtd.style.width = "310px";
+                var title = '<h4>' + item[0] + "</h4>";
+                newtd.innerHTML = '<a target="_blank" href="' + regularui + '">' + title + img + '</a>';
+                $(newtr).append(newtd);
+                var url = 'https://webapps.cspace.berkeley.edu/' + item[1] + '/imageserver/blobs/' + item[2] + '/derivatives/Medium/content';
+                var img = '<img width="' + rowh + '"; alt="' + item[0] + '" src="' + url + '">';
+                var newtd = document.createElement("td");
+                newtd.style.width = "120px";
+                // newtd.style.textAlign = 'center';
+                if (item[1] === 'cinefiles') {
+                    newtd.innerHTML = '<a target="new" href="https://cinefiles.bampfa.berkeley.edu">' + img + '</a>';
+                }
+                else {
+                    newtd.innerHTML = '<a target="new" href="' + webapps + '/search">' + img + '</a>';
+                }
+                $(newtr).append(newtd);
+
+                ['public', 'internal'].forEach(function (apptype) {
+                    var newtd = document.createElement("td");
+                    newtd.style.width = "170px";
+                    var webapp = "https://webapps" + system + ".cspace.berkeley.edu/" + item[1];
+                    $.each(obj[apptype], function (appindex) {
+                        if (item[3].indexOf(this[0]) === -1) {
+                            var newp = document.createElement("p");
+                            // newp.style.padding = "6px 0px 6px 0px";
+                            newp.className = "landing";
+                            newp.innerHTML += '<a class="likeabutton" target="_blank" href="' + webapp + '/' + this[0] + '">' + this[1] + '</a>';
+                            $(newtd).append(newp);
+                        }
+                    });
+                    $(newtr).append(newtd);
+                    $("#" + sys).append(newtr);
+                });
+            });
+        });
+        $('#tabs').tabs({active: 0});
+        $('#analyticspages').tabs({active: 0});
+    });
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-54952024-5', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>

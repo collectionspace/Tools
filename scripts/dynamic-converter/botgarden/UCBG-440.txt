@@ -1,0 +1,13 @@
+HigherGeography,localitygroup,fieldlochighergeography
+propagationhist,collectionobjects_botgarden,propagationhistory
+AcessUseType,accessionusegroup,usetype
+actionCode,movements_common,reasonformove
+LabelSize,movements_botgarden,labelsize
+standType,movements_botgarden,labelstandtype
+propagationType,propagations_common,proptype
+scarStrat,scarstratgroup,scarstrat
+cutType,propagations_common,cuttingtype
+DistributionMethod,objectexit_common_exitmethods,item
+DistributionReason,objectexit_common,exitreason
+EntryReason,intakes_common,entryreason
+placetype,places_common,placetype

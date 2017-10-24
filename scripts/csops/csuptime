@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Print the time elapsed since the CollectionSpace tomcat service was last started.
+
+PID=`cspid`
+
+if [ -n "$PID" ]; then
+	ps -q $PID -o etime=
+fi

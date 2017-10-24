@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#URL="http://pahma.cspace.berkeley.edu:8180/cspace-services/movements"
+#CONTENT_TYPE="Content-Type: application/xml"
+#USER="import@pahma.cspace.berkeley.edu:zzzpasswordzzz"
+#curl -i -S --stderr - --basic -u "$USER" -X GET -H "Content-Type:application/xml" $URL | perl -ne 's/<totalItems>(\d+)<\/totalItems>// && (print "$1 movement records ")'
+
+psql -U reporter -d "host=pahma.cspace.berkeley.edu dbname=nuxeo password=zzzreporterpasswordzzz" -c "select count(*) from objectexit_common" | grep "^ [0-9]" | perl -ne 'chomp; s/^ +//; print "$_ records"'
+
+echo " $1 $2 $3"
+echo == Done         `date`
+echo ==================================================================================

@@ -1,0 +1,161 @@
+The CGI webapps
+
+v1.2 jblowe 01/17/2014
+
+Very short, terse, sketchy notes.
+
+Currently there are 14 webapps in use by PAHMA:
+
+Procedural webapps
+
+  Systematic Inventory
+  Move Object Range
+  Crate Move
+  Bulk Media Upload*
+
+Data update webapps
+
+  Key Information Review
+  Object Info Review
+  Object Details
+  Bulk Object Edit
+
+Reporting webapps
+
+  Packing List Report
+  Hierarchy Viewer
+  Collection Stats
+  Government Holdings
+  iReports Viewer*
+
+Barcode webapps
+
+  Barcode Scan File Upload
+  Barcode Label Generator
+
+* these two are Django webapps, in a different repo, not covered here.
+
+
+Three for UCBG:
+
+  BedList
+  LocationReport
+  HierarchyViewer
+
+And four for BAM/PFA:
+
+Procedural webapps
+
+  Systematic Inventory
+  Bulk Media Upload*
+  Power Move
+
+Reporting webapps
+
+  Packing List Report
+
+
+These are all implemented as a single python CGI script, cswaMain.py. ("cswa" stands for "CollectionSpace Webapp".)
+
+When this script (and its associated modules and config files) are installed in a directory that is execute-enabled for
+a webserver (e.g. in cgi-bin with a suitably configured Apache server), it will read the config file specified in
+the "webapp=" parameter, perform the appropriate application activity, and exit.
+
+E.g. entering:
+
+    http://dev.cspace.berkeley.edu/cgi-bin/cswaMain.py?webapp=pahma_Packinglist_Dev
+
+will display the initial screen for the UCB-PAHMA webapp, in development mode, as specified in the config file named ../cfgs/pahma_Packinglist_Dev.cfg.
+
+The webapps communicates with the backend database via either via pgdb (i.e. direct postgres queries) or via the rest API; the CSpace
+server to and credentials a configured in the .cfg file.
+
+The config file specifies:
+
+- what webapp to be (i.e. what header to print, what actions to perform, look-and-feel settings)
+- postgres credentials
+- cspace credentials
+- other configuration details: directories to read/write files, etc.
+
+The organization and values in the config files are pretty much self-explanatory.
+
+Initial Installations
+
+To install these webapps (these steps have never been performed in this sequence as a real deployment...):
+
+- Obtain a RedHat VM, configure it to run Apache (v2.2 or higher seems to be fine), Python (v2.6.2 or higher).
+
+   - ensure that your webserver is configured to execute python scripts.
+   - some of the webapps expect to write files, mostly in /tmp (logs, barcode files, etc.).
+   - Do not initialize any files in /tmp unless you are prepared to set their permissions, etc.
+   - Other files may need to be initialized and their permissions set.
+
+- Here are the "standard" Python modules imported, you should not have to install these:
+
+   cgi, cgitb, codecs, collections, ConfigParser, copy, csv, datetime, heapq, httplib, itertools, json, locale,
+   operator, os, pgdb, random, re, sys, time, traceback, urllib2
+
+- You may need to install these::
+
+   pgdb, in PyGreSQL
+   lxml, elementtree.ElementTree, or xml.etree.ElementTree as etree (the script figures out which is installed)
+
+- Feather the nest in the Apache setup, i.e. the following directories need to exist with appropriate permissions:
+
+    $ ls /var/www
+    cfgs  cgi-bin css  html  icons  images  js
+
+    there is a script, makeInstallDirs.sh in py/ that will create these if they don't exist.
+    (It will not check permissions or SELinux tags...)
+
+- git the webapps directory the target host (Linux) ("git clone https://github.com/cspace-deployment/Tools")
+- cd Tools/webapps/py; run the deplopment script ("master" is the branch to checkout and deploy; might change!)
+
+    (sudo) ./deployCGIscripts.sh master
+
+    This *should* copy everything need to the various directories, but consider checking the following:
+    - ensure jQuery is installed and available in ../js and ../css on the web server (jQuery is used by the "term matching" (autosuggest) feature).
+    - check that the other .css and .js files are in the appropriate locations.
+    - cswaMain.py and autosuggest.py need to be executable.
+
+- Install the config files; exemplares in are in Tools/webapps/cfgs:
+
+    (sudo) cp Tools/webapps/cfgs/* /var/www/cfgs
+
+    - change "xxxinsertpasswordherexxx", etc. to appropriate values in the various cfgs/*.cfg files you intend to to use.
+    - The .cfg files need to be readable by the scripts.
+    - There is one .csv file ("prohibitedlocations.csv") that should also exist in this directory.
+
+Of course, most of the webapps expect to access a CSpace system customized for a specific UCB deployment, and will probably not work if pointed to any other!
+
+If you have problems, here's a very short troubleshooting guide:
+
+- once you have what you think is a working setup, ssh to the server, cd to the CGI directory (/var/www/cgi-bin) and try to execute the
+  main module from the command line:
+
+  $ python cswaMain.py "webapp=pahma_Packinglist_Dev"
+
+- this should display html on the screen. If it does not, it should display a helpful python error message!
+
+- if you open the webapp in a browser and see nothing, or an incomplete page, look in the webserver error (often
+  something like /var/logs/httpd/error_log).
+- indeed, in general, consult the log if you have problems: the program write messages to stderr from time to time.
+
+Development and Testing
+
+There are provisions for making a "test version" of the scripts for testing. It is pretty raw: it simply makes copies
+of the existing scripts in the cgi-bin, appending "NV" to the file name (and changing import statements internally).
+This is done by a script py/makeNV.sh which expects to make these "NV versions" and scp them directly to dev.cspace.
+This provides a means to execute a development version of the code in the production milieu: it uses the Prod and Dev
+config files, etc. etc. Of course, there is no reason why this primitive method of development should be followed: the
+code *could* simply be deployed on a development server in a development environment.
+
+Caveat Utilizator!
+
+- This code runs on dev.cspace and hasn't run anywhere else without being tweaked.
+- There is no formal testing or deployment apparatus beyond what is here.
+- Many development choices were predicated on being self-sufficient and constrained by the security and resource environment present on the
+server on which it runs.
+- Apologies if you have to mess with this codebase!
+
+

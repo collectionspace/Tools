@@ -1,0 +1,286 @@
+#!/bin/bash
+
+CATALINA_HOME=$(dirname $(dirname $(dirname $(/usr/bin/readlink -f "$0"))))
+
+if [ ! -d "$CATALINA_HOME/webapps" ]
+then
+  echo "Please set CATALINA_HOME to something useful..."
+  exit 1
+fi
+
+if [ -f $CATALINA_HOME/bin/setenv.sh ]
+then
+  . $CATALINA_HOME/bin/setenv.sh
+else
+  echo "Could not find setenv.sh..."
+  exit 1
+fi
+
+OWNER=tomcat
+FORCE="-force"
+APACHE=YES
+
+CMD=`echo $1 | tr [A-Z] [a-z]`
+
+if [ "$CMD" = "halt" -o  "$CMD" = "shutdown" -o "$CMD" = "quit" ]
+then
+  CMD="stop"
+fi
+
+if [ "$CMD" = "startup" -o "$CMD" = "load" -o "$CMD" = "" ]
+then
+  CMD="start"
+fi
+
+[ "$CMD" = "debug" ] && CMD="jpda"
+
+[ "$CMD" = "reload" ] && CMD="restart"
+
+function printHelp
+{
+  echo ""
+  echo "runtc              Start tomcat - if it is not already running."
+  echo "runtc start        Start tomcat - if it is not already running."
+  echo "runtc jpda         Start tomcat in debug mode."
+  echo ""
+  echo "runtc stop         Shut down tomcat with the "-force" option."
+  echo ""
+  echo "runtc restart      Shut down tomcat with the "-force" option,"
+  echo "                   sleep 10 seconds, then start tomcat."
+  echo ""
+  echo "runtc showenv      Print some important environment variables."
+  echo ""
+  echo "runtc status       Indicate whether or not tomcat is running."
+  echo ""
+  echo "runtc -h           Print this message"
+}
+
+function printEnv
+{
+  echo "   CATALINA_HOME: $CATALINA_HOME"
+  echo "   CSPACE_JEESERVER_HOME: $CATALINA_HOME"
+  echo "   JPDA_ADDRESS: $JPDA_ADDRESS"
+  echo "   JPDA_TRANSPORT: $JPDA_TRANSPORT"
+  echo "   CATALINA_OPTS: $CATALINA_OPTS"
+  echo "   CATALINA_PID: $CATALINA_PID"
+  echo "   DB_USER: $DB_USER"
+  echo "   DB_PASSWORD: $DB_PASSWORD"
+  echo "   DB_PASSWORD_CSPACE: $DB_PASSWORD_CSPACE"
+  echo "   DB_PASSWORD_NUXEO: $DB_PASSWORD_NUXEO"
+  echo "   LANG: $LANG"
+  echo "   PATH: $PATH"
+}
+
+function printPIDStatus
+{
+  status=`checkPIDStatus`
+  echo $status
+}
+
+function printStatus
+{
+  if checkTCStatus
+  then
+    echo "Tomcat is running."
+  else
+    echo "Tomcat is not running."
+  fi
+}
+
+function xwaitForIt
+{
+  RES=""
+  while [ -z "$RES" ]
+  do
+    sleep 5
+    RES=`tail -5 $LOG | grep "^INFO: Server startup in " | grep " ms$"`
+  done
+  echo $RES
+}
+
+function waitForIt
+{
+   starttime=`date +'%s'`
+   USER="reader@core.collectionspace.org:reader"
+   URL="http://localhost:8180/cspace-services/authorization/roles"
+
+   RES="Tomcat server is having problems starting"
+
+   cnt=0
+
+   while [ "$cnt" -lt 75 ]
+   do
+      curl -I -u "$USER" $URL > /dev/null 2>&1
+      if [ "$?" -eq 0 ]
+      then
+         endtime=`date +'%s'`
+         elapsedtime=$((endtime-starttime))
+         RES="Tomcat startup complete ($elapsedtime seconds)"
+         break
+      else
+         cnt=$((cnt+1))
+         sleep 5
+      fi
+   done
+   echo $RES
+}
+
+function checkPIDStatus
+{
+  if [ -f "$CATALINA_PID" ]
+  then
+    PID=`cat $CATALINA_PID`
+  else
+    echo "No PID file was found!" 1>&2
+    PID=""
+  fi
+
+  RES=`pgrep -u $OWNER -f "$CATALINA_HOME/bin/bootstrap.jar"`
+  if [ -n "$PID" -a "$PID" = "$RES" ]
+  then
+     echo $PID
+     return 0
+  fi
+
+  echo ""
+  return 1
+}
+
+function checkTCStatus
+{
+  #RES=`pgrep -u $OWNER -f "$CATALINA_HOME/bin/bootstrap.jar" | head -1`
+  RES=`pgrep -u $OWNER -f "$CATALINA_HOME/bin/bootstrap.jar"`
+
+  if [ `echo $RES | wc -w` -gt 1 ]
+  then
+     echo "There appear to be multiple tomcat processes."
+     RES=${RES%%[^0-9]*}
+  fi
+
+  if [ -n "$RES" ] && [ "$RES" -gt 1 ]
+  then
+     TCPID=$RES
+     return 0
+  else
+     TCPID=""
+     return 1
+  fi
+}
+
+function start
+{
+  if checkTCStatus 
+  then
+    echo "Tomcat is already running!"
+    return 0
+  fi
+
+  $CATALINA_HOME/bin/startup.sh
+
+  echo "Waiting for startup to complete.."
+  ANS=`waitForIt`
+  echo $ANS
+  return 0  
+}
+
+function start_jpda
+{
+  if checkTCStatus 
+  then
+    echo "Tomcat is already running!"
+    return 0
+  fi
+
+  $CATALINA_HOME/bin/catalina.sh jpda start
+
+  echo "Waiting for JPDA startup to complete.."
+  ANS=`waitForIt`
+  echo $ANS
+  return 0  
+}
+
+function stop
+{
+  echo "Shutting down tomcat..."
+  if checkTCStatus
+  then
+    $CATALINA_HOME/bin/shutdown.sh $FORCE
+    
+    count=10
+    while [ "$count" -gt 0 ]
+    do
+      sleep 5
+      if ! checkTCStatus
+      then
+        echo "Tomcat stopped."
+        count=0
+      else
+        count=$((count-1))
+        if [ "$count" -eq 0 ]
+        then
+          echo "Tomcat failed to shutdown!"
+          exit 2
+        fi
+      fi
+    done
+  else
+    echo "Tomcat is not running!"
+  fi
+}
+
+function start_httpd
+{
+   [ "$APACHE" = "YES" ] && sudo /sbin/service httpd start
+}
+
+function stop_httpd
+{
+   [ "$APACHE" = "YES" ] && sudo /sbin/service httpd stop
+}
+
+function restart_httpd
+{
+   [ "$APACHE" = "YES" ] && sudo /sbin/service httpd graceful
+}
+
+if [ "$CMD" = "-h" -o "$CMD" = "-help" -o "$CMD" = "help" ]
+then
+  printHelp
+elif [ "$CMD" = "status" ]
+then
+  printStatus
+elif [ "$CMD" = "showenv" ] || [ "$CMD" = "printenv" ]
+then
+  printEnv
+elif [ "$CMD" = "start" ]
+then
+  start
+  restart_httpd
+elif [ "$CMD" = "reboot" ]
+then
+  /bin/rm -f $CATALINA_PID
+  start
+  restart_httpd
+elif [ "$CMD" = "stop" ]
+then
+  stop
+elif [ "$CMD" = "restart" ]
+then
+  stop
+  sleep 10
+  start
+  sleep 10
+  restart_httpd
+elif [ "$CMD" = "jpda" ]
+then
+  stop
+  sleep 10
+  start_jpda
+  restart_httpd
+elif [ "$CMD" = "pid" ]
+then
+  printPIDStatus
+else
+  echo "I don't know how to do that ($1)."
+  exit 1
+fi

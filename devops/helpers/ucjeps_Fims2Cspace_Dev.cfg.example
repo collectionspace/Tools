@@ -1,0 +1,25 @@
+# this config file tells the FIMS uploader which CSpace server to upload to.
+#
+# only institution is used in the [info] block at the moment.
+# however, the other values are being retained in case they are needed later
+#
+[info]
+logo              = http://ucjeps.cspace.berkeley.edu:8180/collectionspace/ui/ucjeps/images/header-logo.png
+schemacolor1      = #73AA4F
+serverlabel       = development
+serverlabelcolor  = green
+institution       = ucjeps
+apptitle          = Upload FIMS data to CSpace
+updatetype        = fims2cspace
+
+# connect_string is not currently using by the FIMS uploader.
+#
+[connect]
+connect_string    = host=dba-postgres-dev-32.ist.berkeley.edu port=5110 dbname=ucjeps_domain_ucjeps user=xxxxx password=xxxxx sslmode=require
+realm             = org.collectionspace.services
+protocol          = https
+port              = 
+hostname          = ucjeps-dev.cspace.berkeley.edu
+username          = xxxxx
+password          = xxxxx
+

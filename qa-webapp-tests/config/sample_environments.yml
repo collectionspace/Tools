@@ -1,0 +1,11 @@
+# This is a sample environments.yml file. You must make a real environments.yml in the config
+# folder with the user credentials filled out
+
+reader:
+# If you have user credentials, add them below: 
+ login:  # login here, omitting the @xxx (e.g. admin) 
+ password:  # password here
+
+# On which server are you running these tests? 
+# Use "" for prod or "-dev" for dev
+ server: ""

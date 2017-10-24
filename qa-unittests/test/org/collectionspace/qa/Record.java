@@ -369,7 +369,7 @@ public class Record {
 				this.fieldMap.put(".csc-object-viewer-contribution-note", "Good job");
 				
 				//ref info
-				this.fieldMap.put("repeat::.csc-collection-object-reference", "Reference again?");
+				this.vocabMap.put("repeat::.csc-collection-object-reference", "Reference again?");
 				this.fieldMap.put("repeat::.csc-collection-object-referenceNote", "why are there so many of these");
 				
 				//object collection info
