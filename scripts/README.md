@@ -1,5 +1,7 @@
 1. Download the CollectionSpace "Tools" git repository from GitHub
-   * git clone https://github.com/collectionspace/Tools.git
+   ```
+   git clone https://github.com/collectionspace/Tools.git
+   ```
 2. In the new "Tools" directory, edit the "create-report-records.sh" file to add the Public Art tenant.  Use the tenant short name -e.g., "publicart"
     * Open the file
         ```
