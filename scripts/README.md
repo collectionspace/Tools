@@ -13,7 +13,7 @@
             with the string
         TENANTS+=(publicart) # Use your tenant's short name here
         ```
-    * Near (or on) line 85, set the default admin user's password.
+    * Near (or on) line 85, set the default admin user's password ```DEFAULT_ADMIN_PASSWORD```.
     * Near the same line, set the ```HOST``` and ```PORT``` values of the CollectionSpace server
     * Save your changes and quit the editor.
 3. If it is not already running, start the CollectionSpace server.
