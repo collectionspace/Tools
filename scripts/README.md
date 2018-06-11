@@ -1,4 +1,4 @@
-1. Download the CollectionSpace "Tools" git repository from GitHub
+1. Download the CollectionSpace ```Tools``` git repository from GitHub
    ```
    git clone https://github.com/collectionspace/Tools.git
    ```
