@@ -12,7 +12,7 @@
 	    TENANTS+=(publicart)
         ```
     * Near (or on) line 85, set the default admin user's password.
-    * Near the same line, set the HOST and PORT values of the CollectionSpace server
+    * Near the same line, set the ```HOST``` and ```PORT``` values of the CollectionSpace server
     * Save your changes and quit the editor.
 3. If it is not already running, start the CollectionSpace server.
 4. Verify you can login and access the CollectionSpace server using the default admin credentials.
