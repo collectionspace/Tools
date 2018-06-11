@@ -11,7 +11,7 @@
         ```
         TENANTS+=(core)
             with the string
-	    TENANTS+=(publicart)
+        TENANTS+=(publicart) # Use your tenant's short name here
         ```
     * Near (or on) line 85, set the default admin user's password.
     * Near the same line, set the ```HOST``` and ```PORT``` values of the CollectionSpace server
