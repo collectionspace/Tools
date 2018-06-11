@@ -5,10 +5,10 @@
         > vim scripts/create-report-records.sh
     * Near (or on) line 20, replace the string
         ```
-	TENANTS+=(core)
+        TENANTS+=(core)
             with the string
 	TENANTS+=(publicart)
-	```
+        ```
     * Near (or on) line 85, set the default admin user's password.
     * Near the same line, set the HOST and PORT values of the CollectionSpace server
     * Save your changes and quit the editor.
