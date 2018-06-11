@@ -2,7 +2,7 @@
    ```
    git clone https://github.com/collectionspace/Tools.git
    ```
-2. In the new ```Tools``` directory, edit the ```create-report-records.sh``` file to add the Public Art tenant.  Use the tenant short name -e.g., "publicart"
+2. In the new ```Tools``` directory, edit the ```create-report-records.sh``` file to add your tenant.  Use your tenant's short name -e.g., "publicart", "core", "lhmc", etc.
     * Open the file
         ```
         vim scripts/create-report-records.sh
