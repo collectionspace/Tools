@@ -2,7 +2,7 @@
 #
 # This script requires 7 arguments to build a proper POST request to the
 # CollectionSpace RESTFul API.
-# 
+#
 # For more information about CollectionSpace
 # batch processes, visit this wiki page: https://wiki.collectionspace.org/display/DOC/Batch+Job+Service+RESTful+APIs
 #
@@ -36,14 +36,16 @@ function test {
     if [ $status -ne 0 ]; then
 		msg=$"Error executing $@."
 		ERRORS_MSGS[ERRORS_COUNTER]="$msg"
-		ERRORS_COUNTER+=1		
+		ERRORS_COUNTER+=1
     fi
     return $status
 }
 
-test ./scripts/create-batch-records.sh "Update locations" "Update cataloging items' current computed location." CollectionObject true true false org.collectionspace.services.batch.nuxeo.UpdateObjectLocationBatchJob
+CSPACE_URL="${1:-http://localhost:8180}"
+TENANT="${2:-core}"
 
-#curl -G -v http://localhost:8180/cspace-services/reports --data-urlencode "as=reports_common:name ILIKE 'Acquisition Summary%'" -u admin@core.collectionspace.org:Administrator
+test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Current Location" "Recompute the current location of Object records, based on the related Location/Movement/Inventory records." CollectionObject true false false true false org.collectionspace.services.batch.nuxeo.UpdateObjectLocationBatchJob
+test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Inventory Status" "Set the inventory status of selected Object records." CollectionObject false true false false false org.collectionspace.services.batch.nuxeo.UpdateInventoryStatusBatchJob
 
 if [ $ERRORS_COUNTER -gt 0 ]; then
 	echo

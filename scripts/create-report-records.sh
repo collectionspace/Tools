@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ####################################################
-# Script for creating a report record in multiple
-# tenants via the CollectionSpace Services REST API.
+# Script for creating a report record via the
+# CollectionSpace Services REST API.
 #
 # (While this is a special purpose, one-off script,
 # this could also be generalized to create many
@@ -158,11 +158,11 @@ echo \
   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
     <supportsDocList>$REPORTXML_SUPPORTS_DOC_LIST</supportsDocList>
     <supportsNoContext>$REPORTXML_SUPPORTS_NO_CONTEXT</supportsNoContext>
+    <supportsGroup>${REPORTXML_SUPPORTS_GROUP}</supportsGroup>
+    <supportsSingleDoc>$REPORTXML_SUPPORTS_SINGLE_DOC</supportsSingleDoc>
     <outputMIME>$DEFAULT_MIMETYPE</outputMIME>
     <name>$REPORTXML_NAME</name>
     <filename>$REPORTXML_FILENAME</filename>
-    <supportsGroup>${REPORTXML_SUPPORTS_GROUP}</supportsGroup>
-    <supportsSingleDoc>$REPORTXML_SUPPORTS_SINGLE_DOC</supportsSingleDoc>
     <notes>$REPORTXML_NOTES</notes>
     <forDocTypes>
       <forDocType>$REPORTXML_DOCTYPE</forDocType>
