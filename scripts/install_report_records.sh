@@ -58,6 +58,7 @@ test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Intake Ethnogra
 test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan In Ethnographic Object List" "Core loan in report" Loanin true false false false coreLoanIn.jrxml
 test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan Out Ethnographic Object List" "Core loan out report" Loanout true false false false coreLoanOut.jrxml
 test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Object Exit Ethnographic Object List" "Core object exit report" ObjectExit true false false false coreObjectExit.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Systematic Inventory" "Generate a checklist for performing an inventory on a range of storage locations." Locationitem false false false true systematicInventory.jrxml
 
 #curl -G -v http://localhost:8180/cspace-services/reports --data-urlencode "as=reports_common:name ILIKE 'Acquisition Summary%'" -u admin@core.collectionspace.org:Administrator
 
