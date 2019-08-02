@@ -45,20 +45,20 @@ function test {
 CSPACE_URL="${1:-http://localhost:8180}"
 TENANT="${2:-core}"
 
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Summary" "An acquisition summary report" Acquisition true false false false acq_basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Basic List" "Catalog info for objects related to an acquisition record" Acquisition true false false false Acq_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Condition Check Basic List" "Catalog info for objects related to a condition check record" Conditioncheck true false false false CC_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Exhibition Basic List" "Catalog info for objects related to a exhibition record" Exhibition true false false false Exhibition_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Group Basic List" "Catalog info for objects related to a group record" Group true false false false Group_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan In Basic List" "Catalog info for objects related to a loan in record" Loanin true false false false LoansIn_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan Out Basic List" "Catalog info for objects related to a loan out record" Loanout true false false false LoansOut_List_Basic.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Ethnographic Object List" "Core acquisition report" Acquisition true false false false coreAcquisition.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Group Object Ethnographic Object List" "Core group object report" Group true false false false coreGroupObject.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Intake Ethnographic Object List" "Core intake report" Intake true false false false coreIntake.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan In Ethnographic Object List" "Core loan in report" Loanin true false false false coreLoanIn.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan Out Ethnographic Object List" "Core loan out report" Loanout true false false false coreLoanOut.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Object Exit Ethnographic Object List" "Core object exit report" ObjectExit true false false false coreObjectExit.jrxml
-test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Systematic Inventory" "Generate a checklist for performing an inventory on a range of storage locations." Locationitem false false false true systematicInventory.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Summary" "An acquisition summary report. Runs on a single record only." Acquisition true false false false acq_basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Basic List" "Catalog info for objects related to an acquisition record. Runs on a single record only." Acquisition true false false false Acq_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Condition Check Basic List" "Catalog info for objects related to a condition check record. Runs on a single record only." Conditioncheck true false false false CC_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Exhibition Basic List" "Catalog info for objects related to a exhibition record. Runs on a single record only." Exhibition true false false false Exhibition_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Group Basic List" "Catalog info for objects related to a group record. Runs on a single record only." Group true false false false Group_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan In Basic List" "Catalog info for objects related to a loan in record. Runs on a single record only." Loanin true false false false LoansIn_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan Out Basic List" "Catalog info for objects related to a loan out record. Runs on a single record only." Loanout true false false false LoansOut_List_Basic.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Ethnographic Object List" "Core acquisition report. Runs on a single record only." Acquisition true false false false coreAcquisition.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Group Object Ethnographic Object List" "Core group object report. Runs on a single record only." Group true false false false coreGroupObject.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Intake Ethnographic Object List" "Core intake report. Runs on a single record only." Intake true false false false coreIntake.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan In Ethnographic Object List" "Core loan in report. Runs on a single record only." Loanin true false false false coreLoanIn.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Loan Out Ethnographic Object List" "Core loan out report. Runs on a single record only." Loanout true false false false coreLoanOut.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Object Exit Ethnographic Object List" "Core object exit report. Runs on a single record only." ObjectExit true false false false coreObjectExit.jrxml
+test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Systematic Inventory" "Generate a checklist for performing an inventory on a range of storage locations. Runs on all records, using the provided start and end locations." Locationitem false false false true systematicInventory.jrxml
 
 #curl -G -v http://localhost:8180/cspace-services/reports --data-urlencode "as=reports_common:name ILIKE 'Acquisition Summary%'" -u admin@core.collectionspace.org:Administrator
 

@@ -7,5 +7,5 @@ TENANTS+=('core' 'lhmc' 'fcart' 'anthro' 'materials' 'bonsai' 'publicart')
 
 for tenant in ${TENANTS[*]}
 do
-  ./scripts/install_batch_records.sh "https://${tenant}.dev.collectionspace.org" $tenant
+  ./scripts/install_batch_records.sh "https://${tenant}.qa.collectionspace.org" $tenant
 done
