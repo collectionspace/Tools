@@ -52,7 +52,7 @@ DEFAULT_ADMIN_PASSWORD=Administrator
 # End of variables to set
 ####################################################
 
-DEFAULT_ADMIN_ACCT="admin@$TENANT.collectionspace.org"
+DEFAULT_ADMIN_ACCT="admin@$TENANT"
 
 CURL_EXECUTABLE=`which curl`
 if [ "xCURL_EXECUTABLE" == "x" ]

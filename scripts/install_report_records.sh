@@ -43,7 +43,7 @@ function test {
 }
 
 CSPACE_URL="${1:-http://localhost:8180}"
-TENANT="${2:-core}"
+TENANT="${2:-core.collectionspace.org}"
 
 test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Summary" "An acquisition summary report. Runs on a single record only." Acquisition true false false false acq_basic.jrxml
 test ./scripts/create-report-records.sh "$CSPACE_URL" "$TENANT" "Acquisition Basic List" "Catalog info for objects related to an acquisition record. Runs on a single record only." Acquisition true false false false Acq_List_Basic.jrxml
