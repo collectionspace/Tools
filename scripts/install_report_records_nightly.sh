@@ -3,7 +3,7 @@
 # Install sample reports on the nightly dev servers.
 #
 
-TENANTS+=('core' 'lhmc' 'fcart' 'anthro' 'materials' 'bonsai' 'publicart')
+TENANTS+=('core' 'lhmc' 'fcart' 'anthro' 'materials' 'bonsai' 'botgarden' 'herbarium' 'publicart')
 
 for tenant in ${TENANTS[*]}
 do
