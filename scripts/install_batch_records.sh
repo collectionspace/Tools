@@ -46,7 +46,7 @@ TENANT="${2:-core.collectionspace.org}"
 
 test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Current Location" "Recompute the current location of Object records, based on the related Location/Movement/Inventory records. Runs on a single record or all records." CollectionObject true false false true false org.collectionspace.services.batch.nuxeo.UpdateObjectLocationBatchJob
 test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Inventory Status" "Set the inventory status of selected Object records. Runs on a record list only." CollectionObject false true false false false org.collectionspace.services.batch.nuxeo.UpdateInventoryStatusBatchJob
-test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Merge Authority Items" "Merge an authority item into a target, and update all referencing records. Runs on a single record only." Person true false false false false org.collectionspace.services.batch.nuxeo.MergeAuthorityItemsBatchJob
+test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Merge Authority Items" "Merge an authority item into a target, and update all referencing records. Runs on a single record only." Workitem,Person,Conceptitem,Placeitem,Citation,Organization,Locationitem true false false false false org.collectionspace.services.batch.nuxeo.MergeAuthorityItemsBatchJob
 
 if [ $ERRORS_COUNTER -gt 0 ]; then
 	echo

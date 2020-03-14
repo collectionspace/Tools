@@ -166,14 +166,21 @@ echo \
     <supportsSingleDoc>$BATCHXML_SUPPORTS_SINGLE_DOC</supportsSingleDoc>
     <name>$BATCHXML_NAME</name>
     <notes>$BATCHXML_NOTES</notes>
-    <forDocTypes>
-      <forDocType>$BATCHXML_DOCTYPE</forDocType>
-    </forDocTypes>
+    <forDocTypes>"\
+> $PAYLOAD
+
+IFS=',' read -ra DOCTYPE <<< "$BATCHXML_DOCTYPE"
+for i in "${DOCTYPE[@]}"; do
+    echo "      <forDocType>$i</forDocType>" >> $PAYLOAD
+done
+
+echo \
+"    </forDocTypes>
     <createsNewFocus>$BATCHXML_CREATES_NEW_FOCUS</createsNewFocus>
     <className>$BATCHXML_CLASSNAME</className>
   </ns2:batch_common>
 </document>"\
-> $PAYLOAD
+>> $PAYLOAD
 
 CREATE_RECORD_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
 echo "curl result file: $CREATE_RECORD_TMPFILE"
