@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Install sample batcj jobs on the nightly dev servers.
+# Install sample batch jobs on the nightly dev servers.
 #
 
 TENANTS+=('outreach')

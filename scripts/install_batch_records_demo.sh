@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Install sample batcj jobs on the nightly dev servers.
+# Install sample batch jobs on the nightly dev servers.
 #
 
-TENANTS+=('core' 'lhmc' 'fcart' 'anthro' 'materials' 'bonsai' 'publicart')
+TENANTS+=('core' 'lhmc' 'fcart' 'anthro' 'materials' 'bonsai' 'botgarden' 'herbarium' 'publicart')
 
 for tenant in ${TENANTS[*]}
 do
