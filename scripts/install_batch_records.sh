@@ -24,6 +24,42 @@
 #	</ns2:batch_common>
 #</document>
 
+CSPACE_URL="${1:-http://localhost:8180}"
+TENANT="${2:-core.collectionspace.org}"
+
+DEFAULT_ADMIN_PASSWORD=Administrator
+DEFAULT_ADMIN_ACCT="admin@$TENANT"
+
+CURL_EXECUTABLE=`which curl`
+if [ "xCURL_EXECUTABLE" == "x" ]
+  then
+    echo "Could not find 'curl' application"
+    exit 1
+fi
+
+tempfilename=`basename $0`
+# Three or more 'X's may be required in the template for the
+# temporary file name, under at least one or more Linux OSes
+READ_AUTHORITIES_TMPFILE=`mktemp -t ${tempfilename}.XXXXX` || exit 1
+
+echo "Getting authority record types for the '$TENANT' tenant ..."
+
+$CURL_EXECUTABLE \
+--get \
+--silent \
+--show-error \
+--user "$DEFAULT_ADMIN_ACCT:$DEFAULT_ADMIN_PASSWORD" \
+--url $CSPACE_URL/cspace-services/servicegroups/authority \
+> $READ_AUTHORITIES_TMPFILE
+
+# Read the response from that file
+authoritydoctypes=`xmllint --xpath "//hasDocType" $READ_AUTHORITIES_TMPFILE`
+rm $READ_AUTHORITIES_TMPFILE
+
+authoritydoctypes=${authoritydoctypes//<hasDocType>/}
+authoritydoctypes=${authoritydoctypes//<\/hasDocType>/,}
+authoritydoctypes=${authoritydoctypes%%,}
+
 NEWLINE=$'\n'
 echo "$NEWLINE"
 
@@ -41,12 +77,9 @@ function test {
     return $status
 }
 
-CSPACE_URL="${1:-http://localhost:8180}"
-TENANT="${2:-core.collectionspace.org}"
-
 test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Current Location" "Recompute the current location of Object records, based on the related Location/Movement/Inventory records. Runs on a single record or all records." CollectionObject true false false true false org.collectionspace.services.batch.nuxeo.UpdateObjectLocationBatchJob
 test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Update Inventory Status" "Set the inventory status of selected Object records. Runs on a record list only." CollectionObject false true false false false org.collectionspace.services.batch.nuxeo.UpdateInventoryStatusBatchJob
-test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Merge Authority Items" "Merge an authority item into a target, and update all referencing records. Runs on a single record only." Workitem,Person,Conceptitem,Placeitem,Citation,Organization,Locationitem true false false false false org.collectionspace.services.batch.nuxeo.MergeAuthorityItemsBatchJob
+test ./scripts/create-batch-records.sh "$CSPACE_URL" "$TENANT" "Merge Authority Items" "Merge an authority item into a target, and update all referencing records. Runs on a single record only." $authoritydoctypes true false false false false org.collectionspace.services.batch.nuxeo.MergeAuthorityItemsBatchJob
 
 if [ $ERRORS_COUNTER -gt 0 ]; then
 	echo
