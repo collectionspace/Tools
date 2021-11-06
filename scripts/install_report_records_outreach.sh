@@ -3,7 +3,7 @@
 # Install sample reports on the outreach server.
 #
 
-TENANTS+=('outreach')
+TENANTS+=('core')
 
 for tenant in ${TENANTS[*]}
 do

@@ -3,7 +3,7 @@
 # Install sample batch jobs on the nightly dev servers.
 #
 
-TENANTS+=('outreach')
+TENANTS+=('core')
 
 for tenant in ${TENANTS[*]}
 do
