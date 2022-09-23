@@ -48,8 +48,10 @@ REPORTXML_SUPPORTS_DOC_LIST="$7"
 REPORTXML_SUPPORTS_GROUP="$8"
 # Supports
 REPORTXML_SUPPORTS_NO_CONTEXT="$9"
+# Default output mime
+DEFAULT_MIMETYPE="${10}"
 # Name of report file to match in a keyword search
-REPORTXML_FILENAME="${10}"
+REPORTXML_FILENAME="${11}"
 
 # Each item in each of the two lists above should correspond 1:1 with
 # its counterpart in the other list. (Associative/hash-style arrays would
@@ -145,7 +147,6 @@ fi
 # As an admin user within this tenant, create the report record,
 # and save the responses to these create requests to temporary files
 
-DEFAULT_MIMETYPE="application/pdf"
 echo
 echo "Creating a new '$REPORTXML_NAME' report record in the '$TENANT' tenant..."
 
